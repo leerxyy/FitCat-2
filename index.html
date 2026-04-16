@@ -16,15 +16,11 @@ html { background: #0D1117; min-height: 100vh; }
 body {
   background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #E6EDF3; padding: 16px 12px 40px; min-height: 100vh; -webkit-font-smoothing: antialiased;
-  transition: background 0.3s, color 0.3s;
 }
 body::before {
   content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  z-index: -1;
-  background: linear-gradient(var(--bg-gradient-angle, 135deg), var(--bg-gradient-start, #0D1117) 0%, var(--bg-gradient-end, #16213E) 100%);
-  background-size: 200% 200%;
-  animation: bgPulse var(--bg-animation-speed, 8s) ease-in-out infinite;
-  opacity: var(--bg-intensity, 1);
+  background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 50%, #16213E 100%);
+  z-index: -1; animation: bgPulse 8s ease-in-out infinite; background-size: 200% 200%;
 }
 @keyframes bgPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .app { max-width: 480px; margin: 0 auto; animation: fadeIn 0.5s ease-out; }
@@ -37,61 +33,47 @@ body::before {
 }
 .greeting-slide h1 {
   font-size: 26px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word;
-  background: linear-gradient(135deg, var(--accent), #A855F7);
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #A855F7 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  background-clip: text; background-size: 200% 100%; animation: textShimmer 4s ease-in-out infinite;
 }
+@keyframes textShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .greeting-slide.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 .greeting-slide.next { transform: translateY(100%); opacity: 0; }
 .greeting-slide.next.visible { transform: translateY(0); opacity: 1; }
 .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-h2 { font-size: 18px; font-weight: 600; color: var(--text-secondary, #9CA3AF); margin-bottom: 16px; letter-spacing: -0.3px; }
+h2 { font-size: 18px; font-weight: 600; color: #9CA3AF; margin-bottom: 16px; letter-spacing: -0.3px; }
 .card {
-  background: rgba(var(--bg-card-rgb, 22,27,34), var(--card-opacity, 0.7));
+  background: rgba(22, 27, 34, var(--card-opacity, 0.7));
   backdrop-filter: blur(var(--card-blur, 12px));
   -webkit-backdrop-filter: blur(var(--card-blur, 12px));
-  border: 1px solid var(--border, #30363D);
+  border: 1px solid rgba(48, 54, 61, 0.5);
   border-radius: 24px;
   padding: 20px 18px;
   margin-bottom: 20px;
-  box-shadow: 0 calc(8px + var(--card-depth, 0)*0.1) calc(32px + var(--card-depth, 0)*0.5) rgba(0,0,0, calc(0.3 + var(--card-depth, 0)*0.01));
-  transition: box-shadow 0.2s, background 0.3s, border 0.3s;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 calc(8px + var(--card-depth, 0) * 0.1) calc(32px + var(--card-depth, 0) * 0.5) rgba(0,0,0, calc(0.3 + var(--card-depth, 0) * 0.01));
+  transition: box-shadow 0.2s, background 0.3s, backdrop-filter 0.3s;
 }
-.card::after {
-  content: '';
-  position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  background: linear-gradient(var(--glow-direction, to right), var(--accent), transparent, var(--accent));
-  background-size: 300% 300%;
-  border-radius: 24px;
-  z-index: -1;
-  opacity: var(--glow-intensity, 0);
-  animation: glowMove var(--glow-speed, 3s) linear infinite;
-  pointer-events: none;
-}
-@keyframes glowMove { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
 .card-header h2 { margin: 0; }
 .card-content { transition: all 0.3s; overflow: hidden; }
 .card-content.collapsed { display: none; }
 .input-group { margin-bottom: 18px; position: relative; }
-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary, #9CA3AF); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+label { display: block; font-size: 13px; font-weight: 500; color: #9CA3AF; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 input, select {
-  width: 100%; background: rgba(1, 4, 9, 0.6); border: 1px solid var(--border, #30363D); border-radius: 16px;
-  padding: 14px 16px; font-size: 16px; color: var(--text-main, #E6EDF3); outline: none; transition: all 0.25s ease;
+  width: 100%; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px;
+  padding: 14px 16px; font-size: 16px; color: #E6EDF3; outline: none; transition: all 0.25s ease;
   -webkit-appearance: none; font-family: inherit; backdrop-filter: blur(5px);
 }
-input:focus { border-color: var(--accent, #4FACFE); box-shadow: 0 0 0 3px rgba(79,172,254,0.2); }
+input:focus { border-color: #4FACFE; box-shadow: 0 0 0 3px rgba(79,172,254,0.2); }
 input::placeholder { color: #6B7280; opacity: 0.7; }
 input[type="date"] { color-scheme: dark; }
-.segmented-control { display: flex; background: rgba(1, 4, 9, 0.6); border: 1px solid var(--border, #30363D); border-radius: 16px; padding: 4px; }
+.segmented-control { display: flex; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px; padding: 4px; }
 .segmented-option {
   flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 500;
-  color: var(--text-secondary, #9CA3AF); cursor: pointer; transition: all 0.2s ease;
+  color: #9CA3AF; cursor: pointer; transition: all 0.2s ease;
 }
-.segmented-option.active { background: var(--accent, #4FACFE); color: var(--bg-page, #0D1117); }
+.segmented-option.active { background: #4FACFE; color: #0D1117; }
 .btn-primary, .btn-secondary, .btn-small, .water-btn {
   transition: transform 0.15s ease, box-shadow 0.2s ease; -webkit-tap-highlight-color: transparent;
 }
@@ -99,92 +81,103 @@ input[type="date"] { color-scheme: dark; }
 .btn-primary {
   width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
   cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; text-align: center;
-  background: var(--accent, #1A2027); color: var(--bg-page, #E6EDF3); border: 2px solid transparent;
+  background: #1A2027; color: #E6EDF3; position: relative; z-index: 1; border: 2px solid transparent; background-clip: padding-box;
 }
+.btn-primary::before {
+  content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(90deg, #00F2FE, #4FACFE, #A855F7, #00F2FE);
+  background-size: 300% 100%; border-radius: 40px; z-index: -1; animation: borderShimmer 4s linear infinite;
+}
+@keyframes borderShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+.btn-primary:hover { transform: scale(1.01); box-shadow: 0 0 25px rgba(79,172,254,0.3); }
 .btn-secondary {
   width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
-  cursor: pointer; margin-bottom: 10px; background: transparent; border: 1px solid var(--border, #30363D); color: var(--text-main, #E6EDF3);
+  cursor: pointer; margin-bottom: 10px; background: transparent; border: 1px solid #30363D; color: #E6EDF3;
 }
 .btn-small {
-  background: rgba(26, 32, 39, 0.8); border: 1px solid var(--border, #30363D); border-radius: 30px;
-  padding: 10px 16px; font-size: 14px; color: var(--text-main, #E6EDF3); cursor: pointer; backdrop-filter: blur(5px);
+  background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+  padding: 10px 16px; font-size: 14px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
 }
 .lang-btn { flex: 1; }
-.lang-btn.active { background: var(--accent, #4FACFE); border-color: var(--accent, #4FACFE); color: var(--bg-page, #0D1117); }
+.lang-btn.active { background: #4FACFE; border-color: #4FACFE; color: #0D1117; }
 .btn-danger { background: transparent; border: 1px solid #F85149; color: #F85149; }
 .water-buttons { display: flex; gap: 8px; margin: 12px 0; }
 .water-btn {
-  flex: 1; background: rgba(26, 32, 39, 0.8); border: 1px solid var(--border, #30363D); border-radius: 30px;
-  padding: 10px; font-size: 16px; font-weight: 600; color: var(--text-main, #E6EDF3); cursor: pointer; text-align: center;
+  flex: 1; background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+  padding: 10px; font-size: 16px; font-weight: 600; color: #E6EDF3; cursor: pointer; text-align: center;
 }
 .water-manual { display: flex; gap: 8px; margin-top: 8px; }
 .water-manual input { flex: 2; }
 .water-manual button { flex: 1; }
 .progress-bar-container { height: 10px; background: rgba(33, 38, 45, 0.6); border-radius: 10px; margin: 8px 0 16px; overflow: hidden; }
 .progress-bar {
-  height: 100%; border-radius: 10px; transition: width 0.6s ease;
-  background-size: 300% 100% !important;
-  animation: var(--progress-animation, shimmer 4s infinite);
-  width: 0%;
+  height: 100%; border-radius: 10px; transition: width 0.6s ease; background-size: 300% 100% !important;
+  animation: barShimmer 4s ease-in-out infinite; width: 0%;
 }
 .bar-kcal { background-image: linear-gradient(90deg, #FF6B6B, #FF8E53, #FFB347, #FF6B6B) !important; }
-.bar-protein { background-image: linear-gradient(90deg, var(--accent), #00F2FE, #7FC8FF, var(--accent)) !important; }
+.bar-protein { background-image: linear-gradient(90deg, #4FACFE, #00F2FE, #7FC8FF, #4FACFE) !important; }
 .bar-fat { background-image: linear-gradient(90deg, #FFD93D, #FFB347, #FFA500, #FFD93D) !important; }
 .bar-carbs { background-image: linear-gradient(90deg, #6BCB77, #4D96FF, #9B59B6, #6BCB77) !important; }
-.bar-water { background-image: linear-gradient(90deg, #00F2FE, var(--accent), #7FC8FF, #00F2FE) !important; }
-@keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+.bar-water { background-image: linear-gradient(90deg, #00F2FE, #4FACFE, #7FC8FF, #00F2FE) !important; }
+@keyframes barShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab {
   flex: 1; text-align: center; padding: 12px; background: rgba(33, 38, 45, 0.6);
-  border-radius: 20px; cursor: pointer; font-weight: 600; color: var(--text-secondary, #9CA3AF); transition: all 0.2s ease;
+  border-radius: 20px; cursor: pointer; font-weight: 600; color: #9CA3AF; transition: all 0.2s ease;
 }
-.tab.active { background: var(--accent, #4FACFE); color: var(--bg-page, #0D1117); }
+.tab.active { background: #4FACFE; color: #0D1117; }
 
-/* Свайпы */
-.pages-swiper { width: 100%; overflow: hidden; touch-action: pan-y pinch-zoom; }
-.pages-container { display: flex; transition: transform var(--swipe-duration, 0.3s) cubic-bezier(0.2, 0.9, 0.4, 1); will-change: transform; }
-.page { flex: 0 0 100%; width: 100%; }
+/* СВАЙПЫ */
+.pages-swiper {
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.pages-container {
+  display: flex;
+  transition: transform var(--swipe-duration, 0.3s) cubic-bezier(0.2, 0.9, 0.4, 1);
+  will-change: transform;
+}
+.page {
+  flex: 0 0 100%;
+  width: 100%;
+}
 
-/* Модалка темы */
-.theme-modal {
+/* МОДАЛКА ОФОРМЛЕНИЯ */
+.modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
-  z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto;
+  z-index: 1000; display: none; padding: 20px; overflow-y: auto;
 }
-.theme-content {
+.modal-content {
+  max-width: 480px; margin: 0 auto;
+}
+.modal-card {
   background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px);
   border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px;
   padding: 24px 20px; margin-top: 20px;
 }
-.theme-section { margin-bottom: 24px; }
-.theme-section h3 { font-size: 16px; font-weight: 600; color: var(--text-main, #E6EDF3); margin-bottom: 12px; }
-.color-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.color-item { display: flex; align-items: center; gap: 8px; }
-.color-item label { margin: 0; text-transform: none; font-size: 14px; }
-.slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.slider-row span { min-width: 70px; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.slider-row span:first-child { min-width: 100px; }
 .slider-row input[type=range] { flex: 1; padding: 0; background: transparent; }
-.template-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(1,4,9,0.4); border-radius: 12px; margin-bottom: 6px; cursor: pointer; }
-.template-item .delete-template { color: #F85149; cursor: pointer; padding: 4px; }
 
-/* Остальные стили (сокращены для экономии места, но полные в исходном коде) */
+/* Остальные стили (как в исходном коде) */
 .food-list { margin: 16px 0; }
 .food-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5); border-radius: 16px; margin-bottom: 8px; }
-.food-toggle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.food-toggle.checked { background: var(--accent); border-color: var(--accent); }
-.food-toggle.checked::after { content: '✓'; color: var(--bg-page); font-size: 16px; font-weight: bold; }
+.food-toggle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.food-toggle.checked { background: #4FACFE; border-color: #4FACFE; }
+.food-toggle.checked::after { content: '✓'; color: #0D1117; font-size: 16px; font-weight: bold; }
 .food-info { flex: 1; }
 .food-name { font-weight: 500; }
-.food-macros { font-size: 12px; color: var(--text-secondary); }
+.food-macros { font-size: 12px; color: #9CA3AF; }
 .food-delete { color: #F85149; cursor: pointer; padding: 8px; font-size: 18px; }
 .templates-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; min-height: 40px; }
-.template-btn { background: rgba(26, 32, 39, 0.8); border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 13px; color: var(--text-main); cursor: pointer; backdrop-filter: blur(5px); }
-.profile-photo { width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid var(--accent); margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.template-btn { background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px; padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px); }
+.profile-photo { width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE; margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
-.profile-initials { font-size: 40px; font-weight: 600; color: var(--text-main); line-height: 1; }
-.header-photo { width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid var(--accent); cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.profile-initials { font-size: 40px; font-weight: 600; color: #E6EDF3; line-height: 1; }
+.header-photo { width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .header-photo img { width: 100%; height: 100%; object-fit: cover; }
-.header-initials { font-size: 20px; font-weight: 600; color: var(--text-main); line-height: 1; }
+.header-initials { font-size: 20px; font-weight: 600; color: #E6EDF3; line-height: 1; }
 .streak-emoji { font-size: 28px; line-height: 1; display: inline-block; cursor: pointer; transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1; }
 .streak-emoji.fade-in { opacity: 0; }
 .streak-emoji.none { filter: drop-shadow(0 0 8px #6B7280); }
@@ -201,66 +194,64 @@ input[type="date"] { color-scheme: dark; }
 .bmi-scale { position: relative; height: 24px; margin: 8px 0; cursor: pointer; }
 .bmi-gradient { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px; }
 .bmi-marker { position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease; }
-.bmi-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--text-secondary); }
-.bmi-tooltip { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027; border: 1px solid var(--accent); border-radius: 12px; padding: 6px 12px; font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.bmi-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #9CA3AF; }
+.bmi-tooltip { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027; border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
 .bmi-scale:hover .bmi-tooltip { opacity: 1; }
 .activity-daily-options { display: flex; flex-direction: column; gap: 12px; }
-.activity-daily-item { background: rgba(1, 4, 9, 0.6); border: 1px solid var(--border); border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s ease; }
-.activity-daily-item.selected { border-color: var(--accent); background: rgba(79,172,254,0.1); }
+.activity-daily-item { background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s ease; }
+.activity-daily-item.selected { border-color: #4FACFE; background: rgba(79,172,254,0.1); }
 .weight-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px; }
-.weight-history-date { font-size: 14px; color: var(--text-secondary); }
+.weight-history-date { font-size: 14px; color: #9CA3AF; }
 .weight-history-value { font-weight: 600; font-size: 16px; margin-right: auto; padding-left: 8px; }
 .weight-history-delete { color: #F85149; cursor: pointer; padding: 4px 8px; font-size: 16px; }
 .slider-container { padding: 20px 0; }
-.slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--text-secondary); font-size: 12px; }
+.slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; color: #9CA3AF; font-size: 12px; }
 .slider-wrapper { position: relative; height: 40px; margin-top: 4px; }
 .slider-gradient { position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%); }
 .temp-gradient { background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); }
 .steps-gradient { background: linear-gradient(to right, #6BCB77, #4D96FF, #9B59B6); }
-.search-gradient { background: linear-gradient(to right, var(--accent), #A855F7); }
+.search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
 .slider-ticks { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; padding: 0 2px; }
 .tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
 input[type=range] { position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%); background: transparent; z-index: 2; -webkit-appearance: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid var(--accent); cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer; }
 .slider-value { text-align: center; margin-top: 16px; font-size: 18px; font-weight: 600; }
 .profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
 .profile-header .btn-small { position: absolute; left: 0; }
 .profile-header h2 { margin: 0; text-align: center; }
-.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid var(--border); border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none; }
-.autocomplete-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D; border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none; }
+.autocomplete-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex; justify-content: space-between; align-items: center; }
 .autocomplete-item:hover { background: rgba(79,172,254,0.2); }
 .autocomplete-item .off-name { font-weight: 500; }
-.autocomplete-item .off-brand { font-size: 12px; color: var(--text-secondary); margin-left: 8px; }
+.autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
 .apple-switch { position: relative; display: inline-block; width: 51px; height: 31px; }
 .apple-switch input { opacity: 0; width: 0; height: 0; }
-.apple-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(48, 54, 61, 0.8); border: 1px solid var(--border); border-radius: 31px; transition: 0.25s; }
+.apple-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D; border-radius: 31px; transition: 0.25s; }
 .apple-switch .slider:before { position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px; background-color: white; border-radius: 50%; transition: 0.25s; }
-.apple-switch input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
+.apple-switch input:checked + .slider { background-color: #4FACFE; border-color: #4FACFE; }
 .apple-switch input:checked + .slider:before { transform: translateX(20px); }
-.toggle-label { margin-left: 12px; font-size: 14px; color: var(--text-secondary); }
+.toggle-label { margin-left: 12px; font-size: 14px; color: #9CA3AF; }
 .flex { display: flex; gap: 8px; align-items: center; }
 .text-center { text-align: center; }
-.text-small { font-size: 13px; color: var(--text-secondary); }
+.text-small { font-size: 13px; color: #9CA3AF; }
 .mb-2 { margin-bottom: 8px; }
-.scanner-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-page); z-index: 1000; display: none; flex-direction: column; }
+.scanner-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117; z-index: 1000; display: none; flex-direction: column; }
 .smart-water-modal, .about-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95); z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
 .about-content { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 24px 20px; margin-top: 20px; }
-.about-content h3 { font-size: 18px; font-weight: 600; color: var(--text-main); margin-top: 20px; margin-bottom: 12px; }
+.about-content h3 { font-size: 18px; font-weight: 600; color: #E6EDF3; margin-top: 20px; margin-bottom: 12px; }
 .about-content h3:first-of-type { margin-top: 0; }
 .about-content p { font-size: 14px; line-height: 1.6; color: #B0B8C1; margin-bottom: 12px; }
 .about-content ul { list-style: none; padding-left: 0; margin-bottom: 16px; }
 .about-content li { font-size: 14px; line-height: 1.8; color: #B0B8C1; padding-left: 20px; position: relative; }
-.about-content li::before { content: '·'; position: absolute; left: 8px; color: var(--accent); font-weight: bold; font-size: 18px; }
+.about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
-body.parallax-weak::before { transition: background-position 0.1s linear; }
-body.parallax-strong::before { transition: background-position 0.05s linear; }
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- Модалки (старые) -->
+<!-- МОДАЛКИ (сканер, умная вода, умный поиск, о приложении) -->
 <div id="scannerModal" class="scanner-container">
   <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
   <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
@@ -340,105 +331,55 @@ body.parallax-strong::before { transition: background-position 0.05s linear; }
     <h3>No Warranty</h3>
     <p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p>
     <div class="divider"></div>
-    <p class="text-center">FitCat v2.0</p>
+    <p class="text-center">FitCat v2.1</p>
   </div>
 </div>
 
-<!-- НОВАЯ МОДАЛКА ТЕМ (ПОЛНОСТЬЮ РАБОЧАЯ) -->
-<div id="themeModal" class="theme-modal">
-  <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
-    <h2 data-i18n="theme">Оформление</h2>
-    <button class="btn-small" onclick="closeThemeModal()" data-i18n="close">Закрыть</button>
-  </div>
-  <div class="theme-content">
-    <div class="theme-section">
-      <h3 data-i18n="theme_mode">Режим</h3>
-      <div class="segmented-control">
-        <div class="segmented-option" data-theme-mode="light" onclick="setThemeMode('light')" data-i18n="theme_light">Светлая</div>
-        <div class="segmented-option" data-theme-mode="dark" onclick="setThemeMode('dark')" data-i18n="theme_dark">Тёмная</div>
+<!-- МОДАЛКА ОФОРМЛЕНИЯ -->
+<div id="appearanceModal" class="modal">
+  <div class="modal-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 data-i18n="appearance">Оформление</h2>
+      <button class="btn-small" onclick="closeAppearanceModal()">✕</button>
+    </div>
+    <div class="modal-card">
+      <h3 data-i18n="card_effects" style="margin-bottom:16px;">Эффекты карточек</h3>
+      
+      <div class="slider-row">
+        <span data-i18n="blur">Размытие</span>
+        <input type="range" id="cardBlurSlider" min="0" max="20" value="12" step="1">
+        <span id="blurValue">12px</span>
       </div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_colors">Цвета</h3>
-      <div class="color-grid">
-        <div class="color-item"><label>Акцентный</label><input type="color" id="colorAccent" value="#4FACFE"></div>
-        <div class="color-item"><label>Фон страницы</label><input type="color" id="colorBgPage" value="#0D1117"></div>
-        <div class="color-item"><label>Фон карточек</label><input type="color" id="colorBgCard" value="#161B22"></div>
-        <div class="color-item"><label>Текст основной</label><input type="color" id="colorTextMain" value="#E6EDF3"></div>
-        <div class="color-item"><label>Текст вторичный</label><input type="color" id="colorTextSecondary" value="#9CA3AF"></div>
-        <div class="color-item"><label>Границы</label><input type="color" id="colorBorder" value="#30363D"></div>
+      
+      <div class="slider-row">
+        <span data-i18n="opacity">Прозрачность</span>
+        <input type="range" id="cardOpacitySlider" min="0" max="100" value="70" step="1">
+        <span id="opacityValue">70%</span>
       </div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_card_effects">Эффекты карточек</h3>
-      <div class="slider-row"><span data-i18n="theme_blur">Размытие</span><input type="range" id="cardBlur" min="0" max="20" value="12"><span id="cardBlurVal">12px</span></div>
-      <div class="slider-row"><span data-i18n="theme_opacity">Прозрачность</span><input type="range" id="cardOpacity" min="0" max="100" value="70"><span id="cardOpacityVal">70%</span></div>
-      <div class="slider-row"><span data-i18n="theme_depth">3D-глубина</span><input type="range" id="cardDepth" min="0" max="100" value="30"><span id="cardDepthVal">30%</span></div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_glow">Свечение границ</h3>
-      <div class="slider-row"><span data-i18n="theme_glow_intensity">Интенсивность</span><input type="range" id="glowIntensity" min="0" max="100" value="0"><span id="glowIntensityVal">0%</span></div>
-      <div class="input-group"><label data-i18n="theme_glow_animation">Анимация</label>
-        <select id="glowAnimation">
-          <option value="none">Выкл</option>
-          <option value="pulse">Пульсация</option>
-          <option value="shimmer">Переливание</option>
+      
+      <div class="slider-row">
+        <span data-i18n="depth">3D-глубина</span>
+        <input type="range" id="cardDepthSlider" min="0" max="100" value="30" step="1">
+        <span id="depthValue">30%</span>
+      </div>
+      
+      <h3 data-i18n="swipe_animation" style="margin:24px 0 16px;">Анимация свайпа</h3>
+      
+      <div class="input-group">
+        <label data-i18n="effect">Эффект</label>
+        <select id="swipeEffectSelect">
+          <option value="slide" data-i18n="slide">Слайд</option>
+          <option value="fade" data-i18n="fade">Затухание</option>
         </select>
       </div>
-      <div class="input-group"><label data-i18n="theme_glow_direction">Направление</label>
-        <select id="glowDirection">
-          <option value="to right">→</option>
-          <option value="to left">←</option>
-          <option value="to top">↑</option>
-          <option value="to bottom">↓</option>
-          <option value="to top right">↗</option>
-          <option value="to top left">↖</option>
-          <option value="to bottom right">↘</option>
-          <option value="to bottom left">↙</option>
-        </select>
+      
+      <div class="slider-row">
+        <span data-i18n="duration">Длительность</span>
+        <input type="range" id="swipeDurationSlider" min="0.1" max="1.0" value="0.3" step="0.1">
+        <span id="durationValue">0.3s</span>
       </div>
-      <div class="slider-row"><span data-i18n="theme_glow_speed">Скорость</span><input type="range" id="glowSpeed" min="1" max="5" step="0.5" value="3"><span id="glowSpeedVal">3s</span></div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_bg_animation">Анимация фона</h3>
-      <div class="slider-row"><span data-i18n="theme_bg_intensity">Интенсивность</span><input type="range" id="bgIntensity" min="0" max="100" value="30"><span id="bgIntensityVal">30%</span></div>
-      <div class="input-group"><label>Скорость анимации</label><input type="range" id="bgAnimSpeed" min="2" max="20" value="8" step="1"><span id="bgAnimSpeedVal">8s</span></div>
-      <div class="input-group"><label data-i18n="theme_parallax">Параллакс</label>
-        <select id="parallax">
-          <option value="none">Выкл</option>
-          <option value="weak">Слабый</option>
-          <option value="strong">Сильный</option>
-        </select>
-      </div>
-      <div class="color-item"><label>Градиент: начало</label><input type="color" id="gradientStart" value="#0D1117"></div>
-      <div class="color-item"><label>Градиент: конец</label><input type="color" id="gradientEnd" value="#16213E"></div>
-      <div class="input-group"><label>Угол градиента</label><input type="range" id="gradientAngle" min="0" max="360" value="135"><span id="gradientAngleVal">135°</span></div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_progress">Прогресс-бары</h3>
-      <div class="input-group"><label data-i18n="theme_progress_animation">Анимация</label>
-        <select id="progressAnimation">
-          <option value="static">Статичный</option>
-          <option value="shimmer">Переливание</option>
-          <option value="pulse">Пульсация</option>
-        </select>
-      </div>
-    </div>
-    <div class="theme-section">
-      <h3 data-i18n="theme_swipe">Анимация свайпа</h3>
-      <div class="input-group"><label data-i18n="theme_swipe_effect">Эффект</label>
-        <select id="swipeEffect">
-          <option value="slide">Слайд</option>
-          <option value="fade">Затухание</option>
-        </select>
-      </div>
-      <div class="slider-row"><span data-i18n="theme_swipe_duration">Длительность</span><input type="range" id="swipeDuration" min="0.1" max="1" step="0.1" value="0.3"><span id="swipeDurationVal">0.3s</span></div>
-    </div>
-    <div class="theme-section">
-      <button class="btn-primary" onclick="saveThemeTemplate()" data-i18n="theme_save_template">Сохранить как шаблон</button>
-      <button class="btn-secondary" onclick="resetThemeToDefault()" style="margin-top:8px;">Сбросить настройки</button>
-      <h4 data-i18n="theme_my_templates" style="margin-top:16px;">Мои шаблоны</h4>
-      <div id="themeTemplatesList"></div>
+      
+      <button class="btn-secondary" onclick="resetAppearance()" data-i18n="reset_settings">Сбросить настройки</button>
     </div>
   </div>
 </div>
@@ -484,6 +425,7 @@ body.parallax-strong::before { transition: background-position 0.05s linear; }
     <div class="tab" data-page="weight" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
   </div>
 
+  <!-- СВАЙП-КОНТЕЙНЕР -->
   <div class="pages-swiper" id="pagesSwiper">
     <div class="pages-container" id="pagesContainer">
       <div id="todayPage" class="page active">
@@ -615,7 +557,7 @@ body.parallax-strong::before { transition: background-position 0.05s linear; }
 <div id="settingsPage" style="display:none;">
   <div class="card">
     <h2 data-i18n="settings">Настройки</h2>
-    <button class="btn-secondary" onclick="openThemeModal()" data-i18n="theme">Оформление</button>
+    <button class="btn-secondary" onclick="openAppearanceModal()" data-i18n="appearance">Оформление</button>
     <button class="btn-secondary" onclick="exportData()" data-i18n="export_data">Скачать данные</button>
     <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
     <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
@@ -641,11 +583,11 @@ body.parallax-strong::before { transition: background-position 0.05s linear; }
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ==================== ПОЛНЫЙ КОД FITCAT V2.0 ====================
+// ==================== ПОЛНЫЙ КОД FITCAT V2.1 ====================
 (function(){
 'use strict';
 
-// ========== ПЕРЕВОДЫ ==========
+// ========== ПЕРЕВОДЫ (ДОБАВЛЕНЫ КЛЮЧИ ДЛЯ ОФОРМЛЕНИЯ) ==========
 const translations = {
   ru: {
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
@@ -686,14 +628,18 @@ const translations = {
     morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
     no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
     photo_too_large: 'Фото слишком большое. Максимум 3 МБ.',
-    theme: 'Оформление', theme_mode: 'Режим', theme_light: 'Светлая', theme_dark: 'Тёмная',
-    theme_colors: 'Цвета', theme_card_effects: 'Эффекты карточек',
-    theme_blur: 'Размытие', theme_opacity: 'Прозрачность', theme_depth: '3D-глубина',
-    theme_glow: 'Свечение границ', theme_glow_intensity: 'Интенсивность', theme_glow_animation: 'Анимация', theme_glow_direction: 'Направление', theme_glow_speed: 'Скорость',
-    theme_bg_animation: 'Анимация фона', theme_bg_intensity: 'Интенсивность', theme_parallax: 'Параллакс', theme_parallax_weak: 'Слабый', theme_parallax_strong: 'Сильный',
-    theme_progress: 'Прогресс-бары', theme_progress_animation: 'Анимация',
-    theme_swipe: 'Анимация свайпа', theme_swipe_effect: 'Эффект', theme_swipe_slide: 'Слайд', theme_swipe_fade: 'Затухание', theme_swipe_duration: 'Длительность',
-    theme_save_template: 'Сохранить как шаблон', theme_my_templates: 'Мои шаблоны', theme_template_name: 'Название шаблона'
+    // Новые ключи оформления
+    appearance: 'Оформление',
+    card_effects: 'Эффекты карточек',
+    blur: 'Размытие',
+    opacity: 'Прозрачность',
+    depth: '3D-глубина',
+    swipe_animation: 'Анимация свайпа',
+    effect: 'Эффект',
+    slide: 'Слайд',
+    fade: 'Затухание',
+    duration: 'Длительность',
+    reset_settings: 'Сбросить настройки'
   },
   en: {
     save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On',
@@ -734,14 +680,17 @@ const translations = {
     morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night',
     no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight',
     photo_too_large: 'Photo too large. Maximum 3 MB.',
-    theme: 'Theme', theme_mode: 'Mode', theme_light: 'Light', theme_dark: 'Dark',
-    theme_colors: 'Colors', theme_card_effects: 'Card effects',
-    theme_blur: 'Blur', theme_opacity: 'Opacity', theme_depth: '3D Depth',
-    theme_glow: 'Border glow', theme_glow_intensity: 'Intensity', theme_glow_animation: 'Animation', theme_glow_direction: 'Direction', theme_glow_speed: 'Speed',
-    theme_bg_animation: 'Background animation', theme_bg_intensity: 'Intensity', theme_parallax: 'Parallax', theme_parallax_weak: 'Weak', theme_parallax_strong: 'Strong',
-    theme_progress: 'Progress bars', theme_progress_animation: 'Animation',
-    theme_swipe: 'Swipe animation', theme_swipe_effect: 'Effect', theme_swipe_slide: 'Slide', theme_swipe_fade: 'Fade', theme_swipe_duration: 'Duration',
-    theme_save_template: 'Save as template', theme_my_templates: 'My templates', theme_template_name: 'Template name'
+    appearance: 'Appearance',
+    card_effects: 'Card Effects',
+    blur: 'Blur',
+    opacity: 'Opacity',
+    depth: '3D Depth',
+    swipe_animation: 'Swipe Animation',
+    effect: 'Effect',
+    slide: 'Slide',
+    fade: 'Fade',
+    duration: 'Duration',
+    reset_settings: 'Reset Settings'
   },
   cn: {
     save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开',
@@ -782,14 +731,17 @@ const translations = {
     morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安',
     no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量',
     photo_too_large: '照片太大。最大 3 MB。',
-    theme: '主题', theme_mode: '模式', theme_light: '浅色', theme_dark: '深色',
-    theme_colors: '颜色', theme_card_effects: '卡片效果',
-    theme_blur: '模糊', theme_opacity: '透明度', theme_depth: '3D深度',
-    theme_glow: '边框发光', theme_glow_intensity: '强度', theme_glow_animation: '动画', theme_glow_direction: '方向', theme_glow_speed: '速度',
-    theme_bg_animation: '背景动画', theme_bg_intensity: '强度', theme_parallax: '视差', theme_parallax_weak: '弱', theme_parallax_strong: '强',
-    theme_progress: '进度条', theme_progress_animation: '动画',
-    theme_swipe: '滑动动画', theme_swipe_effect: '效果', theme_swipe_slide: '滑动', theme_swipe_fade: '淡入淡出', theme_swipe_duration: '时长',
-    theme_save_template: '保存为模板', theme_my_templates: '我的模板', theme_template_name: '模板名称'
+    appearance: '外观',
+    card_effects: '卡片效果',
+    blur: '模糊',
+    opacity: '透明度',
+    depth: '3D深度',
+    swipe_animation: '滑动动画',
+    effect: '效果',
+    slide: '滑动',
+    fade: '淡出',
+    duration: '时长',
+    reset_settings: '重置设置'
   }
 };
 
@@ -827,14 +779,14 @@ let isSwiping = false;
 
 function updateSwipePosition() {
   if (!container) return;
-  const effect = currentTheme?.swipeEffect || 'slide';
-  const duration = currentTheme?.swipeDuration || 0.3;
-  container.style.transition = `transform ${duration}s cubic-bezier(0.2,0.9,0.4,1)`;
+  const effect = getComputedStyle(document.documentElement).getPropertyValue('--swipe-effect').trim() || 'slide';
+  const duration = getComputedStyle(document.documentElement).getPropertyValue('--swipe-duration').trim() || '0.3s';
+  container.style.transition = `transform ${duration} cubic-bezier(0.2,0.9,0.4,1)`;
   container.style.transform = `translateX(-${currentPageIndex * 100}%)`;
   if (effect === 'fade') {
     document.querySelectorAll('.page').forEach((p, i) => {
       p.style.opacity = i === currentPageIndex ? '1' : '0.3';
-      p.style.transition = `opacity ${duration}s`;
+      p.style.transition = `opacity ${duration}`;
     });
   } else {
     document.querySelectorAll('.page').forEach(p => p.style.opacity = '1');
@@ -901,211 +853,72 @@ if (swiper) {
   });
 }
 
-// ========== РАБОЧАЯ ТЕМА ==========
-let themeTemplates = JSON.parse(localStorage.getItem('fitcat_theme_templates') || '[]');
-let currentTheme = JSON.parse(localStorage.getItem('fitcat_theme') || '{}');
-
-const defaultTheme = {
-  mode: 'dark',
-  accent: '#4FACFE', bgPage: '#0D1117', bgCard: '#161B22', textMain: '#E6EDF3', textSecondary: '#9CA3AF', border: '#30363D',
-  cardBlur: 12, cardOpacity: 70, cardDepth: 30,
-  glowIntensity: 0, glowAnimation: 'none', glowDirection: 'to right', glowSpeed: 3,
-  bgIntensity: 30, bgAnimSpeed: 8, parallax: 'none',
-  gradientStart: '#0D1117', gradientEnd: '#16213E', gradientAngle: 135,
-  progressAnimation: 'shimmer',
-  swipeEffect: 'slide', swipeDuration: 0.3
-};
-
-function initTheme() {
-  currentTheme = { ...defaultTheme, ...currentTheme };
-  applyTheme();
-  populateThemeModal();
+// ========== ОФОРМЛЕНИЕ ==========
+function loadAppearance() {
+  const saved = JSON.parse(localStorage.getItem('fitcat_appearance') || '{}');
+  document.documentElement.style.setProperty('--card-blur', (saved.cardBlur || 12) + 'px');
+  document.documentElement.style.setProperty('--card-opacity', (saved.cardOpacity || 70) / 100);
+  document.documentElement.style.setProperty('--card-depth', saved.cardDepth || 30);
+  document.documentElement.style.setProperty('--swipe-effect', saved.swipeEffect || 'slide');
+  document.documentElement.style.setProperty('--swipe-duration', (saved.swipeDuration || 0.3) + 's');
 }
 
-function applyTheme() {
-  const root = document.documentElement;
-  const t = currentTheme;
-  root.style.setProperty('--accent', t.accent);
-  root.style.setProperty('--bg-page', t.bgPage);
-  const bgCardRgb = hexToRgb(t.bgCard).join(',');
-  root.style.setProperty('--bg-card-rgb', bgCardRgb);
-  root.style.setProperty('--text-main', t.textMain);
-  root.style.setProperty('--text-secondary', t.textSecondary);
-  root.style.setProperty('--border', t.border);
-  root.style.setProperty('--card-blur', t.cardBlur + 'px');
-  root.style.setProperty('--card-opacity', t.cardOpacity / 100);
-  root.style.setProperty('--card-depth', t.cardDepth);
-  root.style.setProperty('--glow-intensity', t.glowIntensity / 100);
-  root.style.setProperty('--glow-direction', t.glowDirection);
-  root.style.setProperty('--glow-speed', t.glowSpeed + 's');
-  root.style.setProperty('--bg-intensity', t.bgIntensity / 100);
-  root.style.setProperty('--bg-animation-speed', t.bgAnimSpeed + 's');
-  root.style.setProperty('--bg-gradient-start', t.gradientStart);
-  root.style.setProperty('--bg-gradient-end', t.gradientEnd);
-  root.style.setProperty('--bg-gradient-angle', t.gradientAngle + 'deg');
-  
-  let progAnim = 'none';
-  if (t.progressAnimation === 'shimmer') progAnim = 'shimmer 4s infinite';
-  else if (t.progressAnimation === 'pulse') progAnim = 'pulse 2s infinite';
-  root.style.setProperty('--progress-animation', progAnim);
-  
-  root.style.setProperty('--swipe-effect', t.swipeEffect);
-  root.style.setProperty('--swipe-duration', t.swipeDuration + 's');
-  
-  document.body.classList.toggle('light-theme', t.mode === 'light');
-  if (t.mode === 'light') {
-    root.style.setProperty('--bg-page', '#F5F7FA');
-    root.style.setProperty('--bg-card-rgb', '255,255,255');
-    root.style.setProperty('--text-main', '#1E1E2E');
-    root.style.setProperty('--text-secondary', '#5A5A6E');
-    root.style.setProperty('--border', '#D0D0DD');
-  } else {
-    root.style.setProperty('--bg-page', t.bgPage);
-    root.style.setProperty('--bg-card-rgb', bgCardRgb);
-    root.style.setProperty('--text-main', t.textMain);
-    root.style.setProperty('--text-secondary', t.textSecondary);
-    root.style.setProperty('--border', t.border);
-  }
-  
-  document.body.classList.remove('parallax-weak', 'parallax-strong');
-  if (t.parallax !== 'none') document.body.classList.add('parallax-' + t.parallax);
-  
-  localStorage.setItem('fitcat_theme', JSON.stringify(currentTheme));
-  if (typeof updateSwipePosition === 'function') updateSwipePosition();
-}
-
-function hexToRgb(hex) {
-  let c = hex.substring(1);
-  if (c.length === 3) c = c.split('').map(s => s + s).join('');
-  const intVal = parseInt(c, 16);
-  return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255];
-}
-
-function openThemeModal() { 
-  document.getElementById('themeModal').style.display = 'flex'; 
-  populateThemeModal(); 
-}
-function closeThemeModal() { 
-  document.getElementById('themeModal').style.display = 'none'; 
-}
-
-function populateThemeModal() {
-  const t = currentTheme;
-  document.getElementById('colorAccent').value = t.accent;
-  document.getElementById('colorBgPage').value = t.bgPage;
-  document.getElementById('colorBgCard').value = t.bgCard;
-  document.getElementById('colorTextMain').value = t.textMain;
-  document.getElementById('colorTextSecondary').value = t.textSecondary;
-  document.getElementById('colorBorder').value = t.border;
-  document.getElementById('cardBlur').value = t.cardBlur;
-  document.getElementById('cardBlurVal').innerText = t.cardBlur + 'px';
-  document.getElementById('cardOpacity').value = t.cardOpacity;
-  document.getElementById('cardOpacityVal').innerText = t.cardOpacity + '%';
-  document.getElementById('cardDepth').value = t.cardDepth;
-  document.getElementById('cardDepthVal').innerText = t.cardDepth + '%';
-  document.getElementById('glowIntensity').value = t.glowIntensity;
-  document.getElementById('glowIntensityVal').innerText = t.glowIntensity + '%';
-  document.getElementById('glowAnimation').value = t.glowAnimation;
-  document.getElementById('glowDirection').value = t.glowDirection;
-  document.getElementById('glowSpeed').value = t.glowSpeed;
-  document.getElementById('glowSpeedVal').innerText = t.glowSpeed + 's';
-  document.getElementById('bgIntensity').value = t.bgIntensity;
-  document.getElementById('bgIntensityVal').innerText = t.bgIntensity + '%';
-  document.getElementById('bgAnimSpeed').value = t.bgAnimSpeed;
-  document.getElementById('bgAnimSpeedVal').innerText = t.bgAnimSpeed + 's';
-  document.getElementById('parallax').value = t.parallax;
-  document.getElementById('gradientStart').value = t.gradientStart;
-  document.getElementById('gradientEnd').value = t.gradientEnd;
-  document.getElementById('gradientAngle').value = t.gradientAngle;
-  document.getElementById('gradientAngleVal').innerText = t.gradientAngle + '°';
-  document.getElementById('progressAnimation').value = t.progressAnimation;
-  document.getElementById('swipeEffect').value = t.swipeEffect;
-  document.getElementById('swipeDuration').value = t.swipeDuration;
-  document.getElementById('swipeDurationVal').innerText = t.swipeDuration + 's';
-  
-  document.querySelectorAll('[data-theme-mode]').forEach(el => {
-    el.classList.toggle('active', el.dataset.themeMode === t.mode);
-  });
-  renderThemeTemplates();
-}
-
-function setThemeMode(mode) {
-  currentTheme.mode = mode;
-  applyTheme();
-  populateThemeModal();
-}
-
-function resetThemeToDefault() {
-  currentTheme = { ...defaultTheme };
-  applyTheme();
-  populateThemeModal();
-}
-
-function saveThemeTemplate() {
-  const name = prompt(i18n('theme_template_name'), 'Мой стиль ' + (themeTemplates.length+1));
-  if (!name) return;
-  themeTemplates.push({ name, theme: { ...currentTheme } });
-  localStorage.setItem('fitcat_theme_templates', JSON.stringify(themeTemplates));
-  renderThemeTemplates();
-}
-
-function loadThemeTemplate(index) {
-  currentTheme = { ...themeTemplates[index].theme };
-  applyTheme();
-  populateThemeModal();
-}
-
-function deleteThemeTemplate(index) {
-  themeTemplates.splice(index, 1);
-  localStorage.setItem('fitcat_theme_templates', JSON.stringify(themeTemplates));
-  renderThemeTemplates();
-}
-
-function renderThemeTemplates() {
-  const list = document.getElementById('themeTemplatesList');
-  if (!themeTemplates.length) {
-    list.innerHTML = `<div class="text-small">${i18n('no_templates')}</div>`;
-    return;
-  }
-  list.innerHTML = themeTemplates.map((tm, i) => `
-    <div class="template-item" onclick="loadThemeTemplate(${i})">
-      <span>${tm.name}</span>
-      <span class="delete-template" onclick="event.stopPropagation();deleteThemeTemplate(${i})">✕</span>
-    </div>
-  `).join('');
-}
-
-function bindThemeControls() {
-  const ids = {
-    colorAccent: 'accent', colorBgPage: 'bgPage', colorBgCard: 'bgCard', colorTextMain: 'textMain', colorTextSecondary: 'textSecondary', colorBorder: 'border',
-    cardBlur: 'cardBlur', cardOpacity: 'cardOpacity', cardDepth: 'cardDepth',
-    glowIntensity: 'glowIntensity', glowAnimation: 'glowAnimation', glowDirection: 'glowDirection', glowSpeed: 'glowSpeed',
-    bgIntensity: 'bgIntensity', bgAnimSpeed: 'bgAnimSpeed', parallax: 'parallax',
-    gradientStart: 'gradientStart', gradientEnd: 'gradientEnd', gradientAngle: 'gradientAngle',
-    progressAnimation: 'progressAnimation',
-    swipeEffect: 'swipeEffect', swipeDuration: 'swipeDuration'
+function saveAppearance() {
+  const settings = {
+    cardBlur: parseInt(document.getElementById('cardBlurSlider').value),
+    cardOpacity: parseInt(document.getElementById('cardOpacitySlider').value),
+    cardDepth: parseInt(document.getElementById('cardDepthSlider').value),
+    swipeEffect: document.getElementById('swipeEffectSelect').value,
+    swipeDuration: parseFloat(document.getElementById('swipeDurationSlider').value)
   };
-  Object.entries(ids).forEach(([id, prop]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.addEventListener('input', () => {
-      let val = el.value;
-      if (el.type === 'range') val = parseFloat(val);
-      if (id === 'cardBlur' || id === 'cardOpacity' || id === 'cardDepth' || id === 'glowIntensity' || id === 'bgIntensity' || id === 'bgAnimSpeed' || id === 'gradientAngle' || id === 'swipeDuration') {
-        val = parseFloat(val);
-      }
-      currentTheme[prop] = val;
-      if (id === 'cardBlur') document.getElementById('cardBlurVal').innerText = val + 'px';
-      if (id === 'cardOpacity') document.getElementById('cardOpacityVal').innerText = val + '%';
-      if (id === 'cardDepth') document.getElementById('cardDepthVal').innerText = val + '%';
-      if (id === 'glowIntensity') document.getElementById('glowIntensityVal').innerText = val + '%';
-      if (id === 'glowSpeed') document.getElementById('glowSpeedVal').innerText = val + 's';
-      if (id === 'bgIntensity') document.getElementById('bgIntensityVal').innerText = val + '%';
-      if (id === 'bgAnimSpeed') document.getElementById('bgAnimSpeedVal').innerText = val + 's';
-      if (id === 'gradientAngle') document.getElementById('gradientAngleVal').innerText = val + '°';
-      if (id === 'swipeDuration') document.getElementById('swipeDurationVal').innerText = val + 's';
-      applyTheme();
-    });
+  localStorage.setItem('fitcat_appearance', JSON.stringify(settings));
+  loadAppearance();
+  updateSwipePosition();
+}
+
+function openAppearanceModal() {
+  const saved = JSON.parse(localStorage.getItem('fitcat_appearance') || '{}');
+  document.getElementById('cardBlurSlider').value = saved.cardBlur || 12;
+  document.getElementById('cardOpacitySlider').value = saved.cardOpacity || 70;
+  document.getElementById('cardDepthSlider').value = saved.cardDepth || 30;
+  document.getElementById('swipeEffectSelect').value = saved.swipeEffect || 'slide';
+  document.getElementById('swipeDurationSlider').value = saved.swipeDuration || 0.3;
+  document.getElementById('blurValue').innerText = (saved.cardBlur || 12) + 'px';
+  document.getElementById('opacityValue').innerText = (saved.cardOpacity || 70) + '%';
+  document.getElementById('depthValue').innerText = (saved.cardDepth || 30) + '%';
+  document.getElementById('durationValue').innerText = (saved.swipeDuration || 0.3) + 's';
+  document.getElementById('appearanceModal').style.display = 'block';
+}
+
+function closeAppearanceModal() {
+  document.getElementById('appearanceModal').style.display = 'none';
+}
+
+function resetAppearance() {
+  localStorage.removeItem('fitcat_appearance');
+  loadAppearance();
+  closeAppearanceModal();
+  updateSwipePosition();
+}
+
+// Привязка обработчиков
+function bindAppearanceControls() {
+  document.getElementById('cardBlurSlider').addEventListener('input', function() {
+    document.getElementById('blurValue').innerText = this.value + 'px';
+    saveAppearance();
+  });
+  document.getElementById('cardOpacitySlider').addEventListener('input', function() {
+    document.getElementById('opacityValue').innerText = this.value + '%';
+    saveAppearance();
+  });
+  document.getElementById('cardDepthSlider').addEventListener('input', function() {
+    document.getElementById('depthValue').innerText = this.value + '%';
+    saveAppearance();
+  });
+  document.getElementById('swipeEffectSelect').addEventListener('change', saveAppearance);
+  document.getElementById('swipeDurationSlider').addEventListener('input', function() {
+    document.getElementById('durationValue').innerText = this.value + 's';
+    saveAppearance();
   });
 }
 
@@ -1400,9 +1213,7 @@ window.deleteFood=deleteFood; window.openScanner=openScanner; window.closeScanne
 window.setWeightGoal=setWeightGoal; window.deleteWeightEntry=deleteWeightEntry; window.addWeightEntry=addWeightEntry; window.showPage=showPage;
 window.showProductsManager=showProductsManager; window.editProduct=editProduct; window.deleteProduct=deleteProduct;
 window.exportData=exportData; window.importData=importData; window.showBMITooltip=showBMITooltip;
-window.openThemeModal=openThemeModal; window.closeThemeModal=closeThemeModal; window.setThemeMode=setThemeMode;
-window.saveThemeTemplate=saveThemeTemplate; window.loadThemeTemplate=loadThemeTemplate; window.deleteThemeTemplate=deleteThemeTemplate;
-window.resetThemeToDefault=resetThemeToDefault;
+window.openAppearanceModal=openAppearanceModal; window.closeAppearanceModal=closeAppearanceModal; window.resetAppearance=resetAppearance;
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 window.onload = function() {
@@ -1418,8 +1229,8 @@ window.onload = function() {
   currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
   waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
   
-  initTheme();
-  bindThemeControls();
+  loadAppearance();
+  bindAppearanceControls();
   
   if(!currentProfile){
     document.getElementById('setupPage').style.display='block'; document.getElementById('mainPage').style.display='none';
