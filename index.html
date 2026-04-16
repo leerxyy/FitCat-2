@@ -11,6 +11,7 @@
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <style>
+/* ===== ОСНОВНЫЕ СТИЛИ ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: #0D1117; min-height: 100vh; }
 body {
@@ -120,6 +121,7 @@ input[type="date"] { color-scheme: dark; }
   border-radius: 20px; cursor: pointer; font-weight: 600; color: #9CA3AF; transition: all 0.2s ease;
 }
 .tab.active { background: #4FACFE; color: #0D1117; }
+
 /* Свайпы */
 .pages-swiper {
   width: 100%;
@@ -128,13 +130,14 @@ input[type="date"] { color-scheme: dark; }
 }
 .pages-container {
   display: flex;
-  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+  transition: transform var(--swipe-duration, 0.3s) cubic-bezier(0.2, 0.9, 0.4, 1);
   will-change: transform;
 }
 .page {
   flex: 0 0 100%;
   width: 100%;
 }
+
 /* Модалка темы */
 .theme-modal {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
@@ -155,6 +158,7 @@ input[type="date"] { color-scheme: dark; }
 .slider-row input[type=range] { flex: 1; padding: 0; background: transparent; }
 .template-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(1,4,9,0.4); border-radius: 12px; margin-bottom: 6px; cursor: pointer; }
 .template-item .delete-template { color: #F85149; cursor: pointer; padding: 4px; }
+
 /* Остальные стили */
 .food-list { margin: 16px 0; }
 .food-item {
@@ -314,6 +318,87 @@ input[type=range]::-webkit-slider-thumb {
 .about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
+
+/* CSS-переменные темы */
+:root {
+  --accent: #4FACFE;
+  --bg-page: #0D1117;
+  --bg-card: #161B22;
+  --text-main: #E6EDF3;
+  --text-secondary: #9CA3AF;
+  --border: #30363D;
+  --card-blur: 12px;
+  --card-opacity: 0.7;
+  --card-depth: 0.3;
+  --glow-intensity: 0;
+  --glow-animation: none;
+  --glow-direction: to right;
+  --glow-speed: 3s;
+  --bg-intensity: 0.3;
+  --parallax: none;
+  --progress-animation: shimmer 4s infinite;
+  --swipe-effect: slide;
+  --swipe-duration: 0.3s;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+body::before {
+  opacity: var(--bg-intensity);
+}
+.card {
+  background: rgba(22, 27, 34, var(--card-opacity));
+  backdrop-filter: blur(var(--card-blur));
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  border: 1px solid var(--border);
+  box-shadow: 0 calc(8px + var(--card-depth)*10) calc(32px + var(--card-depth)*50) rgba(0,0,0, calc(0.3 + var(--card-depth)*0.5));
+}
+.tab.active, .segmented-option.active, .btn-primary {
+  background: var(--accent);
+}
+.progress-bar {
+  animation: var(--progress-animation);
+}
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.card {
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(var(--glow-direction), var(--accent), transparent, var(--accent));
+  background-size: 300% 300%;
+  border-radius: 24px;
+  z-index: -1;
+  opacity: var(--glow-intensity);
+  animation: glowMove var(--glow-speed) linear infinite;
+  pointer-events: none;
+}
+@keyframes glowMove {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+body.light-theme {
+  --bg-page: #F5F7FA;
+  --bg-card: #FFFFFF;
+  --text-main: #1E1E2E;
+  --text-secondary: #5A5A6E;
+  --border: #D0D0DD;
+}
+body.light-theme::before {
+  background: #F5F7FA;
+}
 </style>
 </head>
 <body>
@@ -405,12 +490,15 @@ input[type=range]::-webkit-slider-thumb {
 
 <!-- НОВАЯ МОДАЛКА ТЕМ -->
 <div id="themeModal" class="theme-modal">
-  <div style="display:flex;justify-content:space-between;margin-bottom:16px;"><h2 data-i18n="theme">Оформление</h2><button class="btn-small" onclick="closeThemeModal()" data-i18n="close">Закрыть</button></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:16px;">
+    <h2 data-i18n="theme">Оформление</h2>
+    <button class="btn-small" onclick="closeThemeModal()" data-i18n="close">Закрыть</button>
+  </div>
   <div class="theme-content">
     <div class="theme-section">
       <h3 data-i18n="theme_mode">Режим</h3>
       <div class="segmented-control">
-        <div class="segmented-option active" data-theme-mode="light" onclick="setThemeMode('light')" data-i18n="theme_light">Светлая</div>
+        <div class="segmented-option" data-theme-mode="light" onclick="setThemeMode('light')" data-i18n="theme_light">Светлая</div>
         <div class="segmented-option" data-theme-mode="dark" onclick="setThemeMode('dark')" data-i18n="theme_dark">Тёмная</div>
       </div>
     </div>
@@ -434,26 +522,61 @@ input[type=range]::-webkit-slider-thumb {
     <div class="theme-section">
       <h3 data-i18n="theme_glow">Свечение границ</h3>
       <div class="slider-row"><span data-i18n="theme_glow_intensity">Интенсивность</span><input type="range" id="glowIntensity" min="0" max="100" value="0"><span id="glowIntensityVal">0%</span></div>
-      <div class="input-group"><label data-i18n="theme_glow_animation">Анимация</label><select id="glowAnimation"><option value="none">Выкл</option><option value="pulse">Пульсация</option><option value="shimmer">Переливание</option></select></div>
-      <div class="input-group"><label data-i18n="theme_glow_direction">Направление</label><select id="glowDirection"><option value="to right">→</option><option value="to bottom right">↘</option><option value="to top">↑</option></select></div>
-      <div class="slider-row"><span data-i18n="theme_glow_speed">Скорость</span><input type="range" id="glowSpeed" min="1" max="5" value="3"><span id="glowSpeedVal">3s</span></div>
+      <div class="input-group"><label data-i18n="theme_glow_animation">Анимация</label>
+        <select id="glowAnimation">
+          <option value="none">Выкл</option>
+          <option value="pulse">Пульсация</option>
+          <option value="shimmer">Переливание</option>
+        </select>
+      </div>
+      <div class="input-group"><label data-i18n="theme_glow_direction">Направление</label>
+        <select id="glowDirection">
+          <option value="to right">→</option>
+          <option value="to left">←</option>
+          <option value="to top">↑</option>
+          <option value="to bottom">↓</option>
+          <option value="to top right">↗</option>
+          <option value="to top left">↖</option>
+          <option value="to bottom right">↘</option>
+          <option value="to bottom left">↙</option>
+        </select>
+      </div>
+      <div class="slider-row"><span data-i18n="theme_glow_speed">Скорость</span><input type="range" id="glowSpeed" min="1" max="5" step="0.5" value="3"><span id="glowSpeedVal">3s</span></div>
     </div>
     <div class="theme-section">
       <h3 data-i18n="theme_bg_animation">Анимация фона</h3>
       <div class="slider-row"><span data-i18n="theme_bg_intensity">Интенсивность</span><input type="range" id="bgIntensity" min="0" max="100" value="30"><span id="bgIntensityVal">30%</span></div>
-      <div class="input-group"><label data-i18n="theme_parallax">Параллакс</label><select id="parallax"><option value="none">Выкл</option><option value="weak">Слабый</option><option value="strong">Сильный</option></select></div>
+      <div class="input-group"><label data-i18n="theme_parallax">Параллакс</label>
+        <select id="parallax">
+          <option value="none">Выкл</option>
+          <option value="weak">Слабый</option>
+          <option value="strong">Сильный</option>
+        </select>
+      </div>
     </div>
     <div class="theme-section">
       <h3 data-i18n="theme_progress">Прогресс-бары</h3>
-      <div class="input-group"><label data-i18n="theme_progress_animation">Анимация</label><select id="progressAnimation"><option value="static">Статичный</option><option value="shimmer">Переливание</option><option value="pulse">Пульсация</option></select></div>
+      <div class="input-group"><label data-i18n="theme_progress_animation">Анимация</label>
+        <select id="progressAnimation">
+          <option value="static">Статичный</option>
+          <option value="shimmer">Переливание</option>
+          <option value="pulse">Пульсация</option>
+        </select>
+      </div>
     </div>
     <div class="theme-section">
       <h3 data-i18n="theme_swipe">Анимация свайпа</h3>
-      <div class="input-group"><label data-i18n="theme_swipe_effect">Эффект</label><select id="swipeEffect"><option value="slide">Слайд</option><option value="fade">Затухание</option></select></div>
+      <div class="input-group"><label data-i18n="theme_swipe_effect">Эффект</label>
+        <select id="swipeEffect">
+          <option value="slide">Слайд</option>
+          <option value="fade">Затухание</option>
+        </select>
+      </div>
       <div class="slider-row"><span data-i18n="theme_swipe_duration">Длительность</span><input type="range" id="swipeDuration" min="0.1" max="1" step="0.1" value="0.3"><span id="swipeDurationVal">0.3s</span></div>
     </div>
     <div class="theme-section">
       <button class="btn-primary" onclick="saveThemeTemplate()" data-i18n="theme_save_template">Сохранить как шаблон</button>
+      <button class="btn-secondary" onclick="resetThemeToDefault()" style="margin-top:8px;">Сбросить настройки</button>
       <h4 data-i18n="theme_my_templates" style="margin-top:16px;">Мои шаблоны</h4>
       <div id="themeTemplatesList"></div>
     </div>
@@ -663,7 +786,7 @@ input[type=range]::-webkit-slider-thumb {
 (function(){
 'use strict';
 
-// ========== ПЕРЕВОДЫ (включая новые ключи темы) ==========
+// ========== ПЕРЕВОДЫ ==========
 const translations = {
   ru: {
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
@@ -704,7 +827,6 @@ const translations = {
     morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
     no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
     photo_too_large: 'Фото слишком большое. Максимум 3 МБ.',
-    // Новые ключи темы
     theme: 'Оформление', theme_mode: 'Режим', theme_light: 'Светлая', theme_dark: 'Тёмная',
     theme_colors: 'Цвета', theme_card_effects: 'Эффекты карточек',
     theme_blur: 'Размытие', theme_opacity: 'Прозрачность', theme_depth: '3D-глубина',
@@ -920,20 +1042,21 @@ if (swiper) {
   });
 }
 
-// ========== ТЕМЫ ==========
+// ========== ТЕМЫ (РАБОЧАЯ ВЕРСИЯ) ==========
 let themeTemplates = JSON.parse(localStorage.getItem('fitcat_theme_templates') || '[]');
 let currentTheme = JSON.parse(localStorage.getItem('fitcat_theme') || '{}');
 
+const defaultTheme = {
+  mode: 'dark',
+  accent: '#4FACFE', bgPage: '#0D1117', bgCard: '#161B22', textMain: '#E6EDF3', textSecondary: '#9CA3AF', border: '#30363D',
+  cardBlur: 12, cardOpacity: 70, cardDepth: 30,
+  glowIntensity: 0, glowAnimation: 'none', glowDirection: 'to right', glowSpeed: 3,
+  bgIntensity: 30, parallax: 'none',
+  progressAnimation: 'shimmer',
+  swipeEffect: 'slide', swipeDuration: 0.3
+};
+
 function initTheme() {
-  const defaultTheme = {
-    mode: 'dark',
-    accent: '#4FACFE', bgPage: '#0D1117', bgCard: '#161B22', textMain: '#E6EDF3', textSecondary: '#9CA3AF', border: '#30363D',
-    cardBlur: 12, cardOpacity: 70, cardDepth: 30,
-    glowIntensity: 0, glowAnimation: 'none', glowDirection: 'to right', glowSpeed: 3,
-    bgIntensity: 30, parallax: 'none',
-    progressAnimation: 'shimmer',
-    swipeEffect: 'slide', swipeDuration: 0.3
-  };
   currentTheme = { ...defaultTheme, ...currentTheme };
   applyTheme();
   populateThemeModal();
@@ -948,25 +1071,38 @@ function applyTheme() {
   root.style.setProperty('--text-main', t.textMain);
   root.style.setProperty('--text-secondary', t.textSecondary);
   root.style.setProperty('--border', t.border);
+  root.style.setProperty('--card-blur', t.cardBlur + 'px');
+  root.style.setProperty('--card-opacity', t.cardOpacity / 100);
+  root.style.setProperty('--card-depth', t.cardDepth / 100);
+  root.style.setProperty('--glow-intensity', t.glowIntensity / 100);
+  root.style.setProperty('--glow-direction', t.glowDirection);
+  root.style.setProperty('--glow-speed', t.glowSpeed + 's');
+  root.style.setProperty('--bg-intensity', t.bgIntensity / 100);
+  root.style.setProperty('--parallax', t.parallax);
   
-  document.body.style.color = t.textMain;
-  document.body.style.background = t.bgPage;
-  const bgBefore = document.querySelector('body::before');
-  // Применяем к карточкам
-  document.querySelectorAll('.card').forEach(c => {
-    const rgb = hexToRgb(t.bgCard);
-    c.style.backgroundColor = `rgba(${rgb}, ${t.cardOpacity/100})`;
-    c.style.backdropFilter = `blur(${t.cardBlur}px)`;
-    c.style.webkitBackdropFilter = `blur(${t.cardBlur}px)`;
-    c.style.border = `1px solid ${t.border}`;
-    c.style.boxShadow = `0 ${8 + t.cardDepth/10}px ${32 + t.cardDepth/5}px rgba(0,0,0,${0.3 + t.cardDepth/200})`;
+  let progAnim = 'none';
+  if (t.progressAnimation === 'shimmer') progAnim = 'shimmer 4s infinite';
+  else if (t.progressAnimation === 'pulse') progAnim = 'pulse 2s infinite';
+  root.style.setProperty('--progress-animation', progAnim);
+  
+  root.style.setProperty('--swipe-effect', t.swipeEffect);
+  root.style.setProperty('--swipe-duration', t.swipeDuration + 's');
+  
+  document.body.classList.toggle('light-theme', t.mode === 'light');
+  
+  document.querySelectorAll('.card').forEach(card => {
+    card.style.backgroundColor = `rgba(${hexToRgb(t.bgCard)}, ${t.cardOpacity/100})`;
+    card.style.backdropFilter = `blur(${t.cardBlur}px)`;
+    card.style.webkitBackdropFilter = `blur(${t.cardBlur}px)`;
+    card.style.border = `1px solid ${t.border}`;
+    card.style.boxShadow = `0 ${8 + t.cardDepth/10}px ${32 + t.cardDepth/5}px rgba(0,0,0,${0.3 + t.cardDepth/200})`;
   });
-  // Фон страницы
-  document.body.style.setProperty('--page-bg', t.bgPage);
-  // Анимация фона
-  const bgPulse = document.styleSheets[0].cssRules;
-  // ... упрощённо
+  
+  document.body.style.background = t.bgPage;
+  document.body.style.color = t.textMain;
+  
   localStorage.setItem('fitcat_theme', JSON.stringify(currentTheme));
+  if (typeof updateSwipePosition === 'function') updateSwipePosition();
 }
 
 function hexToRgb(hex) {
@@ -976,8 +1112,13 @@ function hexToRgb(hex) {
   return `${(intVal >> 16) & 255}, ${(intVal >> 8) & 255}, ${intVal & 255}`;
 }
 
-function openThemeModal() { document.getElementById('themeModal').style.display = 'flex'; populateThemeModal(); }
-function closeThemeModal() { document.getElementById('themeModal').style.display = 'none'; applyTheme(); }
+function openThemeModal() { 
+  document.getElementById('themeModal').style.display = 'flex'; 
+  populateThemeModal(); 
+}
+function closeThemeModal() { 
+  document.getElementById('themeModal').style.display = 'none'; 
+}
 
 function populateThemeModal() {
   const t = currentTheme;
@@ -987,27 +1128,42 @@ function populateThemeModal() {
   document.getElementById('colorTextMain').value = t.textMain;
   document.getElementById('colorTextSecondary').value = t.textSecondary;
   document.getElementById('colorBorder').value = t.border;
-  document.getElementById('cardBlur').value = t.cardBlur; document.getElementById('cardBlurVal').innerText = t.cardBlur + 'px';
-  document.getElementById('cardOpacity').value = t.cardOpacity; document.getElementById('cardOpacityVal').innerText = t.cardOpacity + '%';
-  document.getElementById('cardDepth').value = t.cardDepth; document.getElementById('cardDepthVal').innerText = t.cardDepth + '%';
-  document.getElementById('glowIntensity').value = t.glowIntensity; document.getElementById('glowIntensityVal').innerText = t.glowIntensity + '%';
+  document.getElementById('cardBlur').value = t.cardBlur;
+  document.getElementById('cardBlurVal').innerText = t.cardBlur + 'px';
+  document.getElementById('cardOpacity').value = t.cardOpacity;
+  document.getElementById('cardOpacityVal').innerText = t.cardOpacity + '%';
+  document.getElementById('cardDepth').value = t.cardDepth;
+  document.getElementById('cardDepthVal').innerText = t.cardDepth + '%';
+  document.getElementById('glowIntensity').value = t.glowIntensity;
+  document.getElementById('glowIntensityVal').innerText = t.glowIntensity + '%';
   document.getElementById('glowAnimation').value = t.glowAnimation;
   document.getElementById('glowDirection').value = t.glowDirection;
-  document.getElementById('glowSpeed').value = t.glowSpeed; document.getElementById('glowSpeedVal').innerText = t.glowSpeed + 's';
-  document.getElementById('bgIntensity').value = t.bgIntensity; document.getElementById('bgIntensityVal').innerText = t.bgIntensity + '%';
+  document.getElementById('glowSpeed').value = t.glowSpeed;
+  document.getElementById('glowSpeedVal').innerText = t.glowSpeed + 's';
+  document.getElementById('bgIntensity').value = t.bgIntensity;
+  document.getElementById('bgIntensityVal').innerText = t.bgIntensity + '%';
   document.getElementById('parallax').value = t.parallax;
   document.getElementById('progressAnimation').value = t.progressAnimation;
   document.getElementById('swipeEffect').value = t.swipeEffect;
-  document.getElementById('swipeDuration').value = t.swipeDuration; document.getElementById('swipeDurationVal').innerText = t.swipeDuration + 's';
-  document.querySelectorAll('[data-theme-mode]').forEach(el => el.classList.remove('active'));
-  document.querySelector(`[data-theme-mode="${t.mode}"]`).classList.add('active');
+  document.getElementById('swipeDuration').value = t.swipeDuration;
+  document.getElementById('swipeDurationVal').innerText = t.swipeDuration + 's';
+  
+  document.querySelectorAll('[data-theme-mode]').forEach(el => {
+    el.classList.toggle('active', el.dataset.themeMode === t.mode);
+  });
   renderThemeTemplates();
 }
 
 function setThemeMode(mode) {
   currentTheme.mode = mode;
-  document.querySelectorAll('[data-theme-mode]').forEach(el => el.classList.remove('active'));
-  document.querySelector(`[data-theme-mode="${mode}"]`).classList.add('active');
+  populateThemeModal();
+  applyTheme();
+}
+
+function resetThemeToDefault() {
+  currentTheme = { ...defaultTheme };
+  applyTheme();
+  populateThemeModal();
 }
 
 function saveThemeTemplate() {
@@ -1044,7 +1200,54 @@ function renderThemeTemplates() {
   `).join('');
 }
 
-// ========== ОСТАЛЬНЫЕ ФУНКЦИИ (полностью из исходного кода) ==========
+function bindThemeControls() {
+  const ids = ['colorAccent','colorBgPage','colorBgCard','colorTextMain','colorTextSecondary','colorBorder',
+    'cardBlur','cardOpacity','cardDepth','glowIntensity','glowAnimation','glowDirection','glowSpeed',
+    'bgIntensity','parallax','progressAnimation','swipeEffect','swipeDuration'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      if (id.startsWith('color')) {
+        currentTheme[id.replace('color','').toLowerCase()] = el.value;
+      } else if (id === 'cardBlur') {
+        currentTheme.cardBlur = parseInt(el.value);
+        document.getElementById('cardBlurVal').innerText = currentTheme.cardBlur + 'px';
+      } else if (id === 'cardOpacity') {
+        currentTheme.cardOpacity = parseInt(el.value);
+        document.getElementById('cardOpacityVal').innerText = currentTheme.cardOpacity + '%';
+      } else if (id === 'cardDepth') {
+        currentTheme.cardDepth = parseInt(el.value);
+        document.getElementById('cardDepthVal').innerText = currentTheme.cardDepth + '%';
+      } else if (id === 'glowIntensity') {
+        currentTheme.glowIntensity = parseInt(el.value);
+        document.getElementById('glowIntensityVal').innerText = currentTheme.glowIntensity + '%';
+      } else if (id === 'glowAnimation') {
+        currentTheme.glowAnimation = el.value;
+      } else if (id === 'glowDirection') {
+        currentTheme.glowDirection = el.value;
+      } else if (id === 'glowSpeed') {
+        currentTheme.glowSpeed = parseFloat(el.value);
+        document.getElementById('glowSpeedVal').innerText = currentTheme.glowSpeed + 's';
+      } else if (id === 'bgIntensity') {
+        currentTheme.bgIntensity = parseInt(el.value);
+        document.getElementById('bgIntensityVal').innerText = currentTheme.bgIntensity + '%';
+      } else if (id === 'parallax') {
+        currentTheme.parallax = el.value;
+      } else if (id === 'progressAnimation') {
+        currentTheme.progressAnimation = el.value;
+      } else if (id === 'swipeEffect') {
+        currentTheme.swipeEffect = el.value;
+      } else if (id === 'swipeDuration') {
+        currentTheme.swipeDuration = parseFloat(el.value);
+        document.getElementById('swipeDurationVal').innerText = currentTheme.swipeDuration + 's';
+      }
+      applyTheme();
+    });
+  });
+}
+
+// ========== ОСТАЛЬНЫЕ ФУНКЦИИ ==========
 function i18n(key) { return translations[currentLang]?.[key] || key; }
 function updateAllI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = i18n(el.dataset.i18n); });
@@ -1308,7 +1511,7 @@ function showPage(pageId) {
   document.getElementById('settingsPage').style.display=pageId==='settingsPage'?'block':'none';
   document.getElementById('profilePage').style.display=pageId==='profilePage'?'block':'none';
   document.getElementById('productsPage').style.display='none';
-  if(pageId==='mainPage'){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelector('.tab:first-child')?.classList.add('active'); document.getElementById('todayPage').classList.add('active'); document.getElementById('activityPage').classList.remove('active'); document.getElementById('weightPage').classList.remove('active'); }
+  if(pageId==='mainPage'){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelector('.tab:first-child')?.classList.add('active'); document.getElementById('todayPage').classList.add('active'); document.getElementById('activityPage').classList.remove('active'); document.getElementById('weightPage').classList.remove('active'); currentPageIndex = 0; updateSwipePosition(); }
 }
 function showProductsManager() { document.getElementById('mainPage').style.display='none'; document.getElementById('settingsPage').style.display='none'; document.getElementById('productsPage').style.display='block'; renderProductsList(); }
 function renderProductsList() {
@@ -1335,9 +1538,9 @@ window.deleteFood=deleteFood; window.openScanner=openScanner; window.closeScanne
 window.setWeightGoal=setWeightGoal; window.deleteWeightEntry=deleteWeightEntry; window.addWeightEntry=addWeightEntry; window.showPage=showPage;
 window.showProductsManager=showProductsManager; window.editProduct=editProduct; window.deleteProduct=deleteProduct;
 window.exportData=exportData; window.importData=importData; window.showBMITooltip=showBMITooltip;
-// Тема
 window.openThemeModal=openThemeModal; window.closeThemeModal=closeThemeModal; window.setThemeMode=setThemeMode;
 window.saveThemeTemplate=saveThemeTemplate; window.loadThemeTemplate=loadThemeTemplate; window.deleteThemeTemplate=deleteThemeTemplate;
+window.resetThemeToDefault=resetThemeToDefault;
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 window.onload = function() {
@@ -1353,7 +1556,8 @@ window.onload = function() {
   currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
   waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
   
-  initTheme(); // инициализация темы
+  initTheme();
+  bindThemeControls();
   
   if(!currentProfile){
     document.getElementById('setupPage').style.display='block'; document.getElementById('mainPage').style.display='none';
@@ -1377,32 +1581,6 @@ window.onload = function() {
   if(localStorage.getItem('card_mealsCard_collapsed')==='true') document.getElementById('mealsContent')?.classList.add('collapsed');
   let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
   updateAllI18n();
-  
-  // Привязка слушателей темы
-  document.querySelectorAll('#themeModal input, #themeModal select').forEach(el => {
-    el.addEventListener('input', () => {
-      currentTheme.accent = document.getElementById('colorAccent').value;
-      currentTheme.bgPage = document.getElementById('colorBgPage').value;
-      currentTheme.bgCard = document.getElementById('colorBgCard').value;
-      currentTheme.textMain = document.getElementById('colorTextMain').value;
-      currentTheme.textSecondary = document.getElementById('colorTextSecondary').value;
-      currentTheme.border = document.getElementById('colorBorder').value;
-      currentTheme.cardBlur = parseInt(document.getElementById('cardBlur').value);
-      currentTheme.cardOpacity = parseInt(document.getElementById('cardOpacity').value);
-      currentTheme.cardDepth = parseInt(document.getElementById('cardDepth').value);
-      currentTheme.glowIntensity = parseInt(document.getElementById('glowIntensity').value);
-      currentTheme.glowAnimation = document.getElementById('glowAnimation').value;
-      currentTheme.glowDirection = document.getElementById('glowDirection').value;
-      currentTheme.glowSpeed = parseFloat(document.getElementById('glowSpeed').value);
-      currentTheme.bgIntensity = parseInt(document.getElementById('bgIntensity').value);
-      currentTheme.parallax = document.getElementById('parallax').value;
-      currentTheme.progressAnimation = document.getElementById('progressAnimation').value;
-      currentTheme.swipeEffect = document.getElementById('swipeEffect').value;
-      currentTheme.swipeDuration = parseFloat(document.getElementById('swipeDuration').value);
-      populateThemeModal();
-      applyTheme();
-    });
-  });
 };
 
 })();
