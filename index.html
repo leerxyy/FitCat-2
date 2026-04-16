@@ -11,7 +11,6 @@
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <style>
-/* ===== ОСНОВНЫЕ СТИЛИ FITCAT (БЕЗ ИЗМЕНЕНИЙ) ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: #0D1117; min-height: 100vh; }
 body {
@@ -45,15 +44,9 @@ body::before {
 .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 h2 { font-size: 18px; font-weight: 600; color: #9CA3AF; margin-bottom: 16px; letter-spacing: -0.3px; }
 .card {
-  background: rgba(22, 27, 34, var(--card-opacity, 0.7));
-  backdrop-filter: blur(var(--card-blur, 12px));
-  -webkit-backdrop-filter: blur(var(--card-blur, 12px));
-  border: 1px solid rgba(48, 54, 61, 0.5);
-  border-radius: 24px;
-  padding: 20px 18px;
-  margin-bottom: 20px;
-  box-shadow: 0 calc(8px + var(--card-depth, 0) * 0.1) calc(32px + var(--card-depth, 0) * 0.5) rgba(0,0,0, calc(0.3 + var(--card-depth, 0) * 0.01));
-  transition: box-shadow 0.2s, background 0.3s, backdrop-filter 0.3s;
+  background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 20px 18px; margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
 .card-header h2 { margin: 0; }
@@ -128,19 +121,36 @@ input[type="date"] { color-scheme: dark; }
 }
 .tab.active { background: #4FACFE; color: #0D1117; }
 
-/* СВАЙПЫ */
-.pages-swiper { width: 100%; overflow: hidden; touch-action: pan-y pinch-zoom; }
+/* ===== СВАЙПЫ (ВАРИАНТ 3 - GLIDE) ===== */
+.pages-swiper {
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
 .pages-container {
   display: flex;
-  transition: transform var(--swipe-duration, 0.3s) cubic-bezier(0.2, 0.9, 0.4, 1);
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform;
 }
-.page { flex: 0 0 100%; width: 100%; }
-
-/* ОСТАЛЬНЫЕ СТИЛИ (КАК В ИСХОДНИКЕ) */
+.page {
+  flex: 0 0 100%;
+  width: 100%;
+  transition: opacity 0.25s ease-in-out;
+}
+.page.swipe-out {
+  opacity: 0.5;
+  transition-delay: 0.05s;
+}
+/* Остальные стили без изменений */
 .food-list { margin: 16px 0; }
-.food-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5); border-radius: 16px; margin-bottom: 8px; }
-.food-toggle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.food-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5);
+  border-radius: 16px; margin-bottom: 8px;
+}
+.food-toggle {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 .food-toggle.checked { background: #4FACFE; border-color: #4FACFE; }
 .food-toggle.checked::after { content: '✓'; color: #0D1117; font-size: 16px; font-weight: bold; }
 .food-info { flex: 1; }
@@ -148,14 +158,26 @@ input[type="date"] { color-scheme: dark; }
 .food-macros { font-size: 12px; color: #9CA3AF; }
 .food-delete { color: #F85149; cursor: pointer; padding: 8px; font-size: 18px; }
 .templates-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; min-height: 40px; }
-.template-btn { background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px; padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px); }
-.profile-photo { width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE; margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.template-btn {
+  background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px;
+  padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
+}
+.profile-photo {
+  width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE;
+  margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
 .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
 .profile-initials { font-size: 40px; font-weight: 600; color: #E6EDF3; line-height: 1; }
-.header-photo { width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.header-photo {
+  width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE;
+  cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 .header-photo img { width: 100%; height: 100%; object-fit: cover; }
 .header-initials { font-size: 20px; font-weight: 600; color: #E6EDF3; line-height: 1; }
-.streak-emoji { font-size: 28px; line-height: 1; display: inline-block; cursor: pointer; transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1; }
+.streak-emoji {
+  font-size: 28px; line-height: 1; display: inline-block; cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1;
+}
 .streak-emoji.fade-in { opacity: 0; }
 .streak-emoji.none { filter: drop-shadow(0 0 8px #6B7280); }
 .streak-emoji.red { filter: drop-shadow(0 0 15px #FF4500); animation: glowPulse 2s infinite; }
@@ -163,32 +185,58 @@ input[type="date"] { color-scheme: dark; }
 .streak-emoji.purple { filter: drop-shadow(0 0 25px #A855F7); animation: glowPulse 1.2s infinite; }
 .streak-emoji.rainbow { animation: rainbowGlow 3s linear infinite, glowPulse 1.5s infinite; }
 @keyframes glowPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
-@keyframes rainbowGlow { 0%{filter:drop-shadow(0 0 20px #F00)} 25%{filter:drop-shadow(0 0 20px #FF0)} 50%{filter:drop-shadow(0 0 20px #0FF)} 75%{filter:drop-shadow(0 0 20px #80F)} 100%{filter:drop-shadow(0 0 20px #F00)} }
+@keyframes rainbowGlow {
+  0%{filter:drop-shadow(0 0 20px #F00)} 25%{filter:drop-shadow(0 0 20px #FF0)}
+  50%{filter:drop-shadow(0 0 20px #0FF)} 75%{filter:drop-shadow(0 0 20px #80F)}
+  100%{filter:drop-shadow(0 0 20px #F00)}
+}
 .bmi-container { margin: 16px 0 8px; }
 .bmi-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .bmi-value { font-size: 24px; font-weight: 700; }
 .bmi-category { font-size: 16px; font-weight: 500; }
 .bmi-scale { position: relative; height: 24px; margin: 8px 0; cursor: pointer; }
-.bmi-gradient { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px; }
-.bmi-marker { position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease; }
+.bmi-gradient {
+  position: absolute; top: 0; left: 0; right: 0; height: 8px;
+  background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px;
+}
+.bmi-marker {
+  position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px;
+  transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease;
+}
 .bmi-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #9CA3AF; }
-.bmi-tooltip { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027; border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.bmi-tooltip {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027;
+  border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px;
+  white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
 .bmi-scale:hover .bmi-tooltip { opacity: 1; }
 .activity-daily-options { display: flex; flex-direction: column; gap: 12px; }
-.activity-daily-item { background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s ease; }
+.activity-daily-item {
+  background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px;
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+  backdrop-filter: blur(5px); transition: all 0.2s ease;
+}
 .activity-daily-item.selected { border-color: #4FACFE; background: rgba(79,172,254,0.1); }
-.weight-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px; }
+.weight-history-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+  background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px;
+}
 .weight-history-date { font-size: 14px; color: #9CA3AF; }
 .weight-history-value { font-weight: 600; font-size: 16px; margin-right: auto; padding-left: 8px; }
 .weight-history-delete { color: #F85149; cursor: pointer; padding: 4px 8px; font-size: 16px; }
 .slider-container { padding: 20px 0; }
 .slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; color: #9CA3AF; font-size: 12px; }
 .slider-wrapper { position: relative; height: 40px; margin-top: 4px; }
-.slider-gradient { position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%); }
+.slider-gradient {
+  position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%);
+}
 .temp-gradient { background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); }
 .steps-gradient { background: linear-gradient(to right, #6BCB77, #4D96FF, #9B59B6); }
 .search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
-.slider-ticks { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; padding: 0 2px; }
+.slider-ticks {
+  position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between;
+  transform: translateY(-50%); pointer-events: none; padding: 0 2px;
+}
 .tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
 input[type=range] {
   position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%);
@@ -202,15 +250,28 @@ input[type=range]::-webkit-slider-thumb {
 .profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
 .profile-header .btn-small { position: absolute; left: 0; }
 .profile-header h2 { margin: 0; text-align: center; }
-.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D; border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none; }
-.autocomplete-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex; justify-content: space-between; align-items: center; }
+.autocomplete-list {
+  position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D;
+  border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none;
+}
+.autocomplete-item {
+  padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex;
+  justify-content: space-between; align-items: center;
+}
 .autocomplete-item:hover { background: rgba(79,172,254,0.2); }
 .autocomplete-item .off-name { font-weight: 500; }
 .autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
 .apple-switch { position: relative; display: inline-block; width: 51px; height: 31px; }
 .apple-switch input { opacity: 0; width: 0; height: 0; }
-.apple-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D; border-radius: 31px; transition: 0.25s; }
-.apple-switch .slider:before { position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px; background-color: white; border-radius: 50%; transition: 0.25s; }
+.apple-switch .slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D;
+  border-radius: 31px; transition: 0.25s;
+}
+.apple-switch .slider:before {
+  position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px;
+  background-color: white; border-radius: 50%; transition: 0.25s;
+}
 .apple-switch input:checked + .slider { background-color: #4FACFE; border-color: #4FACFE; }
 .apple-switch input:checked + .slider:before { transform: translateX(20px); }
 .toggle-label { margin-left: 12px; font-size: 14px; color: #9CA3AF; }
@@ -218,9 +279,19 @@ input[type=range]::-webkit-slider-thumb {
 .text-center { text-align: center; }
 .text-small { font-size: 13px; color: #9CA3AF; }
 .mb-2 { margin-bottom: 8px; }
-.scanner-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117; z-index: 1000; display: none; flex-direction: column; }
-.smart-water-modal, .about-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95); z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
-.about-content { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 24px 20px; margin-top: 20px; }
+.scanner-container {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117;
+  z-index: 1000; display: none; flex-direction: column;
+}
+.smart-water-modal, .about-modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
+  z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto;
+}
+.about-content {
+  background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px);
+  border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px;
+  padding: 24px 20px; margin-top: 20px;
+}
 .about-content h3 { font-size: 18px; font-weight: 600; color: #E6EDF3; margin-top: 20px; margin-bottom: 12px; }
 .about-content h3:first-of-type { margin-top: 0; }
 .about-content p { font-size: 14px; line-height: 1.6; color: #B0B8C1; margin-bottom: 12px; }
@@ -229,20 +300,12 @@ input[type=range]::-webkit-slider-thumb {
 .about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
-
-/* ПЕРЕМЕННЫЕ ОФОРМЛЕНИЯ */
-:root {
-  --card-blur: 12px;
-  --card-opacity: 0.7;
-  --card-depth: 30;
-  --swipe-duration: 0.3s;
-}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- МОДАЛКИ (СКАНЕР, УМНАЯ ВОДА, УМНЫЙ ПОИСК, О ПРИЛОЖЕНИИ) -->
+<!-- МОДАЛКИ (сканер, умная вода, умный поиск, о приложении) -->
 <div id="scannerModal" class="scanner-container">
   <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
   <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
@@ -322,75 +385,7 @@ input[type=range]::-webkit-slider-thumb {
     <h3>No Warranty</h3>
     <p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p>
     <div class="divider"></div>
-    <p class="text-center">FitCat v2.1</p>
-  </div>
-</div>
-
-<!-- МОДАЛКА ОФОРМЛЕНИЯ (ПОЛНОСТЬЮ РАБОЧАЯ) -->
-<div id="appearanceModal" class="smart-water-modal">
-  <div style="display:flex;justify-content:space-between;margin-bottom:24px;">
-    <h2 data-i18n="appearance">Оформление</h2>
-    <button class="btn-small" onclick="closeAppearanceModal()" data-i18n="close">Закрыть</button>
-  </div>
-  <div class="card">
-    <h3 data-i18n="card_effects" style="margin-bottom:16px;">Эффекты карточек</h3>
-
-    <!-- Размытие -->
-    <div class="slider-container">
-      <div class="slider-labels"><span>0px</span><span>5px</span><span>10px</span><span>15px</span><span>20px</span></div>
-      <div class="slider-wrapper">
-        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
-        <div class="slider-ticks" id="blurTicks"></div>
-        <input type="range" id="cardBlurSlider" min="0" max="20" value="12" step="1">
-      </div>
-      <div class="slider-value"><span data-i18n="blur">Размытие</span>: <span id="blurValue">12px</span></div>
-    </div>
-
-    <!-- Прозрачность -->
-    <div class="slider-container">
-      <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-      <div class="slider-wrapper">
-        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
-        <div class="slider-ticks" id="opacityTicks"></div>
-        <input type="range" id="cardOpacitySlider" min="0" max="100" value="70" step="1">
-      </div>
-      <div class="slider-value"><span data-i18n="opacity">Прозрачность</span>: <span id="opacityValue">70%</span></div>
-    </div>
-
-    <!-- 3D-глубина -->
-    <div class="slider-container">
-      <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-      <div class="slider-wrapper">
-        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
-        <div class="slider-ticks" id="depthTicks"></div>
-        <input type="range" id="cardDepthSlider" min="0" max="100" value="30" step="1">
-      </div>
-      <div class="slider-value"><span data-i18n="depth">3D-глубина</span>: <span id="depthValue">30%</span></div>
-    </div>
-
-    <h3 data-i18n="swipe_animation" style="margin:24px 0 16px;">Анимация свайпа</h3>
-
-    <!-- Эффект свайпа (селект) -->
-    <div class="input-group">
-      <label data-i18n="effect">Эффект</label>
-      <select id="swipeEffectSelect">
-        <option value="slide" data-i18n="slide">Слайд</option>
-        <option value="fade" data-i18n="fade">Затухание</option>
-      </select>
-    </div>
-
-    <!-- Длительность свайпа -->
-    <div class="slider-container">
-      <div class="slider-labels"><span>0.1s</span><span>0.3s</span><span>0.5s</span><span>0.7s</span><span>1.0s</span></div>
-      <div class="slider-wrapper">
-        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
-        <div class="slider-ticks" id="swipeTicks"></div>
-        <input type="range" id="swipeDurationSlider" min="0.1" max="1.0" value="0.3" step="0.1">
-      </div>
-      <div class="slider-value"><span data-i18n="duration">Длительность</span>: <span id="durationValue">0.3s</span></div>
-    </div>
-
-    <button class="btn-secondary" onclick="resetAppearance()" style="margin-top:20px;" data-i18n="reset_settings">Сбросить настройки</button>
+    <p class="text-center">FitCat v2.0</p>
   </div>
 </div>
 
@@ -432,7 +427,7 @@ input[type=range]::-webkit-slider-thumb {
   <div class="tabs" id="mainTabs">
     <div class="tab active" data-page="today" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
     <div class="tab" data-page="activity" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
-    <div class="tab" data-page="weight" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
+    <div class="tab" data-page="weight" onclick="switchTab('weight', event)" data-i18n="tab_analytics">Аналитика</div>
   </div>
 
   <!-- СВАЙП-КОНТЕЙНЕР -->
@@ -567,7 +562,6 @@ input[type=range]::-webkit-slider-thumb {
 <div id="settingsPage" style="display:none;">
   <div class="card">
     <h2 data-i18n="settings">Настройки</h2>
-    <button class="btn-secondary" onclick="openAppearanceModal()" data-i18n="appearance">Оформление</button>
     <button class="btn-secondary" onclick="exportData()" data-i18n="export_data">Скачать данные</button>
     <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
     <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
@@ -593,7 +587,7 @@ input[type=range]::-webkit-slider-thumb {
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ==================== ПОЛНЫЙ КОД FITCAT V2.1 ====================
+// ==================== ПОЛНЫЙ КОД FITCAT V2.0 ====================
 (function(){
 'use strict';
 
@@ -611,7 +605,7 @@ const translations = {
     height_placeholder: 'Введите рост', weight_placeholder: 'Введите вес',
     start: 'Начать', data_local: 'Данные только в твоём телефоне', language: 'Язык',
     error_fill: 'Пожалуйста, заполните все поля корректно',
-    tab_today: 'Сегодня', tab_activity: 'Активность', tab_weight: 'Вес',
+    tab_today: 'Сегодня', tab_activity: 'Активность', tab_analytics: 'Аналитика',
     progress: 'Прогресс', water_title: 'Вода', meals: 'Продукты',
     water_placeholder: 'Введи мл', smart_water: 'Умная вода',
     save_template: 'Сохранить шаблон', clear: 'Очистить', per_100g: 'На 100 грамм:',
@@ -637,18 +631,7 @@ const translations = {
     about: 'О приложении',
     morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
     no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
-    photo_too_large: 'Фото слишком большое. Максимум 3 МБ.',
-    appearance: 'Оформление',
-    card_effects: 'Эффекты карточек',
-    blur: 'Размытие',
-    opacity: 'Прозрачность',
-    depth: '3D-глубина',
-    swipe_animation: 'Анимация свайпа',
-    effect: 'Эффект',
-    slide: 'Слайд',
-    fade: 'Затухание',
-    duration: 'Длительность',
-    reset_settings: 'Сбросить настройки'
+    photo_too_large: 'Фото слишком большое. Максимум 3 МБ.'
   },
   en: {
     save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On',
@@ -662,7 +645,7 @@ const translations = {
     height_placeholder: 'Enter height', weight_placeholder: 'Enter weight',
     start: 'Start', data_local: 'Data stored locally', language: 'Language',
     error_fill: 'Please fill in all fields correctly',
-    tab_today: 'Today', tab_activity: 'Activity', tab_weight: 'Weight',
+    tab_today: 'Today', tab_activity: 'Activity', tab_analytics: 'Analytics',
     progress: 'Progress', water_title: 'Water', meals: 'Meals',
     water_placeholder: 'Enter ml', smart_water: 'Smart Water',
     save_template: 'Save Template', clear: 'Clear', per_100g: 'Per 100g:',
@@ -688,18 +671,7 @@ const translations = {
     about: 'About',
     morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night',
     no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight',
-    photo_too_large: 'Photo too large. Maximum 3 MB.',
-    appearance: 'Appearance',
-    card_effects: 'Card Effects',
-    blur: 'Blur',
-    opacity: 'Opacity',
-    depth: '3D Depth',
-    swipe_animation: 'Swipe Animation',
-    effect: 'Effect',
-    slide: 'Slide',
-    fade: 'Fade',
-    duration: 'Duration',
-    reset_settings: 'Reset Settings'
+    photo_too_large: 'Photo too large. Maximum 3 MB.'
   },
   cn: {
     save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开',
@@ -713,7 +685,7 @@ const translations = {
     height_placeholder: '输入身高', weight_placeholder: '输入体重',
     start: '开始', data_local: '数据仅保存在本地', language: '语言',
     error_fill: '请正确填写所有字段',
-    tab_today: '今天', tab_activity: '活动', tab_weight: '体重',
+    tab_today: '今天', tab_activity: '活动', tab_analytics: '分析',
     progress: '进度', water_title: '水', meals: '食物',
     water_placeholder: '输入毫升', smart_water: '智能饮水',
     save_template: '保存模板', clear: '清空', per_100g: '每100克:',
@@ -739,18 +711,7 @@ const translations = {
     about: '关于',
     morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安',
     no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量',
-    photo_too_large: '照片太大。最大 3 MB。',
-    appearance: '外观',
-    card_effects: '卡片效果',
-    blur: '模糊',
-    opacity: '透明度',
-    depth: '3D深度',
-    swipe_animation: '滑动动画',
-    effect: '效果',
-    slide: '滑动',
-    fade: '淡出',
-    duration: '时长',
-    reset_settings: '重置设置'
+    photo_too_large: '照片太大。最大 3 MB。'
   }
 };
 
@@ -778,7 +739,7 @@ let smartSearchEnabled = false;
 let smartSearchResults = 10;
 let smartWaterEnabled = false;
 
-// ========== СВАЙПЫ ==========
+// ========== СВАЙПЫ (ВАРИАНТ 3 - GLIDE) ==========
 const pages = ['today', 'activity', 'weight'];
 let currentPageIndex = 0;
 const container = document.getElementById('pagesContainer');
@@ -788,18 +749,10 @@ let isSwiping = false;
 
 function updateSwipePosition() {
   if (!container) return;
-  const effect = document.getElementById('swipeEffectSelect')?.value || 'slide';
-  const duration = getComputedStyle(document.documentElement).getPropertyValue('--swipe-duration').trim() || '0.3s';
-  container.style.transition = `transform ${duration} cubic-bezier(0.2,0.9,0.4,1)`;
   container.style.transform = `translateX(-${currentPageIndex * 100}%)`;
-  if (effect === 'fade') {
-    document.querySelectorAll('.page').forEach((p, i) => {
-      p.style.opacity = i === currentPageIndex ? '1' : '0.3';
-      p.style.transition = `opacity ${duration}`;
-    });
-  } else {
-    document.querySelectorAll('.page').forEach(p => p.style.opacity = '1');
-  }
+  document.querySelectorAll('.page').forEach((p, i) => {
+    p.classList.toggle('swipe-out', i !== currentPageIndex);
+  });
 }
 
 function syncTabsFromSwipe() {
@@ -851,6 +804,7 @@ if (swiper) {
   swiper.addEventListener('touchend', e => {
     if (!isSwiping) return;
     isSwiping = false;
+    container.style.transition = '';
     const dx = e.changedTouches[0].clientX - touchStartX;
     const threshold = swiper.offsetWidth * 0.3;
     if (touchMoved && Math.abs(dx) > threshold) {
@@ -859,79 +813,6 @@ if (swiper) {
     }
     updateSwipePosition();
     syncTabsFromSwipe();
-  });
-}
-
-// ========== ОФОРМЛЕНИЕ ==========
-function loadAppearance() {
-  const saved = JSON.parse(localStorage.getItem('fitcat_appearance') || '{}');
-  document.documentElement.style.setProperty('--card-blur', (saved.cardBlur || 12) + 'px');
-  document.documentElement.style.setProperty('--card-opacity', (saved.cardOpacity || 70) / 100);
-  document.documentElement.style.setProperty('--card-depth', saved.cardDepth || 30);
-  document.documentElement.style.setProperty('--swipe-duration', (saved.swipeDuration || 0.3) + 's');
-  if (document.getElementById('swipeEffectSelect')) {
-    document.getElementById('swipeEffectSelect').value = saved.swipeEffect || 'slide';
-  }
-  updateSwipePosition();
-}
-
-function saveAppearance() {
-  const settings = {
-    cardBlur: parseInt(document.getElementById('cardBlurSlider').value),
-    cardOpacity: parseInt(document.getElementById('cardOpacitySlider').value),
-    cardDepth: parseInt(document.getElementById('cardDepthSlider').value),
-    swipeEffect: document.getElementById('swipeEffectSelect').value,
-    swipeDuration: parseFloat(document.getElementById('swipeDurationSlider').value)
-  };
-  localStorage.setItem('fitcat_appearance', JSON.stringify(settings));
-  loadAppearance();
-}
-
-function openAppearanceModal() {
-  const saved = JSON.parse(localStorage.getItem('fitcat_appearance') || '{}');
-  document.getElementById('cardBlurSlider').value = saved.cardBlur || 12;
-  document.getElementById('cardOpacitySlider').value = saved.cardOpacity || 70;
-  document.getElementById('cardDepthSlider').value = saved.cardDepth || 30;
-  document.getElementById('swipeEffectSelect').value = saved.swipeEffect || 'slide';
-  document.getElementById('swipeDurationSlider').value = saved.swipeDuration || 0.3;
-  document.getElementById('blurValue').innerText = (saved.cardBlur || 12) + 'px';
-  document.getElementById('opacityValue').innerText = (saved.cardOpacity || 70) + '%';
-  document.getElementById('depthValue').innerText = (saved.cardDepth || 30) + '%';
-  document.getElementById('durationValue').innerText = (saved.swipeDuration || 0.3) + 's';
-  document.getElementById('appearanceModal').style.display = 'flex';
-  genTicks('blurTicks', 4);
-  genTicks('opacityTicks', 4);
-  genTicks('depthTicks', 4);
-  genTicks('swipeTicks', 4);
-}
-
-function closeAppearanceModal() {
-  document.getElementById('appearanceModal').style.display = 'none';
-}
-
-function resetAppearance() {
-  localStorage.removeItem('fitcat_appearance');
-  loadAppearance();
-  closeAppearanceModal();
-}
-
-function bindAppearanceControls() {
-  document.getElementById('cardBlurSlider').addEventListener('input', function() {
-    document.getElementById('blurValue').innerText = this.value + 'px';
-    saveAppearance();
-  });
-  document.getElementById('cardOpacitySlider').addEventListener('input', function() {
-    document.getElementById('opacityValue').innerText = this.value + '%';
-    saveAppearance();
-  });
-  document.getElementById('cardDepthSlider').addEventListener('input', function() {
-    document.getElementById('depthValue').innerText = this.value + '%';
-    saveAppearance();
-  });
-  document.getElementById('swipeEffectSelect').addEventListener('change', saveAppearance);
-  document.getElementById('swipeDurationSlider').addEventListener('input', function() {
-    document.getElementById('durationValue').innerText = this.value + 's';
-    saveAppearance();
   });
 }
 
@@ -1199,7 +1080,7 @@ function showPage(pageId) {
   document.getElementById('settingsPage').style.display=pageId==='settingsPage'?'block':'none';
   document.getElementById('profilePage').style.display=pageId==='profilePage'?'block':'none';
   document.getElementById('productsPage').style.display='none';
-  if(pageId==='mainPage'){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelector('.tab:first-child')?.classList.add('active'); document.getElementById('todayPage').classList.add('active'); document.getElementById('activityPage').classList.remove('active'); document.getElementById('weightPage').classList.remove('active'); currentPageIndex = 0; updateSwipePosition(); }
+  if(pageId==='mainPage'){ currentPageIndex = 0; updateSwipePosition(); syncTabsFromSwipe(); }
 }
 function showProductsManager() { document.getElementById('mainPage').style.display='none'; document.getElementById('settingsPage').style.display='none'; document.getElementById('productsPage').style.display='block'; renderProductsList(); }
 function renderProductsList() {
@@ -1226,7 +1107,6 @@ window.deleteFood=deleteFood; window.openScanner=openScanner; window.closeScanne
 window.setWeightGoal=setWeightGoal; window.deleteWeightEntry=deleteWeightEntry; window.addWeightEntry=addWeightEntry; window.showPage=showPage;
 window.showProductsManager=showProductsManager; window.editProduct=editProduct; window.deleteProduct=deleteProduct;
 window.exportData=exportData; window.importData=importData; window.showBMITooltip=showBMITooltip;
-window.openAppearanceModal=openAppearanceModal; window.closeAppearanceModal=closeAppearanceModal; window.resetAppearance=resetAppearance;
 
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 window.onload = function() {
@@ -1242,9 +1122,6 @@ window.onload = function() {
   currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
   waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
   
-  loadAppearance();
-  bindAppearanceControls();
-  
   if(!currentProfile){
     document.getElementById('setupPage').style.display='block'; document.getElementById('mainPage').style.display='none';
   } else {
@@ -1253,9 +1130,7 @@ window.onload = function() {
   }
   updateStreak();
   function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
-  genTicks('tempTicks',5);
-  genTicks('stepsTicks',5);
-  genTicks('resultsTicks',5);
+  genTicks('tempTicks',5); genTicks('stepsTicks',5); genTicks('resultsTicks',5);
   document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
   document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
   document.getElementById('resultsSlider')?.addEventListener('input', function(){ document.getElementById('resultsDisplay').innerText=this.value; smartSearchResults=parseInt(this.value); });
