@@ -11,6 +11,7 @@
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
 <style>
+/* ===== ОСНОВНЫЕ СТИЛИ FITCAT (БЕЗ ИЗМЕНЕНИЙ) ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: #0D1117; min-height: 100vh; }
 body {
@@ -128,39 +129,15 @@ input[type="date"] { color-scheme: dark; }
 .tab.active { background: #4FACFE; color: #0D1117; }
 
 /* СВАЙПЫ */
-.pages-swiper {
-  width: 100%;
-  overflow: hidden;
-  touch-action: pan-y pinch-zoom;
-}
+.pages-swiper { width: 100%; overflow: hidden; touch-action: pan-y pinch-zoom; }
 .pages-container {
   display: flex;
   transition: transform var(--swipe-duration, 0.3s) cubic-bezier(0.2, 0.9, 0.4, 1);
   will-change: transform;
 }
-.page {
-  flex: 0 0 100%;
-  width: 100%;
-}
+.page { flex: 0 0 100%; width: 100%; }
 
-/* МОДАЛКА ОФОРМЛЕНИЯ */
-.modal {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
-  z-index: 1000; display: none; padding: 20px; overflow-y: auto;
-}
-.modal-content {
-  max-width: 480px; margin: 0 auto;
-}
-.modal-card {
-  background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px);
-  border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px;
-  padding: 24px 20px; margin-top: 20px;
-}
-.slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.slider-row span:first-child { min-width: 100px; }
-.slider-row input[type=range] { flex: 1; padding: 0; background: transparent; }
-
-/* Остальные стили (как в исходном коде) */
+/* ОСТАЛЬНЫЕ СТИЛИ (КАК В ИСХОДНИКЕ) */
 .food-list { margin: 16px 0; }
 .food-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5); border-radius: 16px; margin-bottom: 8px; }
 .food-toggle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -213,8 +190,14 @@ input[type="date"] { color-scheme: dark; }
 .search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
 .slider-ticks { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; padding: 0 2px; }
 .tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
-input[type=range] { position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%); background: transparent; z-index: 2; -webkit-appearance: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer; }
+input[type=range] {
+  position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%);
+  background: transparent; z-index: 2; -webkit-appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer;
+}
 .slider-value { text-align: center; margin-top: 16px; font-size: 18px; font-weight: 600; }
 .profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
 .profile-header .btn-small { position: absolute; left: 0; }
@@ -246,12 +229,20 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 .about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
+
+/* ПЕРЕМЕННЫЕ ОФОРМЛЕНИЯ */
+:root {
+  --card-blur: 12px;
+  --card-opacity: 0.7;
+  --card-depth: 30;
+  --swipe-duration: 0.3s;
+}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- МОДАЛКИ (сканер, умная вода, умный поиск, о приложении) -->
+<!-- МОДАЛКИ (СКАНЕР, УМНАЯ ВОДА, УМНЫЙ ПОИСК, О ПРИЛОЖЕНИИ) -->
 <div id="scannerModal" class="scanner-container">
   <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
   <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
@@ -335,52 +326,71 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
   </div>
 </div>
 
-<!-- МОДАЛКА ОФОРМЛЕНИЯ -->
-<div id="appearanceModal" class="modal">
-  <div class="modal-content">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 data-i18n="appearance">Оформление</h2>
-      <button class="btn-small" onclick="closeAppearanceModal()">✕</button>
-    </div>
-    <div class="modal-card">
-      <h3 data-i18n="card_effects" style="margin-bottom:16px;">Эффекты карточек</h3>
-      
-      <div class="slider-row">
-        <span data-i18n="blur">Размытие</span>
+<!-- МОДАЛКА ОФОРМЛЕНИЯ (ПОЛНОСТЬЮ РАБОЧАЯ) -->
+<div id="appearanceModal" class="smart-water-modal">
+  <div style="display:flex;justify-content:space-between;margin-bottom:24px;">
+    <h2 data-i18n="appearance">Оформление</h2>
+    <button class="btn-small" onclick="closeAppearanceModal()" data-i18n="close">Закрыть</button>
+  </div>
+  <div class="card">
+    <h3 data-i18n="card_effects" style="margin-bottom:16px;">Эффекты карточек</h3>
+
+    <!-- Размытие -->
+    <div class="slider-container">
+      <div class="slider-labels"><span>0px</span><span>5px</span><span>10px</span><span>15px</span><span>20px</span></div>
+      <div class="slider-wrapper">
+        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
+        <div class="slider-ticks" id="blurTicks"></div>
         <input type="range" id="cardBlurSlider" min="0" max="20" value="12" step="1">
-        <span id="blurValue">12px</span>
       </div>
-      
-      <div class="slider-row">
-        <span data-i18n="opacity">Прозрачность</span>
-        <input type="range" id="cardOpacitySlider" min="0" max="100" value="70" step="1">
-        <span id="opacityValue">70%</span>
-      </div>
-      
-      <div class="slider-row">
-        <span data-i18n="depth">3D-глубина</span>
-        <input type="range" id="cardDepthSlider" min="0" max="100" value="30" step="1">
-        <span id="depthValue">30%</span>
-      </div>
-      
-      <h3 data-i18n="swipe_animation" style="margin:24px 0 16px;">Анимация свайпа</h3>
-      
-      <div class="input-group">
-        <label data-i18n="effect">Эффект</label>
-        <select id="swipeEffectSelect">
-          <option value="slide" data-i18n="slide">Слайд</option>
-          <option value="fade" data-i18n="fade">Затухание</option>
-        </select>
-      </div>
-      
-      <div class="slider-row">
-        <span data-i18n="duration">Длительность</span>
-        <input type="range" id="swipeDurationSlider" min="0.1" max="1.0" value="0.3" step="0.1">
-        <span id="durationValue">0.3s</span>
-      </div>
-      
-      <button class="btn-secondary" onclick="resetAppearance()" data-i18n="reset_settings">Сбросить настройки</button>
+      <div class="slider-value"><span data-i18n="blur">Размытие</span>: <span id="blurValue">12px</span></div>
     </div>
+
+    <!-- Прозрачность -->
+    <div class="slider-container">
+      <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      <div class="slider-wrapper">
+        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
+        <div class="slider-ticks" id="opacityTicks"></div>
+        <input type="range" id="cardOpacitySlider" min="0" max="100" value="70" step="1">
+      </div>
+      <div class="slider-value"><span data-i18n="opacity">Прозрачность</span>: <span id="opacityValue">70%</span></div>
+    </div>
+
+    <!-- 3D-глубина -->
+    <div class="slider-container">
+      <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      <div class="slider-wrapper">
+        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
+        <div class="slider-ticks" id="depthTicks"></div>
+        <input type="range" id="cardDepthSlider" min="0" max="100" value="30" step="1">
+      </div>
+      <div class="slider-value"><span data-i18n="depth">3D-глубина</span>: <span id="depthValue">30%</span></div>
+    </div>
+
+    <h3 data-i18n="swipe_animation" style="margin:24px 0 16px;">Анимация свайпа</h3>
+
+    <!-- Эффект свайпа (селект) -->
+    <div class="input-group">
+      <label data-i18n="effect">Эффект</label>
+      <select id="swipeEffectSelect">
+        <option value="slide" data-i18n="slide">Слайд</option>
+        <option value="fade" data-i18n="fade">Затухание</option>
+      </select>
+    </div>
+
+    <!-- Длительность свайпа -->
+    <div class="slider-container">
+      <div class="slider-labels"><span>0.1s</span><span>0.3s</span><span>0.5s</span><span>0.7s</span><span>1.0s</span></div>
+      <div class="slider-wrapper">
+        <div class="slider-gradient" style="background: linear-gradient(to right, #4FACFE, #A855F7);"></div>
+        <div class="slider-ticks" id="swipeTicks"></div>
+        <input type="range" id="swipeDurationSlider" min="0.1" max="1.0" value="0.3" step="0.1">
+      </div>
+      <div class="slider-value"><span data-i18n="duration">Длительность</span>: <span id="durationValue">0.3s</span></div>
+    </div>
+
+    <button class="btn-secondary" onclick="resetAppearance()" style="margin-top:20px;" data-i18n="reset_settings">Сбросить настройки</button>
   </div>
 </div>
 
@@ -587,7 +597,7 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 (function(){
 'use strict';
 
-// ========== ПЕРЕВОДЫ (ДОБАВЛЕНЫ КЛЮЧИ ДЛЯ ОФОРМЛЕНИЯ) ==========
+// ========== ПЕРЕВОДЫ ==========
 const translations = {
   ru: {
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
@@ -628,7 +638,6 @@ const translations = {
     morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
     no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
     photo_too_large: 'Фото слишком большое. Максимум 3 МБ.',
-    // Новые ключи оформления
     appearance: 'Оформление',
     card_effects: 'Эффекты карточек',
     blur: 'Размытие',
@@ -779,7 +788,7 @@ let isSwiping = false;
 
 function updateSwipePosition() {
   if (!container) return;
-  const effect = getComputedStyle(document.documentElement).getPropertyValue('--swipe-effect').trim() || 'slide';
+  const effect = document.getElementById('swipeEffectSelect')?.value || 'slide';
   const duration = getComputedStyle(document.documentElement).getPropertyValue('--swipe-duration').trim() || '0.3s';
   container.style.transition = `transform ${duration} cubic-bezier(0.2,0.9,0.4,1)`;
   container.style.transform = `translateX(-${currentPageIndex * 100}%)`;
@@ -859,8 +868,11 @@ function loadAppearance() {
   document.documentElement.style.setProperty('--card-blur', (saved.cardBlur || 12) + 'px');
   document.documentElement.style.setProperty('--card-opacity', (saved.cardOpacity || 70) / 100);
   document.documentElement.style.setProperty('--card-depth', saved.cardDepth || 30);
-  document.documentElement.style.setProperty('--swipe-effect', saved.swipeEffect || 'slide');
   document.documentElement.style.setProperty('--swipe-duration', (saved.swipeDuration || 0.3) + 's');
+  if (document.getElementById('swipeEffectSelect')) {
+    document.getElementById('swipeEffectSelect').value = saved.swipeEffect || 'slide';
+  }
+  updateSwipePosition();
 }
 
 function saveAppearance() {
@@ -873,7 +885,6 @@ function saveAppearance() {
   };
   localStorage.setItem('fitcat_appearance', JSON.stringify(settings));
   loadAppearance();
-  updateSwipePosition();
 }
 
 function openAppearanceModal() {
@@ -887,7 +898,11 @@ function openAppearanceModal() {
   document.getElementById('opacityValue').innerText = (saved.cardOpacity || 70) + '%';
   document.getElementById('depthValue').innerText = (saved.cardDepth || 30) + '%';
   document.getElementById('durationValue').innerText = (saved.swipeDuration || 0.3) + 's';
-  document.getElementById('appearanceModal').style.display = 'block';
+  document.getElementById('appearanceModal').style.display = 'flex';
+  genTicks('blurTicks', 4);
+  genTicks('opacityTicks', 4);
+  genTicks('depthTicks', 4);
+  genTicks('swipeTicks', 4);
 }
 
 function closeAppearanceModal() {
@@ -898,10 +913,8 @@ function resetAppearance() {
   localStorage.removeItem('fitcat_appearance');
   loadAppearance();
   closeAppearanceModal();
-  updateSwipePosition();
 }
 
-// Привязка обработчиков
 function bindAppearanceControls() {
   document.getElementById('cardBlurSlider').addEventListener('input', function() {
     document.getElementById('blurValue').innerText = this.value + 'px';
@@ -1240,7 +1253,9 @@ window.onload = function() {
   }
   updateStreak();
   function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
-  genTicks('tempTicks',50); genTicks('stepsTicks',20); genTicks('resultsTicks',45);
+  genTicks('tempTicks',5);
+  genTicks('stepsTicks',5);
+  genTicks('resultsTicks',5);
   document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
   document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
   document.getElementById('resultsSlider')?.addEventListener('input', function(){ document.getElementById('resultsDisplay').innerText=this.value; smartSearchResults=parseInt(this.value); });
