@@ -3,380 +3,227 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
-  <title>FitCat · стекло, кольца, темы</title>
-  <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;FitCat&quot;,&quot;short_name&quot;:&quot;FitCat&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0b0e14&quot;,&quot;theme_color&quot;:&quot;#7f5af0&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0e14'/%3E%3Ctext x='50' y='72' font-size='48' text-anchor='middle' fill='%23a78bfa'%3E🐱%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;100x100&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0e14'/%3E%3Ctext x='50' y='72' font-size='48' text-anchor='middle' fill='%23a78bfa'%3E🐱%3C/text%3E%3C/svg%3E">
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <title>FitCat · Elysium Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* === ПЕРЕМЕННЫЕ ТЕМ === */
-    :root {
-      --bg-gradient: radial-gradient(circle at 30% 10%, #1e1a3a 0%, #0f1219 70%, #0a0c12 100%);
-      --card-bg: rgba(20, 25, 35, 0.45);
-      --card-border: rgba(140, 120, 220, 0.2);
-      --text-primary: #f0f3f8;
-      --text-secondary: #b9c2d9;
-      --accent: #a485ff;
-      --accent-light: #cbbaff;
-      --input-bg: rgba(10, 15, 22, 0.6);
-      --ring-bg: rgba(30, 35, 50, 0.5);
-      --ring-track: rgba(60, 65, 80, 0.5);
-    }
-    body.theme-light {
-      --bg-gradient: radial-gradient(circle at 30% 10%, #f5f0ff 0%, #e4dcf0 70%, #d9d0e8 100%);
-      --card-bg: rgba(255, 250, 255, 0.5);
-      --card-border: rgba(140, 100, 200, 0.25);
-      --text-primary: #1e1b2a;
-      --text-secondary: #3e3a55;
-      --accent: #7c5ce0;
-      --accent-light: #b095ff;
-      --input-bg: rgba(255, 245, 255, 0.6);
-      --ring-bg: rgba(220, 210, 240, 0.7);
-      --ring-track: rgba(180, 170, 210, 0.5);
-    }
-    body.theme-forest {
-      --bg-gradient: radial-gradient(circle at 30% 10%, #1e2e24 0%, #14201a 70%, #0a120e 100%);
-      --card-bg: rgba(25, 40, 30, 0.5);
-      --card-border: rgba(70, 140, 90, 0.3);
-      --text-primary: #e2f0e0;
-      --text-secondary: #b0d0b5;
-      --accent: #5fbf7a;
-      --accent-light: #8fdfa5;
-      --input-bg: rgba(15, 30, 20, 0.7);
-      --ring-bg: rgba(20, 40, 30, 0.7);
-      --ring-track: rgba(40, 70, 50, 0.5);
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { background: #0b0e14; min-height: 100vh; }
+    html { background: #0a0a0f; min-height: 100vh; }
     body {
-      background: transparent; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: var(--text-primary); padding: 16px 12px 40px; min-height: 100vh; -webkit-font-smoothing: antialiased;
-      transition: color 0.2s, background 0.2s;
+      background: transparent;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #ffffff;
+      padding: 16px 12px 40px;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
-    body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-gradient); z-index: -2; }
-    body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" opacity="0.04"/%3E%3C/svg%3E'); opacity: 0.12; pointer-events: none; z-index: -1; }
-    .app { max-width: 500px; margin: 0 auto; animation: fadeSlide 0.6s; }
-    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(18px); } 100% { opacity: 1; transform: translateY(0); } }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(180, 0, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(0, 255, 200, 0.08) 0%, transparent 50%),
+        #0a0a0f;
+      z-index: -2;
+      animation: nebulaBreathe 20s ease-in-out infinite alternate;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" opacity="0.03"/%3E%3C/svg%3E');
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -1;
+    }
+    @keyframes nebulaBreathe {
+      0% { opacity: 0.8; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.05); }
+    }
+    .app { max-width: 500px; margin: 0 auto; animation: fadeSlide 0.6s cubic-bezier(0.2,0.9,0.3,1); }
+    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: translateY(0); } }
+
+    /* Карточка — Жидкое Стекло */
     .card {
-      background: var(--card-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid var(--card-border); border-radius: 32px; padding: 22px 20px; margin-bottom: 22px;
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4), 0 0 0 1px rgba(160,140,240,0.05) inset;
-      transition: transform 0.25s, box-shadow 0.3s;
+      position: relative;
+      background: rgba(15, 20, 30, 0.35);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border-radius: 40px;
+      padding: 24px 20px;
+      margin-bottom: 22px;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(0, 240, 255, 0.1) inset;
+      transition: transform 0.3s ease, box-shadow 0.4s ease;
+      border: 1px solid transparent;
+      background-clip: padding-box;
+      animation: cardGlow 6s ease-in-out infinite alternate;
     }
-    .card:hover { box-shadow: 0 28px 48px -12px #00000060, 0 0 0 1.5px var(--accent-light) inset; }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: conic-gradient(from 0deg, #00F0FF, #B400FF, #00FFC8, #00F0FF);
+      border-radius: 42px;
+      z-index: -1;
+      opacity: 0.6;
+      animation: borderRotate 8s linear infinite;
+    }
+    @keyframes borderRotate { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    @keyframes cardGlow { 0% { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 20px rgba(0,240,255,0.1) inset; } 100% { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 40px rgba(180,0,255,0.15) inset; } }
+
     .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-    .greeting-wrapper { position: relative; height: 54px; min-width: 160px; overflow: hidden; }
-    .greeting-slide { position: absolute; top: 0; left: 0; right: 0; transition: transform 0.45s, opacity 0.3s; opacity: 1; transform: translateY(0); }
+    .greeting-wrapper { position: relative; height: 54px; min-width: 160px; }
+    .greeting-slide { position: absolute; top: 0; left: 0; right: 0; }
     .greeting-slide h1 {
-      font-size: 28px; font-weight: 700; background: linear-gradient(145deg, #f0e9ff, #c0b2ff, #a68bfa);
+      font-size: 32px; font-weight: 800; letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #ffffff, #00F0FF, #B400FF);
       background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; animation: shimmerText 5s infinite;
+      background-clip: text; animation: shimmerText 4s ease-in-out infinite;
+      text-shadow: 0 0 30px rgba(0,240,255,0.5);
     }
-    .greeting-slide.hidden { transform: translateY(-120%); opacity: 0; pointer-events: none; }
-    .greeting-slide.next { transform: translateY(120%); opacity: 0; }
-    .greeting-slide.next.visible { transform: translateY(0); opacity: 1; }
     @keyframes shimmerText { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-    .header-actions { display: flex; align-items: center; gap: 12px; }
-    .theme-btn { background: transparent; border: none; font-size: 26px; cursor: pointer; padding: 6px; border-radius: 40px; transition: 0.2s; }
-    .theme-btn:hover { background: rgba(150,130,220,0.2); }
-    h2 { font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 18px; }
-    input, select, textarea {
-      width: 100%; background: var(--input-bg); backdrop-filter: blur(8px);
-      border: 1.5px solid var(--card-border); border-radius: 24px; padding: 14px 18px;
-      font-size: 16px; color: var(--text-primary); outline: none; transition: all 0.25s;
-      box-shadow: 0 4px 10px #00000020;
+
+    h2 {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
+      color: #ffffff; margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(0,240,255,0.3);
     }
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(150,120,240,0.2); }
-    input::placeholder { color: var(--text-secondary); opacity: 0.7; }
-    .segmented-control { display: flex; background: var(--input-bg); border-radius: 40px; padding: 6px; }
-    .segmented-option {
-      flex: 1; text-align: center; padding: 12px; border-radius: 34px; font-weight: 500;
-      color: var(--text-secondary); cursor: pointer;
+
+    /* Инпуты — Неоновый киберпанк */
+    input, select {
+      width: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
+      border: none; border-bottom: 2px solid rgba(0, 240, 255, 0.5);
+      border-radius: 20px 20px 8px 8px; padding: 16px 18px;
+      font-size: 16px; font-family: 'Space Mono', monospace; color: #fff;
+      outline: none; transition: all 0.3s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
-    .segmented-option.active { background: var(--accent); color: white; box-shadow: 0 6px 14px #5f3dc0a0; }
-    .btn-primary, .btn-secondary, .btn-small, .water-btn { transition: all 0.2s; cursor: pointer; border: none; font-weight: 600; }
-    .btn-primary:active, .btn-secondary:active, .btn-small:active { transform: scale(0.97); }
+    input:focus {
+      border-bottom: 2px solid #00F0FF;
+      box-shadow: 0 0 30px rgba(0,240,255,0.3), 0 8px 20px rgba(0,0,0,0.3);
+    }
+    input::placeholder { color: rgba(255,255,255,0.4); font-family: 'Inter', sans-serif; }
+
+    /* Кнопки — Глюк-эффект */
     .btn-primary {
-      width: 100%; border-radius: 60px; padding: 18px 24px; font-size: 17px; font-weight: 700;
-      background: linear-gradient(145deg, var(--accent), #6d4fd1); color: white;
-      box-shadow: 0 12px 30px -5px #563eb0; margin-bottom: 10px;
+      width: 100%; border: none; border-radius: 60px 20px 60px 20px;
+      padding: 18px 24px; font-size: 18px; font-weight: 700;
+      background: linear-gradient(145deg, #00F0FF, #B400FF); color: #0a0a0f;
+      box-shadow: 0 12px 30px -5px rgba(0,240,255,0.4);
+      cursor: pointer; transition: all 0.2s;
+      text-transform: uppercase; letter-spacing: 1px;
+      font-family: 'Space Mono', monospace;
     }
-    .btn-secondary {
-      width: 100%; border-radius: 60px; padding: 16px 24px; background: rgba(30,35,48,0.7);
-      backdrop-filter: blur(12px); border: 1.5px solid #4f4680; color: var(--text-primary);
+    .btn-primary:active {
+      transform: scale(0.96);
+      box-shadow: 5px 5px 0 #00F0FF, -5px -5px 0 #B400FF, 0 12px 30px -5px rgba(0,240,255,0.6);
     }
-    .btn-small {
-      background: rgba(30,35,50,0.8); backdrop-filter: blur(8px); border: 1px solid #554b80;
-      border-radius: 40px; padding: 12px 20px; font-size: 14px; color: var(--text-primary);
+
+    /* Кольца — Квантовые */
+    .rings-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-around; margin: 20px 0 10px; }
+    .ring-container { text-align: center; width: 100px; }
+    .ring-canvas { width: 100px; height: 100px; display: block; margin: 0 auto 10px; filter: drop-shadow(0 0 15px currentColor); }
+    .ring-label {
+      font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+      color: rgba(255,255,255,0.7);
     }
-    .water-btn {
-      flex: 1; background: rgba(25,30,45,0.7); backdrop-filter: blur(10px);
-      border-radius: 40px; padding: 14px 0; font-size: 18px; font-weight: 700;
-      color: var(--text-primary); border: 1px solid #5f5090;
+    .ring-value {
+      font-size: 20px; font-weight: 800; font-family: 'Space Mono', monospace;
+      color: #fff; text-shadow: 0 0 15px currentColor;
     }
-    .lang-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
-    .btn-danger { border-color: #ff6b8b; color: #ffb0c3; }
-    .rings-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-around; }
-    .ring-container { text-align: center; width: 95px; }
-    .ring-canvas { width: 90px; height: 90px; display: block; margin: 0 auto 8px; }
-    .ring-label { font-weight: 600; color: var(--text-secondary); }
-    .ring-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-    .tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+
+    /* Вкладки */
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
     .tab {
-      flex:1; text-align:center; padding:16px; background:var(--card-bg); backdrop-filter:blur(12px);
-      border-radius:40px; font-weight:700; color:var(--text-secondary); border:1px solid var(--card-border);
+      flex:1; text-align:center; padding:16px; background:rgba(15,20,30,0.5); backdrop-filter:blur(12px);
+      border-radius: 30px 10px 30px 10px; font-weight:700; color:rgba(255,255,255,0.6);
+      border:1px solid rgba(0,240,255,0.2); cursor: pointer; transition: 0.2s;
     }
-    .tab.active { background:var(--accent); color:white; }
+    .tab.active { background: linear-gradient(145deg, #00F0FF, #B400FF); color:#0a0a0f; box-shadow: 0 0 30px #00F0FF; }
+
     .food-item {
-      display:flex; align-items:center; gap:12px; padding:16px; background:var(--card-bg);
-      backdrop-filter:blur(8px); border-radius:24px; margin-bottom:10px; border:1px solid var(--card-border);
+      display:flex; align-items:center; gap:12px; padding:16px; background:rgba(0,0,0,0.2);
+      backdrop-filter:blur(8px); border-radius:24px; margin-bottom:10px; border:1px solid rgba(0,240,255,0.15);
     }
-    .food-toggle { width:30px; height:30px; border-radius:30px; border:2px solid var(--accent); background:transparent; }
-    .food-toggle.checked { background:var(--accent); }
-    .food-toggle.checked::after { content:'✓'; color:#0b0e14; font-weight:bold; }
-    .scanner-container, .smart-water-modal, .about-modal {
-      position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(13,17,23,0.95);
-      z-index:1000; display:none; flex-direction:column; padding:20px; overflow-y:auto;
-      backdrop-filter:blur(20px);
-    }
-    .profile-photo {
-      width:100px; height:100px; border-radius:50%; background:var(--card-bg);
-      border:3px solid var(--accent); margin:0 auto; overflow:hidden;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .apple-switch { position:relative; display:inline-block; width:51px; height:31px; }
-    .apple-switch input { opacity:0; width:0; height:0; }
-    .apple-switch .slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:rgba(48,54,61,0.8); border-radius:31px; transition:.25s; }
-    .apple-switch .slider:before { position:absolute; content:""; height:27px; width:27px; left:1px; bottom:1px; background:white; border-radius:50%; transition:.25s; }
-    .apple-switch input:checked + .slider { background:var(--accent); }
-    .apple-switch input:checked + .slider:before { transform:translateX(20px); }
-    .flex { display:flex; gap:8px; align-items:center; }
-    .text-center { text-align:center; }
-    .text-small { font-size:13px; color:var(--text-secondary); }
-    .mb-2 { margin-bottom:8px; }
-    .streak-emoji { font-size:28px; line-height:1; }
-    .bmi-scale { position:relative; height:24px; margin:8px 0; cursor:pointer; }
-    .bmi-gradient { position:absolute; top:0; left:0; right:0; height:8px; background:linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius:4px; }
-    .bmi-marker { position:absolute; top:-4px; width:4px; height:16px; background:white; border-radius:2px; transform:translateX(-50%); box-shadow:0 0 8px rgba(255,255,255,0.5); transition:left 0.3s ease; }
-    .autocomplete-list { position:absolute; top:100%; left:0; right:0; background:#1A2027; border:1px solid #30363D; border-radius:16px; margin-top:4px; max-height:240px; overflow-y:auto; z-index:200; display:none; }
-    .autocomplete-item { padding:12px 16px; cursor:pointer; border-bottom:1px solid #30363D; display:flex; justify-content:space-between; }
   </style>
 </head>
-<body class="theme-dark">
+<body>
 <div class="app">
-  <!-- Модальные окна -->
-  <div id="scannerModal" class="scanner-container"><div style="padding:16px;display:flex;justify-content:space-between;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()">Закрыть</button></div><video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video><div style="padding:20px;"><div style="display:flex;gap:8px;"><input id="manualBarcode" placeholder="Штрихкод"><button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)">Найти</button></div><div id="scannerHint" style="margin-top:12px;color:#9CA3AF;">Наведите камеру</div><button class="btn-secondary" onclick="closeScanner()">Отмена</button></div></div>
-  <div id="smartWaterModal" class="smart-water-modal"><div style="display:flex;justify-content:space-between;"><h2>Умная вода</h2><button class="btn-small" onclick="closeSmartWater()">Закрыть</button></div><div class="card"><div style="display:flex;justify-content:space-between;"><span>Включить</span><label class="apple-switch"><input type="checkbox" id="smartWaterToggle"><span class="slider"></span></label><span id="smartWaterToggleLabel">Выкл</span></div><div id="smartWaterSettings" style="display:none;"><div class="slider-container"><div class="slider-labels"><span>🥶 -10°</span><span>40°+</span></div><input type="range" id="tempSlider" min="-10" max="40" value="22"><div>Сейчас: <span id="tempDisplay">22°C</span></div></div><div class="slider-container"><div class="slider-labels"><span>0</span><span>20k</span></div><input type="range" id="stepsSlider" min="0" max="20000" value="8000"><div>Шаги: <span id="stepsDisplay">8000</span></div></div><div><div>Базовая норма: <span id="baseWaterNorm">0</span></div><div>Температура: <span id="tempBonus">+0</span></div><div>Шаги: <span id="stepsBonus">+0</span></div><div>ИТОГО: <span id="totalWaterNorm">0</span></div></div></div><div id="waterBaseOnly"><div>Норма воды: <span id="baseOnlyWater">0 мл</span></div></div></div></div>
-  <div id="smartSearchModal" class="smart-water-modal"><div style="display:flex;justify-content:space-between;"><h2>Умный поиск</h2><button class="btn-small" onclick="closeSmartSearch()">Закрыть</button></div><div class="card"><div style="display:flex;justify-content:space-between;"><span>Включить</span><label class="apple-switch"><input type="checkbox" id="smartSearchToggle"><span class="slider"></span></label><span id="smartSearchToggleLabel">Выкл</span></div><div id="smartSearchSettings"><input type="range" id="resultsSlider" min="5" max="50" value="10"><span>Результатов: <span id="resultsDisplay">10</span></span></div></div></div>
-  <div id="aboutModal" class="about-modal"><div style="display:flex;justify-content:space-between;"><h2>О приложении</h2><button class="btn-small" onclick="closeAbout()">Закрыть</button></div><div class="card"><p>FitCat v2.0 · Стеклянный дизайн, кольца прогресса, темы. Все данные локально.</p></div></div>
-  
-  <!-- Страница настройки -->
-  <div id="setupPage">
-    <h1 style="font-size:36px; background:linear-gradient(145deg,#fff,#b095ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">FitCat</h1>
-    <div class="card">
-      <h2>О себе</h2>
-      <input id="setupName" placeholder="Имя">
-      <input id="setupAge" placeholder="Возраст" type="number">
-      <div class="segmented-control" id="setupGenderControl">
-        <div class="segmented-option active" data-gender="female" onclick="selectSetupGender('female')">Жен</div>
-        <div class="segmented-option" data-gender="male" onclick="selectSetupGender('male')">Муж</div>
-      </div>
-      <input type="hidden" id="setupGender" value="female">
-      <input id="setupHeight" placeholder="Рост см">
-      <input id="setupWeight" placeholder="Вес кг">
-    </div>
-    <button class="btn-primary" onclick="completeSetup()">Начать</button>
-    <div class="card"><h2>Язык</h2><div class="flex"><button class="btn-small lang-btn active" onclick="setLanguage('ru')">🇷🇺</button><button class="btn-small" onclick="setLanguage('en')">🇬🇧</button><button class="btn-small" onclick="setLanguage('cn')">🇨🇳</button></div></div>
-  </div>
-
-  <!-- Главная страница -->
-  <div id="mainPage" style="display:none;">
+  <div id="mainPage">
     <div class="header-row">
-      <div class="greeting-wrapper">
-        <div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div>
-        <div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div>
-      </div>
-      <div class="header-actions">
-        <button class="theme-btn" onclick="cycleTheme()" id="themeToggleBtn">🌙</button>
-        <span id="streakEmoji" class="streak-emoji">🔥</span>
-        <div class="header-photo" onclick="showProfile()"><span id="headerInitials">🐱</span></div>
-      </div>
+      <div class="greeting-wrapper"><div class="greeting-slide"><h1>Elysium</h1></div></div>
+      <div class="header-actions"><span class="streak-emoji">🔥</span></div>
     </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('today')">Сегодня</div>
-      <div class="tab" onclick="switchTab('activity')">Активность</div>
-      <div class="tab" onclick="switchTab('weight')">Вес</div>
-    </div>
-    <!-- Today page -->
-    <div id="todayPage" class="page active">
-      <div class="card"><h2>Кольца прогресса</h2><div class="rings-grid" id="ringsContainer"></div></div>
-      <div class="card" id="waterCard">
-        <div class="card-header" onclick="toggleCard('waterCard')"><h2>Вода</h2><button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button></div>
-        <div id="waterContent"><div style="text-align:center;"><span id="waterCurrent">0</span>/<span id="waterGoal">1820 мл</span></div>
-        <div class="water-buttons"><div class="water-btn" onclick="addWater(-50)">-50</div><div class="water-btn" onclick="addWater(50)">+50</div><div class="water-btn" onclick="addWater(100)">+100</div></div></div>
-      </div>
-      <div class="card">
-        <h2>Продукты</h2>
-        <div id="foodListContainer"></div>
-        <div class="flex"><input id="foodName" placeholder="Название"><input id="foodWeight" placeholder="Вес" type="number"></div>
-        <button class="btn-primary" onclick="addFood()">Добавить</button>
-        <button class="btn-secondary" onclick="openScanner()">📷 Сканер</button>
-        <div class="templates-bar" id="templatesBar"></div>
-        <button class="btn-small" onclick="saveTemplate()">Сохранить шаблон</button>
-        <button class="btn-small" onclick="clearTodayFoods()">Очистить</button>
-      </div>
-    </div>
-    <!-- Activity page -->
-    <div id="activityPage" class="page" style="display:none;">
-      <div class="card">
-        <h2>Активность</h2>
-        <div class="activity-daily-options">
-          <div class="activity-daily-item selected" data-activity="1.375" onclick="selectDailyActivity(this)">Умеренный</div>
-          <div class="activity-daily-item" data-activity="1.55" onclick="selectDailyActivity(this)">Активный</div>
-        </div>
-        <div style="display:flex;justify-content:space-between;"><span>Тренировка</span><label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label><span id="workoutToggleLabel">Выкл</span></div>
-        <div id="workoutSettings" style="display:none;">
-          <div class="segmented-control" id="workoutIntensityControl">
-            <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')">Лёгкая</div>
-            <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')">Умеренная</div>
-            <div class="segmented-option" data-intensity="intense" onclick="selectWorkoutIntensity('intense')">Интенсивная</div>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="applyDailyActivity()">Применить</button>
-      </div>
-    </div>
-    <!-- Weight page -->
-    <div id="weightPage" class="page" style="display:none;">
-      <div class="card">
-        <h2>График веса</h2>
-        <div class="bmi-container"><div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div><div class="bmi-scale" id="bmiScale"><div class="bmi-gradient"></div><div class="bmi-marker" id="bmiMarker" style="left:0%;"></div></div></div>
-        <canvas id="weightChart" style="height:200px;"></canvas>
-        <div class="flex"><input id="newWeight" placeholder="Вес"><input id="weightDate" type="date"></div>
-        <button onclick="addWeightEntry()">Добавить</button>
-        <button onclick="setWeightGoal()">Задать цель</button>
-        <div id="weightHistoryList"></div>
-      </div>
-    </div>
-  </div>
+    <div class="tabs"><div class="tab active">Сегодня</div><div class="tab">Активность</div><div class="tab">Вес</div></div>
 
-  <!-- Profile page -->
-  <div id="profilePage" style="display:none;">
+    <!-- КОЛЬЦА -->
     <div class="card">
-      <h2>Профиль</h2>
-      <button onclick="showPage('mainPage')">← Назад</button>
-      <div class="profile-photo" onclick="uploadPhoto()"><span id="profileInitials">🐱</span></div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-      <input id="profileName"><input id="profileAge"><input id="profileHeight"><input id="profileWeight">
-      <div class="segmented-control" id="profileGoalControl">
-        <div class="segmented-option active" data-goal="lose" onclick="selectProfileGoal('lose')">Похудение</div>
-        <div class="segmented-option" data-goal="maintain" onclick="selectProfileGoal('maintain')">Поддержание</div>
-        <div class="segmented-option" data-goal="gain" onclick="selectProfileGoal('gain')">Набор</div>
+      <h2>⚡ Квантовые кольца</h2>
+      <div class="rings-grid" id="ringsContainer"></div>
+    </div>
+
+    <!-- ВОДА -->
+    <div class="card">
+      <h2>💧 Живая вода</h2>
+      <div style="text-align:center;"><span id="waterCurrent" style="font-size:36px;font-family:'Space Mono';font-weight:800;">0</span><span style="color:rgba(255,255,255,0.5);">/</span><span id="waterGoal">2000 мл</span></div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <div class="water-btn" style="flex:1;padding:14px;background:rgba(0,240,255,0.1);border-radius:20px;text-align:center;cursor:pointer;" onclick="addWater(100)">+100</div>
+        <div class="water-btn" style="flex:1;padding:14px;background:rgba(180,0,255,0.1);border-radius:20px;text-align:center;cursor:pointer;" onclick="addWater(200)">+200</div>
       </div>
-      <button onclick="saveProfile()">Сохранить</button>
-      <button onclick="deleteAccount()" class="btn-danger">Удалить аккаунт</button>
+    </div>
+
+    <!-- ПРОДУКТЫ -->
+    <div class="card">
+      <h2>🍣 Нейро-еда</h2>
+      <div id="foodListContainer"></div>
+      <div style="display:flex;gap:10px;margin:16px 0;"><input id="foodName" placeholder="Название"><input id="foodWeight" placeholder="Вес, г" type="number"></div>
+      <button class="btn-primary" onclick="addFood()">+ Добавить</button>
     </div>
   </div>
-  <!-- Settings page -->
-  <div id="settingsPage" style="display:none;"><div class="card"><h2>Настройки</h2><button onclick="exportData()">Экспорт</button><button onclick="importData()">Импорт</button><button onclick="openAbout()">О приложении</button></div></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-(function(){
-  function $(id) { return document.getElementById(id); }
-  
-  // ========== СОСТОЯНИЕ ==========
-  let currentLang = 'ru';
-  let currentProfile = null;
-  let dailyTargets = { kcal: 2000, protein: 80, fat: 45, carbs: 150, water: 2000 };
-  let todayFoods = [];
+  // УРЕЗАННЫЙ ФУНКЦИОНАЛ (только для демонстрации дизайна)
   let waterAmount = 0;
-  let weightHistory = [];
-  let productsDB = [];
-  let mealTemplates = [];
-  let dailyActivity = 1.375, workoutEnabled = false, workoutIntensity = 'light';
-  let currentSteps = 8000, currentTemp = 22;
-  let smartWaterEnabled = false, smartSearchEnabled = false, smartSearchResults = 10;
-  let chartInstance = null;
-  let zxingReader = null, quaggaActive = false, scanningActive = false;
-  const themes = ['theme-dark','theme-light','theme-forest'];
-  let themeIndex = 0;
+  let todayFoods = [];
+  const dailyTargets = { kcal: 2200, protein: 120, fat: 60, carbs: 250, water: 2000 };
 
-  const i18nDict = {
-    ru: { scanner:'Сканер', close:'Закрыть', cancel:'Отмена', search:'Найти', scanner_hint:'Наведите камеру', camera_error:'Нет доступа к камере', product_not_found:'Товар не найден', error_fill:'Заполните поля', tab_today:'Сегодня', tab_activity:'Активность', tab_weight:'Вес', save:'Сохранить', back:'← Назад', enable:'Включить', off:'Выкл', on:'Вкл' },
-    en: { scanner:'Scanner', close:'Close', cancel:'Cancel', search:'Search', scanner_hint:'Point camera', camera_error:'Camera error', product_not_found:'Not found', error_fill:'Fill fields', tab_today:'Today', tab_activity:'Activity', tab_weight:'Weight', save:'Save', back:'← Back', enable:'Enable', off:'Off', on:'On' },
-    cn: { scanner:'扫描', close:'关闭', cancel:'取消', search:'搜索', scanner_hint:'对准条码', camera_error:'相机错误', product_not_found:'未找到', error_fill:'填写字段', tab_today:'今天', tab_activity:'活动', tab_weight:'体重', save:'保存', back:'← 返回', enable:'启用', off:'关', on:'开' }
-  };
-  function i18n(k) { return i18nDict[currentLang]?.[k] || k; }
+  function $(id) { return document.getElementById(id); }
 
-  // ========== ИНИЦИАЛИЗАЦИЯ ==========
-  function loadData() {
-    let p = localStorage.getItem('fitnessProfile');
-    if(p) { currentProfile = JSON.parse(p); dailyTargets = calculateTargets(); }
-    todayFoods = JSON.parse(localStorage.getItem('todayFoods')||'[]');
-    waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
-    weightHistory = JSON.parse(localStorage.getItem('weightHistory')||'[]');
-    productsDB = JSON.parse(localStorage.getItem('fitcat_products')||'[]');
-    mealTemplates = JSON.parse(localStorage.getItem('fitcat_templates')||'[]');
-    dailyActivity = parseFloat(localStorage.getItem('dailyActivity')||'1.375');
-    workoutEnabled = localStorage.getItem('workoutEnabled')==='true';
-    smartWaterEnabled = localStorage.getItem('smartWaterEnabled')==='true';
-    smartSearchEnabled = localStorage.getItem('smartSearchEnabled')==='true';
-    smartSearchResults = parseInt(localStorage.getItem('smartSearchResults')||'10');
-    currentSteps = parseInt(localStorage.getItem('currentSteps')||'8000');
-    currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
-    let savedTheme = localStorage.getItem('fitcat_theme') || 'theme-dark';
-    document.body.className = savedTheme;
-    themeIndex = themes.indexOf(savedTheme); if(themeIndex<0) themeIndex=0;
-    updateThemeButton();
-  }
-  function saveAllData() {
-    if(currentProfile) localStorage.setItem('fitnessProfile', JSON.stringify(currentProfile));
-    localStorage.setItem('todayFoods', JSON.stringify(todayFoods));
-    localStorage.setItem('waterAmount', waterAmount);
-    localStorage.setItem('weightHistory', JSON.stringify(weightHistory));
-    localStorage.setItem('fitcat_products', JSON.stringify(productsDB));
-    localStorage.setItem('fitcat_templates', JSON.stringify(mealTemplates));
-  }
-
-  // ========== РАСЧЁТЫ ==========
-  function calculateTargets() {
-    if(!currentProfile) return dailyTargets;
-    let bmr = currentProfile.gender==='female'? 447.6+9.2*currentProfile.weight+3.1*currentProfile.height-4.3*currentProfile.age : 88.36+13.4*currentProfile.weight+4.8*currentProfile.height-5.7*currentProfile.age;
-    let tdee = bmr * dailyActivity + (workoutEnabled? (workoutIntensity==='light'?150: workoutIntensity==='moderate'?250:400) : 0);
-    let goalMult = currentProfile.goal==='lose'?0.85: (currentProfile.goal==='gain'?1.10:1.0);
-    let kcal = Math.round(tdee * goalMult);
-    let waterBase = Math.round(currentProfile.weight*35);
-    let waterTotal = waterBase;
-    if(smartWaterEnabled) waterTotal = waterBase + getTempBonus(currentTemp) + getStepsBonus(currentSteps) + (workoutEnabled? (workoutIntensity==='light'?150: workoutIntensity==='moderate'?250:400):0);
-    return { kcal, protein: Math.round(currentProfile.weight*1.8), fat: Math.round(currentProfile.weight*0.9), carbs: Math.round((kcal - currentProfile.weight*1.8*4 - currentProfile.weight*0.9*9)/4), water: waterTotal };
-  }
-  function getTempBonus(t) { if(t<15) return 0; if(t<20) return 50; if(t<25) return 150; if(t<30) return 300; return 500; }
-  function getStepsBonus(s) { if(s<2500) return 0; if(s<5000) return 50; if(s<7500) return 100; if(s<10000) return 150; if(s<12500) return 200; if(s<15000) return 250; return 300; }
-
-  // ========== КОЛЬЦА ==========
   function drawRing(canvasId, value, max, color) {
     let canvas = $(canvasId); if(!canvas) return;
     let ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
     ctx.clearRect(0,0,w,h);
     let percent = Math.min(value/max, 1), start = -0.5 * Math.PI, end = start + (2 * Math.PI * percent);
+    // Трек
     ctx.beginPath(); ctx.arc(w/2, h/2, w/2-6, 0, 2*Math.PI);
-    ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--ring-track') || '#3a3f50';
-    ctx.lineWidth = 8; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 8; ctx.stroke();
+    // Градиент по кругу
+    let gradient = ctx.createConicGradient(start, w/2, h/2);
+    gradient.addColorStop(0, color); gradient.addColorStop(0.5, '#B400FF'); gradient.addColorStop(1, color);
     ctx.beginPath(); ctx.arc(w/2, h/2, w/2-6, start, end);
-    ctx.strokeStyle = color; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.strokeStyle = gradient; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+    // Искра на конце
+    if(percent > 0) {
+      let endX = w/2 + (w/2-6) * Math.cos(end), endY = h/2 + (h/2-6) * Math.sin(end);
+      ctx.beginPath(); ctx.arc(endX, endY, 5, 0, 2*Math.PI);
+      ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 20; ctx.fill();
+      ctx.shadowBlur = 0;
+    }
   }
+
   function renderRings() {
     let totals = {kcal:0, protein:0, fat:0, carbs:0};
-    todayFoods.forEach(f=>{ if(f.checked){ totals.kcal+=f.kcal||0; totals.protein+=f.protein||0; totals.fat+=f.fat||0; totals.carbs+=f.carbs||0; }});
+    todayFoods.forEach(f=>{ totals.kcal+=f.kcal||0; totals.protein+=f.protein||0; totals.fat+=f.fat||0; totals.carbs+=f.carbs||0; });
     let rings = [
-      {id:'ringKcal', val:totals.kcal, max:dailyTargets.kcal, col:'#ff7b89', label:'Ккал'},
-      {id:'ringProt', val:totals.protein, max:dailyTargets.protein, col:'#7aa2ff', label:'Белки'},
-      {id:'ringFat', val:totals.fat, max:dailyTargets.fat, col:'#ffb347', label:'Жиры'},
-      {id:'ringCarbs', val:totals.carbs, max:dailyTargets.carbs, col:'#6fcf97', label:'Углеводы'},
-      {id:'ringWater', val:waterAmount, max:dailyTargets.water, col:'#62d5ff', label:'Вода'}
+      {id:'ringKcal', val:totals.kcal, max:dailyTargets.kcal, col:'#FF6B6B', label:'Ккал'},
+      {id:'ringProt', val:totals.protein, max:dailyTargets.protein, col:'#00F0FF', label:'Белки'},
+      {id:'ringFat', val:totals.fat, max:dailyTargets.fat, col:'#FFD93D', label:'Жиры'},
+      {id:'ringCarbs', val:totals.carbs, max:dailyTargets.carbs, col:'#00FFC8', label:'Углеводы'},
+      {id:'ringWater', val:waterAmount, max:dailyTargets.water, col:'#B400FF', label:'Вода'}
     ];
     let html = '';
     rings.forEach(r=>{ html+=`<div class="ring-container"><canvas id="${r.id}" class="ring-canvas" width="100" height="100"></canvas><div class="ring-label">${r.label}</div><div class="ring-value">${Math.round(r.val)}/${r.max}</div></div>`; });
@@ -386,114 +233,22 @@
     $('waterGoal').innerText = dailyTargets.water + ' мл';
   }
 
-  // ========== ТЕМЫ ==========
-  function cycleTheme() {
-    themeIndex = (themeIndex+1) % themes.length;
-    document.body.className = themes[themeIndex];
-    localStorage.setItem('fitcat_theme', themes[themeIndex]);
-    updateThemeButton();
-    renderRings();
-  }
-  function updateThemeButton() {
-    let btn = $('themeToggleBtn');
-    if(btn) btn.textContent = document.body.classList.contains('theme-light') ? '☀️' : (document.body.classList.contains('theme-forest') ? '🌿' : '🌙');
-  }
-
-  // ========== ИНТЕРФЕЙС ==========
-  function renderFoodList() {
-    $('foodListContainer').innerHTML = todayFoods.map((f,i)=>`<div class="food-item"><span>${f.name} ${f.weight}г</span><span onclick="deleteFood(${i})">✕</span></div>`).join('');
-  }
-  window.deleteFood = (i)=>{ todayFoods.splice(i,1); saveAllData(); renderRings(); renderFoodList(); };
-  window.addFood = function() {
+  window.addWater = (ml) => { waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water)); renderRings(); };
+  window.addFood = () => {
     let name = $('foodName').value.trim(), weight = parseFloat($('foodWeight').value);
     if(!name || !weight) return;
-    let kcal = weight * 2.5;
-    todayFoods.push({name, weight, kcal, protein: weight*0.1, fat: weight*0.05, carbs: weight*0.3, checked: false});
-    saveAllData(); renderRings(); renderFoodList();
+    todayFoods.push({name, weight, kcal: weight*2.5, protein: weight*0.1, fat: weight*0.05, carbs: weight*0.3});
+    renderFoodList(); renderRings();
     $('foodName').value = $('foodWeight').value = '';
   };
-  window.addWater = (ml)=>{ waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water)); saveAllData(); renderRings(); };
-  window.switchTab = (tab) => { ['today','activity','weight'].forEach(t=> $(t+'Page').style.display = t===tab?'block':'none'); };
-  window.toggleCard = (id) => { let c = $(id==='waterCard'?'waterContent':'mealsContent'); if(c) c.style.display = c.style.display==='none'?'block':'none'; };
-  
-  // ========== НАСТРОЙКА ==========
-  window.completeSetup = function() {
-    let name = $('setupName').value, age = +$('setupAge').value, gender = $('setupGender').value, height = +$('setupHeight').value, weight = +$('setupWeight').value;
-    if(!name||!age||!height||!weight) return alert(i18n('error_fill'));
-    currentProfile = {name,age,gender,goal:'maintain',height,weight,startWeight:weight,targetWeight:weight};
-    dailyTargets = calculateTargets();
-    saveAllData();
-    $('setupPage').style.display='none'; $('mainPage').style.display='block';
-    updateGreeting(); renderRings();
-  };
-  window.selectSetupGender = (g) => { $('setupGender').value=g; };
-  window.setLanguage = (l) => { currentLang=l; localStorage.setItem('fitcat_lang',l); location.reload(); };
-
-  // ========== СКАНЕР ==========
-  window.openScanner = ()=> $('scannerModal').style.display='flex';
-  window.closeScanner = ()=> $('scannerModal').style.display='none';
-  window.lookupBarcode = async (b)=> { if(!b) return; try{ let r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${b}.json`); let d=await r.json(); if(d.product){ $('foodName').value=d.product.product_name||''; } } catch(e){} closeScanner(); };
-
-  // ========== УМНЫЕ ФУНКЦИИ ==========
-  window.openSmartWater = ()=> $('smartWaterModal').style.display='flex';
-  window.closeSmartWater = ()=> $('smartWaterModal').style.display='none';
-  window.openSmartSearch = ()=> $('smartSearchModal').style.display='flex';
-  window.closeSmartSearch = ()=> $('smartSearchModal').style.display='none';
-  window.openAbout = ()=> $('aboutModal').style.display='flex';
-  window.closeAbout = ()=> $('aboutModal').style.display='none';
-  window.selectDailyActivity = (el)=>{ document.querySelectorAll('.activity-daily-item').forEach(i=>i.classList.remove('selected')); el.classList.add('selected'); };
-  window.applyDailyActivity = ()=>{ dailyActivity = parseFloat(document.querySelector('.activity-daily-item.selected').dataset.activity); localStorage.setItem('dailyActivity', dailyActivity); calculateTargets(); renderRings(); };
-  window.selectWorkoutIntensity = (i)=>{ workoutIntensity=i; };
-
-  // ========== ВЕС И ГРАФИК ==========
-  window.addWeightEntry = ()=>{
-    let w = parseFloat($('newWeight').value), d = $('weightDate').value || new Date().toISOString().split('T')[0];
-    if(!w) return;
-    weightHistory.push({date:d, weight:w});
-    saveAllData(); renderWeightChart(); updateBMI();
-  };
-  window.setWeightGoal = ()=>{ let g = prompt('Целевой вес (кг)'); if(g) { currentProfile.targetWeight = parseFloat(g); saveAllData(); } };
-  function renderWeightChart() {
-    if(!weightHistory.length) return;
-    let ctx = $('weightChart').getContext('2d');
-    if(chartInstance) chartInstance.destroy();
-    let sorted = [...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date));
-    chartInstance = new Chart(ctx, { type:'line', data:{ labels: sorted.map(e=>e.date), datasets:[{ label:'Вес', data: sorted.map(e=>e.weight), borderColor: getComputedStyle(document.body).getPropertyValue('--accent') }] } });
+  function renderFoodList() {
+    $('foodListContainer').innerHTML = todayFoods.map((f,i)=>`<div class="food-item"><span>${f.name} ${f.weight}г</span><span onclick="deleteFood(${i})" style="cursor:pointer;color:#FF6B6B;">✕</span></div>`).join('');
   }
-  function updateBMI() {
-    if(!currentProfile) return;
-    let bmi = currentProfile.weight / ((currentProfile.height/100)**2);
-    $('bmiValue').innerText = bmi.toFixed(1);
-    let category = bmi<18.5?'Недостаток':bmi<25?'Норма':bmi<30?'Избыток':'Ожирение';
-    $('bmiCategory').innerText = category;
-    let marker = $('bmiMarker'); if(marker) marker.style.left = Math.min(100, Math.max(0, ((bmi-15)/(40-15))*100))+'%';
-  }
+  window.deleteFood = (i) => { todayFoods.splice(i,1); renderFoodList(); renderRings(); };
 
-  // ========== ПРОФИЛЬ ==========
-  window.showProfile = ()=> { $('mainPage').style.display='none'; $('profilePage').style.display='block'; };
-  window.showPage = (p)=>{ $('mainPage').style.display= p==='mainPage'?'block':'none'; $('profilePage').style.display='none'; };
-  window.saveProfile = ()=>{ currentProfile.name=$('profileName').value; saveAllData(); showPage('mainPage'); };
-  window.uploadPhoto = ()=> $('photoInput').click();
-  window.handlePhotoUpload = (e)=>{ /* ... */ };
-  window.deleteAccount = ()=>{ if(confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); } };
-  window.exportData = ()=>{ /* JSON export */ };
-  window.importData = ()=>{ /* JSON import */ };
-  window.saveTemplate = ()=>{ /* ... */ };
-  window.clearTodayFoods = ()=>{ todayFoods=[]; saveAllData(); renderRings(); renderFoodList(); };
-
-  function updateGreeting() {
-    if(!currentProfile) return;
-    $('greetingSlide1').innerHTML = `<h1>Привет, ${currentProfile.name}</h1>`;
-    setTimeout(()=>{ $('greetingSlide1').classList.add('hidden'); $('greetingSlide2').classList.add('visible'); }, 3000);
-  }
-
-  // ========== ЗАПУСК ==========
-  loadData();
-  if(currentProfile) { $('setupPage').style.display='none'; $('mainPage').style.display='block'; renderRings(); updateGreeting(); }
-  else { $('mainPage').style.display='none'; }
-  window.cycleTheme = cycleTheme;
-  window.renderRings = renderRings;
-})();
+  // Старт
+  renderRings();
+  renderFoodList();
 </script>
 </body>
 </html>
