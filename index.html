@@ -31,7 +31,6 @@ body::before {
     background-size: 300% 300%;
 }
 
-/* Плавающие частицы */
 body::after {
     content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background-image: 
@@ -67,7 +66,25 @@ body::after {
     to { opacity: 1; transform: translateY(0); } 
 }
 
-/* Анимированные переходы между страницами */
+/* СВАЙП-КОНТЕЙНЕР */
+.swipe-container {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y pinch-zoom;
+}
+
+.swipe-wrapper {
+    display: flex;
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    will-change: transform;
+}
+
+.swipe-page {
+    flex: 0 0 100%;
+    width: 100%;
+    min-height: 100%;
+}
+
 .page {
     animation: pageEnter 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
@@ -286,6 +303,7 @@ input[type="date"] { color-scheme: dark; }
 .ring-item {
     display: flex; flex-direction: column; align-items: center;
     width: 100px;
+    cursor: pointer;
 }
 
 .ring-canvas-container {
@@ -294,11 +312,51 @@ input[type="date"] { color-scheme: dark; }
 
 .ring-canvas {
     width: 100%; height: 100%;
+    transition: filter 0.3s ease;
+    animation: ringGlowIdle 3s ease-in-out infinite;
+}
+
+/* Анимация колец в покое */
+@keyframes ringGlowIdle {
+    0%, 100% { 
+        filter: drop-shadow(0 0 6px rgba(79, 172, 254, 0.2)) 
+                drop-shadow(0 0 12px rgba(168, 85, 247, 0.1));
+    }
+    50% { 
+        filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.4)) 
+                drop-shadow(0 0 20px rgba(168, 85, 247, 0.2));
+    }
+}
+
+#ringKcal { animation: ringGlowKcal 3s ease-in-out infinite; }
+#ringProtein { animation: ringGlowProtein 3.2s ease-in-out infinite; }
+#ringFat { animation: ringGlowFat 2.8s ease-in-out infinite; }
+#ringCarbs { animation: ringGlowCarbs 3.4s ease-in-out infinite; }
+
+@keyframes ringGlowKcal {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 107, 107, 0.3)) drop-shadow(0 0 12px rgba(255, 142, 83, 0.15)); }
+    50% { filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.5)) drop-shadow(0 0 20px rgba(255, 142, 83, 0.25)); }
+}
+
+@keyframes ringGlowProtein {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(79, 172, 254, 0.3)) drop-shadow(0 0 12px rgba(0, 242, 254, 0.15)); }
+    50% { filter: drop-shadow(0 0 12px rgba(79, 172, 254, 0.5)) drop-shadow(0 0 20px rgba(0, 242, 254, 0.25)); }
+}
+
+@keyframes ringGlowFat {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 217, 61, 0.3)) drop-shadow(0 0 12px rgba(255, 179, 71, 0.15)); }
+    50% { filter: drop-shadow(0 0 12px rgba(255, 217, 61, 0.5)) drop-shadow(0 0 20px rgba(255, 179, 71, 0.25)); }
+}
+
+@keyframes ringGlowCarbs {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(107, 203, 119, 0.3)) drop-shadow(0 0 12px rgba(155, 89, 182, 0.15)); }
+    50% { filter: drop-shadow(0 0 12px rgba(107, 203, 119, 0.5)) drop-shadow(0 0 20px rgba(155, 89, 182, 0.25)); }
 }
 
 .ring-value {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     font-size: 18px; font-weight: 700; color: #E6EDF3; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    transition: opacity 0.2s ease;
 }
 
 .ring-label {
@@ -310,17 +368,24 @@ input[type="date"] { color-scheme: dark; }
     font-size: 11px; color: #6B7280; margin-top: 2px;
 }
 
-/* Водный прогресс отдельно */
+/* Водный прогресс */
 .water-ring-container {
     display: flex; justify-content: center; margin: 8px 0;
 }
 
 .water-ring {
     position: relative; width: 140px; height: 140px; margin: 0 auto;
+    cursor: pointer;
 }
 
 .water-ring-canvas {
     width: 100%; height: 100%;
+    animation: waterRingGlow 3s ease-in-out infinite;
+}
+
+@keyframes waterRingGlow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.3)) drop-shadow(0 0 15px rgba(79, 172, 254, 0.15)); }
+    50% { filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.5)) drop-shadow(0 0 25px rgba(79, 172, 254, 0.25)); }
 }
 
 .water-ring-value {
@@ -334,6 +399,7 @@ input[type="date"] { color-scheme: dark; }
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
     line-height: 1.2;
+    transition: opacity 0.2s ease;
 }
 
 .water-ring-goal {
@@ -388,8 +454,23 @@ input[type="date"] { color-scheme: dark; }
     transform: scale(1.02);
 }
 
-.page { display: none; }
-.page.active { display: block; }
+/* Свайп-индикатор */
+.swipe-indicator {
+    display: flex; justify-content: center; gap: 6px;
+    margin-top: 8px; margin-bottom: 4px;
+}
+
+.swipe-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(79, 172, 254, 0.3);
+    transition: all 0.3s ease;
+}
+
+.swipe-dot.active {
+    width: 20px; border-radius: 10px;
+    background: #4FACFE;
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+}
 
 /* ========== СПИСОК ЕДЫ ========== */
 .food-list { margin: 16px 0; }
@@ -758,7 +839,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
         <h3>No Warranty</h3>
         <p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p>
         <div class="divider"></div>
-        <p class="text-center">FitCat v1.2 — Glassmorphism Edition 🐱</p>
+        <p class="text-center">FitCat v1.3 — Glassmorphism Edition 🐱</p>
     </div>
 </div>
 
@@ -809,143 +890,165 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
     </div>
 
     <div class="tabs">
-        <div class="tab active" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
-        <div class="tab" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
-        <div class="tab" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
+        <div class="tab active" data-tab="today" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
+        <div class="tab" data-tab="activity" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
+        <div class="tab" data-tab="weight" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
     </div>
 
-    <div id="todayPage" class="page active">
-        <div class="card">
-            <h2 data-i18n="progress">Прогресс</h2>
-            <div id="progressBars"></div>
-        </div>
+    <!-- Свайп-индикатор -->
+    <div class="swipe-indicator">
+        <span class="swipe-dot active" data-dot="0"></span>
+        <span class="swipe-dot" data-dot="1"></span>
+        <span class="swipe-dot" data-dot="2"></span>
+    </div>
 
-        <div class="card" id="waterCard">
-            <div class="card-header" onclick="toggleCard('waterCard')">
-                <h2 data-i18n="water_title">Вода</h2>
-                <button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button>
-            </div>
-            <div class="card-content" id="waterContent">
-                <div class="water-ring-container">
-                    <div class="water-ring">
-                        <canvas id="waterRingCanvas" class="water-ring-canvas" width="140" height="140"></canvas>
-                        <div class="water-ring-value">
-                            <div class="water-ring-current" id="waterCurrent">0</div>
-                            <div class="water-ring-goal"><span id="waterGoalDisplay">1820</span> <span data-i18n="ml">мл</span></div>
+    <!-- Свайп-контейнер -->
+    <div class="swipe-container" id="swipeContainer">
+        <div class="swipe-wrapper" id="swipeWrapper">
+            
+            <!-- Today Page -->
+            <div class="swipe-page" data-page="0">
+                <div id="todayPage" class="page active">
+                    <div class="card">
+                        <h2 data-i18n="progress">Прогресс</h2>
+                        <div id="progressBars"></div>
+                    </div>
+
+                    <div class="card" id="waterCard">
+                        <div class="card-header" onclick="toggleCard('waterCard')">
+                            <h2 data-i18n="water_title">Вода</h2>
+                            <button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button>
+                        </div>
+                        <div class="card-content" id="waterContent">
+                            <div class="water-ring-container">
+                                <div class="water-ring" onclick="toggleWaterDisplay()">
+                                    <canvas id="waterRingCanvas" class="water-ring-canvas" width="140" height="140"></canvas>
+                                    <div class="water-ring-value">
+                                        <div class="water-ring-current" id="waterCurrentDisplay">0</div>
+                                        <div class="water-ring-goal"><span id="waterGoalDisplay">1820</span> <span data-i18n="ml">мл</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="water-buttons">
+                                <div class="water-btn" onclick="addWater(-50)">−50</div>
+                                <div class="water-btn" onclick="addWater(50)">+50</div>
+                                <div class="water-btn" onclick="addWater(100)">+100</div>
+                                <div class="water-btn" onclick="addWater(200)">+200</div>
+                            </div>
+                            <div class="water-manual">
+                                <input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10">
+                                <button class="btn-small" onclick="setManualWater()">✓</button>
+                            </div>
+                            <div id="smartWaterHint" class="text-small" style="margin-top:16px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="mealsCard">
+                        <div class="card-header" onclick="toggleCard('mealsCard')">
+                            <h2 data-i18n="meals">Продукты</h2>
+                            <button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button>
+                        </div>
+                        <div class="card-content" id="mealsContent">
+                            <div class="templates-bar" id="templatesBar"></div>
+                            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                                <button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button>
+                                <button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button>
+                                <button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button>
+                            </div>
+                            <div class="food-list" id="foodListContainer"></div>
+                            <div class="add-food-form" style="display:flex;flex-direction:column;gap:10px;">
+                                <div class="input-group" style="position: relative;">
+                                    <input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off">
+                                    <div id="autocompleteList" class="autocomplete-list"></div>
+                                </div>
+                                <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1">
+                                    <input type="number" id="foodFat100" data-i18n-placeholder="fat_short" placeholder="Ж" step="0.1">
+                                    <input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1">
+                                    <input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал">
+                                </div>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;">
+                                </div>
+                                <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="water-buttons">
-                    <div class="water-btn" onclick="addWater(-50)">−50</div>
-                    <div class="water-btn" onclick="addWater(50)">+50</div>
-                    <div class="water-btn" onclick="addWater(100)">+100</div>
-                    <div class="water-btn" onclick="addWater(200)">+200</div>
-                </div>
-                <div class="water-manual">
-                    <input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10">
-                    <button class="btn-small" onclick="setManualWater()">✓</button>
-                </div>
-                <div id="smartWaterHint" class="text-small" style="margin-top:16px;"></div>
             </div>
-        </div>
 
-        <div class="card" id="mealsCard">
-            <div class="card-header" onclick="toggleCard('mealsCard')">
-                <h2 data-i18n="meals">Продукты</h2>
-                <button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button>
-            </div>
-            <div class="card-content" id="mealsContent">
-                <div class="templates-bar" id="templatesBar"></div>
-                <div style="display:flex;gap:8px;margin-bottom:16px;">
-                    <button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button>
-                    <button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button>
-                    <button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button>
+            <!-- Activity Page -->
+            <div class="swipe-page" data-page="1">
+                <div id="activityPage" class="page">
+                    <div class="card">
+                        <h2 data-i18n="activity">Активность</h2>
+                        <div class="activity-daily-options">
+                            <div class="activity-daily-item" data-activity="1.2" onclick="selectDailyActivity(this)" data-i18n="sedentary">Сидячий</div>
+                            <div class="activity-daily-item" data-activity="1.375" onclick="selectDailyActivity(this)" data-i18n="light">Умеренный</div>
+                            <div class="activity-daily-item" data-activity="1.55" onclick="selectDailyActivity(this)" data-i18n="moderate">Активный</div>
+                            <div class="activity-daily-item" data-activity="1.725" onclick="selectDailyActivity(this)" data-i18n="very_active">Очень активный</div>
+                        </div>
+                        <div class="workout-section">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                                <span data-i18n="workout">Тренировка</span>
+                                <div style="display:flex; align-items:center;">
+                                    <label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label>
+                                    <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
+                                </div>
+                            </div>
+                            <div id="workoutSettings" style="display:none;">
+                                <label style="display:block; margin-bottom:12px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
+                                <div class="segmented-control" id="workoutIntensityControl">
+                                    <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div>
+                                    <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div>
+                                    <div class="segmented-option" data-intensity="intense" onclick="selectWorkoutIntensity('intense')" data-i18n="workout_intense">Интенсивная</div>
+                                </div>
+                                <input type="hidden" id="workoutIntensity" value="light">
+                            </div>
+                        </div>
+                        <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:24px;" data-i18n="apply_today">Применить на сегодня</button>
+                    </div>
                 </div>
-                <div class="food-list" id="foodListContainer"></div>
-                <div class="add-food-form" style="display:flex;flex-direction:column;gap:10px;">
-                    <div class="input-group" style="position: relative;">
-                        <input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off">
-                        <div id="autocompleteList" class="autocomplete-list"></div>
-                    </div>
-                    <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
-                    <div style="display:flex;gap:8px;">
-                        <input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1">
-                        <input type="number" id="foodFat100" data-i18n-placeholder="fat_short" placeholder="Ж" step="0.1">
-                        <input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1">
-                        <input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал">
-                    </div>
-                    <div style="display:flex;gap:8px;">
-                        <input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;">
-                    </div>
-                    <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
-                </div>
             </div>
-        </div>
-    </div>
 
-    <div id="activityPage" class="page">
-        <div class="card">
-            <h2 data-i18n="activity">Активность</h2>
-            <div class="activity-daily-options">
-                <div class="activity-daily-item" data-activity="1.2" onclick="selectDailyActivity(this)" data-i18n="sedentary">Сидячий</div>
-                <div class="activity-daily-item" data-activity="1.375" onclick="selectDailyActivity(this)" data-i18n="light">Умеренный</div>
-                <div class="activity-daily-item" data-activity="1.55" onclick="selectDailyActivity(this)" data-i18n="moderate">Активный</div>
-                <div class="activity-daily-item" data-activity="1.725" onclick="selectDailyActivity(this)" data-i18n="very_active">Очень активный</div>
-            </div>
-            <div class="workout-section">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
-                    <span data-i18n="workout">Тренировка</span>
-                    <div style="display:flex; align-items:center;">
-                        <label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label>
-                        <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
+            <!-- Weight Page -->
+            <div class="swipe-page" data-page="2">
+                <div id="weightPage" class="page">
+                    <div class="card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                            <h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2>
+                            <button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button>
+                        </div>
+                        <div id="weightStats" style="margin-bottom:16px;padding:16px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
+                            <div class="flex" style="justify-content:space-around;text-align:center;">
+                                <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:22px;font-weight:700;" id="startWeightStat">---</div></div>
+                                <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:22px;font-weight:700;" id="currentWeightStat">---</div></div>
+                                <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:22px;font-weight:700;" id="weightChangeStat">---</div></div>
+                                <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:22px;font-weight:700;" id="toGoalStat">---</div></div>
+                            </div>
+                        </div>
+                        <div class="bmi-container">
+                            <div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div>
+                            <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()">
+                                <div class="bmi-gradient"></div>
+                                <div class="bmi-marker" id="bmiMarker" style="left:0%;"></div>
+                                <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
+                            </div>
+                            <div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
+                        </div>
+                        <div class="flex mb-2" style="margin-top:16px;">
+                            <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;">
+                            <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.4);border:1.5px solid rgba(48,54,61,0.5);border-radius:20px;color:#E6EDF3;">
+                            <button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button>
+                        </div>
+                        <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
+                        <div style="margin-top:20px;">
+                            <h3 data-i18n="history">История</h3>
+                            <div id="weightHistoryList"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="workoutSettings" style="display:none;">
-                    <label style="display:block; margin-bottom:12px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
-                    <div class="segmented-control" id="workoutIntensityControl">
-                        <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div>
-                        <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div>
-                        <div class="segmented-option" data-intensity="intense" onclick="selectWorkoutIntensity('intense')" data-i18n="workout_intense">Интенсивная</div>
-                    </div>
-                    <input type="hidden" id="workoutIntensity" value="light">
-                </div>
-            </div>
-            <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:24px;" data-i18n="apply_today">Применить на сегодня</button>
-        </div>
-    </div>
-
-    <div id="weightPage" class="page">
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2>
-                <button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button>
-            </div>
-            <div id="weightStats" style="margin-bottom:16px;padding:16px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
-                <div class="flex" style="justify-content:space-around;text-align:center;">
-                    <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:22px;font-weight:700;" id="startWeightStat">---</div></div>
-                    <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:22px;font-weight:700;" id="currentWeightStat">---</div></div>
-                    <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:22px;font-weight:700;" id="weightChangeStat">---</div></div>
-                    <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:22px;font-weight:700;" id="toGoalStat">---</div></div>
-                </div>
-            </div>
-            <div class="bmi-container">
-                <div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div>
-                <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()">
-                    <div class="bmi-gradient"></div>
-                    <div class="bmi-marker" id="bmiMarker" style="left:0%;"></div>
-                    <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
-                </div>
-                <div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
-            </div>
-            <div class="flex mb-2" style="margin-top:16px;">
-                <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;">
-                <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.4);border:1.5px solid rgba(48,54,61,0.5);border-radius:20px;color:#E6EDF3;">
-                <button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button>
-            </div>
-            <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
-            <div style="margin-top:20px;">
-                <h3 data-i18n="history">История</h3>
-                <div id="weightHistoryList"></div>
             </div>
         </div>
     </div>
@@ -1180,6 +1283,20 @@ let smartSearchEnabled = false;
 let smartSearchResults = 10;
 let smartWaterEnabled = false;
 
+// Состояния для анимаций
+let animFrame = null;
+let currentRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0, water: 0 };
+let targetRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0, water: 0 };
+let ringDisplayMode = { kcal: 'value', protein: 'value', fat: 'value', carbs: 'value', water: 'value' };
+let ringTimeouts = {};
+
+// Свайп
+let currentPage = 0;
+let swipeStartX = 0;
+let swipeCurrentX = 0;
+let isSwiping = false;
+const swipeThreshold = 50;
+
 function i18n(key) { return translations[currentLang]?.[key] || key; }
 
 function updateAllI18n() {
@@ -1273,23 +1390,49 @@ function toggleCard(id) {
 }
 
 function addWater(ml) { 
-    waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water));
+    let newAmount = waterAmount + ml;
+    waterAmount = Math.max(0, newAmount);
     localStorage.setItem('waterAmount',waterAmount); 
     updateWaterDisplay(); 
-    renderProgressBars(); 
+    startRingAnimation();
     vibrate(); 
 }
 
 function setManualWater() { 
     let ml=parseInt(document.getElementById('manualWaterInput').value);
-    if(!isNaN(ml)&&ml>=0){waterAmount=Math.min(ml,dailyTargets.water); localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();}
+    if(!isNaN(ml)&&ml>=0){waterAmount=ml; localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); startRingAnimation(); vibrate();}
     document.getElementById('manualWaterInput').value=''; 
 }
 
 function updateWaterDisplay() {
-    document.getElementById('waterCurrent').innerText = waterAmount;
+    let displayEl = document.getElementById('waterCurrentDisplay');
+    let pct = Math.min((waterAmount / dailyTargets.water) * 100, 100);
+    
+    if (ringDisplayMode.water === 'value') {
+        displayEl.textContent = waterAmount;
+    } else {
+        displayEl.textContent = Math.round(pct) + '%';
+    }
+    
     document.getElementById('waterGoalDisplay').innerText = dailyTargets.water;
-    drawWaterRing();
+    targetRingValues.water = waterAmount;
+}
+
+function toggleWaterDisplay() {
+    if (ringDisplayMode.water === 'value') {
+        ringDisplayMode.water = 'percent';
+        let pct = Math.min((waterAmount / dailyTargets.water) * 100, 100);
+        document.getElementById('waterCurrentDisplay').textContent = Math.round(pct) + '%';
+    } else {
+        ringDisplayMode.water = 'value';
+        document.getElementById('waterCurrentDisplay').textContent = waterAmount;
+    }
+    
+    if (ringTimeouts.water) clearTimeout(ringTimeouts.water);
+    ringTimeouts.water = setTimeout(() => {
+        ringDisplayMode.water = 'value';
+        document.getElementById('waterCurrentDisplay').textContent = waterAmount;
+    }, 2000);
 }
 
 function openSmartWater() {
@@ -1598,7 +1741,7 @@ function renderWeightChart() {
     if(s.length>1){ let f=s[0].weight, l=s[s.length-1].weight; if(l<f) col='#6BCB77'; else if(l>f) col='#F85149'; }
     let w=s.map(e=>e.weight), min=Math.min(...w,goal)-1, max=Math.max(...w,goal)+1, grad=ctx.createLinearGradient(0,0,0,canvas.height);
     grad.addColorStop(0,col+'B3'); grad.addColorStop(0.4,col+'60'); grad.addColorStop(0.7,col+'20'); grad.addColorStop(1,col+'00');
-    chartInstance = new Chart(ctx, { type:'line', data:{ labels:s.map(e=>e.date), datasets:[ { label:i18n('weight')+' ('+i18n('kg')+')', data:s.map(e=>e.weight), borderColor:col, backgroundColor:grad, tension:0.3, fill:true, pointBackgroundColor:col, pointBorderColor:'#0D1117', pointRadius:5 }, { label:i18n('set_goal'), data:s.map(()=>goal), borderColor:'#FFD93D', borderDash:[5,5], borderWidth:2, pointRadius:0, fill:false } ] }, options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ min,max, ticks:{ color:'#9CA3AF' } } } } });
+    chartInstance = new Chart(ctx, { type:'line', data:{ labels:s.map(e=>e.date), datasets:[ { label:i18n('weight'), data:s.map(e=>e.weight), borderColor:col, backgroundColor:grad, tension:0.3, fill:true, pointBackgroundColor:col, pointBorderColor:'#0D1117', pointRadius:5 }, { label:i18n('set_goal'), data:s.map(()=>goal), borderColor:'#FFD93D', borderDash:[5,5], borderWidth:2, pointRadius:0, fill:false } ] }, options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ min,max, ticks:{ color:'#9CA3AF' } } } } });
 }
 
 function loadData() {
@@ -1641,7 +1784,9 @@ function completeSetup() {
         currentProfile = { name:n, age:a, gender:g, goal:'lose', height:h, weight:w, startWeight:w, targetWeight:Math.round(w*0.9*10)/10 };
         calculateTargets(); saveAllData(); localStorage.setItem('lastDate',new Date().toDateString());
         document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block';
-        updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); vibrate();
+        updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); 
+        initSwipe();
+        vibrate();
     } catch(e) { alert('Ошибка'); }
 }
 
@@ -1654,19 +1799,68 @@ function calculateTargets() {
     else waterTotal = waterBase + (workoutEnabled?getWorkoutWater(workoutIntensity):0);
     let goalMult = getGoalMultiplier(currentProfile.goal||'lose');
     dailyTargets = { kcal: Math.round(tdee * goalMult), protein: Math.round(p.weight*1.8), fat: Math.round(p.weight*0.9), carbs: Math.round((tdee*goalMult - p.weight*1.8*4 - p.weight*0.9*9)/4), water: waterTotal };
-    if(waterAmount>dailyTargets.water) waterAmount=dailyTargets.water;
 }
 
-function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
+function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); startRingAnimation(); }
 
-// ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ ==========
-function drawRing(canvasId, current, target, color1, color2, unit) {
+// ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ С АНИМАЦИЕЙ ==========
+function startRingAnimation() {
+    let c={kcal:0,protein:0,fat:0,carbs:0}; 
+    todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
+    
+    targetRingValues = {
+        kcal: c.kcal,
+        protein: c.protein,
+        fat: c.fat,
+        carbs: c.carbs,
+        water: waterAmount
+    };
+    
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animateRings();
+}
+
+function animateRings() {
+    let changed = false;
+    const ease = 0.12;
+    
+    for (let key of ['kcal', 'protein', 'fat', 'carbs', 'water']) {
+        let diff = targetRingValues[key] - currentRingValues[key];
+        if (Math.abs(diff) > 0.1) {
+            currentRingValues[key] += diff * ease;
+            changed = true;
+        } else {
+            currentRingValues[key] = targetRingValues[key];
+        }
+    }
+    
+    drawAllRings();
+    
+    if (changed) {
+        animFrame = requestAnimationFrame(animateRings);
+    } else {
+        animFrame = null;
+    }
+}
+
+function drawAllRings() {
+    drawRing('ringKcal', currentRingValues.kcal, dailyTargets.kcal, '#FF6B6B', '#FF8E53');
+    drawRing('ringProtein', currentRingValues.protein, dailyTargets.protein, '#4FACFE', '#00F2FE');
+    drawRing('ringFat', currentRingValues.fat, dailyTargets.fat, '#FFD93D', '#FFB347');
+    drawRing('ringCarbs', currentRingValues.carbs, dailyTargets.carbs, '#6BCB77', '#9B59B6');
+    drawWaterRingAnimated(currentRingValues.water);
+    
+    // Обновляем текст в кольцах
+    updateRingTexts();
+}
+
+function drawRing(canvasId, current, target, color1, color2) {
     let canvas = document.getElementById(canvasId);
     if(!canvas) return;
     let ctx = canvas.getContext('2d');
     let w = canvas.width, h = canvas.height;
     let centerX = w/2, centerY = h/2;
-    let radius = Math.min(w,h)/2 - 6;
+    let radius = Math.min(w,h)/2 - 8;
     let lineWidth = 8;
     
     ctx.clearRect(0, 0, w, h);
@@ -1686,7 +1880,12 @@ function drawRing(canvasId, current, target, color1, color2, unit) {
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, start, end);
     
-    let gradient = ctx.createConicGradient(start, centerX, centerY);
+    let gradient;
+    try {
+        gradient = ctx.createConicGradient(start, centerX, centerY);
+    } catch(e) {
+        gradient = ctx.createLinearGradient(0, 0, w, h);
+    }
     gradient.addColorStop(0, color1);
     gradient.addColorStop(1, color2);
     
@@ -1694,15 +1893,9 @@ function drawRing(canvasId, current, target, color1, color2, unit) {
     ctx.lineWidth = lineWidth;
     ctx.lineCap = 'round';
     ctx.stroke();
-    
-    // Свечение
-    ctx.shadowColor = color1;
-    ctx.shadowBlur = 12;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
 }
 
-function drawWaterRing() {
+function drawWaterRingAnimated(current) {
     let canvas = document.getElementById('waterRingCanvas');
     if(!canvas) return;
     let ctx = canvas.getContext('2d');
@@ -1721,14 +1914,19 @@ function drawWaterRing() {
     ctx.stroke();
     
     // Прогресс
-    let pct = Math.min(waterAmount / dailyTargets.water, 1);
+    let pct = Math.min(current / dailyTargets.water, 1);
     let start = -0.5 * Math.PI;
     let end = start + (2 * Math.PI * pct);
     
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, start, end);
     
-    let gradient = ctx.createConicGradient(start, centerX, centerY);
+    let gradient;
+    try {
+        gradient = ctx.createConicGradient(start, centerX, centerY);
+    } catch(e) {
+        gradient = ctx.createLinearGradient(0, 0, w, h);
+    }
     gradient.addColorStop(0, '#00F2FE');
     gradient.addColorStop(1, '#4FACFE');
     
@@ -1736,72 +1934,231 @@ function drawWaterRing() {
     ctx.lineWidth = lineWidth;
     ctx.lineCap = 'round';
     ctx.stroke();
+}
+
+function updateRingTexts() {
+    let c = currentRingValues;
     
-    ctx.shadowColor = '#00F2FE';
-    ctx.shadowBlur = 15;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
+    // Ккал
+    let kcalRing = document.querySelector('#ringKcal')?.parentElement?.querySelector('.ring-value');
+    if (kcalRing) {
+        if (ringDisplayMode.kcal === 'value') {
+            kcalRing.textContent = Math.round(c.kcal);
+        } else {
+            let pct = Math.min((c.kcal / dailyTargets.kcal) * 100, 100);
+            kcalRing.textContent = Math.round(pct) + '%';
+        }
+    }
+    
+    // Белки
+    let protRing = document.querySelector('#ringProtein')?.parentElement?.querySelector('.ring-value');
+    if (protRing) {
+        if (ringDisplayMode.protein === 'value') {
+            protRing.textContent = Math.round(c.protein);
+        } else {
+            let pct = Math.min((c.protein / dailyTargets.protein) * 100, 100);
+            protRing.textContent = Math.round(pct) + '%';
+        }
+    }
+    
+    // Жиры
+    let fatRing = document.querySelector('#ringFat')?.parentElement?.querySelector('.ring-value');
+    if (fatRing) {
+        if (ringDisplayMode.fat === 'value') {
+            fatRing.textContent = Math.round(c.fat);
+        } else {
+            let pct = Math.min((c.fat / dailyTargets.fat) * 100, 100);
+            fatRing.textContent = Math.round(pct) + '%';
+        }
+    }
+    
+    // Углеводы
+    let carbRing = document.querySelector('#ringCarbs')?.parentElement?.querySelector('.ring-value');
+    if (carbRing) {
+        if (ringDisplayMode.carbs === 'value') {
+            carbRing.textContent = Math.round(c.carbs);
+        } else {
+            let pct = Math.min((c.carbs / dailyTargets.carbs) * 100, 100);
+            carbRing.textContent = Math.round(pct) + '%';
+        }
+    }
+}
+
+function toggleRingDisplay(type) {
+    if (ringDisplayMode[type] === 'value') {
+        ringDisplayMode[type] = 'percent';
+    } else {
+        ringDisplayMode[type] = 'value';
+    }
+    
+    updateRingTexts();
+    
+    if (ringTimeouts[type]) clearTimeout(ringTimeouts[type]);
+    ringTimeouts[type] = setTimeout(() => {
+        ringDisplayMode[type] = 'value';
+        updateRingTexts();
+    }, 2000);
 }
 
 function renderProgressBars() {
     let c={kcal:0,protein:0,fat:0,carbs:0}; 
     todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
     
+    // Инициализируем текущие значения
+    currentRingValues = { kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs, water: waterAmount };
+    targetRingValues = { ...currentRingValues };
+    
     let cont=document.getElementById('progressBars');
     let html = `
         <div class="rings-container">
-            <div class="ring-item">
+            <div class="ring-item" onclick="toggleRingDisplay('kcal')">
                 <div class="ring-canvas-container">
                     <canvas id="ringKcal" class="ring-canvas" width="100" height="100"></canvas>
                     <div class="ring-value">${Math.round(c.kcal)}</div>
                 </div>
-                <div class="ring-label">🔥 ${i18n('calories')}</div>
+                <div class="ring-label">${i18n('calories')}</div>
                 <div class="ring-target">/${dailyTargets.kcal} ${i18n('kcal')}</div>
             </div>
-            <div class="ring-item">
+            <div class="ring-item" onclick="toggleRingDisplay('protein')">
                 <div class="ring-canvas-container">
                     <canvas id="ringProtein" class="ring-canvas" width="100" height="100"></canvas>
                     <div class="ring-value">${Math.round(c.protein)}</div>
                 </div>
-                <div class="ring-label">🥩 ${i18n('protein')}</div>
+                <div class="ring-label">${i18n('protein')}</div>
                 <div class="ring-target">/${dailyTargets.protein} ${i18n('g')}</div>
             </div>
-            <div class="ring-item">
+            <div class="ring-item" onclick="toggleRingDisplay('fat')">
                 <div class="ring-canvas-container">
                     <canvas id="ringFat" class="ring-canvas" width="100" height="100"></canvas>
                     <div class="ring-value">${Math.round(c.fat)}</div>
                 </div>
-                <div class="ring-label">🥑 ${i18n('fat')}</div>
+                <div class="ring-label">${i18n('fat')}</div>
                 <div class="ring-target">/${dailyTargets.fat} ${i18n('g')}</div>
             </div>
-            <div class="ring-item">
+            <div class="ring-item" onclick="toggleRingDisplay('carbs')">
                 <div class="ring-canvas-container">
                     <canvas id="ringCarbs" class="ring-canvas" width="100" height="100"></canvas>
                     <div class="ring-value">${Math.round(c.carbs)}</div>
                 </div>
-                <div class="ring-label">🍚 ${i18n('carbs')}</div>
+                <div class="ring-label">${i18n('carbs')}</div>
                 <div class="ring-target">/${dailyTargets.carbs} ${i18n('g')}</div>
             </div>
         </div>
     `;
     cont.innerHTML = html;
     
-    // Рисуем кольца
     requestAnimationFrame(() => {
-        drawRing('ringKcal', c.kcal, dailyTargets.kcal, '#FF6B6B', '#FF8E53', i18n('kcal'));
-        drawRing('ringProtein', c.protein, dailyTargets.protein, '#4FACFE', '#00F2FE', i18n('g'));
-        drawRing('ringFat', c.fat, dailyTargets.fat, '#FFD93D', '#FFB347', i18n('g'));
-        drawRing('ringCarbs', c.carbs, dailyTargets.carbs, '#6BCB77', '#9B59B6', i18n('g'));
-        drawWaterRing();
+        drawAllRings();
     });
+}
+
+// ========== СВАЙП ==========
+function initSwipe() {
+    const container = document.getElementById('swipeContainer');
+    const wrapper = document.getElementById('swipeWrapper');
+    
+    if (!container || !wrapper) return;
+    
+    container.addEventListener('touchstart', handleSwipeStart, { passive: true });
+    container.addEventListener('touchmove', handleSwipeMove, { passive: false });
+    container.addEventListener('touchend', handleSwipeEnd);
+    
+    updateSwipePosition(0);
+}
+
+function handleSwipeStart(e) {
+    swipeStartX = e.touches[0].clientX;
+    isSwiping = true;
+}
+
+function handleSwipeMove(e) {
+    if (!isSwiping) return;
+    
+    swipeCurrentX = e.touches[0].clientX;
+    const diff = swipeCurrentX - swipeStartX;
+    const wrapper = document.getElementById('swipeWrapper');
+    
+    if (Math.abs(diff) > 10) {
+        e.preventDefault();
+    }
+    
+    const containerWidth = document.getElementById('swipeContainer').offsetWidth;
+    const currentOffset = -currentPage * containerWidth;
+    const dragOffset = Math.max(-containerWidth * 2, Math.min(0, currentOffset + diff));
+    
+    wrapper.style.transition = 'none';
+    wrapper.style.transform = `translateX(${dragOffset}px)`;
+}
+
+function handleSwipeEnd(e) {
+    if (!isSwiping) return;
+    isSwiping = false;
+    
+    const diff = swipeCurrentX - swipeStartX;
+    const wrapper = document.getElementById('swipeWrapper');
+    wrapper.style.transition = '';
+    
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0 && currentPage > 0) {
+            currentPage--;
+        } else if (diff < 0 && currentPage < 2) {
+            currentPage++;
+        }
+    }
+    
+    updateSwipePosition(currentPage);
+    updateTabsFromSwipe(currentPage);
+}
+
+function updateSwipePosition(page) {
+    const wrapper = document.getElementById('swipeWrapper');
+    const container = document.getElementById('swipeContainer');
+    if (wrapper && container) {
+        const offset = -page * container.offsetWidth;
+        wrapper.style.transform = `translateX(${offset}px)`;
+    }
+    
+    // Обновляем индикатор
+    document.querySelectorAll('.swipe-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === page);
+    });
+    
+    currentPage = page;
+}
+
+function updateTabsFromSwipe(page) {
+    const tabs = ['today', 'activity', 'weight'];
+    const activeTab = tabs[page];
+    
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === activeTab);
+    });
+    
+    // Показываем соответствующую страницу
+    document.getElementById('todayPage').classList.toggle('active', page === 0);
+    document.getElementById('activityPage').classList.toggle('active', page === 1);
+    document.getElementById('weightPage').classList.toggle('active', page === 2);
+    
+    if (page === 2) {
+        updateWeightStatsAndList();
+        renderWeightChart();
+        updateBMI();
+    }
+    if (page === 1 && currentProfile) {
+        updateActivityUI();
+    }
 }
 
 function switchTab(tab, ev) {
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
     if(ev&&ev.currentTarget) ev.currentTarget.classList.add('active');
-    document.getElementById('todayPage').classList.toggle('active', tab==='today');
-    document.getElementById('activityPage').classList.toggle('active', tab==='activity');
-    document.getElementById('weightPage').classList.toggle('active', tab==='weight');
+    
+    const pageMap = { 'today': 0, 'activity': 1, 'weight': 2 };
+    const page = pageMap[tab] || 0;
+    
+    currentPage = page;
+    updateSwipePosition(page);
+    
     if(tab==='weight'){ updateWeightStatsAndList(); renderWeightChart(); updateBMI(); }
     if(tab==='activity'&&currentProfile){ updateActivityUI(); }
 }
@@ -1814,6 +2171,8 @@ function showPage(pageId) {
     if(pageId==='mainPage'){
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         document.querySelector('.tab:first-child')?.classList.add('active');
+        currentPage = 0;
+        updateSwipePosition(0);
         document.getElementById('todayPage').classList.add('active');
         document.getElementById('activityPage').classList.remove('active');
         document.getElementById('weightPage').classList.remove('active');
@@ -1904,6 +2263,8 @@ window.deleteProduct=deleteProduct;
 window.exportData=exportData;
 window.importData=importData;
 window.showBMITooltip=showBMITooltip;
+window.toggleRingDisplay=toggleRingDisplay;
+window.toggleWaterDisplay=toggleWaterDisplay;
 
 window.onload = function() {
     let sl = localStorage.getItem('fitcat_lang')||'ru'; setLanguage(sl);
@@ -1926,6 +2287,7 @@ window.onload = function() {
         document.getElementById('mainPage').style.display='block';
         calculateTargets(); renderDashboard(); renderTemplates(); checkDateReset(); 
         updateGreeting(); updateActivityUI(); updateWaterHint(); updateHeaderPhoto(); updateBMI(); updateWaterDisplay();
+        initSwipe();
     }
     updateStreak();
     
