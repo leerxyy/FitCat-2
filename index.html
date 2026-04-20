@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
 <title>FitCat</title>
 <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;FitCat&quot;,&quot;short_name&quot;:&quot;FitCat&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0D1117&quot;,&quot;theme_color&quot;:&quot;#0D1117&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230D1117'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%234FACFE'%3E🐱%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;100x100&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,743 +19,355 @@ body {
     background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #E6EDF3; padding: 16px 12px 40px; min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    position: relative;
-    overflow-x: hidden;
+    touch-action: pan-y;
 }
 
-/* ========== УСИЛЕННЫЙ ГРАДИЕНТНЫЙ ФОН С ЧАСТИЦАМИ ========== */
 body::before {
     content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 30%, #16213E 50%, #1A1B2F 70%, #0D1117 100%);
-    z-index: -2; animation: bgPulse 12s ease-in-out infinite;
-    background-size: 300% 300%;
+    background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 50%, #16213E 100%);
+    z-index: -1; animation: bgPulse 8s ease-in-out infinite;
+    background-size: 200% 200%;
 }
 
-body::after {
-    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background-image: 
-        radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 30%),
-        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 30%),
-        radial-gradient(circle at 40% 40%, rgba(0, 242, 254, 0.06) 0%, transparent 25%),
-        radial-gradient(circle at 90% 70%, rgba(255, 107, 107, 0.06) 0%, transparent 25%),
-        radial-gradient(circle at 10% 30%, rgba(107, 203, 119, 0.06) 0%, transparent 25%);
-    z-index: -1; animation: particleFloat 20s ease-in-out infinite;
-    pointer-events: none;
-}
+@keyframes bgPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-@keyframes bgPulse { 
-    0% { background-position: 0% 50%; } 
-    50% { background-position: 100% 50%; } 
-    100% { background-position: 0% 50%; } 
-}
+.app { max-width: 480px; margin: 0 auto; animation: fadeIn 0.5s ease-out; }
 
-@keyframes particleFloat {
-    0%, 100% { opacity: 0.6; transform: scale(1) translate(0, 0); }
-    33% { opacity: 1; transform: scale(1.1) translate(-1%, -1%); }
-    66% { opacity: 0.8; transform: scale(0.95) translate(1%, 1%); }
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ========== GLASSMORPHISM БАЗА ========== */
-.app { 
-    max-width: 480px; margin: 0 auto; 
-    animation: slideInFromBottom 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-@keyframes slideInFromBottom { 
-    from { opacity: 0; transform: translateY(30px); } 
-    to { opacity: 1; transform: translateY(0); } 
-}
-
-/* СВАЙП-КОНТЕЙНЕР */
-.swipe-container {
-    position: relative;
-    overflow: visible;
-    touch-action: pan-y pinch-zoom;
-    min-height: 500px;
-}
-
-.swipe-wrapper {
-    display: flex;
-    transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
-    will-change: transform;
-}
-
-.swipe-page {
-    flex: 0 0 100%;
-    width: 100%;
-    padding-bottom: 8px;
-}
-
-.page {
-    animation: pageEnter 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
-}
-
-@keyframes pageEnter {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-.header-row { 
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 28px; width: 100%; 
-}
+.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; width: 100%; }
 
 .greeting-wrapper { position: relative; height: 48px; min-width: 180px; overflow: visible; }
 
 .greeting-slide {
     position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center;
-    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.4s ease; 
-    opacity: 1; transform: translateY(0);
+    transition: transform 0.4s ease, opacity 0.3s ease; opacity: 1; transform: translateY(0);
 }
 
 .greeting-slide h1 {
-    font-size: 28px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word;
-    background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 40%, #A855F7 70%, #FF6B6B 100%);
+    font-size: 26px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word;
+    background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #A855F7 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; background-size: 300% 100%; 
-    animation: textShimmer 5s ease-in-out infinite;
-    text-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+    background-clip: text; background-size: 200% 100%; animation: textShimmer 4s ease-in-out infinite;
 }
 
-@keyframes textShimmer { 
-    0% { background-position: 0% 50%; } 
-    50% { background-position: 100% 50%; } 
-    100% { background-position: 0% 50%; } 
-}
+@keyframes textShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
 .greeting-slide.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 .greeting-slide.next { transform: translateY(100%); opacity: 0; }
 .greeting-slide.next.visible { transform: translateY(0); opacity: 1; }
 
-.header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-/* ========== КАРТОЧКИ GLASS - ФИКС ТЕНЕЙ ========== */
+h2 { font-size: 18px; font-weight: 600; color: #9CA3AF; margin-bottom: 16px; letter-spacing: -0.3px; }
+
 .card {
-    background: rgba(22, 27, 34, 0.35); 
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(79, 172, 254, 0.15); 
-    border-radius: 32px; 
-    padding: 22px 20px; 
-    margin-bottom: 20px;
-    box-shadow: 
-        0 20px 40px -10px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(79, 172, 254, 0.05) inset,
-        0 0 30px rgba(79, 172, 254, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    animation: cardGlow 3s ease-in-out infinite alternate;
-    overflow: visible;
+    background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 20px 18px; margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-@keyframes cardGlow {
-    from { 
-        box-shadow: 
-            0 20px 40px -10px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(79, 172, 254, 0.05) inset,
-            0 0 20px rgba(79, 172, 254, 0.08); 
-    }
-    to { 
-        box-shadow: 
-            0 20px 40px -10px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(79, 172, 254, 0.15) inset,
-            0 0 35px rgba(168, 85, 247, 0.12); 
-    }
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(79, 172, 254, 0.3);
-}
-
-.card-header { 
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 12px; cursor: pointer; 
-}
-
-h2 { 
-    font-size: 18px; font-weight: 600; color: #E6EDF3; 
-    letter-spacing: -0.3px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    margin-bottom: 16px;
-}
-
-.card-content { transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1); overflow: hidden; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
+.card-header h2 { margin: 0; }
+.card-content { transition: all 0.3s; overflow: hidden; }
 .card-content.collapsed { display: none; }
 
-/* ========== ФОРМЫ GLASS ========== */
 .input-group { margin-bottom: 18px; position: relative; }
 
-label { 
-    display: block; font-size: 13px; font-weight: 500; color: #B0B8C1; 
-    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; 
-}
+label { display: block; font-size: 13px; font-weight: 500; color: #9CA3AF; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 input, select {
-    width: 100%; background: rgba(1, 4, 9, 0.4); 
-    border: 1.5px solid rgba(48, 54, 61, 0.5); 
-    border-radius: 20px;
-    padding: 14px 18px; font-size: 16px; color: #E6EDF3; outline: none; 
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
-    -webkit-appearance: none; font-family: inherit; 
-    backdrop-filter: blur(10px);
+    width: 100%; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px;
+    padding: 14px 16px; font-size: 16px; color: #E6EDF3; outline: none; transition: all 0.25s ease;
+    -webkit-appearance: none; font-family: inherit; backdrop-filter: blur(5px);
 }
 
-input:focus { 
-    border-color: #4FACFE; 
-    box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.15), 0 0 20px rgba(79, 172, 254, 0.3); 
-    background: rgba(1, 4, 9, 0.6);
-    transform: scale(1.01);
-}
-
+input:focus { border-color: #4FACFE; box-shadow: 0 0 0 3px rgba(79,172,254,0.2); }
 input::placeholder { color: #6B7280; opacity: 0.7; }
 input[type="date"] { color-scheme: dark; }
 
-.segmented-control { 
-    display: flex; background: rgba(1, 4, 9, 0.5); 
-    border: 1.5px solid rgba(48, 54, 61, 0.4); 
-    border-radius: 20px; padding: 4px; 
-    backdrop-filter: blur(10px);
-}
-
+.segmented-control { display: flex; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px; padding: 4px; }
 .segmented-option {
-    flex: 1; text-align: center; padding: 12px; border-radius: 16px;
-    font-size: 15px; font-weight: 600; color: #9CA3AF; cursor: pointer; 
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 500;
+    color: #9CA3AF; cursor: pointer; transition: all 0.2s ease;
 }
+.segmented-option.active { background: #4FACFE; color: #0D1117; }
 
-.segmented-option.active { 
-    background: linear-gradient(135deg, #4FACFE, #A855F7); 
-    color: #fff; 
-    box-shadow: 0 6px 15px rgba(79, 172, 254, 0.4);
-    transform: scale(1.02);
-}
-
-/* ========== КНОПКИ GLASS ========== */
 .btn-primary, .btn-secondary, .btn-small, .water-btn {
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
     -webkit-tap-highlight-color: transparent;
-    cursor: pointer;
 }
-
-.btn-primary:active, .btn-secondary:active, .btn-small:active, .water-btn:active { 
-    transform: scale(0.96); 
-}
+.btn-primary:active, .btn-secondary:active, .btn-small:active, .water-btn:active { transform: scale(0.98); }
 
 .btn-primary {
-    width: 100%; border: none; border-radius: 60px; padding: 18px 24px; 
-    font-size: 17px; font-weight: 700;
-    cursor: pointer; margin-bottom: 10px; -webkit-appearance: none;
-    text-align: center;
-    background: rgba(26, 32, 39, 0.7); 
-    color: #E6EDF3; 
-    position: relative; z-index: 1; 
-    border: 1.5px solid transparent; 
-    background-clip: padding-box;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; text-align: center;
+    background: #1A2027; color: #E6EDF3; position: relative; z-index: 1;
+    border: 2px solid transparent; background-clip: padding-box;
 }
-
 .btn-primary::before {
     content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
-    background: linear-gradient(135deg, #00F2FE, #4FACFE, #A855F7, #FF6B6B, #00F2FE);
-    background-size: 400% 100%; border-radius: 60px; z-index: -1; 
-    animation: borderShimmer 5s linear infinite;
-    opacity: 0.8;
+    background: linear-gradient(90deg, #00F2FE, #4FACFE, #A855F7, #00F2FE);
+    background-size: 300% 100%; border-radius: 40px; z-index: -1; animation: borderShimmer 4s linear infinite;
 }
-
-@keyframes borderShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 400% 50%; } }
-
-.btn-primary:hover { 
-    transform: scale(1.02); 
-    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4), 0 0 0 1px rgba(79, 172, 254, 0.3) inset;
-}
+@keyframes borderShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+.btn-primary:hover { transform: scale(1.01); box-shadow: 0 0 25px rgba(79,172,254,0.3); }
 
 .btn-secondary {
-    width: 100%; border: none; border-radius: 60px; padding: 18px 24px; 
-    font-size: 17px; font-weight: 700;
-    cursor: pointer; margin-bottom: 10px; 
-    background: transparent; 
-    border: 1.5px solid rgba(48, 54, 61, 0.6); 
-    color: #E6EDF3;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-    border-color: rgba(79, 172, 254, 0.5);
-    background: rgba(79, 172, 254, 0.05);
+    width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px; background: transparent; border: 1px solid #30363D; color: #E6EDF3;
 }
 
 .btn-small {
-    background: rgba(26, 32, 39, 0.6); 
-    border: 1.5px solid rgba(48, 54, 61, 0.5);
-    border-radius: 40px;
-    padding: 12px 18px; font-size: 14px; color: #E6EDF3; cursor: pointer; 
-    backdrop-filter: blur(10px);
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-small:hover {
-    background: rgba(79, 172, 254, 0.15);
-    border-color: rgba(79, 172, 254, 0.4);
+    background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+    padding: 10px 16px; font-size: 14px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
 }
 
 .lang-btn { flex: 1; }
-.lang-btn.active { 
-    background: linear-gradient(135deg, #4FACFE, #A855F7); 
-    border-color: transparent; 
-    color: white; 
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+.lang-btn.active { background: #4FACFE; border-color: #4FACFE; color: #0D1117; }
+.btn-danger { background: transparent; border: 1px solid #F85149; color: #F85149; }
+
+.water-buttons { display: flex; gap: 8px; margin: 12px 0; }
+.water-btn {
+    flex: 1; background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+    padding: 10px; font-size: 16px; font-weight: 600; color: #E6EDF3; cursor: pointer; text-align: center;
 }
+.water-manual { display: flex; gap: 8px; margin-top: 8px; }
+.water-manual input { flex: 2; }
+.water-manual button { flex: 1; }
 
-.btn-danger { background: transparent; border: 1.5px solid rgba(248, 81, 73, 0.5); color: #F85149; }
-.btn-danger:hover { background: rgba(248, 81, 73, 0.1); border-color: #F85149; }
-
-/* ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ ========== */
+/* Круги */
 .rings-container {
-    display: flex; flex-wrap: wrap; justify-content: space-around; 
-    gap: 16px; margin-bottom: 8px;
+    display: flex; flex-wrap: wrap; justify-content: space-around; gap: 16px; margin-bottom: 8px;
 }
-
 .ring-item {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100px;
-    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; width: 100px; cursor: pointer;
 }
-
 .ring-canvas-container {
     position: relative; width: 100px; height: 100px;
 }
-
 .ring-canvas {
     width: 100%; height: 100%;
-    transition: filter 0.3s ease;
-    animation: ringGlowIdle 3s ease-in-out infinite;
 }
-
-@keyframes ringGlowIdle {
-    0%, 100% { 
-        filter: drop-shadow(0 0 6px rgba(79, 172, 254, 0.2)) 
-                drop-shadow(0 0 12px rgba(168, 85, 247, 0.1));
-    }
-    50% { 
-        filter: drop-shadow(0 0 10px rgba(79, 172, 254, 0.4)) 
-                drop-shadow(0 0 20px rgba(168, 85, 247, 0.2));
-    }
-}
-
-#ringKcal { animation: ringGlowKcal 3s ease-in-out infinite; }
-#ringProtein { animation: ringGlowProtein 3.2s ease-in-out infinite; }
-#ringFat { animation: ringGlowFat 2.8s ease-in-out infinite; }
-#ringCarbs { animation: ringGlowCarbs 3.4s ease-in-out infinite; }
-
-@keyframes ringGlowKcal {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 107, 107, 0.3)) drop-shadow(0 0 12px rgba(255, 142, 83, 0.15)); }
-    50% { filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.5)) drop-shadow(0 0 20px rgba(255, 142, 83, 0.25)); }
-}
-
-@keyframes ringGlowProtein {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(79, 172, 254, 0.3)) drop-shadow(0 0 12px rgba(0, 242, 254, 0.15)); }
-    50% { filter: drop-shadow(0 0 12px rgba(79, 172, 254, 0.5)) drop-shadow(0 0 20px rgba(0, 242, 254, 0.25)); }
-}
-
-@keyframes ringGlowFat {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 217, 61, 0.3)) drop-shadow(0 0 12px rgba(255, 179, 71, 0.15)); }
-    50% { filter: drop-shadow(0 0 12px rgba(255, 217, 61, 0.5)) drop-shadow(0 0 20px rgba(255, 179, 71, 0.25)); }
-}
-
-@keyframes ringGlowCarbs {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(107, 203, 119, 0.3)) drop-shadow(0 0 12px rgba(155, 89, 182, 0.15)); }
-    50% { filter: drop-shadow(0 0 12px rgba(107, 203, 119, 0.5)) drop-shadow(0 0 20px rgba(155, 89, 182, 0.25)); }
-}
-
 .ring-value {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     font-size: 18px; font-weight: 700; color: #E6EDF3; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
     transition: opacity 0.2s ease;
 }
-
 .ring-label {
     margin-top: 8px; font-size: 13px; font-weight: 600; color: #B0B8C1;
     text-transform: uppercase; letter-spacing: 0.5px;
 }
-
 .ring-target {
     font-size: 11px; color: #6B7280; margin-top: 2px;
 }
 
-/* Водный прогресс - ФИКС ОБРЕЗАНИЯ */
-.water-ring-container {
-    display: flex; justify-content: center; margin: 8px 0;
-    padding: 8px 0;
-}
-
-.water-ring {
-    position: relative; width: 150px; height: 150px; margin: 0 auto;
-    cursor: pointer;
-}
-
-.water-ring-canvas {
-    width: 100%; height: 100%;
-    animation: waterRingGlow 3s ease-in-out infinite;
-}
-
-@keyframes waterRingGlow {
-    0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.3)) drop-shadow(0 0 15px rgba(79, 172, 254, 0.15)); }
-    50% { filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.5)) drop-shadow(0 0 25px rgba(79, 172, 254, 0.25)); }
-}
-
-.water-ring-value {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.water-ring-current {
-    font-size: 32px; font-weight: 800; 
-    background: linear-gradient(135deg, #00F2FE, #4FACFE);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.2;
-    transition: opacity 0.2s ease;
-}
-
-.water-ring-goal {
-    font-size: 14px; color: #9CA3AF;
-}
-
-/* ========== ВОДА ========== */
-.water-buttons { display: flex; gap: 10px; margin: 16px 0; }
-
-.water-btn {
-    flex: 1; background: rgba(26, 32, 39, 0.6); 
-    border: 1.5px solid rgba(48, 54, 61, 0.5);
-    border-radius: 40px;
-    padding: 12px; font-size: 16px; font-weight: 600; color: #E6EDF3; 
-    cursor: pointer; text-align: center;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.water-btn:hover {
-    background: rgba(0, 242, 254, 0.1);
-    border-color: rgba(0, 242, 254, 0.3);
-    transform: scale(1.02);
-}
-
-.water-manual { display: flex; gap: 10px; margin-top: 12px; }
-.water-manual input { flex: 2; }
-.water-manual button { flex: 1; }
-
-/* ========== ТАБЫ ========== */
-.tabs { 
-    display: flex; gap: 8px; margin-bottom: 16px; 
-    background: rgba(22, 27, 34, 0.3);
-    backdrop-filter: blur(15px);
-    border-radius: 60px;
-    padding: 6px;
-    border: 1px solid rgba(79, 172, 254, 0.1);
-}
-
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .tab {
-    flex: 1; text-align: center; padding: 14px; 
-    background: transparent;
-    border-radius: 60px; cursor: pointer; font-weight: 600; color: #9CA3AF; 
-    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
-    font-size: 15px;
+    flex: 1; text-align: center; padding: 12px; background: rgba(33, 38, 45, 0.6);
+    border-radius: 20px; cursor: pointer; font-weight: 600; color: #9CA3AF; transition: all 0.2s ease;
+}
+.tab.active { background: #4FACFE; color: #0D1117; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* Свайп-контейнер */
+.swipe-container {
+    position: relative; overflow: hidden; touch-action: pan-y; min-height: 500px;
+}
+.swipe-wrapper {
+    display: flex; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); will-change: transform;
+}
+.swipe-page {
+    flex: 0 0 100%; width: 100%;
 }
 
-.tab.active { 
-    background: linear-gradient(135deg, #4FACFE, #A855F7); 
-    color: #fff; 
-    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
-    transform: scale(1.02);
-}
-
-/* Свайп-индикатор - ФИКС ОТСТУПОВ */
+/* Свайп-индикатор */
 .swipe-indicator {
-    display: flex; justify-content: center; gap: 8px;
-    margin-top: 4px; margin-bottom: 12px;
-    padding: 4px 0;
+    display: flex; justify-content: center; gap: 6px; margin-top: 4px; margin-bottom: 8px;
 }
-
 .swipe-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: rgba(79, 172, 254, 0.3);
+    width: 6px; height: 6px; border-radius: 50%; background: rgba(79, 172, 254, 0.3);
     transition: all 0.3s ease;
 }
-
 .swipe-dot.active {
-    width: 24px; border-radius: 10px;
-    background: #4FACFE;
-    box-shadow: 0 0 12px rgba(79, 172, 254, 0.6);
+    width: 20px; border-radius: 10px; background: #4FACFE;
 }
 
-/* ========== СПИСОК ЕДЫ ========== */
 .food-list { margin: 16px 0; }
-
 .food-item {
-    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
-    background: rgba(1, 4, 9, 0.3); 
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(79, 172, 254, 0.1);
-    border-radius: 24px; margin-bottom: 8px;
-    transition: all 0.3s ease;
+    display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5);
+    border-radius: 16px; margin-bottom: 8px;
 }
-
-.food-item:hover {
-    background: rgba(79, 172, 254, 0.08);
-    border-color: rgba(79, 172, 254, 0.2);
-}
-
 .food-toggle {
-    width: 30px; height: 30px; border-radius: 50%; 
-    border: 2px solid #4FACFE; background: transparent;
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s ease;
 }
-
-.food-toggle.checked { 
-    background: linear-gradient(135deg, #4FACFE, #A855F7); 
-    border-color: transparent; 
-}
-.food-toggle.checked::after { content: '✓'; color: #fff; font-size: 16px; font-weight: bold; }
-
+.food-toggle.checked { background: #4FACFE; border-color: #4FACFE; }
+.food-toggle.checked::after { content: '✓'; color: #0D1117; font-size: 16px; font-weight: bold; }
 .food-info { flex: 1; }
-.food-name { font-weight: 600; }
+.food-name { font-weight: 500; }
 .food-macros { font-size: 12px; color: #9CA3AF; }
+.food-delete { color: #F85149; cursor: pointer; padding: 8px; font-size: 18px; }
 
-.food-delete { 
-    color: #F85149; cursor: pointer; padding: 10px; font-size: 18px; 
-    opacity: 0.7; transition: opacity 0.2s;
-}
-.food-delete:hover { opacity: 1; }
-
-/* ========== ШАБЛОНЫ ========== */
-.templates-bar { 
-    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; 
-    min-height: 44px; 
-}
-
+.templates-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; min-height: 40px; }
 .template-btn {
-    background: rgba(26, 32, 39, 0.6); 
-    border: 1.5px solid rgba(48, 54, 61, 0.4);
-    border-radius: 40px;
-    padding: 10px 18px; font-size: 14px; color: #E6EDF3; cursor: pointer; 
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px;
+    padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
 }
 
-.template-btn:hover {
-    background: rgba(79, 172, 254, 0.15);
-    border-color: rgba(79, 172, 254, 0.3);
-}
-
-/* ========== ПРОФИЛЬ ========== */
 .profile-photo {
-    width: 110px; height: 110px; border-radius: 50%; 
-    background: linear-gradient(135deg, #1A2027, #0D1117); 
-    border: 3px solid #4FACFE;
-    margin: 0 auto 12px; cursor: pointer; overflow: hidden; display: flex;
-    align-items: center; justify-content: center;
-    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+    width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE;
+    margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center;
 }
-
 .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
-.profile-initials { font-size: 44px; font-weight: 600; color: #E6EDF3; line-height: 1; }
+.profile-initials { font-size: 40px; font-weight: 600; color: #E6EDF3; line-height: 1; }
 
 .header-photo {
-    width: 52px; height: 52px; border-radius: 50%; 
-    background: linear-gradient(135deg, #1A2027, #0D1117);
-    border: 2.5px solid #4FACFE;
-    cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; 
-    flex-shrink: 0;
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE;
+    cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-
 .header-photo img { width: 100%; height: 100%; object-fit: cover; }
-.header-initials { font-size: 22px; font-weight: 600; color: #E6EDF3; line-height: 1; }
+.header-initials { font-size: 20px; font-weight: 600; color: #E6EDF3; line-height: 1; }
 
-/* ========== СТРИК ========== */
 .streak-emoji {
-    font-size: 30px; line-height: 1; display: inline-block; cursor: pointer;
-    transition: transform 0.3s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    font-size: 28px; line-height: 1; display: inline-block; cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1;
 }
 .streak-emoji.fade-in { opacity: 0; }
-.streak-emoji.none { filter: drop-shadow(0 0 12px #6B7280); }
-.streak-emoji.red { filter: drop-shadow(0 0 20px #FF4500); animation: glowPulse 2s infinite; }
-.streak-emoji.yellow { filter: drop-shadow(0 0 25px #FFD700); animation: glowPulse 1.6s infinite; }
-.streak-emoji.purple { filter: drop-shadow(0 0 30px #A855F7); animation: glowPulse 1.2s infinite; }
+.streak-emoji.none { filter: drop-shadow(0 0 8px #6B7280); }
+.streak-emoji.red { filter: drop-shadow(0 0 15px #FF4500); animation: glowPulse 2s infinite; }
+.streak-emoji.yellow { filter: drop-shadow(0 0 20px #FFD700); animation: glowPulse 1.6s infinite; }
+.streak-emoji.purple { filter: drop-shadow(0 0 25px #A855F7); animation: glowPulse 1.2s infinite; }
 .streak-emoji.rainbow { animation: rainbowGlow 3s linear infinite, glowPulse 1.5s infinite; }
 
-@keyframes glowPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+@keyframes glowPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
 @keyframes rainbowGlow {
-    0%{filter:drop-shadow(0 0 25px #F00)} 25%{filter:drop-shadow(0 0 25px #FF0)}
-    50%{filter:drop-shadow(0 0 25px #0FF)} 75%{filter:drop-shadow(0 0 25px #80F)}
-    100%{filter:drop-shadow(0 0 25px #F00)}
+    0%{filter:drop-shadow(0 0 20px #F00)} 25%{filter:drop-shadow(0 0 20px #FF0)}
+    50%{filter:drop-shadow(0 0 20px #0FF)} 75%{filter:drop-shadow(0 0 20px #80F)}
+    100%{filter:drop-shadow(0 0 20px #F00)}
 }
 
-/* ========== BMI ========== */
 .bmi-container { margin: 16px 0 8px; }
-.bmi-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-.bmi-value { font-size: 28px; font-weight: 700; }
-.bmi-category { font-size: 16px; font-weight: 500; color: #B0B8C1; }
-
-.bmi-scale { position: relative; height: 24px; margin: 12px 0; cursor: pointer; }
+.bmi-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.bmi-value { font-size: 24px; font-weight: 700; }
+.bmi-category { font-size: 16px; font-weight: 500; }
+.bmi-scale { position: relative; height: 24px; margin: 8px 0; cursor: pointer; }
 .bmi-gradient {
-    position: absolute; top: 0; left: 0; right: 0; height: 10px;
-    background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); 
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    position: absolute; top: 0; left: 0; right: 0; height: 8px;
+    background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px;
 }
 .bmi-marker {
-    position: absolute; top: -5px; width: 5px; height: 20px; background: white; 
-    border-radius: 4px;
-    transform: translateX(-50%); 
-    box-shadow: 0 0 20px rgba(255,255,255,0.6); 
-    transition: left 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+    position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px;
+    transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease;
 }
-.bmi-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #9CA3AF; }
+.bmi-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #9CA3AF; }
 .bmi-tooltip {
-    position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
-    background: rgba(26, 32, 39, 0.9); backdrop-filter: blur(15px);
-    border: 1.5px solid #4FACFE; border-radius: 20px; padding: 8px 16px;
-    font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.3s;
-    pointer-events: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027;
+    border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px;
+    white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none;
 }
 .bmi-scale:hover .bmi-tooltip { opacity: 1; }
 
-/* ========== АКТИВНОСТЬ ========== */
 .activity-daily-options { display: flex; flex-direction: column; gap: 12px; }
 .activity-daily-item {
-    background: rgba(1, 4, 9, 0.3); 
-    border: 1.5px solid rgba(48, 54, 61, 0.4);
-    border-radius: 24px;
-    padding: 18px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer;
-    backdrop-filter: blur(10px); transition: all 0.3s ease;
+    background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px;
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+    backdrop-filter: blur(5px); transition: all 0.2s ease;
 }
-.activity-daily-item.selected { 
-    border-color: #4FACFE; 
-    background: rgba(79, 172, 254, 0.12); 
-    box-shadow: 0 0 20px rgba(79, 172, 254, 0.2);
-}
+.activity-daily-item.selected { border-color: #4FACFE; background: rgba(79,172,254,0.1); }
 
-/* ========== ИСТОРИЯ ВЕСА ========== */
 .weight-history-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px;
-    background: rgba(1, 4, 9, 0.25); backdrop-filter: blur(8px);
-    border-radius: 20px; margin-bottom: 8px;
-    border: 1px solid rgba(79, 172, 254, 0.08);
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+    background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px;
 }
-.weight-history-date { font-size: 14px; color: #B0B8C1; }
-.weight-history-value { font-weight: 600; font-size: 17px; margin-right: auto; padding-left: 12px; }
-.weight-history-delete { color: #F85149; cursor: pointer; padding: 6px 12px; font-size: 18px; opacity: 0.7; }
-.weight-history-delete:hover { opacity: 1; }
+.weight-history-date { font-size: 14px; color: #9CA3AF; }
+.weight-history-value { font-weight: 600; font-size: 16px; margin-right: auto; padding-left: 8px; }
+.weight-history-delete { color: #F85149; cursor: pointer; padding: 4px 8px; font-size: 16px; }
 
-/* ========== СЛАЙДЕРЫ ========== */
 .slider-container { padding: 20px 0; }
-.slider-labels { display: flex; justify-content: space-between; margin-bottom: 16px; color: #9CA3AF; font-size: 12px; }
+.slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; color: #9CA3AF; font-size: 12px; }
 .slider-wrapper { position: relative; height: 40px; margin-top: 4px; }
 .slider-gradient {
-    position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 8px; 
-    transform: translateY(-50%);
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%);
 }
 .temp-gradient { background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); }
 .steps-gradient { background: linear-gradient(to right, #6BCB77, #4D96FF, #9B59B6); }
 .search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
-
 .slider-ticks {
     position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between;
     transform: translateY(-50%); pointer-events: none; padding: 0 2px;
 }
 .tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
-
 input[type=range] {
     position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%);
     background: transparent; z-index: 2; -webkit-appearance: none;
 }
 input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 28px; height: 28px; 
-    background: white; border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 0 4px rgba(79, 172, 254, 0.3); 
-    border: 2px solid #4FACFE; cursor: pointer;
-    transition: transform 0.2s ease;
+    -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer;
 }
-input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.slider-value { text-align: center; margin-top: 16px; font-size: 18px; font-weight: 600; }
 
-.slider-value { text-align: center; margin-top: 20px; font-size: 18px; font-weight: 600; }
-
-/* ========== АВТОКОМПЛИТ ========== */
-.autocomplete-list {
-    position: absolute; top: 100%; left: 0; right: 0; 
-    background: rgba(26, 32, 39, 0.95); backdrop-filter: blur(20px);
-    border: 1.5px solid rgba(79, 172, 254, 0.3);
-    border-radius: 24px; margin-top: 8px; max-height: 260px; overflow-y: auto; 
-    z-index: 200; display: none;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-}
-.autocomplete-item {
-    padding: 14px 18px; cursor: pointer; 
-    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
-    display: flex; justify-content: space-between; align-items: center;
-    transition: background 0.2s;
-}
-.autocomplete-item:hover { background: rgba(79, 172, 254, 0.15); }
-.autocomplete-item .off-name { font-weight: 600; }
-.autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
-
-/* ========== SWITCH ========== */
-.apple-switch { position: relative; display: inline-block; width: 55px; height: 31px; }
-.apple-switch input { opacity: 0; width: 0; height: 0; }
-.apple-switch .slider {
-    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(48, 54, 61, 0.8); border: 1.5px solid rgba(48, 54, 61, 0.6);
-    border-radius: 31px; transition: 0.3s;
-    backdrop-filter: blur(5px);
-}
-.apple-switch .slider:before {
-    position: absolute; content: ""; height: 25px; width: 25px; left: 2px; bottom: 1.5px;
-    background-color: white; border-radius: 50%; transition: 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-.apple-switch input:checked + .slider { background: linear-gradient(135deg, #4FACFE, #A855F7); border-color: transparent; }
-.apple-switch input:checked + .slider:before { transform: translateX(26px); }
-
-.toggle-label { margin-left: 14px; font-size: 15px; color: #B0B8C1; }
-
-/* ========== МОДАЛКИ ========== */
-.scanner-container, .smart-water-modal, .about-modal {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-    background: rgba(13, 17, 23, 0.98); backdrop-filter: blur(20px);
-    z-index: 1000; display: none; flex-direction: column; padding: 20px;
-    overflow-y: auto;
-}
-.about-content {
-    background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(25px);
-    border: 1.5px solid rgba(79, 172, 254, 0.2);
-    border-radius: 32px; padding: 28px 24px; margin-top: 20px;
-}
-.about-content h3 { font-size: 20px; font-weight: 600; color: #E6EDF3; margin-top: 24px; margin-bottom: 16px; }
-.about-content h3:first-of-type { margin-top: 0; }
-.about-content p { font-size: 15px; line-height: 1.7; color: #B0B8C1; margin-bottom: 14px; }
-.about-content ul { list-style: none; padding-left: 0; margin-bottom: 20px; }
-.about-content li { font-size: 15px; line-height: 2; color: #B0B8C1; padding-left: 24px; position: relative; }
-.about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 22px; }
-.about-content .divider { height: 1px; background: rgba(79, 172, 254, 0.2); margin: 24px 0; }
-
-/* ========== УТИЛИТЫ ========== */
-.flex { display: flex; gap: 10px; align-items: center; }
-.text-center { text-align: center; }
-.text-small { font-size: 13px; color: #9CA3AF; }
-.mb-2 { margin-bottom: 10px; }
-
-.profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 20px; }
+.profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
 .profile-header .btn-small { position: absolute; left: 0; }
 .profile-header h2 { margin: 0; text-align: center; }
 
-.workout-section { margin-top: 28px; }
+.autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D;
+    border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none;
+}
+.autocomplete-item {
+    padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex;
+    justify-content: space-between; align-items: center;
+}
+.autocomplete-item:hover { background: rgba(79,172,254,0.2); }
+.autocomplete-item .off-name { font-weight: 500; }
+.autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
+
+.apple-switch { position: relative; display: inline-block; width: 51px; height: 31px; }
+.apple-switch input { opacity: 0; width: 0; height: 0; }
+.apple-switch .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D;
+    border-radius: 31px; transition: 0.25s;
+}
+.apple-switch .slider:before {
+    position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px;
+    background-color: white; border-radius: 50%; transition: 0.25s;
+}
+.apple-switch input:checked + .slider { background-color: #4FACFE; border-color: #4FACFE; }
+.apple-switch input:checked + .slider:before { transform: translateX(20px); }
+
+.toggle-label { margin-left: 12px; font-size: 14px; color: #9CA3AF; }
+.flex { display: flex; gap: 8px; align-items: center; }
+.text-center { text-align: center; }
+.text-small { font-size: 13px; color: #9CA3AF; }
+.mb-2 { margin-bottom: 8px; }
+
+.scanner-container {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117;
+    z-index: 1000; display: none; flex-direction: column;
+}
+.smart-water-modal, .about-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
+    z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto;
+}
+.about-content {
+    background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px);
+    border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px;
+    padding: 24px 20px; margin-top: 20px;
+}
+.about-content h3 { font-size: 18px; font-weight: 600; color: #E6EDF3; margin-top: 20px; margin-bottom: 12px; }
+.about-content h3:first-of-type { margin-top: 0; }
+.about-content p { font-size: 14px; line-height: 1.6; color: #B0B8C1; margin-bottom: 12px; }
+.about-content ul { list-style: none; padding-left: 0; margin-bottom: 16px; }
+.about-content li { font-size: 14px; line-height: 1.8; color: #B0B8C1; padding-left: 20px; position: relative; }
+.about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
+.about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
+.workout-section { margin-top: 24px; }
 </style>
 </head>
 <body>
@@ -764,28 +376,19 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 <!-- Модалки -->
 <div id="scannerModal" class="scanner-container">
-    <div style="padding:20px;display:flex;justify-content:space-between;background:transparent;">
-        <h2 data-i18n="scanner">Сканер</h2>
-        <button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button>
-    </div>
-    <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;border-radius:32px;" playsinline></video>
-    <div style="padding:24px;text-align:center;">
-        <div style="display:flex;gap:10px;">
-            <input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" style="flex:2;">
-            <button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)" style="flex:1;" data-i18n="search">Найти</button>
-        </div>
-        <div id="scannerHint" style="margin-top:16px;color:#9CA3AF;" data-i18n="scanner_hint">Наведите камеру</div>
-        <button class="btn-secondary" onclick="closeScanner()" style="margin-top:16px;" data-i18n="cancel">Отмена</button>
+    <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
+    <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
+    <div style="padding:20px;text-align:center;">
+        <div style="display:flex;gap:8px;"><input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" style="flex:2;"><button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)" style="flex:1;" data-i18n="search">Найти</button></div>
+        <div id="scannerHint" style="margin-top:12px;color:#9CA3AF;" data-i18n="scanner_hint">Наведите камеру</div>
+        <button class="btn-secondary" onclick="closeScanner()" style="margin-top:12px;" data-i18n="cancel">Отмена</button>
     </div>
 </div>
 
 <div id="smartWaterModal" class="smart-water-modal">
-    <div style="display:flex;justify-content:space-between;margin-bottom:28px;">
-        <h2 data-i18n="smart_water">Умная вода</h2>
-        <button class="btn-small" onclick="closeSmartWater()" data-i18n="close">Закрыть</button>
-    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_water">Умная вода</h2><button class="btn-small" onclick="closeSmartWater()" data-i18n="close">Закрыть</button></div>
     <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
             <span data-i18n="enable">Включить</span>
             <div style="display:flex; align-items:center;">
                 <label class="apple-switch"><input type="checkbox" id="smartWaterToggle"><span class="slider"></span></label>
@@ -803,26 +406,23 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                 <div class="slider-wrapper"><div class="slider-gradient steps-gradient"></div><div class="slider-ticks" id="stepsTicks"></div><input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100"></div>
                 <div class="slider-value"><span data-i18n="steps">Шаги</span>: <span id="stepsDisplay">8 000</span></div>
             </div>
-            <div style="padding:20px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
+            <div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;">
                 <div class="flex" style="justify-content:space-between;"><span data-i18n="base_norm">Базовая норма</span>: <span id="baseWaterNorm">1820 мл</span></div>
                 <div class="flex" style="justify-content:space-between;"><span data-i18n="temperature">Температура</span>: <span id="tempBonus">+150 мл</span></div>
                 <div class="flex" style="justify-content:space-between;"><span data-i18n="steps">Шаги</span>: <span id="stepsBonus">+150 мл</span></div>
-                <div class="flex" style="justify-content:space-between;font-weight:700;margin-top:12px;"><span data-i18n="total">ИТОГО</span>: <span id="totalWaterNorm">2120 мл</span></div>
+                <div class="flex" style="justify-content:space-between;font-weight:700;margin-top:8px;"><span data-i18n="total">ИТОГО</span>: <span id="totalWaterNorm">2120 мл</span></div>
             </div>
         </div>
-        <div style="padding:20px;background:rgba(1,4,9,0.3);border-radius:24px;margin-top:24px;backdrop-filter:blur(10px);" id="waterBaseOnly">
+        <div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;margin-top:20px;" id="waterBaseOnly">
             <div class="flex" style="justify-content:space-between;"><span data-i18n="water_norm">Норма воды</span>: <span id="baseOnlyWater">1820 мл</span></div>
         </div>
     </div>
 </div>
 
 <div id="smartSearchModal" class="smart-water-modal">
-    <div style="display:flex;justify-content:space-between;margin-bottom:28px;">
-        <h2 data-i18n="smart_search">Умный поиск</h2>
-        <button class="btn-small" onclick="closeSmartSearch()" data-i18n="close">Закрыть</button>
-    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_search">Умный поиск</h2><button class="btn-small" onclick="closeSmartSearch()" data-i18n="close">Закрыть</button></div>
     <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
             <span data-i18n="enable">Включить</span>
             <div style="display:flex; align-items:center;">
                 <label class="apple-switch"><input type="checkbox" id="smartSearchToggle"><span class="slider"></span></label>
@@ -840,10 +440,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 </div>
 
 <div id="aboutModal" class="about-modal">
-    <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
-        <h2 data-i18n="about">О приложении</h2>
-        <button class="btn-small" onclick="closeAbout()" data-i18n="close">Закрыть</button>
-    </div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:16px;"><h2 data-i18n="about">О приложении</h2><button class="btn-small" onclick="closeAbout()" data-i18n="close">Закрыть</button></div>
     <div class="about-content">
         <h3>Disclaimer</h3>
         <p>FitCat is not a medical application. All calculations (calories, macronutrients, water intake, BMI) are based on general formulas and provided for informational purposes only. They do not constitute medical advice, diagnosis, or treatment.</p>
@@ -857,13 +454,13 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
         <h3>No Warranty</h3>
         <p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p>
         <div class="divider"></div>
-        <p class="text-center">FitCat v1.4 — Glassmorphism Edition 🐱</p>
+        <p class="text-center">FitCat v1.1</p>
     </div>
 </div>
 
 <!-- Страница настройки -->
 <div id="setupPage">
-    <h1 style="font-size:42px;font-weight:800;margin-bottom:32px;text-align:center;background:linear-gradient(135deg,#00F2FE,#4FACFE,#A855F7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FitCat</h1>
+    <h1>FitCat</h1>
     <div class="card">
         <h2 data-i18n="about_you">О себе</h2>
         <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="setupName" data-i18n-placeholder="name_placeholder" placeholder="Введите имя"></div>
@@ -879,8 +476,8 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
         <div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="setupWeight" data-i18n-placeholder="weight_placeholder" placeholder="Введите вес" min="30" max="500" step="0.1"></div>
     </div>
     <button class="btn-primary" onclick="completeSetup()" data-i18n="start">Начать</button>
-    <div class="text-center text-small" style="margin-top:20px;" data-i18n="data_local">Данные только в твоём телефоне</div>
-    <div class="card" style="margin-top:24px;">
+    <div class="text-center text-small" style="margin-top:16px;" data-i18n="data_local">Данные только в твоём телефоне</div>
+    <div class="card" style="margin-top:20px;">
         <h2 data-i18n="language">Язык</h2>
         <div class="flex">
             <button class="btn-small lang-btn active" id="setupLangRu" onclick="setSetupLanguage('ru')">🇷🇺</button>
@@ -893,18 +490,8 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 <!-- Главная страница -->
 <div id="mainPage" style="display:none;">
     <div class="header-row">
-        <div style="flex:1; min-width:0;">
-            <div class="greeting-wrapper">
-                <div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div>
-                <div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div>
-            </div>
-        </div>
-        <div class="header-actions">
-            <span id="streakEmoji" class="streak-emoji none fade-in">🕯️</span>
-            <div class="header-photo" id="headerPhoto" onclick="showProfile()">
-                <span id="headerInitials" class="header-initials">🐱</span>
-            </div>
-        </div>
+        <div style="flex:1; min-width:0;"><div class="greeting-wrapper"><div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div><div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div></div></div>
+        <div class="header-actions"><span id="streakEmoji" class="streak-emoji none fade-in">🕯️</span><div class="header-photo" id="headerPhoto" onclick="showProfile()"><span id="headerInitials" class="header-initials">🐱</span></div></div>
     </div>
 
     <div class="tabs">
@@ -913,14 +500,12 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
         <div class="tab" data-tab="weight" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
     </div>
 
-    <!-- Свайп-индикатор -->
     <div class="swipe-indicator">
         <span class="swipe-dot active" data-dot="0"></span>
         <span class="swipe-dot" data-dot="1"></span>
         <span class="swipe-dot" data-dot="2"></span>
     </div>
 
-    <!-- Свайп-контейнер -->
     <div class="swipe-container" id="swipeContainer">
         <div class="swipe-wrapper" id="swipeWrapper">
             
@@ -933,52 +518,27 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                     </div>
 
                     <div class="card" id="waterCard">
-                        <div class="card-header" onclick="toggleCard('waterCard')">
-                            <h2 data-i18n="water_title">Вода</h2>
-                            <button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button>
-                        </div>
+                        <div class="card-header" onclick="toggleCard('waterCard')"><h2 data-i18n="water_title">Вода</h2><button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button></div>
                         <div class="card-content" id="waterContent">
-                            <div class="water-ring-container">
-                                <div class="water-ring" onclick="toggleWaterDisplay()">
-                                    <canvas id="waterRingCanvas" class="water-ring-canvas" width="150" height="150"></canvas>
-                                    <div class="water-ring-value">
-                                        <div class="water-ring-current" id="waterCurrentDisplay">0</div>
-                                        <div class="water-ring-goal"><span id="waterGoalDisplay">1820</span> <span data-i18n="ml">мл</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="water-buttons">
-                                <div class="water-btn" onclick="addWater(-50)">−50</div>
-                                <div class="water-btn" onclick="addWater(50)">+50</div>
-                                <div class="water-btn" onclick="addWater(100)">+100</div>
-                                <div class="water-btn" onclick="addWater(200)">+200</div>
-                            </div>
-                            <div class="water-manual">
-                                <input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10">
-                                <button class="btn-small" onclick="setManualWater()">✓</button>
-                            </div>
-                            <div id="smartWaterHint" class="text-small" style="margin-top:16px;"></div>
+                            <div style="text-align:center;margin:12px 0;"><span style="font-size:28px;font-weight:700;" id="waterCurrent">0</span><span style="color:#9CA3AF;"> / </span><span style="font-size:20px;" id="waterGoal">1820 <span data-i18n="ml">мл</span></span></div>
+                            <div class="water-buttons"><div class="water-btn" onclick="addWater(-50)">−50</div><div class="water-btn" onclick="addWater(50)">+50</div><div class="water-btn" onclick="addWater(100)">+100</div><div class="water-btn" onclick="addWater(200)">+200</div></div>
+                            <div class="water-manual"><input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10"><button class="btn-small" onclick="setManualWater()">✓</button></div>
+                            <div id="smartWaterHint" class="text-small" style="margin-top:12px;"></div>
                         </div>
                     </div>
 
                     <div class="card" id="mealsCard">
-                        <div class="card-header" onclick="toggleCard('mealsCard')">
-                            <h2 data-i18n="meals">Продукты</h2>
-                            <button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button>
-                        </div>
+                        <div class="card-header" onclick="toggleCard('mealsCard')"><h2 data-i18n="meals">Продукты</h2><button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button></div>
                         <div class="card-content" id="mealsContent">
                             <div class="templates-bar" id="templatesBar"></div>
-                            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                            <div style="display:flex;gap:8px;margin-bottom:12px;">
                                 <button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button>
                                 <button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button>
                                 <button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button>
                             </div>
                             <div class="food-list" id="foodListContainer"></div>
-                            <div class="add-food-form" style="display:flex;flex-direction:column;gap:10px;">
-                                <div class="input-group" style="position: relative;">
-                                    <input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off">
-                                    <div id="autocompleteList" class="autocomplete-list"></div>
-                                </div>
+                            <div class="add-food-form" style="display:flex;flex-direction:column;gap:8px;">
+                                <div class="input-group" style="position: relative;"><input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off"><div id="autocompleteList" class="autocomplete-list"></div></div>
                                 <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
                                 <div style="display:flex;gap:8px;">
                                     <input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1">
@@ -986,9 +546,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                                     <input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1">
                                     <input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал">
                                 </div>
-                                <div style="display:flex;gap:8px;">
-                                    <input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;">
-                                </div>
+                                <div style="display:flex;gap:8px;"><input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;"></div>
                                 <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
                             </div>
                         </div>
@@ -1008,7 +566,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                             <div class="activity-daily-item" data-activity="1.725" onclick="selectDailyActivity(this)" data-i18n="very_active">Очень активный</div>
                         </div>
                         <div class="workout-section">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
                                 <span data-i18n="workout">Тренировка</span>
                                 <div style="display:flex; align-items:center;">
                                     <label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label>
@@ -1016,7 +574,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                                 </div>
                             </div>
                             <div id="workoutSettings" style="display:none;">
-                                <label style="display:block; margin-bottom:12px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
+                                <label style="display:block; margin-bottom:8px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
                                 <div class="segmented-control" id="workoutIntensityControl">
                                     <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div>
                                     <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div>
@@ -1025,7 +583,7 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
                                 <input type="hidden" id="workoutIntensity" value="light">
                             </div>
                         </div>
-                        <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:24px;" data-i18n="apply_today">Применить на сегодня</button>
+                        <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:20px;" data-i18n="apply_today">Применить на сегодня</button>
                     </div>
                 </div>
             </div>
@@ -1034,37 +592,27 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
             <div class="swipe-page" data-page="2">
                 <div id="weightPage" class="page">
                     <div class="card">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                            <h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2>
-                            <button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button>
-                        </div>
-                        <div id="weightStats" style="margin-bottom:16px;padding:16px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2><button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button></div>
+                        <div id="weightStats" style="margin-bottom:12px;padding:12px;background:rgba(1,4,9,0.4);border-radius:16px;">
                             <div class="flex" style="justify-content:space-around;text-align:center;">
-                                <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:22px;font-weight:700;" id="startWeightStat">---</div></div>
-                                <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:22px;font-weight:700;" id="currentWeightStat">---</div></div>
-                                <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:22px;font-weight:700;" id="weightChangeStat">---</div></div>
-                                <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:22px;font-weight:700;" id="toGoalStat">---</div></div>
+                                <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:20px;font-weight:700;" id="startWeightStat">---</div></div>
+                                <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:20px;font-weight:700;" id="currentWeightStat">---</div></div>
+                                <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:20px;font-weight:700;" id="weightChangeStat">---</div></div>
+                                <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:20px;font-weight:700;" id="toGoalStat">---</div></div>
                             </div>
                         </div>
                         <div class="bmi-container">
                             <div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div>
-                            <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()">
-                                <div class="bmi-gradient"></div>
-                                <div class="bmi-marker" id="bmiMarker" style="left:0%;"></div>
-                                <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
-                            </div>
+                            <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()"><div class="bmi-gradient"></div><div class="bmi-marker" id="bmiMarker" style="left:0%;"></div><div class="bmi-tooltip" id="bmiTooltip">Норма</div></div>
                             <div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
                         </div>
-                        <div class="flex mb-2" style="margin-top:16px;">
+                        <div class="flex mb-2">
                             <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;">
-                            <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.4);border:1.5px solid rgba(48,54,61,0.5);border-radius:20px;color:#E6EDF3;">
+                            <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.6);border:1px solid #30363D;border-radius:16px;color:#E6EDF3;">
                             <button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button>
                         </div>
                         <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
-                        <div style="margin-top:20px;">
-                            <h3 data-i18n="history">История</h3>
-                            <div id="weightHistoryList"></div>
-                        </div>
+                        <div style="margin-top:16px;"><h3 data-i18n="history">История</h3><div id="weightHistoryList"></div></div>
                     </div>
                 </div>
             </div>
@@ -1075,18 +623,10 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 <!-- Страница профиля -->
 <div id="profilePage" style="display:none;">
     <div class="card">
-        <div class="profile-header">
-            <button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button>
-            <h2 data-i18n="profile">Профиль</h2>
-            <div style="width:60px;"></div>
-        </div>
-        <div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()">
-            <span id="profileInitials" class="profile-initials">🐱</span>
-        </div>
+        <div class="profile-header"><button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button><h2 data-i18n="profile">Профиль</h2><div style="width:60px;"></div></div>
+        <div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()"><span id="profileInitials" class="profile-initials">🐱</span></div>
         <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
-        <div style="text-align:center;margin-bottom:20px;">
-            <button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button>
-        </div>
+        <div style="text-align:center;margin-bottom:16px;"><button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button></div>
         <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="profileName"></div>
         <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="profileAge" min="10" max="100"></div>
         <div class="input-group"><label data-i18n="gender">Пол</label>
@@ -1120,23 +660,20 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
         <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
         <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
         <button class="btn-secondary" onclick="openAbout()" data-i18n="about">О приложении</button>
-        <h2 style="margin-top:28px;" data-i18n="language">Язык</h2>
+        <h2 style="margin-top:24px;" data-i18n="language">Язык</h2>
         <div class="flex">
             <button class="btn-small lang-btn" id="settingsLangRu" onclick="setSettingsLanguage('ru')">🇷🇺</button>
             <button class="btn-small lang-btn" id="settingsLangEn" onclick="setSettingsLanguage('en')">🇬🇧</button>
             <button class="btn-small lang-btn" id="settingsLangCn" onclick="setSettingsLanguage('cn')">🇨🇳</button>
         </div>
-        <button class="btn-primary" onclick="showPage('mainPage')" style="margin-top:28px;" data-i18n="back">← Назад</button>
+        <button class="btn-primary" onclick="showPage('mainPage')" style="margin-top:24px;" data-i18n="back">← Назад</button>
     </div>
 </div>
 
 <!-- Страница продуктов -->
 <div id="productsPage" style="display:none;">
     <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-            <button class="btn-small" onclick="showPage('settingsPage')" data-i18n="back">← Назад</button>
-            <h2 data-i18n="my_products">Мои продукты</h2>
-        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><button class="btn-small" onclick="showPage('settingsPage')" data-i18n="back">← Назад</button><h2 data-i18n="my_products">Мои продукты</h2></div>
         <div id="productsList"></div>
     </div>
 </div>
@@ -1301,20 +838,22 @@ let smartSearchEnabled = false;
 let smartSearchResults = 10;
 let smartWaterEnabled = false;
 
-// Состояния для анимаций
+// Анимация колец
 let animFrame = null;
-let currentRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0, water: 0 };
-let targetRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0, water: 0 };
-let ringDisplayMode = { kcal: 'value', protein: 'value', fat: 'value', carbs: 'value', water: 'value' };
+let currentRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+let targetRingValues = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+let ringDisplayMode = { kcal: 'value', protein: 'value', fat: 'value', carbs: 'value' };
 let ringTimeouts = {};
 
 // Свайп
 let currentPage = 0;
 let swipeStartX = 0;
+let swipeStartY = 0;
 let swipeCurrentX = 0;
 let isSwiping = false;
-let swipePreventClick = false;
-const swipeThreshold = 50;
+let swipeDirection = null;
+const SWIPE_THRESHOLD = 40;
+const DIRECTION_LOCK_THRESHOLD = 10;
 
 function i18n(key) { return translations[currentLang]?.[key] || key; }
 
@@ -1371,87 +910,32 @@ function updateStreak() {
     let s = parseInt(localStorage.getItem('fitcat_streak')||'0'), lo = localStorage.getItem('fitcat_lastOpen'), t = new Date().toDateString(), y = new Date(Date.now()-86400000).toDateString();
     if(!lo) s=1; else if(lo===t){} else if(lo===y) s=Math.min(s+1,5); else s=1;
     localStorage.setItem('fitcat_streak',s); localStorage.setItem('fitcat_lastOpen',t);
-    let e = document.getElementById('streakEmoji'); 
-    if(e) { 
-        let c,ch;
-        if(s===1){c='none';ch='🕯️'} else if(s===2){c='red';ch='🔥'} else if(s===3){c='yellow';ch='🔥'} else if(s===4){c='purple';ch='🔥'} else{c='rainbow';ch='🔥'} 
+    let e = document.getElementById('streakEmoji'); if(e) { let c,ch;
+        if(s===1){c='none';ch='🕯️'} else if(s===2){c='red';ch='🔥'} else if(s===3){c='yellow';ch='🔥'} else if(s===4){c='purple';ch='🔥'} else{c='rainbow';ch='🔥'}
         e.className='streak-emoji '+c+' fade-in'; e.textContent=ch; e.title=s+' '+(currentLang==='ru'?'дн.':currentLang==='en'?'days':'天');
-        requestAnimationFrame(()=>e.classList.remove('fade-in')); 
-    }
+        requestAnimationFrame(()=>e.classList.remove('fade-in')); }
 }
 
 function getInitials(n) { if(!n) return '🐱'; let p=n.trim().split(/\s+/); return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.slice(0,2).toUpperCase(); }
 
-function updateHeaderPhoto() { 
-    let h=document.getElementById('headerPhoto'), s=localStorage.getItem('profilePhoto'); 
-    h.innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="header-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; 
-}
+function updateHeaderPhoto() { let h=document.getElementById('headerPhoto'), s=localStorage.getItem('profilePhoto'); h.innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="header-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; }
 
 function uploadPhoto() { document.getElementById('photoInput').click(); }
 
-function handlePhotoUpload(ev) { 
-    let f=ev.target.files[0]; if(!f) return;
-    if(f.size>3*1024*1024){alert(i18n('photo_too_large'));return} 
-    let r=new FileReader();
-    r.onload=e=>{localStorage.setItem('profilePhoto',e.target.result); document.getElementById('profilePhoto').innerHTML=`<img src="${e.target.result}" alt="Profile">`; updateHeaderPhoto(); vibrate();}; 
-    r.readAsDataURL(f); 
-}
+function handlePhotoUpload(ev) { let f=ev.target.files[0]; if(!f) return;
+    if(f.size>3*1024*1024){alert(i18n('photo_too_large'));return} let r=new FileReader();
+    r.onload=e=>{localStorage.setItem('profilePhoto',e.target.result); document.getElementById('profilePhoto').innerHTML=`<img src="${e.target.result}" alt="Profile">`; updateHeaderPhoto(); vibrate();}; r.readAsDataURL(f); }
 
-function deletePhoto() { 
-    localStorage.removeItem('profilePhoto'); 
-    document.getElementById('profilePhoto').innerHTML=`<span class="profile-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; 
-    updateHeaderPhoto(); vibrate(); 
-}
+function deletePhoto() { localStorage.removeItem('profilePhoto'); document.getElementById('profilePhoto').innerHTML=`<span class="profile-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; updateHeaderPhoto(); vibrate(); }
 
-function toggleCard(id) { 
-    let c=document.getElementById(id==='waterCard'?'waterContent':'mealsContent'); 
-    if(c){c.classList.toggle('collapsed'); localStorage.setItem('card_'+id+'_collapsed', c.classList.contains('collapsed'));} 
-}
+function toggleCard(id) { let c=document.getElementById(id==='waterCard'?'waterContent':'mealsContent'); if(c){c.classList.toggle('collapsed'); localStorage.setItem('card_'+id+'_collapsed', c.classList.contains('collapsed'));} }
 
-function addWater(ml) { 
-    let newAmount = waterAmount + ml;
-    waterAmount = Math.max(0, newAmount);
-    localStorage.setItem('waterAmount',waterAmount); 
-    updateWaterDisplay(); 
-    startRingAnimation();
-    vibrate(); 
-}
-
-function setManualWater() { 
-    let ml=parseInt(document.getElementById('manualWaterInput').value);
-    if(!isNaN(ml)&&ml>=0){waterAmount=ml; localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); startRingAnimation(); vibrate();}
-    document.getElementById('manualWaterInput').value=''; 
-}
+function addWater(ml) { waterAmount = Math.max(0, waterAmount + ml); localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate(); }
+function setManualWater() { let ml=parseInt(document.getElementById('manualWaterInput').value); if(!isNaN(ml)&&ml>=0){waterAmount=ml; localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();} document.getElementById('manualWaterInput').value=''; }
 
 function updateWaterDisplay() {
-    let displayEl = document.getElementById('waterCurrentDisplay');
-    let pct = (waterAmount / dailyTargets.water) * 100;
-    
-    if (ringDisplayMode.water === 'value') {
-        displayEl.textContent = waterAmount;
-    } else {
-        displayEl.textContent = Math.round(pct) + '%';
-    }
-    
-    document.getElementById('waterGoalDisplay').innerText = dailyTargets.water;
-    targetRingValues.water = waterAmount;
-}
-
-function toggleWaterDisplay() {
-    if (ringDisplayMode.water === 'value') {
-        ringDisplayMode.water = 'percent';
-        let pct = (waterAmount / dailyTargets.water) * 100;
-        document.getElementById('waterCurrentDisplay').textContent = Math.round(pct) + '%';
-    } else {
-        ringDisplayMode.water = 'value';
-        document.getElementById('waterCurrentDisplay').textContent = waterAmount;
-    }
-    
-    if (ringTimeouts.water) clearTimeout(ringTimeouts.water);
-    ringTimeouts.water = setTimeout(() => {
-        ringDisplayMode.water = 'value';
-        document.getElementById('waterCurrentDisplay').textContent = waterAmount;
-    }, 2000);
+    document.getElementById('waterCurrent').innerText = waterAmount;
+    document.getElementById('waterGoal').innerHTML = dailyTargets.water + ' ' + i18n('ml');
 }
 
 function openSmartWater() {
@@ -1465,24 +949,11 @@ function openSmartWater() {
     document.getElementById('stepsSlider').value = currentSteps;
     updateTempDisplay(); updateStepsDisplay(); updateWaterCalculation();
 }
-
 function closeSmartWater() { document.getElementById('smartWaterModal').style.display='none'; calculateTargets(); updateWaterDisplay(); renderProgressBars(); }
-
-function updateTempDisplay() {
-    currentTemp=parseInt(document.getElementById('tempSlider').value);
-    document.getElementById('tempDisplay').innerText = currentTemp+'°C';
-    updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
-}
-
-function updateStepsDisplay() {
-    currentSteps=parseInt(document.getElementById('stepsSlider').value);
-    document.getElementById('stepsDisplay').innerText = currentSteps.toLocaleString();
-    updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
-}
-
+function updateTempDisplay() { currentTemp=parseInt(document.getElementById('tempSlider').value); document.getElementById('tempDisplay').innerText = currentTemp+'°C'; updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings(); }
+function updateStepsDisplay() { currentSteps=parseInt(document.getElementById('stepsSlider').value); document.getElementById('stepsDisplay').innerText = currentSteps.toLocaleString(); updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings(); }
 function getTempBonus(t) { if(t<0) return 0; if(t<15) return 0; if(t<20) return 50; if(t<25) return 150; if(t<30) return 300; return 500; }
 function getStepsBonus(s) { if(s<2500) return 0; if(s<5000) return 50; if(s<7500) return 100; if(s<10000) return 150; if(s<12500) return 200; if(s<15000) return 250; return 300; }
-
 function updateWaterCalculation() {
     if(!currentProfile) return;
     let base=Math.round(currentProfile.weight*35), total=base+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0);
@@ -1491,29 +962,16 @@ function updateWaterCalculation() {
     document.getElementById('stepsBonus').innerText = '+'+getStepsBonus(currentSteps)+' '+i18n('ml');
     document.getElementById('totalWaterNorm').innerText = total+' '+i18n('ml');
 }
-
 function applySmartWaterSettings() { if(!smartWaterEnabled) return; currentSteps=parseInt(document.getElementById('stepsSlider').value); currentTemp=parseInt(document.getElementById('tempSlider').value); localStorage.setItem('currentSteps',currentSteps); localStorage.setItem('currentTemp',currentTemp); calculateTargets(); }
+function updateWaterHint() { let h=document.getElementById('smartWaterHint'); if(smartWaterEnabled) { let b=dailyTargets.water-Math.round(currentProfile.weight*35)-getStepsBonus(currentSteps); h.innerText = b>0?`${i18n('smart_water')}: +${b} ${i18n('ml')}`:''; } else h.innerText=''; }
 
-function updateWaterHint() { 
-    let h=document.getElementById('smartWaterHint'); 
-    if(smartWaterEnabled) { let b=dailyTargets.water-Math.round(currentProfile.weight*35)-getStepsBonus(currentSteps); h.innerText = b>0?`${i18n('smart_water')}: +${b} ${i18n('ml')}`:''; } 
-    else h.innerText=''; 
-}
-
-function selectDailyActivity(el) {
-    document.querySelectorAll('#activityPage .activity-daily-item').forEach(i=>i.classList.remove('selected'));
-    el.classList.add('selected');
-}
-
-function applyDailyActivity() { 
-    let s=document.querySelector('#activityPage .activity-daily-item.selected'); if(!s) return;
+function selectDailyActivity(el) { document.querySelectorAll('#activityPage .activity-daily-item').forEach(i=>i.classList.remove('selected')); el.classList.add('selected'); }
+function applyDailyActivity() { let s=document.querySelector('#activityPage .activity-daily-item.selected'); if(!s) return;
     dailyActivity=parseFloat(s.dataset.activity); localStorage.setItem('dailyActivity',dailyActivity);
     workoutEnabled=document.getElementById('workoutToggle').checked;
     workoutIntensity=document.getElementById('workoutIntensity').value;
     localStorage.setItem('workoutEnabled',workoutEnabled); localStorage.setItem('workoutIntensity',workoutIntensity);
-    calculateTargets(); renderDashboard(); updateActivityUI(); showPage('mainPage'); vibrate(); 
-}
-
+    calculateTargets(); renderDashboard(); updateActivityUI(); showPage('mainPage'); vibrate(); }
 function updateActivityUI() {
     let tabs=document.querySelectorAll('.tab'); if(tabs.length>=3) { let n=['sedentary','light','moderate','very_active'], idx=[1.2,1.375,1.55,1.725].indexOf(dailyActivity); if(idx>=0) tabs[1].innerHTML = i18n(n[idx]); }
     if(currentProfile) { document.querySelectorAll('#activityPage .activity-daily-item').forEach(el=>el.classList.toggle('selected', parseFloat(el.dataset.activity)===dailyActivity)); }
@@ -1527,33 +985,27 @@ function showProfile() {
     if(!currentProfile) return;
     document.getElementById('profileName').value=currentProfile.name||'';
     document.getElementById('profileAge').value=currentProfile.age||'';
-    document.getElementById('profileGender').value=currentProfile.gender||'female';
-    selectProfileGender(currentProfile.gender||'female');
-    document.getElementById('profileGoal').value=currentProfile.goal||'lose';
-    selectProfileGoal(currentProfile.goal||'lose');
+    document.getElementById('profileGender').value=currentProfile.gender||'female'; selectProfileGender(currentProfile.gender||'female');
+    document.getElementById('profileGoal').value=currentProfile.goal||'lose'; selectProfileGoal(currentProfile.goal||'lose');
     document.getElementById('profileHeight').value=currentProfile.height||'';
     document.getElementById('profileWeight').value=currentProfile.weight||'';
     let s=localStorage.getItem('profilePhoto');
     document.getElementById('profilePhoto').innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="profile-initials">${getInitials(currentProfile.name)}</span>`;
     showPage('profilePage');
 }
-
 function saveProfile() {
     let n=document.getElementById('profileName').value.trim(), a=parseInt(document.getElementById('profileAge').value), g=document.getElementById('profileGender').value, goal=document.getElementById('profileGoal').value, h=parseFloat(document.getElementById('profileHeight').value), w=parseFloat(document.getElementById('profileWeight').value);
     if(!n||!a||a<10||a>100||!g||!goal||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
     currentProfile = {...currentProfile, name:n, age:a, gender:g, goal:goal, height:h, weight:w};
     saveAllData(); calculateTargets(); renderDashboard(); updateGreeting(); updateHeaderPhoto(); updateBMI(); showPage('mainPage'); vibrate();
 }
-
 function deleteAccount() { if(confirm(i18n('confirm_delete'))){ localStorage.clear(); location.reload(); } }
 
 function calculateBMI() { if(!currentProfile) return 0; let h=currentProfile.height/100; return currentProfile.weight/(h*h); }
-
 function getBMICategory(bmi) {
     if(bmi<16) return i18n('bmi_underweight_severe'); if(bmi<18.5) return i18n('bmi_underweight'); if(bmi<25) return i18n('bmi_normal');
     if(bmi<30) return i18n('bmi_overweight'); if(bmi<35) return i18n('bmi_obese_i'); if(bmi<40) return i18n('bmi_obese_ii'); return i18n('bmi_obese_iii');
 }
-
 function updateBMI() {
     let bmi=calculateBMI();
     document.getElementById('bmiValue').innerText=bmi.toFixed(1);
@@ -1562,18 +1014,11 @@ function updateBMI() {
     document.getElementById('bmiMarker').style.left=pct+'%';
     document.getElementById('bmiTooltip').innerText=getBMICategory(bmi);
 }
-
 function showBMITooltip() { let t=document.getElementById('bmiTooltip'); t.style.opacity='1'; setTimeout(()=>t.style.opacity='',1500); }
 
 function loadProductsDB() { let s=localStorage.getItem('fitcat_products'); if(s) productsDB=JSON.parse(s); }
 function saveProductsDB() { localStorage.setItem('fitcat_products', JSON.stringify(productsDB)); }
-
-function addToProductsDB(n,p,f,c,k) {
-    if(!productsDB.find(x=>x.name.toLowerCase()===n.toLowerCase())){
-        productsDB.push({name:n,protein:p,fat:f,carbs:c,kcal:k});
-        saveProductsDB();
-    }
-}
+function addToProductsDB(n,p,f,c,k) { if(!productsDB.find(x=>x.name.toLowerCase()===n.toLowerCase())){ productsDB.push({name:n,protein:p,fat:f,carbs:c,kcal:k}); saveProductsDB(); } }
 
 function openSmartSearch() {
     document.getElementById('smartSearchModal').style.display='flex';
@@ -1583,54 +1028,20 @@ function openSmartSearch() {
     document.getElementById('resultsSlider').value = smartSearchResults;
     document.getElementById('resultsDisplay').innerText = smartSearchResults;
 }
-
-function closeSmartSearch() { 
-    document.getElementById('smartSearchModal').style.display='none'; 
-    smartSearchEnabled=document.getElementById('smartSearchToggle').checked; 
-    smartSearchResults=parseInt(document.getElementById('resultsSlider').value); 
-    localStorage.setItem('smartSearchEnabled',smartSearchEnabled); 
-    localStorage.setItem('smartSearchResults',smartSearchResults); 
-}
+function closeSmartSearch() { document.getElementById('smartSearchModal').style.display='none'; smartSearchEnabled=document.getElementById('smartSearchToggle').checked; smartSearchResults=parseInt(document.getElementById('resultsSlider').value); localStorage.setItem('smartSearchEnabled',smartSearchEnabled); localStorage.setItem('smartSearchResults',smartSearchResults); }
 
 function openAbout() { document.getElementById('aboutModal').style.display='flex'; }
 function closeAbout() { document.getElementById('aboutModal').style.display='none'; }
 
-function fillFromProduct(name) { 
-    let p=productsDB.find(x=>x.name===name); 
-    if(p){
-        document.getElementById('foodName').value=p.name;
-        document.getElementById('foodProt100').value=p.protein;
-        document.getElementById('foodFat100').value=p.fat;
-        document.getElementById('foodCarb100').value=p.carbs;
-        document.getElementById('foodKcal100').value=p.kcal;
-    } 
-    document.getElementById('autocompleteList').style.display='none'; 
-}
-
-function fillFromOFF(name,kcal,prot,fat,carbs) {
-    document.getElementById('foodName').value=name;
-    document.getElementById('foodProt100').value=prot||0;
-    document.getElementById('foodFat100').value=fat||0;
-    document.getElementById('foodCarb100').value=carbs||0;
-    document.getElementById('foodKcal100').value=kcal||0;
-    document.getElementById('autocompleteList').style.display='none';
-}
+function fillFromProduct(name) { let p=productsDB.find(x=>x.name===name); if(p){ document.getElementById('foodName').value=p.name; document.getElementById('foodProt100').value=p.protein; document.getElementById('foodFat100').value=p.fat; document.getElementById('foodCarb100').value=p.carbs; document.getElementById('foodKcal100').value=p.kcal; } document.getElementById('autocompleteList').style.display='none'; }
+function fillFromOFF(name,kcal,prot,fat,carbs) { document.getElementById('foodName').value=name; document.getElementById('foodProt100').value=prot||0; document.getElementById('foodFat100').value=fat||0; document.getElementById('foodCarb100').value=carbs||0; document.getElementById('foodKcal100').value=kcal||0; document.getElementById('autocompleteList').style.display='none'; }
 
 function setupAutocomplete() {
     let inp=document.getElementById('foodName'), list=document.getElementById('autocompleteList');
     inp.addEventListener('input', function() {
         let val=this.value.trim(); if(val.length<2){ list.style.display='none'; return; }
-        if(!smartSearchEnabled) { 
-            let m=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,5); 
-            if(!m.length) list.style.display='none'; 
-            else { 
-                list.innerHTML=m.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); 
-                list.style.display='block'; 
-            } 
-            return; 
-        }
-        inp.placeholder='🔍 '+i18n('search')+'...'; inp.style.borderColor='#4FACFE'; 
-        if(searchDebounce) clearTimeout(searchDebounce);
+        if(!smartSearchEnabled) { let m=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,5); if(!m.length) list.style.display='none'; else { list.innerHTML=m.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; } return; }
+        inp.placeholder='🔍 '+i18n('search')+'...'; inp.style.borderColor='#4FACFE'; if(searchDebounce) clearTimeout(searchDebounce);
         searchDebounce=setTimeout(()=>{
             let local=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,3);
             fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(val)}&json=1&page_size=${smartSearchResults}&search_simple=1&search_fields=product_name`)
@@ -1638,11 +1049,7 @@ function setupAutocomplete() {
                 let items=[]; if(d.products) items=d.products.filter(p=>p.product_name).map(p=>({name:p.product_name,brand:p.brands,kcal:p.nutriments?.['energy-kcal_100g']||0,prot:p.nutriments?.proteins_100g||0,fat:p.nutriments?.fat_100g||0,carbs:p.nutriments?.carbohydrates_100g||0})).slice(0,smartSearchResults);
                 let all=[...local.map(p=>({name:p.name,isLocal:true,...p})), ...items];
                 if(!all.length) { inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); }
-                else { 
-                    inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';
-                    list.innerHTML=all.map(p=>p.isLocal?`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`:`<div class="autocomplete-item" onclick="fillFromOFF('${p.name.replace(/'/g,"\\'")}',${p.kcal},${p.prot},${p.fat},${p.carbs})"><span class="off-name">🌍 ${p.name}</span><span class="off-brand">${p.brand||''}</span></div>`).join(''); 
-                    list.style.display='block'; 
-                }
+                else { inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D'; list.innerHTML=all.map(p=>p.isLocal?`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`:`<div class="autocomplete-item" onclick="fillFromOFF('${p.name.replace(/'/g,"\\'")}',${p.kcal},${p.prot},${p.fat},${p.carbs})"><span class="off-name">🌍 ${p.name}</span><span class="off-brand">${p.brand||''}</span></div>`).join(''); list.style.display='block'; }
             }).catch(()=>{ if(!local.length){ inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); } else { list.innerHTML=local.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; } });
         },400);
     });
@@ -1651,12 +1058,7 @@ function setupAutocomplete() {
 
 function loadTemplates() { let s=localStorage.getItem('fitcat_templates'); if(s) mealTemplates=JSON.parse(s); }
 function saveTemplates() { localStorage.setItem('fitcat_templates', JSON.stringify(mealTemplates)); }
-
-function renderTemplates() { 
-    let c=document.getElementById('templatesBar'); 
-    c.innerHTML = mealTemplates.length ? mealTemplates.map((tm,i)=>`<div class="template-btn" onclick="loadTemplate(${i})">${tm.name}</div><div class="template-btn" onclick="deleteTemplate(${i})" style="padding:8px;">✕</div>`).join('') : `<div class="text-small" style="width:100%;text-align:center;margin-bottom:16px;">${i18n('no_templates')}</div>`; 
-}
-
+function renderTemplates() { let c=document.getElementById('templatesBar'); c.innerHTML = mealTemplates.length ? mealTemplates.map((tm,i)=>`<div class="template-btn" onclick="loadTemplate(${i})">${tm.name}</div><div class="template-btn" onclick="deleteTemplate(${i})" style="padding:8px;">✕</div>`).join('') : `<div class="text-small" style="width:100%;text-align:center;margin-bottom:16px;">${i18n('no_templates')}</div>`; }
 function saveTemplate() { if(!todayFoods.length){ alert(i18n('no_dishes')); return; } let n=prompt(i18n('template_name'),'Шаблон '+(mealTemplates.length+1)); if(!n) return; mealTemplates.push({name:n, foods:JSON.parse(JSON.stringify(todayFoods))}); saveTemplates(); renderTemplates(); vibrate(); }
 function loadTemplate(i) { todayFoods=JSON.parse(JSON.stringify(mealTemplates[i].foods)); saveAllData(); renderDashboard(); vibrate(); }
 function deleteTemplate(i) { mealTemplates.splice(i,1); saveTemplates(); renderTemplates(); }
@@ -1671,7 +1073,6 @@ function addFood() {
     document.getElementById('foodName').value=document.getElementById('foodProt100').value=document.getElementById('foodFat100').value=document.getElementById('foodCarb100').value=document.getElementById('foodKcal100').value=document.getElementById('foodWeight').value='';
     vibrate();
 }
-
 function toggleFood(i) { todayFoods[i].checked=!todayFoods[i].checked; saveAllData(); renderProgressBars(); renderFoodList(); vibrate(); }
 function deleteFood(i) { todayFoods.splice(i,1); saveAllData(); renderDashboard(); }
 
@@ -1685,51 +1086,21 @@ function closeScanner() { document.getElementById('scannerModal').style.display=
 
 async function startScanner() {
     let v=document.getElementById('scannerVideo'); scanningActive=true;
-    try{ 
-        let s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); 
-        v.srcObject=s; v.play();
-        zxingReader=new ZXing.BrowserMultiFormatReader(); 
-        zxingReader.decodeFromVideoDevice(null,v,r=>{if(r&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.text)}});
+    try{ let s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); v.srcObject=s; v.play();
+        zxingReader=new ZXing.BrowserMultiFormatReader(); zxingReader.decodeFromVideoDevice(null,v,r=>{if(r&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.text)}});
         Quagga.init({inputStream:{name:'Live',type:'LiveStream',target:v},decoder:{readers:['ean_reader','ean_8_reader','upc_reader']},locate:true,numOfWorkers:2,frequency:10},e=>{if(!e){quaggaActive=true;Quagga.start()}});
         Quagga.onDetected(r=>{if(r?.codeResult?.code&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.codeResult.code)}});
         scanTimeout=setTimeout(()=>{if(scanningActive)document.getElementById('scannerHint').innerText=i18n('scanner_failed')},8000);
     }catch(e){alert(i18n('camera_error'));closeScanner();}
 }
+function stopScanner() { scanningActive=false; if(scanTimeout)clearTimeout(scanTimeout); if(zxingReader){zxingReader.reset();zxingReader=null} if(quaggaActive){Quagga.stop();quaggaActive=false} let v=document.getElementById('scannerVideo'); if(v?.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null} }
+async function lookupBarcode(b) { if(!b) return; try{ let r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${b}.json`); let d=await r.json(); if(d.product){ let p=d.product; document.getElementById('foodName').value=p.product_name||''; document.getElementById('foodKcal100').value=p.nutriments?.['energy-kcal_100g']||''; document.getElementById('foodProt100').value=p.nutriments?.proteins_100g||''; document.getElementById('foodFat100').value=p.nutriments?.fat_100g||''; document.getElementById('foodCarb100').value=p.nutriments?.carbohydrates_100g||''; vibrate(); } else alert(i18n('product_not_found')); } catch(e) { alert(i18n('product_not_found')); } }
 
-function stopScanner() { 
-    scanningActive=false; if(scanTimeout)clearTimeout(scanTimeout); 
-    if(zxingReader){zxingReader.reset();zxingReader=null} 
-    if(quaggaActive){Quagga.stop();quaggaActive=false} 
-    let v=document.getElementById('scannerVideo'); if(v?.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null} 
-}
-
-async function lookupBarcode(b) { 
-    if(!b) return; 
-    try{ 
-        let r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${b}.json`); 
-        let d=await r.json(); 
-        if(d.product){ 
-            let p=d.product; 
-            document.getElementById('foodName').value=p.product_name||''; 
-            document.getElementById('foodKcal100').value=p.nutriments?.['energy-kcal_100g']||''; 
-            document.getElementById('foodProt100').value=p.nutriments?.proteins_100g||''; 
-            document.getElementById('foodFat100').value=p.nutriments?.fat_100g||''; 
-            document.getElementById('foodCarb100').value=p.nutriments?.carbohydrates_100g||''; 
-            vibrate(); 
-        } else alert(i18n('product_not_found')); 
-    } catch(e) { alert(i18n('product_not_found')); } 
-}
-
-function setWeightGoal() { 
-    let c=currentProfile?.targetWeight||(currentProfile?.startWeight*0.9).toFixed(1); 
-    let g=prompt(i18n('enter_goal'),c); 
-    if(g&&!isNaN(g)&&g>=30&&g<=500){ currentProfile.targetWeight=parseFloat(g); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); } 
-}
+function setWeightGoal() { let c=currentProfile?.targetWeight||(currentProfile?.startWeight*0.9).toFixed(1); let g=prompt(i18n('enter_goal'),c); if(g&&!isNaN(g)&&g>=30&&g<=500){ currentProfile.targetWeight=parseFloat(g); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); } }
 
 function updateWeightStatsAndList() {
     let goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55;
-    if(weightHistory.length){ 
-        let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), start=s[0].weight, cur=s[s.length-1].weight, ch=cur-start, tg=cur-goal;
+    if(weightHistory.length){ let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), start=s[0].weight, cur=s[s.length-1].weight, ch=cur-start, tg=cur-goal;
         document.getElementById('startWeightStat').innerText=start.toFixed(1)+' '+i18n('kg');
         document.getElementById('currentWeightStat').innerText=cur.toFixed(1)+' '+i18n('kg');
         let ce=document.getElementById('weightChangeStat'); ce.innerText=(ch>0?'+':'')+ch.toFixed(1)+' '+i18n('kg'); ce.style.color=ch<0?'#6BCB77':(ch>0?'#F85149':'#9CA3AF');
@@ -1740,31 +1111,11 @@ function updateWeightStatsAndList() {
     else l.innerHTML = [...weightHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((e,i)=>`<div class="weight-history-item"><span class="weight-history-date">${e.date}</span><span class="weight-history-value">${e.weight} ${i18n('kg')}</span><span class="weight-history-delete" onclick="deleteWeightEntry(${i})">✕</span></div>`).join('');
     updateBMI();
 }
-
-function deleteWeightEntry(i) { 
-    weightHistory.splice(i,1); 
-    saveAllData(); 
-    updateWeightStatsAndList(); 
-    renderWeightChart(); 
-}
-
-function addWeightEntry() { 
-    let w=parseFloat(document.getElementById('newWeight').value), d=document.getElementById('weightDate').value||new Date().toISOString().split('T')[0]; 
-    if(!w||w<30||w>500) return; 
-    let ex=weightHistory.findIndex(e=>e.date===d); if(ex>=0&&!confirm(i18n('overwrite_weight'))) return; 
-    if(ex>=0) weightHistory.splice(ex,1); 
-    weightHistory.push({date:d,weight:w}); 
-    saveAllData(); 
-    updateWeightStatsAndList(); 
-    renderWeightChart(); 
-    document.getElementById('newWeight').value=''; 
-    vibrate(); 
-}
+function deleteWeightEntry(i) { weightHistory.splice(i,1); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); }
+function addWeightEntry() { let w=parseFloat(document.getElementById('newWeight').value), d=document.getElementById('weightDate').value||new Date().toISOString().split('T')[0]; if(!w||w<30||w>500) return; let ex=weightHistory.findIndex(e=>e.date===d); if(ex>=0&&!confirm(i18n('overwrite_weight'))) return; if(ex>=0) weightHistory.splice(ex,1); weightHistory.push({date:d,weight:w}); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); document.getElementById('newWeight').value=''; vibrate(); }
 
 function renderWeightChart() {
-    let canvas=document.getElementById('weightChart'), ctx=canvas.getContext('2d'); 
-    if(chartInstance) chartInstance.destroy(); 
-    if(!weightHistory.length) return;
+    let canvas=document.getElementById('weightChart'), ctx=canvas.getContext('2d'); if(chartInstance) chartInstance.destroy(); if(!weightHistory.length) return;
     let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55, col='#4FACFE';
     if(s.length>1){ let f=s[0].weight, l=s[s.length-1].weight; if(l<f) col='#6BCB77'; else if(l>f) col='#F85149'; }
     let w=s.map(e=>e.weight), min=Math.min(...w,goal)-1, max=Math.max(...w,goal)+1, grad=ctx.createLinearGradient(0,0,0,canvas.height);
@@ -1778,43 +1129,23 @@ function loadData() {
     weightHistory=JSON.parse(localStorage.getItem('weightHistory')||'[]');
     if(currentProfile && !currentProfile.goal) currentProfile.goal = 'lose';
 }
-
-function saveAllData() { 
-    if(currentProfile) localStorage.setItem('fitnessProfile',JSON.stringify(currentProfile)); 
-    localStorage.setItem('todayFoods',JSON.stringify(todayFoods)); 
-    localStorage.setItem('weightHistory',JSON.stringify(weightHistory)); 
-}
-
-function checkDateReset() { 
-    let ld=localStorage.getItem('lastDate'), td=new Date().toDateString(); 
-    if(ld!==td){ 
-        todayFoods=[]; localStorage.setItem('waterAmount',0); waterAmount=0; 
-        workoutEnabled=false; localStorage.setItem('workoutEnabled',false); 
-        localStorage.setItem('lastDate',td); saveAllData(); 
-    } 
-}
+function saveAllData() { if(currentProfile) localStorage.setItem('fitnessProfile',JSON.stringify(currentProfile)); localStorage.setItem('todayFoods',JSON.stringify(todayFoods)); localStorage.setItem('weightHistory',JSON.stringify(weightHistory)); }
+function checkDateReset() { let ld=localStorage.getItem('lastDate'), td=new Date().toDateString(); if(ld!==td){ todayFoods=[]; localStorage.setItem('waterAmount',0); waterAmount=0; workoutEnabled=false; localStorage.setItem('workoutEnabled',false); localStorage.setItem('lastDate',td); saveAllData(); } }
 
 function updateGreeting() {
-    if(greetingTimeout) clearTimeout(greetingTimeout); 
-    let h=new Date().getHours(), k='day'; 
-    if(h>=5&&h<12) k='morning'; else if(h>=12&&h<18) k='day'; else if(h>=18&&h<23) k='evening'; else k='night';
+    if(greetingTimeout) clearTimeout(greetingTimeout); let h=new Date().getHours(), k='day'; if(h>=5&&h<12) k='morning'; else if(h>=12&&h<18) k='day'; else if(h>=18&&h<23) k='evening'; else k='night';
     let s1=document.getElementById('greetingSlide1'), s2=document.getElementById('greetingSlide2'), strek=document.getElementById('streakEmoji'), name=currentProfile?.name||'';
-    if(strek){ strek.style.opacity='0'; strek.classList.add('fade-in'); } 
-    s1.innerHTML=`<h1>${i18n(k)}, ${name}</h1>`; s2.innerHTML='<h1>FitCat</h1>'; 
-    s1.classList.remove('hidden'); s2.classList.remove('visible');
+    if(strek){ strek.style.opacity='0'; strek.classList.add('fade-in'); } s1.innerHTML=`<h1>${i18n(k)}, ${name}</h1>`; s2.innerHTML='<h1>FitCat</h1>'; s1.classList.remove('hidden'); s2.classList.remove('visible');
     greetingTimeout=setTimeout(()=>{ s1.classList.add('hidden'); s2.classList.add('visible'); if(strek){ strek.style.display='inline-block'; requestAnimationFrame(()=>{ strek.style.opacity='1'; strek.classList.remove('fade-in'); }); } updateStreak(); },3500);
 }
 
 function completeSetup() {
-    try{ 
-        let n=document.getElementById('setupName').value.trim(), a=parseInt(document.getElementById('setupAge').value), g=document.getElementById('setupGender').value, h=parseFloat(document.getElementById('setupHeight').value), w=parseFloat(document.getElementById('setupWeight').value);
+    try{ let n=document.getElementById('setupName').value.trim(), a=parseInt(document.getElementById('setupAge').value), g=document.getElementById('setupGender').value, h=parseFloat(document.getElementById('setupHeight').value), w=parseFloat(document.getElementById('setupWeight').value);
         if(!n||!a||a<10||a>100||!g||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
         currentProfile = { name:n, age:a, gender:g, goal:'lose', height:h, weight:w, startWeight:w, targetWeight:Math.round(w*0.9*10)/10 };
         calculateTargets(); saveAllData(); localStorage.setItem('lastDate',new Date().toDateString());
         document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block';
-        updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); 
-        initSwipe();
-        vibrate();
+        updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); initSwipe(); vibrate();
     } catch(e) { alert('Ошибка'); }
 }
 
@@ -1829,46 +1160,26 @@ function calculateTargets() {
     dailyTargets = { kcal: Math.round(tdee * goalMult), protein: Math.round(p.weight*1.8), fat: Math.round(p.weight*0.9), carbs: Math.round((tdee*goalMult - p.weight*1.8*4 - p.weight*0.9*9)/4), water: waterTotal };
 }
 
-function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); startRingAnimation(); }
+function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
 
-// ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ С АНИМАЦИЕЙ ==========
+// ========== ГЛАДКИЕ КРУГИ С АНИМАЦИЕЙ ==========
 function startRingAnimation() {
     let c={kcal:0,protein:0,fat:0,carbs:0}; 
     todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
-    
-    targetRingValues = {
-        kcal: c.kcal,
-        protein: c.protein,
-        fat: c.fat,
-        carbs: c.carbs,
-        water: waterAmount
-    };
-    
+    targetRingValues = { kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs };
     if (animFrame) cancelAnimationFrame(animFrame);
     animateRings();
 }
 
 function animateRings() {
-    let changed = false;
-    const ease = 0.12;
-    
-    for (let key of ['kcal', 'protein', 'fat', 'carbs', 'water']) {
+    let changed = false; const ease = 0.1;
+    for (let key of ['kcal', 'protein', 'fat', 'carbs']) {
         let diff = targetRingValues[key] - currentRingValues[key];
-        if (Math.abs(diff) > 0.1) {
-            currentRingValues[key] += diff * ease;
-            changed = true;
-        } else {
-            currentRingValues[key] = targetRingValues[key];
-        }
+        if (Math.abs(diff) > 0.1) { currentRingValues[key] += diff * ease; changed = true; }
+        else { currentRingValues[key] = targetRingValues[key]; }
     }
-    
     drawAllRings();
-    
-    if (changed) {
-        animFrame = requestAnimationFrame(animateRings);
-    } else {
-        animFrame = null;
-    }
+    if (changed) { animFrame = requestAnimationFrame(animateRings); } else { animFrame = null; }
 }
 
 function drawAllRings() {
@@ -1876,14 +1187,11 @@ function drawAllRings() {
     drawRing('ringProtein', currentRingValues.protein, dailyTargets.protein, '#4FACFE', '#00F2FE');
     drawRing('ringFat', currentRingValues.fat, dailyTargets.fat, '#FFD93D', '#FFB347');
     drawRing('ringCarbs', currentRingValues.carbs, dailyTargets.carbs, '#6BCB77', '#9B59B6');
-    drawWaterRingAnimated(currentRingValues.water);
-    
     updateRingTexts();
 }
 
 function drawRing(canvasId, current, target, color1, color2) {
-    let canvas = document.getElementById(canvasId);
-    if(!canvas) return;
+    let canvas = document.getElementById(canvasId); if(!canvas) return;
     let ctx = canvas.getContext('2d');
     let w = canvas.width, h = canvas.height;
     let centerX = w/2, centerY = h/2;
@@ -1891,57 +1199,8 @@ function drawRing(canvasId, current, target, color1, color2) {
     let lineWidth = 8;
     
     ctx.clearRect(0, 0, w, h);
-    
-    // Фоновое кольцо
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(48, 54, 61, 0.4)';
-    ctx.lineWidth = lineWidth;
-    ctx.stroke();
-    
-    // Прогресс (без ограничения 100%)
-    let pct = current / target;
-    let start = -0.5 * Math.PI;
-    let end = start + (2 * Math.PI * Math.min(pct, 1));
-    
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, start, end);
-    
-    let gradient;
-    try {
-        gradient = ctx.createConicGradient(start, centerX, centerY);
-    } catch(e) {
-        gradient = ctx.createLinearGradient(0, 0, w, h);
-    }
-    gradient.addColorStop(0, color1);
-    gradient.addColorStop(1, pct > 1 ? '#F85149' : color2);
-    
-    ctx.strokeStyle = gradient;
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    
-    // Если переизбыток, рисуем красную полоску сверху
-    if (pct > 1) {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, start, start + (2 * Math.PI));
-        ctx.strokeStyle = '#F85149';
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-    }
-}
-
-function drawWaterRingAnimated(current) {
-    let canvas = document.getElementById('waterRingCanvas');
-    if(!canvas) return;
-    let ctx = canvas.getContext('2d');
-    let w = 150, h = 150;
-    let centerX = 75, centerY = 75;
-    let radius = 60;
-    let lineWidth = 10;
-    
-    ctx.clearRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     
     // Фон
     ctx.beginPath();
@@ -1950,33 +1209,28 @@ function drawWaterRingAnimated(current) {
     ctx.lineWidth = lineWidth;
     ctx.stroke();
     
-    // Прогресс (без ограничения)
-    let pct = current / dailyTargets.water;
+    // Прогресс (без ограничения, показываем переизбыток)
+    let pct = current / target;
     let start = -0.5 * Math.PI;
     let end = start + (2 * Math.PI * Math.min(pct, 1));
     
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, start, end);
     
-    let gradient;
-    try {
-        gradient = ctx.createConicGradient(start, centerX, centerY);
-    } catch(e) {
-        gradient = ctx.createLinearGradient(0, 0, w, h);
-    }
-    gradient.addColorStop(0, '#00F2FE');
-    gradient.addColorStop(1, pct > 1 ? '#F85149' : '#4FACFE');
+    let gradient = ctx.createLinearGradient(0, 0, w, h);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
     
     ctx.strokeStyle = gradient;
     ctx.lineWidth = lineWidth;
     ctx.lineCap = 'round';
     ctx.stroke();
     
-    // Переизбыток
+    // Если переизбыток - рисуем остаток тем же цветом (не меняем)
     if (pct > 1) {
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, start, start + (2 * Math.PI));
-        ctx.strokeStyle = '#F85149';
+        ctx.strokeStyle = gradient;
         ctx.lineWidth = lineWidth;
         ctx.lineCap = 'round';
         ctx.stroke();
@@ -1985,260 +1239,143 @@ function drawWaterRingAnimated(current) {
 
 function updateRingTexts() {
     let c = currentRingValues;
-    
     let kcalRing = document.querySelector('#ringKcal')?.parentElement?.querySelector('.ring-value');
-    if (kcalRing) {
-        if (ringDisplayMode.kcal === 'value') {
-            kcalRing.textContent = Math.round(c.kcal);
-            if (c.kcal > dailyTargets.kcal) kcalRing.style.color = '#F85149';
-            else kcalRing.style.color = '#E6EDF3';
-        } else {
-            let pct = (c.kcal / dailyTargets.kcal) * 100;
-            kcalRing.textContent = Math.round(pct) + '%';
-        }
-    }
-    
+    if (kcalRing) kcalRing.textContent = ringDisplayMode.kcal === 'value' ? Math.round(c.kcal) : Math.round((c.kcal/dailyTargets.kcal)*100) + '%';
     let protRing = document.querySelector('#ringProtein')?.parentElement?.querySelector('.ring-value');
-    if (protRing) {
-        if (ringDisplayMode.protein === 'value') {
-            protRing.textContent = Math.round(c.protein);
-            if (c.protein > dailyTargets.protein) protRing.style.color = '#F85149';
-            else protRing.style.color = '#E6EDF3';
-        } else {
-            let pct = (c.protein / dailyTargets.protein) * 100;
-            protRing.textContent = Math.round(pct) + '%';
-        }
-    }
-    
+    if (protRing) protRing.textContent = ringDisplayMode.protein === 'value' ? Math.round(c.protein) : Math.round((c.protein/dailyTargets.protein)*100) + '%';
     let fatRing = document.querySelector('#ringFat')?.parentElement?.querySelector('.ring-value');
-    if (fatRing) {
-        if (ringDisplayMode.fat === 'value') {
-            fatRing.textContent = Math.round(c.fat);
-            if (c.fat > dailyTargets.fat) fatRing.style.color = '#F85149';
-            else fatRing.style.color = '#E6EDF3';
-        } else {
-            let pct = (c.fat / dailyTargets.fat) * 100;
-            fatRing.textContent = Math.round(pct) + '%';
-        }
-    }
-    
+    if (fatRing) fatRing.textContent = ringDisplayMode.fat === 'value' ? Math.round(c.fat) : Math.round((c.fat/dailyTargets.fat)*100) + '%';
     let carbRing = document.querySelector('#ringCarbs')?.parentElement?.querySelector('.ring-value');
-    if (carbRing) {
-        if (ringDisplayMode.carbs === 'value') {
-            carbRing.textContent = Math.round(c.carbs);
-            if (c.carbs > dailyTargets.carbs) carbRing.style.color = '#F85149';
-            else carbRing.style.color = '#E6EDF3';
-        } else {
-            let pct = (c.carbs / dailyTargets.carbs) * 100;
-            carbRing.textContent = Math.round(pct) + '%';
-        }
-    }
+    if (carbRing) carbRing.textContent = ringDisplayMode.carbs === 'value' ? Math.round(c.carbs) : Math.round((c.carbs/dailyTargets.carbs)*100) + '%';
 }
 
 function toggleRingDisplay(type) {
-    if (ringDisplayMode[type] === 'value') {
-        ringDisplayMode[type] = 'percent';
-    } else {
-        ringDisplayMode[type] = 'value';
-    }
-    
+    ringDisplayMode[type] = ringDisplayMode[type] === 'value' ? 'percent' : 'value';
     updateRingTexts();
-    
     if (ringTimeouts[type]) clearTimeout(ringTimeouts[type]);
-    ringTimeouts[type] = setTimeout(() => {
-        ringDisplayMode[type] = 'value';
-        updateRingTexts();
-    }, 2000);
+    ringTimeouts[type] = setTimeout(() => { ringDisplayMode[type] = 'value'; updateRingTexts(); }, 2000);
 }
 
 function renderProgressBars() {
     let c={kcal:0,protein:0,fat:0,carbs:0}; 
     todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
-    
-    currentRingValues = { kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs, water: waterAmount };
+    currentRingValues = { kcal: c.kcal, protein: c.protein, fat: c.fat, carbs: c.carbs };
     targetRingValues = { ...currentRingValues };
     
     let cont=document.getElementById('progressBars');
     let html = `
         <div class="rings-container">
             <div class="ring-item" onclick="toggleRingDisplay('kcal')">
-                <div class="ring-canvas-container">
-                    <canvas id="ringKcal" class="ring-canvas" width="100" height="100"></canvas>
-                    <div class="ring-value">${Math.round(c.kcal)}</div>
-                </div>
-                <div class="ring-label">${i18n('calories')}</div>
-                <div class="ring-target">/${dailyTargets.kcal} ${i18n('kcal')}</div>
+                <div class="ring-canvas-container"><canvas id="ringKcal" class="ring-canvas" width="100" height="100"></canvas><div class="ring-value">${Math.round(c.kcal)}</div></div>
+                <div class="ring-label">${i18n('calories')}</div><div class="ring-target">/${dailyTargets.kcal} ${i18n('kcal')}</div>
             </div>
             <div class="ring-item" onclick="toggleRingDisplay('protein')">
-                <div class="ring-canvas-container">
-                    <canvas id="ringProtein" class="ring-canvas" width="100" height="100"></canvas>
-                    <div class="ring-value">${Math.round(c.protein)}</div>
-                </div>
-                <div class="ring-label">${i18n('protein')}</div>
-                <div class="ring-target">/${dailyTargets.protein} ${i18n('g')}</div>
+                <div class="ring-canvas-container"><canvas id="ringProtein" class="ring-canvas" width="100" height="100"></canvas><div class="ring-value">${Math.round(c.protein)}</div></div>
+                <div class="ring-label">${i18n('protein')}</div><div class="ring-target">/${dailyTargets.protein} ${i18n('g')}</div>
             </div>
             <div class="ring-item" onclick="toggleRingDisplay('fat')">
-                <div class="ring-canvas-container">
-                    <canvas id="ringFat" class="ring-canvas" width="100" height="100"></canvas>
-                    <div class="ring-value">${Math.round(c.fat)}</div>
-                </div>
-                <div class="ring-label">${i18n('fat')}</div>
-                <div class="ring-target">/${dailyTargets.fat} ${i18n('g')}</div>
+                <div class="ring-canvas-container"><canvas id="ringFat" class="ring-canvas" width="100" height="100"></canvas><div class="ring-value">${Math.round(c.fat)}</div></div>
+                <div class="ring-label">${i18n('fat')}</div><div class="ring-target">/${dailyTargets.fat} ${i18n('g')}</div>
             </div>
             <div class="ring-item" onclick="toggleRingDisplay('carbs')">
-                <div class="ring-canvas-container">
-                    <canvas id="ringCarbs" class="ring-canvas" width="100" height="100"></canvas>
-                    <div class="ring-value">${Math.round(c.carbs)}</div>
-                </div>
-                <div class="ring-label">${i18n('carbs')}</div>
-                <div class="ring-target">/${dailyTargets.carbs} ${i18n('g')}</div>
+                <div class="ring-canvas-container"><canvas id="ringCarbs" class="ring-canvas" width="100" height="100"></canvas><div class="ring-value">${Math.round(c.carbs)}</div></div>
+                <div class="ring-label">${i18n('carbs')}</div><div class="ring-target">/${dailyTargets.carbs} ${i18n('g')}</div>
             </div>
         </div>
     `;
     cont.innerHTML = html;
-    
-    requestAnimationFrame(() => {
-        drawAllRings();
-    });
+    requestAnimationFrame(() => drawAllRings());
 }
 
 // ========== СВАЙП (ИСПРАВЛЕННЫЙ) ==========
 function initSwipe() {
     const container = document.getElementById('swipeContainer');
     const wrapper = document.getElementById('swipeWrapper');
-    
     if (!container || !wrapper) return;
-    
     container.addEventListener('touchstart', handleSwipeStart, { passive: true });
     container.addEventListener('touchmove', handleSwipeMove, { passive: false });
     container.addEventListener('touchend', handleSwipeEnd);
-    
-    updateSwipePosition(0);
+    updateSwipePosition(currentPage);
 }
 
 function handleSwipeStart(e) {
-    // Не запускаем свайп если касание на интерактивном элементе
     const target = e.target;
-    if (target.closest('button') || target.closest('input') || target.closest('select') || target.closest('.food-toggle') || target.closest('.food-delete') || target.closest('.activity-daily-item') || target.closest('.segmented-option')) {
-        return;
-    }
-    
+    if (target.closest('button') || target.closest('input') || target.closest('select') || target.closest('.food-toggle') || target.closest('.food-delete') || target.closest('.activity-daily-item') || target.closest('.segmented-option') || target.closest('.tab')) return;
     swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
     isSwiping = true;
-    swipePreventClick = false;
+    swipeDirection = null;
 }
 
 function handleSwipeMove(e) {
     if (!isSwiping) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - swipeStartX;
+    const diffY = currentY - swipeStartY;
     
-    swipeCurrentX = e.touches[0].clientX;
-    const diff = swipeCurrentX - swipeStartX;
-    const wrapper = document.getElementById('swipeWrapper');
-    
-    if (Math.abs(diff) > 10) {
-        e.preventDefault();
-        swipePreventClick = true;
-    }
-    
-    const containerWidth = document.getElementById('swipeContainer').offsetWidth;
-    const currentOffset = -currentPage * containerWidth;
-    const maxOffset = 0;
-    const minOffset = -containerWidth * 2;
-    const dragOffset = Math.max(minOffset, Math.min(maxOffset, currentOffset + diff));
-    
-    wrapper.style.transition = 'none';
-    wrapper.style.transform = `translateX(${dragOffset}px)`;
-}
-
-function handleSwipeEnd(e) {
-    if (!isSwiping) return;
-    isSwiping = false;
-    
-    const diff = swipeCurrentX - swipeStartX;
-    const wrapper = document.getElementById('swipeWrapper');
-    wrapper.style.transition = '';
-    
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0 && currentPage > 0) {
-            currentPage--;
-        } else if (diff < 0 && currentPage < 2) {
-            currentPage++;
+    if (swipeDirection === null) {
+        if (Math.abs(diffX) > DIRECTION_LOCK_THRESHOLD || Math.abs(diffY) > DIRECTION_LOCK_THRESHOLD) {
+            swipeDirection = Math.abs(diffX) > Math.abs(diffY) ? 'horizontal' : 'vertical';
         }
     }
     
+    if (swipeDirection === 'horizontal') {
+        e.preventDefault();
+        const wrapper = document.getElementById('swipeWrapper');
+        const containerWidth = document.getElementById('swipeContainer').offsetWidth;
+        const currentOffset = -currentPage * containerWidth;
+        const dragOffset = Math.max(-containerWidth * 2, Math.min(0, currentOffset + diffX));
+        wrapper.style.transition = 'none';
+        wrapper.style.transform = `translateX(${dragOffset}px)`;
+    }
+}
+
+function handleSwipeEnd(e) {
+    if (!isSwiping || swipeDirection !== 'horizontal') { isSwiping = false; return; }
+    isSwiping = false;
+    const diffX = swipeCurrentX - swipeStartX;
+    const wrapper = document.getElementById('swipeWrapper');
+    wrapper.style.transition = '';
+    if (Math.abs(diffX) > SWIPE_THRESHOLD) {
+        if (diffX > 0 && currentPage > 0) currentPage--;
+        else if (diffX < 0 && currentPage < 2) currentPage++;
+    }
     updateSwipePosition(currentPage);
     updateTabsFromSwipe(currentPage);
-    
-    // Предотвращаем клики после свайпа
-    if (swipePreventClick) {
-        setTimeout(() => { swipePreventClick = false; }, 100);
-    }
 }
 
 function updateSwipePosition(page) {
     const wrapper = document.getElementById('swipeWrapper');
     const container = document.getElementById('swipeContainer');
-    if (wrapper && container) {
-        const offset = -page * container.offsetWidth;
-        wrapper.style.transform = `translateX(${offset}px)`;
-    }
-    
-    document.querySelectorAll('.swipe-dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === page);
-    });
-    
+    if (wrapper && container) { const offset = -page * container.offsetWidth; wrapper.style.transform = `translateX(${offset}px)`; }
+    document.querySelectorAll('.swipe-dot').forEach((dot, i) => dot.classList.toggle('active', i === page));
     currentPage = page;
 }
 
 function updateTabsFromSwipe(page) {
     const tabs = ['today', 'activity', 'weight'];
     const activeTab = tabs[page];
-    
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.tab === activeTab);
-    });
-    
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === activeTab));
     document.getElementById('todayPage').classList.toggle('active', page === 0);
     document.getElementById('activityPage').classList.toggle('active', page === 1);
     document.getElementById('weightPage').classList.toggle('active', page === 2);
-    
-    if (page === 2) {
-        updateWeightStatsAndList();
-        renderWeightChart();
-        updateBMI();
-    }
-    if (page === 1 && currentProfile) {
-        updateActivityUI();
-    }
+    if (page === 2) { updateWeightStatsAndList(); renderWeightChart(); updateBMI(); }
+    if (page === 1 && currentProfile) { updateActivityUI(); }
 }
 
 function switchTab(tab, ev) {
-    if (ev) {
-        ev.stopPropagation();
-    }
-    
+    if (ev) ev.stopPropagation();
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    const activeTabEl = document.querySelector(`.tab[data-tab="${tab}"]`);
-    if (activeTabEl) activeTabEl.classList.add('active');
-    
+    document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add('active');
     const pageMap = { 'today': 0, 'activity': 1, 'weight': 2 };
-    const page = pageMap[tab] || 0;
-    
-    currentPage = page;
-    updateSwipePosition(page);
-    
-    document.getElementById('todayPage').classList.toggle('active', page === 0);
-    document.getElementById('activityPage').classList.toggle('active', page === 1);
-    document.getElementById('weightPage').classList.toggle('active', page === 2);
-    
-    if (page === 2) {
-        updateWeightStatsAndList();
-        renderWeightChart();
-        updateBMI();
-    }
-    if (page === 1 && currentProfile) {
-        updateActivityUI();
-    }
+    currentPage = pageMap[tab] || 0;
+    updateSwipePosition(currentPage);
+    document.getElementById('todayPage').classList.toggle('active', currentPage === 0);
+    document.getElementById('activityPage').classList.toggle('active', currentPage === 1);
+    document.getElementById('weightPage').classList.toggle('active', currentPage === 2);
+    if (currentPage === 2) { updateWeightStatsAndList(); renderWeightChart(); updateBMI(); }
+    if (currentPage === 1 && currentProfile) { updateActivityUI(); }
 }
 
 function showPage(pageId) {
@@ -2249,100 +1386,39 @@ function showPage(pageId) {
     if(pageId==='mainPage'){
         document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
         document.querySelector('.tab:first-child')?.classList.add('active');
-        currentPage = 0;
-        updateSwipePosition(0);
+        currentPage = 0; updateSwipePosition(0);
         document.getElementById('todayPage').classList.add('active');
         document.getElementById('activityPage').classList.remove('active');
         document.getElementById('weightPage').classList.remove('active');
     }
 }
 
-function showProductsManager() {
-    document.getElementById('mainPage').style.display='none';
-    document.getElementById('settingsPage').style.display='none';
-    document.getElementById('productsPage').style.display='block';
-    renderProductsList();
-}
-
+function showProductsManager() { document.getElementById('mainPage').style.display='none'; document.getElementById('settingsPage').style.display='none'; document.getElementById('productsPage').style.display='block'; renderProductsList(); }
 function renderProductsList() {
-    let c=document.getElementById('productsList'); 
-    if(!productsDB.length){ c.innerHTML=`<div class="text-center text-small">${i18n('no_templates')}</div>`; return; }
-    c.innerHTML = productsDB.map((p,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:rgba(1,4,9,0.3);border-radius:20px;margin-bottom:8px;backdrop-filter:blur(10px);"><div><div style="font-weight:600;">${p.name}</div><div style="font-size:12px;color:#9CA3AF;">${p.protein}/${p.fat}/${p.carbs} ${p.kcal}${i18n('kcal')}</div></div><div style="display:flex;gap:8px;"><button class="btn-small" onclick="editProduct(${i})">✏️</button><button class="btn-small" onclick="deleteProduct(${i})">🗑️</button></div></div>`).join('');
+    let c=document.getElementById('productsList'); if(!productsDB.length){ c.innerHTML=`<div class="text-center text-small">${i18n('no_templates')}</div>`; return; }
+    c.innerHTML = productsDB.map((p,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(1,4,9,0.5);border-radius:16px;margin-bottom:8px;"><div><div style="font-weight:500;">${p.name}</div><div style="font-size:12px;color:#9CA3AF;">${p.protein}/${p.fat}/${p.carbs} ${p.kcal}${i18n('kcal')}</div></div><div style="display:flex;gap:8px;"><button class="btn-small" onclick="editProduct(${i})">✏️</button><button class="btn-small" onclick="deleteProduct(${i})">🗑️</button></div></div>`).join('');
 }
-
-function editProduct(i) { 
-    let p=productsDB[i], n=prompt(i18n('name'),p.name); if(n)p.name=n; 
-    let prot=prompt(i18n('protein'),p.protein); if(prot)p.protein=parseFloat(prot); 
-    let fat=prompt(i18n('fat'),p.fat); if(fat)p.fat=parseFloat(fat); 
-    let carbs=prompt(i18n('carbs'),p.carbs); if(carbs)p.carbs=parseFloat(carbs); 
-    let kcal=prompt(i18n('calories'),p.kcal); if(kcal)p.kcal=parseFloat(kcal); 
-    saveProductsDB(); renderProductsList(); 
-}
-
+function editProduct(i) { let p=productsDB[i], n=prompt(i18n('name'),p.name); if(n)p.name=n; let prot=prompt(i18n('protein'),p.protein); if(prot)p.protein=parseFloat(prot); let fat=prompt(i18n('fat'),p.fat); if(fat)p.fat=parseFloat(fat); let carbs=prompt(i18n('carbs'),p.carbs); if(carbs)p.carbs=parseFloat(carbs); let kcal=prompt(i18n('calories'),p.kcal); if(kcal)p.kcal=parseFloat(kcal); saveProductsDB(); renderProductsList(); }
 function deleteProduct(i) { if(confirm(i18n('delete_product'))){ productsDB.splice(i,1); saveProductsDB(); renderProductsList(); } }
+function exportData() { let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); }
+function importData() { let i=document.createElement('input'); i.type='file'; i.accept='.json'; i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; i.click(); }
 
-function exportData() { 
-    let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); 
-    a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); 
-}
-
-function importData() { 
-    let i=document.createElement('input'); i.type='file'; i.accept='.json'; 
-    i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; 
-    i.click(); 
-}
-
-// Глобальные функции
-window.setLanguage=setLanguage;
-window.setSetupLanguage=setSetupLanguage;
-window.setSettingsLanguage=setSettingsLanguage;
-window.selectSetupGender=selectSetupGender;
-window.selectProfileGender=selectProfileGender;
-window.selectProfileGoal=selectProfileGoal;
-window.selectWorkoutIntensity=selectWorkoutIntensity;
-window.completeSetup=completeSetup;
-window.switchTab=switchTab;
-window.showProfile=showProfile;
-window.saveProfile=saveProfile;
-window.deleteAccount=deleteAccount;
-window.toggleCard=toggleCard;
-window.addWater=addWater;
-window.setManualWater=setManualWater;
-window.openSmartWater=openSmartWater;
-window.closeSmartWater=closeSmartWater;
-window.selectDailyActivity=selectDailyActivity;
-window.applyDailyActivity=applyDailyActivity;
-window.uploadPhoto=uploadPhoto;
-window.handlePhotoUpload=handlePhotoUpload;
-window.deletePhoto=deletePhoto;
-window.openSmartSearch=openSmartSearch;
-window.closeSmartSearch=closeSmartSearch;
-window.openAbout=openAbout;
-window.closeAbout=closeAbout;
-window.fillFromProduct=fillFromProduct;
-window.fillFromOFF=fillFromOFF;
-window.saveTemplate=saveTemplate;
-window.loadTemplate=loadTemplate;
-window.deleteTemplate=deleteTemplate;
-window.clearTodayFoods=clearTodayFoods;
-window.addFood=addFood;
-window.toggleFood=toggleFood;
-window.deleteFood=deleteFood;
-window.openScanner=openScanner;
-window.closeScanner=closeScanner;
-window.lookupBarcode=lookupBarcode;
-window.setWeightGoal=setWeightGoal;
-window.deleteWeightEntry=deleteWeightEntry;
-window.addWeightEntry=addWeightEntry;
-window.showPage=showPage;
-window.showProductsManager=showProductsManager;
-window.editProduct=editProduct;
-window.deleteProduct=deleteProduct;
-window.exportData=exportData;
-window.importData=importData;
-window.showBMITooltip=showBMITooltip;
+window.setLanguage=setLanguage; window.setSetupLanguage=setSetupLanguage; window.setSettingsLanguage=setSettingsLanguage;
+window.selectSetupGender=selectSetupGender; window.selectProfileGender=selectProfileGender; window.selectProfileGoal=selectProfileGoal;
+window.selectWorkoutIntensity=selectWorkoutIntensity; window.completeSetup=completeSetup;
+window.switchTab=switchTab; window.showProfile=showProfile; window.saveProfile=saveProfile; window.deleteAccount=deleteAccount;
+window.toggleCard=toggleCard; window.addWater=addWater; window.setManualWater=setManualWater; window.openSmartWater=openSmartWater;
+window.closeSmartWater=closeSmartWater; window.selectDailyActivity=selectDailyActivity; window.applyDailyActivity=applyDailyActivity;
+window.uploadPhoto=uploadPhoto; window.handlePhotoUpload=handlePhotoUpload; window.deletePhoto=deletePhoto;
+window.openSmartSearch=openSmartSearch; window.closeSmartSearch=closeSmartSearch;
+window.openAbout=openAbout; window.closeAbout=closeAbout; window.fillFromProduct=fillFromProduct; window.fillFromOFF=fillFromOFF;
+window.saveTemplate=saveTemplate; window.loadTemplate=loadTemplate; window.deleteTemplate=deleteTemplate; window.clearTodayFoods=clearTodayFoods;
+window.addFood=addFood; window.toggleFood=toggleFood; window.deleteFood=deleteFood; window.openScanner=openScanner;
+window.closeScanner=closeScanner; window.lookupBarcode=lookupBarcode; window.setWeightGoal=setWeightGoal;
+window.deleteWeightEntry=deleteWeightEntry; window.addWeightEntry=addWeightEntry; window.showPage=showPage;
+window.showProductsManager=showProductsManager; window.editProduct=editProduct; window.deleteProduct=deleteProduct;
+window.exportData=exportData; window.importData=importData; window.showBMITooltip=showBMITooltip;
 window.toggleRingDisplay=toggleRingDisplay;
-window.toggleWaterDisplay=toggleWaterDisplay;
 
 window.onload = function() {
     let sl = localStorage.getItem('fitcat_lang')||'ru'; setLanguage(sl);
@@ -2356,57 +1432,22 @@ window.onload = function() {
     currentSteps = parseInt(localStorage.getItem('currentSteps')||'8000');
     currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
     waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
-    
-    if(!currentProfile){
-        document.getElementById('setupPage').style.display='block';
-        document.getElementById('mainPage').style.display='none';
-    } else {
-        document.getElementById('setupPage').style.display='none';
-        document.getElementById('mainPage').style.display='block';
-        calculateTargets(); renderDashboard(); renderTemplates(); checkDateReset(); 
-        updateGreeting(); updateActivityUI(); updateWaterHint(); updateHeaderPhoto(); updateBMI(); updateWaterDisplay();
-        initSwipe();
-    }
+    if(!currentProfile){ document.getElementById('setupPage').style.display='block'; document.getElementById('mainPage').style.display='none'; }
+    else { document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block';
+        calculateTargets(); renderDashboard(); renderTemplates(); checkDateReset(); updateGreeting(); updateActivityUI();
+        updateWaterHint(); updateHeaderPhoto(); updateBMI(); updateWaterDisplay(); initSwipe(); }
     updateStreak();
-    
     function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
     genTicks('tempTicks',50); genTicks('stepsTicks',20); genTicks('resultsTicks',45);
-    
     document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
     document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
     document.getElementById('resultsSlider')?.addEventListener('input', function(){ document.getElementById('resultsDisplay').innerText=this.value; smartSearchResults=parseInt(this.value); });
-    
-    document.getElementById('smartWaterToggle')?.addEventListener('change', function(){ 
-        smartWaterEnabled=this.checked; 
-        document.getElementById('smartWaterToggleLabel').innerText=i18n(smartWaterEnabled?'on':'off'); 
-        document.getElementById('smartWaterSettings').style.display=smartWaterEnabled?'block':'none'; 
-        document.getElementById('waterBaseOnly').style.display=smartWaterEnabled?'none':'block'; 
-        localStorage.setItem('smartWaterEnabled',smartWaterEnabled); 
-        if(!smartWaterEnabled){ calculateTargets(); updateWaterDisplay(); renderProgressBars(); } 
-        else { applySmartWaterSettings(); } 
-    });
-    
-    document.getElementById('smartSearchToggle')?.addEventListener('change', function(){ 
-        smartSearchEnabled=this.checked; 
-        document.getElementById('smartSearchToggleLabel').innerText=i18n(smartSearchEnabled?'on':'off'); 
-        document.getElementById('smartSearchSettings').style.display=smartSearchEnabled?'block':'none'; 
-        localStorage.setItem('smartSearchEnabled',smartSearchEnabled); 
-    });
-    
-    document.getElementById('workoutToggle')?.addEventListener('change', function() {
-        workoutEnabled = this.checked;
-        document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off');
-        document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none';
-        localStorage.setItem('workoutEnabled', workoutEnabled);
-        calculateTargets(); renderDashboard(); updateWaterHint();
-        if(smartWaterEnabled) updateWaterCalculation();
-    });
-    
+    document.getElementById('smartWaterToggle')?.addEventListener('change', function(){ smartWaterEnabled=this.checked; document.getElementById('smartWaterToggleLabel').innerText=i18n(smartWaterEnabled?'on':'off'); document.getElementById('smartWaterSettings').style.display=smartWaterEnabled?'block':'none'; document.getElementById('waterBaseOnly').style.display=smartWaterEnabled?'none':'block'; localStorage.setItem('smartWaterEnabled',smartWaterEnabled); if(!smartWaterEnabled){ calculateTargets(); updateWaterDisplay(); renderProgressBars(); } else { applySmartWaterSettings(); } });
+    document.getElementById('smartSearchToggle')?.addEventListener('change', function(){ smartSearchEnabled=this.checked; document.getElementById('smartSearchToggleLabel').innerText=i18n(smartSearchEnabled?'on':'off'); document.getElementById('smartSearchSettings').style.display=smartSearchEnabled?'block':'none'; localStorage.setItem('smartSearchEnabled',smartSearchEnabled); });
+    document.getElementById('workoutToggle')?.addEventListener('change', function() { workoutEnabled = this.checked; document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off'); document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none'; localStorage.setItem('workoutEnabled', workoutEnabled); calculateTargets(); renderDashboard(); updateWaterHint(); if(smartWaterEnabled) updateWaterCalculation(); });
     if(localStorage.getItem('card_waterCard_collapsed')==='true') document.getElementById('waterContent')?.classList.add('collapsed');
     if(localStorage.getItem('card_mealsCard_collapsed')==='true') document.getElementById('mealsContent')?.classList.add('collapsed');
-    
     let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
-    
     updateAllI18n();
 };
 
