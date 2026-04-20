@@ -1,254 +1,1976 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
-  <title>FitCat · Elysium Edition</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { background: #0a0a0f; min-height: 100vh; }
-    body {
-      background: transparent;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #ffffff;
-      padding: 16px 12px 40px;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(180, 0, 255, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 40% 80%, rgba(0, 255, 200, 0.08) 0%, transparent 50%),
-        #0a0a0f;
-      z-index: -2;
-      animation: nebulaBreathe 20s ease-in-out infinite alternate;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noise"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" opacity="0.03"/%3E%3C/svg%3E');
-      opacity: 0.5;
-      pointer-events: none;
-      z-index: -1;
-    }
-    @keyframes nebulaBreathe {
-      0% { opacity: 0.8; transform: scale(1); }
-      100% { opacity: 1; transform: scale(1.05); }
-    }
-    .app { max-width: 500px; margin: 0 auto; animation: fadeSlide 0.6s cubic-bezier(0.2,0.9,0.3,1); }
-    @keyframes fadeSlide { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: translateY(0); } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
+<title>FitCat</title>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;FitCat&quot;,&quot;short_name&quot;:&quot;FitCat&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0D1117&quot;,&quot;theme_color&quot;:&quot;#0D1117&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230D1117'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%234FACFE'%3E🐱%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;100x100&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230D1117'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%234FACFE'%3E🐱%3C/text%3E%3C/svg%3E">
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Карточка — Жидкое Стекло */
-    .card {
-      position: relative;
-      background: rgba(15, 20, 30, 0.35);
-      backdrop-filter: blur(20px) saturate(200%);
-      -webkit-backdrop-filter: blur(20px) saturate(200%);
-      border-radius: 40px;
-      padding: 24px 20px;
-      margin-bottom: 22px;
-      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(0, 240, 255, 0.1) inset;
-      transition: transform 0.3s ease, box-shadow 0.4s ease;
-      border: 1px solid transparent;
-      background-clip: padding-box;
-      animation: cardGlow 6s ease-in-out infinite alternate;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -2px; left: -2px; right: -2px; bottom: -2px;
-      background: conic-gradient(from 0deg, #00F0FF, #B400FF, #00FFC8, #00F0FF);
-      border-radius: 42px;
-      z-index: -1;
-      opacity: 0.6;
-      animation: borderRotate 8s linear infinite;
-    }
-    @keyframes borderRotate { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-    @keyframes cardGlow { 0% { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 20px rgba(0,240,255,0.1) inset; } 100% { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), 0 0 40px rgba(180,0,255,0.15) inset; } }
+html { background: #0D1117; min-height: 100vh; }
 
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-    .greeting-wrapper { position: relative; height: 54px; min-width: 160px; }
-    .greeting-slide { position: absolute; top: 0; left: 0; right: 0; }
-    .greeting-slide h1 {
-      font-size: 32px; font-weight: 800; letter-spacing: -0.02em;
-      background: linear-gradient(145deg, #ffffff, #00F0FF, #B400FF);
-      background-size: 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; animation: shimmerText 4s ease-in-out infinite;
-      text-shadow: 0 0 30px rgba(0,240,255,0.5);
-    }
-    @keyframes shimmerText { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+body {
+    background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #E6EDF3; padding: 16px 12px 40px; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+}
 
-    h2 {
-      font-size: 22px; font-weight: 700; letter-spacing: -0.3px;
-      color: #ffffff; margin-bottom: 20px;
-      text-shadow: 0 0 20px rgba(0,240,255,0.3);
-    }
+/* ========== УСИЛЕННЫЙ ГРАДИЕНТНЫЙ ФОН С ЧАСТИЦАМИ ========== */
+body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 30%, #16213E 50%, #1A1B2F 70%, #0D1117 100%);
+    z-index: -2; animation: bgPulse 12s ease-in-out infinite;
+    background-size: 300% 300%;
+}
 
-    /* Инпуты — Неоновый киберпанк */
-    input, select {
-      width: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px);
-      border: none; border-bottom: 2px solid rgba(0, 240, 255, 0.5);
-      border-radius: 20px 20px 8px 8px; padding: 16px 18px;
-      font-size: 16px; font-family: 'Space Mono', monospace; color: #fff;
-      outline: none; transition: all 0.3s;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-    input:focus {
-      border-bottom: 2px solid #00F0FF;
-      box-shadow: 0 0 30px rgba(0,240,255,0.3), 0 8px 20px rgba(0,0,0,0.3);
-    }
-    input::placeholder { color: rgba(255,255,255,0.4); font-family: 'Inter', sans-serif; }
+/* Плавающие частицы */
+body::after {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 30%),
+        radial-gradient(circle at 40% 40%, rgba(0, 242, 254, 0.06) 0%, transparent 25%),
+        radial-gradient(circle at 90% 70%, rgba(255, 107, 107, 0.06) 0%, transparent 25%),
+        radial-gradient(circle at 10% 30%, rgba(107, 203, 119, 0.06) 0%, transparent 25%);
+    z-index: -1; animation: particleFloat 20s ease-in-out infinite;
+    pointer-events: none;
+}
 
-    /* Кнопки — Глюк-эффект */
-    .btn-primary {
-      width: 100%; border: none; border-radius: 60px 20px 60px 20px;
-      padding: 18px 24px; font-size: 18px; font-weight: 700;
-      background: linear-gradient(145deg, #00F0FF, #B400FF); color: #0a0a0f;
-      box-shadow: 0 12px 30px -5px rgba(0,240,255,0.4);
-      cursor: pointer; transition: all 0.2s;
-      text-transform: uppercase; letter-spacing: 1px;
-      font-family: 'Space Mono', monospace;
-    }
-    .btn-primary:active {
-      transform: scale(0.96);
-      box-shadow: 5px 5px 0 #00F0FF, -5px -5px 0 #B400FF, 0 12px 30px -5px rgba(0,240,255,0.6);
-    }
+@keyframes bgPulse { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
 
-    /* Кольца — Квантовые */
-    .rings-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-around; margin: 20px 0 10px; }
-    .ring-container { text-align: center; width: 100px; }
-    .ring-canvas { width: 100px; height: 100px; display: block; margin: 0 auto 10px; filter: drop-shadow(0 0 15px currentColor); }
-    .ring-label {
-      font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
-      color: rgba(255,255,255,0.7);
-    }
-    .ring-value {
-      font-size: 20px; font-weight: 800; font-family: 'Space Mono', monospace;
-      color: #fff; text-shadow: 0 0 15px currentColor;
-    }
+@keyframes particleFloat {
+    0%, 100% { opacity: 0.6; transform: scale(1) translate(0, 0); }
+    33% { opacity: 1; transform: scale(1.1) translate(-1%, -1%); }
+    66% { opacity: 0.8; transform: scale(0.95) translate(1%, 1%); }
+}
 
-    /* Вкладки */
-    .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
-    .tab {
-      flex:1; text-align:center; padding:16px; background:rgba(15,20,30,0.5); backdrop-filter:blur(12px);
-      border-radius: 30px 10px 30px 10px; font-weight:700; color:rgba(255,255,255,0.6);
-      border:1px solid rgba(0,240,255,0.2); cursor: pointer; transition: 0.2s;
-    }
-    .tab.active { background: linear-gradient(145deg, #00F0FF, #B400FF); color:#0a0a0f; box-shadow: 0 0 30px #00F0FF; }
+/* ========== GLASSMORPHISM БАЗА ========== */
+.app { 
+    max-width: 480px; margin: 0 auto; 
+    animation: slideInFromBottom 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
 
-    .food-item {
-      display:flex; align-items:center; gap:12px; padding:16px; background:rgba(0,0,0,0.2);
-      backdrop-filter:blur(8px); border-radius:24px; margin-bottom:10px; border:1px solid rgba(0,240,255,0.15);
-    }
-  </style>
+@keyframes slideInFromBottom { 
+    from { opacity: 0; transform: translateY(30px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* Анимированные переходы между страницами */
+.page {
+    animation: pageEnter 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.header-row { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 28px; width: 100%; 
+}
+
+.greeting-wrapper { position: relative; height: 48px; min-width: 180px; overflow: visible; }
+
+.greeting-slide {
+    position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center;
+    transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.4s ease; 
+    opacity: 1; transform: translateY(0);
+}
+
+.greeting-slide h1 {
+    font-size: 28px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word;
+    background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 40%, #A855F7 70%, #FF6B6B 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; background-size: 300% 100%; 
+    animation: textShimmer 5s ease-in-out infinite;
+    text-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+}
+
+@keyframes textShimmer { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
+
+.greeting-slide.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.greeting-slide.next { transform: translateY(100%); opacity: 0; }
+.greeting-slide.next.visible { transform: translateY(0); opacity: 1; }
+
+.header-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* ========== КАРТОЧКИ GLASS ========== */
+.card {
+    background: rgba(22, 27, 34, 0.35); 
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(79, 172, 254, 0.15); 
+    border-radius: 32px; padding: 22px 20px; margin-bottom: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(79, 172, 254, 0.05) inset, 0 0 30px rgba(79, 172, 254, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    animation: cardGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes cardGlow {
+    from { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(79, 172, 254, 0.05) inset, 0 0 20px rgba(79, 172, 254, 0.08); }
+    to { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(79, 172, 254, 0.15) inset, 0 0 35px rgba(168, 85, 247, 0.12); }
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(79, 172, 254, 0.3);
+}
+
+.card-header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 12px; cursor: pointer; 
+}
+
+h2 { 
+    font-size: 18px; font-weight: 600; color: #E6EDF3; 
+    letter-spacing: -0.3px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 16px;
+}
+
+.card-content { transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1); overflow: hidden; }
+.card-content.collapsed { display: none; }
+
+/* ========== ФОРМЫ GLASS ========== */
+.input-group { margin-bottom: 18px; position: relative; }
+
+label { 
+    display: block; font-size: 13px; font-weight: 500; color: #B0B8C1; 
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; 
+}
+
+input, select {
+    width: 100%; background: rgba(1, 4, 9, 0.4); 
+    border: 1.5px solid rgba(48, 54, 61, 0.5); 
+    border-radius: 20px;
+    padding: 14px 18px; font-size: 16px; color: #E6EDF3; outline: none; 
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    -webkit-appearance: none; font-family: inherit; 
+    backdrop-filter: blur(10px);
+}
+
+input:focus { 
+    border-color: #4FACFE; 
+    box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.15), 0 0 20px rgba(79, 172, 254, 0.3); 
+    background: rgba(1, 4, 9, 0.6);
+    transform: scale(1.01);
+}
+
+input::placeholder { color: #6B7280; opacity: 0.7; }
+input[type="date"] { color-scheme: dark; }
+
+.segmented-control { 
+    display: flex; background: rgba(1, 4, 9, 0.5); 
+    border: 1.5px solid rgba(48, 54, 61, 0.4); 
+    border-radius: 20px; padding: 4px; 
+    backdrop-filter: blur(10px);
+}
+
+.segmented-option {
+    flex: 1; text-align: center; padding: 12px; border-radius: 16px;
+    font-size: 15px; font-weight: 600; color: #9CA3AF; cursor: pointer; 
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.segmented-option.active { 
+    background: linear-gradient(135deg, #4FACFE, #A855F7); 
+    color: #fff; 
+    box-shadow: 0 6px 15px rgba(79, 172, 254, 0.4);
+    transform: scale(1.02);
+}
+
+/* ========== КНОПКИ GLASS ========== */
+.btn-primary, .btn-secondary, .btn-small, .water-btn {
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.btn-primary:active, .btn-secondary:active, .btn-small:active, .water-btn:active { 
+    transform: scale(0.96); 
+}
+
+.btn-primary {
+    width: 100%; border: none; border-radius: 60px; padding: 18px 24px; 
+    font-size: 17px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px; -webkit-appearance: none;
+    text-align: center;
+    background: rgba(26, 32, 39, 0.7); 
+    color: #E6EDF3; 
+    position: relative; z-index: 1; 
+    border: 1.5px solid transparent; 
+    background-clip: padding-box;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary::before {
+    content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+    background: linear-gradient(135deg, #00F2FE, #4FACFE, #A855F7, #FF6B6B, #00F2FE);
+    background-size: 400% 100%; border-radius: 60px; z-index: -1; 
+    animation: borderShimmer 5s linear infinite;
+    opacity: 0.8;
+}
+
+@keyframes borderShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 400% 50%; } }
+
+.btn-primary:hover { 
+    transform: scale(1.02); 
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.4), 0 0 0 1px rgba(79, 172, 254, 0.3) inset;
+}
+
+.btn-secondary {
+    width: 100%; border: none; border-radius: 60px; padding: 18px 24px; 
+    font-size: 17px; font-weight: 700;
+    cursor: pointer; margin-bottom: 10px; 
+    background: transparent; 
+    border: 1.5px solid rgba(48, 54, 61, 0.6); 
+    color: #E6EDF3;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    border-color: rgba(79, 172, 254, 0.5);
+    background: rgba(79, 172, 254, 0.05);
+}
+
+.btn-small {
+    background: rgba(26, 32, 39, 0.6); 
+    border: 1.5px solid rgba(48, 54, 61, 0.5);
+    border-radius: 40px;
+    padding: 12px 18px; font-size: 14px; color: #E6EDF3; cursor: pointer; 
+    backdrop-filter: blur(10px);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+    background: rgba(79, 172, 254, 0.15);
+    border-color: rgba(79, 172, 254, 0.4);
+}
+
+.lang-btn { flex: 1; }
+.lang-btn.active { 
+    background: linear-gradient(135deg, #4FACFE, #A855F7); 
+    border-color: transparent; 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.btn-danger { background: transparent; border: 1.5px solid rgba(248, 81, 73, 0.5); color: #F85149; }
+.btn-danger:hover { background: rgba(248, 81, 73, 0.1); border-color: #F85149; }
+
+/* ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ ========== */
+.rings-container {
+    display: flex; flex-wrap: wrap; justify-content: space-around; 
+    gap: 16px; margin-bottom: 8px;
+}
+
+.ring-item {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100px;
+}
+
+.ring-canvas-container {
+    position: relative; width: 100px; height: 100px;
+}
+
+.ring-canvas {
+    width: 100%; height: 100%;
+}
+
+.ring-value {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 18px; font-weight: 700; color: #E6EDF3; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.ring-label {
+    margin-top: 8px; font-size: 13px; font-weight: 600; color: #B0B8C1;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.ring-target {
+    font-size: 11px; color: #6B7280; margin-top: 2px;
+}
+
+/* Водный прогресс отдельно */
+.water-ring-container {
+    display: flex; justify-content: center; margin: 8px 0;
+}
+
+.water-ring {
+    position: relative; width: 140px; height: 140px; margin: 0 auto;
+}
+
+.water-ring-canvas {
+    width: 100%; height: 100%;
+}
+
+.water-ring-value {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.water-ring-current {
+    font-size: 32px; font-weight: 800; 
+    background: linear-gradient(135deg, #00F2FE, #4FACFE);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+
+.water-ring-goal {
+    font-size: 14px; color: #9CA3AF;
+}
+
+/* ========== ВОДА ========== */
+.water-buttons { display: flex; gap: 10px; margin: 16px 0; }
+
+.water-btn {
+    flex: 1; background: rgba(26, 32, 39, 0.6); 
+    border: 1.5px solid rgba(48, 54, 61, 0.5);
+    border-radius: 40px;
+    padding: 12px; font-size: 16px; font-weight: 600; color: #E6EDF3; 
+    cursor: pointer; text-align: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.water-btn:hover {
+    background: rgba(0, 242, 254, 0.1);
+    border-color: rgba(0, 242, 254, 0.3);
+    transform: scale(1.02);
+}
+
+.water-manual { display: flex; gap: 10px; margin-top: 12px; }
+.water-manual input { flex: 2; }
+.water-manual button { flex: 1; }
+
+/* ========== ТАБЫ ========== */
+.tabs { 
+    display: flex; gap: 8px; margin-bottom: 24px; 
+    background: rgba(22, 27, 34, 0.3);
+    backdrop-filter: blur(15px);
+    border-radius: 60px;
+    padding: 6px;
+    border: 1px solid rgba(79, 172, 254, 0.1);
+}
+
+.tab {
+    flex: 1; text-align: center; padding: 14px; 
+    background: transparent;
+    border-radius: 60px; cursor: pointer; font-weight: 600; color: #9CA3AF; 
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    font-size: 15px;
+}
+
+.tab.active { 
+    background: linear-gradient(135deg, #4FACFE, #A855F7); 
+    color: #fff; 
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+    transform: scale(1.02);
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== СПИСОК ЕДЫ ========== */
+.food-list { margin: 16px 0; }
+
+.food-item {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    background: rgba(1, 4, 9, 0.3); 
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(79, 172, 254, 0.1);
+    border-radius: 24px; margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.food-item:hover {
+    background: rgba(79, 172, 254, 0.08);
+    border-color: rgba(79, 172, 254, 0.2);
+}
+
+.food-toggle {
+    width: 30px; height: 30px; border-radius: 50%; 
+    border: 2px solid #4FACFE; background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.food-toggle.checked { 
+    background: linear-gradient(135deg, #4FACFE, #A855F7); 
+    border-color: transparent; 
+}
+.food-toggle.checked::after { content: '✓'; color: #fff; font-size: 16px; font-weight: bold; }
+
+.food-info { flex: 1; }
+.food-name { font-weight: 600; }
+.food-macros { font-size: 12px; color: #9CA3AF; }
+
+.food-delete { 
+    color: #F85149; cursor: pointer; padding: 10px; font-size: 18px; 
+    opacity: 0.7; transition: opacity 0.2s;
+}
+.food-delete:hover { opacity: 1; }
+
+/* ========== ШАБЛОНЫ ========== */
+.templates-bar { 
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; 
+    min-height: 44px; 
+}
+
+.template-btn {
+    background: rgba(26, 32, 39, 0.6); 
+    border: 1.5px solid rgba(48, 54, 61, 0.4);
+    border-radius: 40px;
+    padding: 10px 18px; font-size: 14px; color: #E6EDF3; cursor: pointer; 
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.template-btn:hover {
+    background: rgba(79, 172, 254, 0.15);
+    border-color: rgba(79, 172, 254, 0.3);
+}
+
+/* ========== ПРОФИЛЬ ========== */
+.profile-photo {
+    width: 110px; height: 110px; border-radius: 50%; 
+    background: linear-gradient(135deg, #1A2027, #0D1117); 
+    border: 3px solid #4FACFE;
+    margin: 0 auto 12px; cursor: pointer; overflow: hidden; display: flex;
+    align-items: center; justify-content: center;
+    box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+}
+
+.profile-photo img { width: 100%; height: 100%; object-fit: cover; }
+.profile-initials { font-size: 44px; font-weight: 600; color: #E6EDF3; line-height: 1; }
+
+.header-photo {
+    width: 52px; height: 52px; border-radius: 50%; 
+    background: linear-gradient(135deg, #1A2027, #0D1117);
+    border: 2.5px solid #4FACFE;
+    cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; 
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+}
+
+.header-photo img { width: 100%; height: 100%; object-fit: cover; }
+.header-initials { font-size: 22px; font-weight: 600; color: #E6EDF3; line-height: 1; }
+
+/* ========== СТРИК ========== */
+.streak-emoji {
+    font-size: 30px; line-height: 1; display: inline-block; cursor: pointer;
+    transition: transform 0.3s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+.streak-emoji.fade-in { opacity: 0; }
+.streak-emoji.none { filter: drop-shadow(0 0 12px #6B7280); }
+.streak-emoji.red { filter: drop-shadow(0 0 20px #FF4500); animation: glowPulse 2s infinite; }
+.streak-emoji.yellow { filter: drop-shadow(0 0 25px #FFD700); animation: glowPulse 1.6s infinite; }
+.streak-emoji.purple { filter: drop-shadow(0 0 30px #A855F7); animation: glowPulse 1.2s infinite; }
+.streak-emoji.rainbow { animation: rainbowGlow 3s linear infinite, glowPulse 1.5s infinite; }
+
+@keyframes glowPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+@keyframes rainbowGlow {
+    0%{filter:drop-shadow(0 0 25px #F00)} 25%{filter:drop-shadow(0 0 25px #FF0)}
+    50%{filter:drop-shadow(0 0 25px #0FF)} 75%{filter:drop-shadow(0 0 25px #80F)}
+    100%{filter:drop-shadow(0 0 25px #F00)}
+}
+
+/* ========== BMI ========== */
+.bmi-container { margin: 16px 0 8px; }
+.bmi-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.bmi-value { font-size: 28px; font-weight: 700; }
+.bmi-category { font-size: 16px; font-weight: 500; color: #B0B8C1; }
+
+.bmi-scale { position: relative; height: 24px; margin: 12px 0; cursor: pointer; }
+.bmi-gradient {
+    position: absolute; top: 0; left: 0; right: 0; height: 10px;
+    background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); 
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+.bmi-marker {
+    position: absolute; top: -5px; width: 5px; height: 20px; background: white; 
+    border-radius: 4px;
+    transform: translateX(-50%); 
+    box-shadow: 0 0 20px rgba(255,255,255,0.6); 
+    transition: left 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.bmi-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #9CA3AF; }
+.bmi-tooltip {
+    position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+    background: rgba(26, 32, 39, 0.9); backdrop-filter: blur(15px);
+    border: 1.5px solid #4FACFE; border-radius: 20px; padding: 8px 16px;
+    font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+.bmi-scale:hover .bmi-tooltip { opacity: 1; }
+
+/* ========== АКТИВНОСТЬ ========== */
+.activity-daily-options { display: flex; flex-direction: column; gap: 12px; }
+.activity-daily-item {
+    background: rgba(1, 4, 9, 0.3); 
+    border: 1.5px solid rgba(48, 54, 61, 0.4);
+    border-radius: 24px;
+    padding: 18px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+    backdrop-filter: blur(10px); transition: all 0.3s ease;
+}
+.activity-daily-item.selected { 
+    border-color: #4FACFE; 
+    background: rgba(79, 172, 254, 0.12); 
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.2);
+}
+
+/* ========== ИСТОРИЯ ВЕСА ========== */
+.weight-history-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px;
+    background: rgba(1, 4, 9, 0.25); backdrop-filter: blur(8px);
+    border-radius: 20px; margin-bottom: 8px;
+    border: 1px solid rgba(79, 172, 254, 0.08);
+}
+.weight-history-date { font-size: 14px; color: #B0B8C1; }
+.weight-history-value { font-weight: 600; font-size: 17px; margin-right: auto; padding-left: 12px; }
+.weight-history-delete { color: #F85149; cursor: pointer; padding: 6px 12px; font-size: 18px; opacity: 0.7; }
+.weight-history-delete:hover { opacity: 1; }
+
+/* ========== СЛАЙДЕРЫ ========== */
+.slider-container { padding: 20px 0; }
+.slider-labels { display: flex; justify-content: space-between; margin-bottom: 16px; color: #9CA3AF; font-size: 12px; }
+.slider-wrapper { position: relative; height: 40px; margin-top: 4px; }
+.slider-gradient {
+    position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 8px; 
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+.temp-gradient { background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); }
+.steps-gradient { background: linear-gradient(to right, #6BCB77, #4D96FF, #9B59B6); }
+.search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
+
+.slider-ticks {
+    position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between;
+    transform: translateY(-50%); pointer-events: none; padding: 0 2px;
+}
+.tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
+
+input[type=range] {
+    position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%);
+    background: transparent; z-index: 2; -webkit-appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 28px; height: 28px; 
+    background: white; border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 0 0 4px rgba(79, 172, 254, 0.3); 
+    border: 2px solid #4FACFE; cursor: pointer;
+    transition: transform 0.2s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.slider-value { text-align: center; margin-top: 20px; font-size: 18px; font-weight: 600; }
+
+/* ========== АВТОКОМПЛИТ ========== */
+.autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; 
+    background: rgba(26, 32, 39, 0.95); backdrop-filter: blur(20px);
+    border: 1.5px solid rgba(79, 172, 254, 0.3);
+    border-radius: 24px; margin-top: 8px; max-height: 260px; overflow-y: auto; 
+    z-index: 200; display: none;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+.autocomplete-item {
+    padding: 14px 18px; cursor: pointer; 
+    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: background 0.2s;
+}
+.autocomplete-item:hover { background: rgba(79, 172, 254, 0.15); }
+.autocomplete-item .off-name { font-weight: 600; }
+.autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
+
+/* ========== SWITCH ========== */
+.apple-switch { position: relative; display: inline-block; width: 55px; height: 31px; }
+.apple-switch input { opacity: 0; width: 0; height: 0; }
+.apple-switch .slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(48, 54, 61, 0.8); border: 1.5px solid rgba(48, 54, 61, 0.6);
+    border-radius: 31px; transition: 0.3s;
+    backdrop-filter: blur(5px);
+}
+.apple-switch .slider:before {
+    position: absolute; content: ""; height: 25px; width: 25px; left: 2px; bottom: 1.5px;
+    background-color: white; border-radius: 50%; transition: 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.apple-switch input:checked + .slider { background: linear-gradient(135deg, #4FACFE, #A855F7); border-color: transparent; }
+.apple-switch input:checked + .slider:before { transform: translateX(26px); }
+
+.toggle-label { margin-left: 14px; font-size: 15px; color: #B0B8C1; }
+
+/* ========== МОДАЛКИ ========== */
+.scanner-container, .smart-water-modal, .about-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+    background: rgba(13, 17, 23, 0.98); backdrop-filter: blur(20px);
+    z-index: 1000; display: none; flex-direction: column; padding: 20px;
+    overflow-y: auto;
+}
+.about-content {
+    background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(25px);
+    border: 1.5px solid rgba(79, 172, 254, 0.2);
+    border-radius: 32px; padding: 28px 24px; margin-top: 20px;
+}
+.about-content h3 { font-size: 20px; font-weight: 600; color: #E6EDF3; margin-top: 24px; margin-bottom: 16px; }
+.about-content h3:first-of-type { margin-top: 0; }
+.about-content p { font-size: 15px; line-height: 1.7; color: #B0B8C1; margin-bottom: 14px; }
+.about-content ul { list-style: none; padding-left: 0; margin-bottom: 20px; }
+.about-content li { font-size: 15px; line-height: 2; color: #B0B8C1; padding-left: 24px; position: relative; }
+.about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 22px; }
+.about-content .divider { height: 1px; background: rgba(79, 172, 254, 0.2); margin: 24px 0; }
+
+/* ========== УТИЛИТЫ ========== */
+.flex { display: flex; gap: 10px; align-items: center; }
+.text-center { text-align: center; }
+.text-small { font-size: 13px; color: #9CA3AF; }
+.mb-2 { margin-bottom: 10px; }
+
+.profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 20px; }
+.profile-header .btn-small { position: absolute; left: 0; }
+.profile-header h2 { margin: 0; text-align: center; }
+
+.workout-section { margin-top: 28px; }
+</style>
 </head>
 <body>
+
 <div class="app">
-  <div id="mainPage">
-    <div class="header-row">
-      <div class="greeting-wrapper"><div class="greeting-slide"><h1>Elysium</h1></div></div>
-      <div class="header-actions"><span class="streak-emoji">🔥</span></div>
-    </div>
-    <div class="tabs"><div class="tab active">Сегодня</div><div class="tab">Активность</div><div class="tab">Вес</div></div>
 
-    <!-- КОЛЬЦА -->
-    <div class="card">
-      <h2>⚡ Квантовые кольца</h2>
-      <div class="rings-grid" id="ringsContainer"></div>
+<!-- Модалки -->
+<div id="scannerModal" class="scanner-container">
+    <div style="padding:20px;display:flex;justify-content:space-between;background:transparent;">
+        <h2 data-i18n="scanner">Сканер</h2>
+        <button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button>
     </div>
-
-    <!-- ВОДА -->
-    <div class="card">
-      <h2>💧 Живая вода</h2>
-      <div style="text-align:center;"><span id="waterCurrent" style="font-size:36px;font-family:'Space Mono';font-weight:800;">0</span><span style="color:rgba(255,255,255,0.5);">/</span><span id="waterGoal">2000 мл</span></div>
-      <div style="display:flex;gap:10px;margin-top:20px;">
-        <div class="water-btn" style="flex:1;padding:14px;background:rgba(0,240,255,0.1);border-radius:20px;text-align:center;cursor:pointer;" onclick="addWater(100)">+100</div>
-        <div class="water-btn" style="flex:1;padding:14px;background:rgba(180,0,255,0.1);border-radius:20px;text-align:center;cursor:pointer;" onclick="addWater(200)">+200</div>
-      </div>
+    <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;border-radius:32px;" playsinline></video>
+    <div style="padding:24px;text-align:center;">
+        <div style="display:flex;gap:10px;">
+            <input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" style="flex:2;">
+            <button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)" style="flex:1;" data-i18n="search">Найти</button>
+        </div>
+        <div id="scannerHint" style="margin-top:16px;color:#9CA3AF;" data-i18n="scanner_hint">Наведите камеру</div>
+        <button class="btn-secondary" onclick="closeScanner()" style="margin-top:16px;" data-i18n="cancel">Отмена</button>
     </div>
-
-    <!-- ПРОДУКТЫ -->
-    <div class="card">
-      <h2>🍣 Нейро-еда</h2>
-      <div id="foodListContainer"></div>
-      <div style="display:flex;gap:10px;margin:16px 0;"><input id="foodName" placeholder="Название"><input id="foodWeight" placeholder="Вес, г" type="number"></div>
-      <button class="btn-primary" onclick="addFood()">+ Добавить</button>
-    </div>
-  </div>
 </div>
 
+<div id="smartWaterModal" class="smart-water-modal">
+    <div style="display:flex;justify-content:space-between;margin-bottom:28px;">
+        <h2 data-i18n="smart_water">Умная вода</h2>
+        <button class="btn-small" onclick="closeSmartWater()" data-i18n="close">Закрыть</button>
+    </div>
+    <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+            <span data-i18n="enable">Включить</span>
+            <div style="display:flex; align-items:center;">
+                <label class="apple-switch"><input type="checkbox" id="smartWaterToggle"><span class="slider"></span></label>
+                <span class="toggle-label" id="smartWaterToggleLabel" data-i18n="off">Выкл</span>
+            </div>
+        </div>
+        <div id="smartWaterSettings" style="display:none;">
+            <div class="slider-container">
+                <div class="slider-labels"><span>🥶 -10°</span><span>0°</span><span>10°</span><span>20°</span><span>30°</span><span>🔥 40°+</span></div>
+                <div class="slider-wrapper"><div class="slider-gradient temp-gradient"></div><div class="slider-ticks" id="tempTicks"></div><input type="range" id="tempSlider" min="-10" max="40" value="22" step="1"></div>
+                <div class="slider-value"><span data-i18n="now_temp">Сейчас</span>: <span id="tempDisplay">22°C</span></div>
+            </div>
+            <div class="slider-container">
+                <div class="slider-labels"><span>0</span><span>5k</span><span>10k</span><span>15k</span><span>20k+</span></div>
+                <div class="slider-wrapper"><div class="slider-gradient steps-gradient"></div><div class="slider-ticks" id="stepsTicks"></div><input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100"></div>
+                <div class="slider-value"><span data-i18n="steps">Шаги</span>: <span id="stepsDisplay">8 000</span></div>
+            </div>
+            <div style="padding:20px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
+                <div class="flex" style="justify-content:space-between;"><span data-i18n="base_norm">Базовая норма</span>: <span id="baseWaterNorm">1820 мл</span></div>
+                <div class="flex" style="justify-content:space-between;"><span data-i18n="temperature">Температура</span>: <span id="tempBonus">+150 мл</span></div>
+                <div class="flex" style="justify-content:space-between;"><span data-i18n="steps">Шаги</span>: <span id="stepsBonus">+150 мл</span></div>
+                <div class="flex" style="justify-content:space-between;font-weight:700;margin-top:12px;"><span data-i18n="total">ИТОГО</span>: <span id="totalWaterNorm">2120 мл</span></div>
+            </div>
+        </div>
+        <div style="padding:20px;background:rgba(1,4,9,0.3);border-radius:24px;margin-top:24px;backdrop-filter:blur(10px);" id="waterBaseOnly">
+            <div class="flex" style="justify-content:space-between;"><span data-i18n="water_norm">Норма воды</span>: <span id="baseOnlyWater">1820 мл</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="smartSearchModal" class="smart-water-modal">
+    <div style="display:flex;justify-content:space-between;margin-bottom:28px;">
+        <h2 data-i18n="smart_search">Умный поиск</h2>
+        <button class="btn-small" onclick="closeSmartSearch()" data-i18n="close">Закрыть</button>
+    </div>
+    <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+            <span data-i18n="enable">Включить</span>
+            <div style="display:flex; align-items:center;">
+                <label class="apple-switch"><input type="checkbox" id="smartSearchToggle"><span class="slider"></span></label>
+                <span class="toggle-label" id="smartSearchToggleLabel" data-i18n="off">Выкл</span>
+            </div>
+        </div>
+        <div id="smartSearchSettings" style="display:none;">
+            <div class="slider-container">
+                <div class="slider-labels"><span>5</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div>
+                <div class="slider-wrapper"><div class="slider-gradient search-gradient"></div><div class="slider-ticks" id="resultsTicks"></div><input type="range" id="resultsSlider" min="5" max="50" value="10" step="1"></div>
+                <div class="slider-value"><span data-i18n="results">Результатов</span>: <span id="resultsDisplay">10</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="aboutModal" class="about-modal">
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+        <h2 data-i18n="about">О приложении</h2>
+        <button class="btn-small" onclick="closeAbout()" data-i18n="close">Закрыть</button>
+    </div>
+    <div class="about-content">
+        <h3>Disclaimer</h3>
+        <p>FitCat is not a medical application. All calculations (calories, macronutrients, water intake, BMI) are based on general formulas and provided for informational purposes only. They do not constitute medical advice, diagnosis, or treatment.</p>
+        <p>Always consult a qualified healthcare professional before making any changes to your diet, exercise routine, or lifestyle. The developer assumes no liability for any consequences resulting from the use of this application.</p>
+        <h3>Third-Party Services & Libraries</h3>
+        <p>This application uses the following open-source libraries and services:</p>
+        <ul><li>OpenFoodFacts (world.openfoodfacts.org) — food product database. Used for barcode scanning and product search.</li><li>ZXing (Zebra Crossing) — barcode scanning library (Apache License 2.0).</li><li>QuaggaJS — barcode scanning library (MIT License).</li><li>Chart.js — charting library (MIT License).</li></ul>
+        <p>All product data is provided by OpenFoodFacts and may not be complete or accurate. The developer is not responsible for the accuracy of third-party data.</p>
+        <h3>Data Privacy</h3>
+        <p>All personal data (profile, food diary, weight history, photos) is stored exclusively on your device using browser localStorage. No data is transmitted to any server or third party. The developer does not have access to your data.</p>
+        <h3>No Warranty</h3>
+        <p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p>
+        <div class="divider"></div>
+        <p class="text-center">FitCat v1.2 — Glassmorphism Edition 🐱</p>
+    </div>
+</div>
+
+<!-- Страница настройки -->
+<div id="setupPage">
+    <h1 style="font-size:42px;font-weight:800;margin-bottom:32px;text-align:center;background:linear-gradient(135deg,#00F2FE,#4FACFE,#A855F7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FitCat</h1>
+    <div class="card">
+        <h2 data-i18n="about_you">О себе</h2>
+        <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="setupName" data-i18n-placeholder="name_placeholder" placeholder="Введите имя"></div>
+        <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="setupAge" data-i18n-placeholder="age_placeholder" placeholder="Введите возраст" min="10" max="100"></div>
+        <div class="input-group"><label data-i18n="gender">Пол</label>
+            <div class="segmented-control" id="setupGenderControl">
+                <div class="segmented-option active" data-gender="female" onclick="selectSetupGender('female')" data-i18n="female">Женский</div>
+                <div class="segmented-option" data-gender="male" onclick="selectSetupGender('male')" data-i18n="male">Мужской</div>
+            </div>
+            <input type="hidden" id="setupGender" value="female">
+        </div>
+        <div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="setupHeight" data-i18n-placeholder="height_placeholder" placeholder="Введите рост" min="100" max="250"></div>
+        <div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="setupWeight" data-i18n-placeholder="weight_placeholder" placeholder="Введите вес" min="30" max="500" step="0.1"></div>
+    </div>
+    <button class="btn-primary" onclick="completeSetup()" data-i18n="start">Начать</button>
+    <div class="text-center text-small" style="margin-top:20px;" data-i18n="data_local">Данные только в твоём телефоне</div>
+    <div class="card" style="margin-top:24px;">
+        <h2 data-i18n="language">Язык</h2>
+        <div class="flex">
+            <button class="btn-small lang-btn active" id="setupLangRu" onclick="setSetupLanguage('ru')">🇷🇺</button>
+            <button class="btn-small lang-btn" id="setupLangEn" onclick="setSetupLanguage('en')">🇬🇧</button>
+            <button class="btn-small lang-btn" id="setupLangCn" onclick="setSetupLanguage('cn')">🇨🇳</button>
+        </div>
+    </div>
+</div>
+
+<!-- Главная страница -->
+<div id="mainPage" style="display:none;">
+    <div class="header-row">
+        <div style="flex:1; min-width:0;">
+            <div class="greeting-wrapper">
+                <div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div>
+                <div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span id="streakEmoji" class="streak-emoji none fade-in">🕯️</span>
+            <div class="header-photo" id="headerPhoto" onclick="showProfile()">
+                <span id="headerInitials" class="header-initials">🐱</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
+        <div class="tab" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
+        <div class="tab" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
+    </div>
+
+    <div id="todayPage" class="page active">
+        <div class="card">
+            <h2 data-i18n="progress">Прогресс</h2>
+            <div id="progressBars"></div>
+        </div>
+
+        <div class="card" id="waterCard">
+            <div class="card-header" onclick="toggleCard('waterCard')">
+                <h2 data-i18n="water_title">Вода</h2>
+                <button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button>
+            </div>
+            <div class="card-content" id="waterContent">
+                <div class="water-ring-container">
+                    <div class="water-ring">
+                        <canvas id="waterRingCanvas" class="water-ring-canvas" width="140" height="140"></canvas>
+                        <div class="water-ring-value">
+                            <div class="water-ring-current" id="waterCurrent">0</div>
+                            <div class="water-ring-goal"><span id="waterGoalDisplay">1820</span> <span data-i18n="ml">мл</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="water-buttons">
+                    <div class="water-btn" onclick="addWater(-50)">−50</div>
+                    <div class="water-btn" onclick="addWater(50)">+50</div>
+                    <div class="water-btn" onclick="addWater(100)">+100</div>
+                    <div class="water-btn" onclick="addWater(200)">+200</div>
+                </div>
+                <div class="water-manual">
+                    <input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10">
+                    <button class="btn-small" onclick="setManualWater()">✓</button>
+                </div>
+                <div id="smartWaterHint" class="text-small" style="margin-top:16px;"></div>
+            </div>
+        </div>
+
+        <div class="card" id="mealsCard">
+            <div class="card-header" onclick="toggleCard('mealsCard')">
+                <h2 data-i18n="meals">Продукты</h2>
+                <button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button>
+            </div>
+            <div class="card-content" id="mealsContent">
+                <div class="templates-bar" id="templatesBar"></div>
+                <div style="display:flex;gap:8px;margin-bottom:16px;">
+                    <button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button>
+                    <button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button>
+                    <button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button>
+                </div>
+                <div class="food-list" id="foodListContainer"></div>
+                <div class="add-food-form" style="display:flex;flex-direction:column;gap:10px;">
+                    <div class="input-group" style="position: relative;">
+                        <input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off">
+                        <div id="autocompleteList" class="autocomplete-list"></div>
+                    </div>
+                    <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
+                    <div style="display:flex;gap:8px;">
+                        <input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1">
+                        <input type="number" id="foodFat100" data-i18n-placeholder="fat_short" placeholder="Ж" step="0.1">
+                        <input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1">
+                        <input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал">
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;">
+                    </div>
+                    <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="activityPage" class="page">
+        <div class="card">
+            <h2 data-i18n="activity">Активность</h2>
+            <div class="activity-daily-options">
+                <div class="activity-daily-item" data-activity="1.2" onclick="selectDailyActivity(this)" data-i18n="sedentary">Сидячий</div>
+                <div class="activity-daily-item" data-activity="1.375" onclick="selectDailyActivity(this)" data-i18n="light">Умеренный</div>
+                <div class="activity-daily-item" data-activity="1.55" onclick="selectDailyActivity(this)" data-i18n="moderate">Активный</div>
+                <div class="activity-daily-item" data-activity="1.725" onclick="selectDailyActivity(this)" data-i18n="very_active">Очень активный</div>
+            </div>
+            <div class="workout-section">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                    <span data-i18n="workout">Тренировка</span>
+                    <div style="display:flex; align-items:center;">
+                        <label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label>
+                        <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
+                    </div>
+                </div>
+                <div id="workoutSettings" style="display:none;">
+                    <label style="display:block; margin-bottom:12px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
+                    <div class="segmented-control" id="workoutIntensityControl">
+                        <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div>
+                        <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div>
+                        <div class="segmented-option" data-intensity="intense" onclick="selectWorkoutIntensity('intense')" data-i18n="workout_intense">Интенсивная</div>
+                    </div>
+                    <input type="hidden" id="workoutIntensity" value="light">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:24px;" data-i18n="apply_today">Применить на сегодня</button>
+        </div>
+    </div>
+
+    <div id="weightPage" class="page">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2>
+                <button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button>
+            </div>
+            <div id="weightStats" style="margin-bottom:16px;padding:16px;background:rgba(1,4,9,0.3);border-radius:24px;backdrop-filter:blur(10px);">
+                <div class="flex" style="justify-content:space-around;text-align:center;">
+                    <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:22px;font-weight:700;" id="startWeightStat">---</div></div>
+                    <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:22px;font-weight:700;" id="currentWeightStat">---</div></div>
+                    <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:22px;font-weight:700;" id="weightChangeStat">---</div></div>
+                    <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:22px;font-weight:700;" id="toGoalStat">---</div></div>
+                </div>
+            </div>
+            <div class="bmi-container">
+                <div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div>
+                <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()">
+                    <div class="bmi-gradient"></div>
+                    <div class="bmi-marker" id="bmiMarker" style="left:0%;"></div>
+                    <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
+                </div>
+                <div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
+            </div>
+            <div class="flex mb-2" style="margin-top:16px;">
+                <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;">
+                <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.4);border:1.5px solid rgba(48,54,61,0.5);border-radius:20px;color:#E6EDF3;">
+                <button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button>
+            </div>
+            <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
+            <div style="margin-top:20px;">
+                <h3 data-i18n="history">История</h3>
+                <div id="weightHistoryList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Страница профиля -->
+<div id="profilePage" style="display:none;">
+    <div class="card">
+        <div class="profile-header">
+            <button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button>
+            <h2 data-i18n="profile">Профиль</h2>
+            <div style="width:60px;"></div>
+        </div>
+        <div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()">
+            <span id="profileInitials" class="profile-initials">🐱</span>
+        </div>
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+        <div style="text-align:center;margin-bottom:20px;">
+            <button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button>
+        </div>
+        <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="profileName"></div>
+        <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="profileAge" min="10" max="100"></div>
+        <div class="input-group"><label data-i18n="gender">Пол</label>
+            <div class="segmented-control" id="profileGenderControl">
+                <div class="segmented-option" data-gender="female" onclick="selectProfileGender('female')" data-i18n="female">Женский</div>
+                <div class="segmented-option" data-gender="male" onclick="selectProfileGender('male')" data-i18n="male">Мужской</div>
+            </div>
+            <input type="hidden" id="profileGender" value="female">
+        </div>
+        <div class="input-group"><label data-i18n="goal">Цель</label>
+            <div class="segmented-control" id="profileGoalControl">
+                <div class="segmented-option active" data-goal="lose" onclick="selectProfileGoal('lose')" data-i18n="lose">Похудение</div>
+                <div class="segmented-option" data-goal="maintain" onclick="selectProfileGoal('maintain')" data-i18n="maintain">Поддержание</div>
+                <div class="segmented-option" data-goal="gain" onclick="selectProfileGoal('gain')" data-i18n="gain">Набор</div>
+            </div>
+            <input type="hidden" id="profileGoal" value="lose">
+        </div>
+        <div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="profileHeight" min="100" max="250"></div>
+        <div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="profileWeight" min="30" max="500" step="0.1"></div>
+        <button class="btn-primary" onclick="saveProfile()" data-i18n="save">Сохранить</button>
+        <button class="btn-secondary" onclick="showPage('settingsPage')" data-i18n="settings">Настройки</button>
+        <button class="btn-secondary btn-danger" onclick="deleteAccount()" data-i18n="delete_account">Удалить аккаунт</button>
+    </div>
+</div>
+
+<!-- Страница настроек -->
+<div id="settingsPage" style="display:none;">
+    <div class="card">
+        <h2 data-i18n="settings">Настройки</h2>
+        <button class="btn-secondary" onclick="exportData()" data-i18n="export_data">Скачать данные</button>
+        <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
+        <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
+        <button class="btn-secondary" onclick="openAbout()" data-i18n="about">О приложении</button>
+        <h2 style="margin-top:28px;" data-i18n="language">Язык</h2>
+        <div class="flex">
+            <button class="btn-small lang-btn" id="settingsLangRu" onclick="setSettingsLanguage('ru')">🇷🇺</button>
+            <button class="btn-small lang-btn" id="settingsLangEn" onclick="setSettingsLanguage('en')">🇬🇧</button>
+            <button class="btn-small lang-btn" id="settingsLangCn" onclick="setSettingsLanguage('cn')">🇨🇳</button>
+        </div>
+        <button class="btn-primary" onclick="showPage('mainPage')" style="margin-top:28px;" data-i18n="back">← Назад</button>
+    </div>
+</div>
+
+<!-- Страница продуктов -->
+<div id="productsPage" style="display:none;">
+    <div class="card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <button class="btn-small" onclick="showPage('settingsPage')" data-i18n="back">← Назад</button>
+            <h2 data-i18n="my_products">Мои продукты</h2>
+        </div>
+        <div id="productsList"></div>
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-  // УРЕЗАННЫЙ ФУНКЦИОНАЛ (только для демонстрации дизайна)
-  let waterAmount = 0;
-  let todayFoods = [];
-  const dailyTargets = { kcal: 2200, protein: 120, fat: 60, carbs: 250, water: 2000 };
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register("data:application/javascript,self.addEventListener('install',e=>{e.waitUntil(caches.open('fitcat-v1').then(c=>c.addAll(['.'],{cache:'reload'})));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!=='fitcat-v1').map(n=>caches.delete(n)))));clients.claim()});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline'))))});");
+    });
+}
 
-  function $(id) { return document.getElementById(id); }
+(function(){
+'use strict';
 
-  function drawRing(canvasId, value, max, color) {
-    let canvas = $(canvasId); if(!canvas) return;
-    let ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-    ctx.clearRect(0,0,w,h);
-    let percent = Math.min(value/max, 1), start = -0.5 * Math.PI, end = start + (2 * Math.PI * percent);
-    // Трек
-    ctx.beginPath(); ctx.arc(w/2, h/2, w/2-6, 0, 2*Math.PI);
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 8; ctx.stroke();
-    // Градиент по кругу
-    let gradient = ctx.createConicGradient(start, w/2, h/2);
-    gradient.addColorStop(0, color); gradient.addColorStop(0.5, '#B400FF'); gradient.addColorStop(1, color);
-    ctx.beginPath(); ctx.arc(w/2, h/2, w/2-6, start, end);
-    ctx.strokeStyle = gradient; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
-    // Искра на конце
-    if(percent > 0) {
-      let endX = w/2 + (w/2-6) * Math.cos(end), endY = h/2 + (h/2-6) * Math.sin(end);
-      ctx.beginPath(); ctx.arc(endX, endY, 5, 0, 2*Math.PI);
-      ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 20; ctx.fill();
-      ctx.shadowBlur = 0;
+const translations = {
+    ru: {
+        save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
+        total: 'ИТОГО', now_temp: 'Сейчас', steps: 'Шаги', temperature: 'Температура',
+        base_norm: 'Базовая норма', water_norm: 'Норма воды',
+        kcal: 'ккал', g: 'г', ml: 'мл', kg: 'кг', cm: 'см',
+        scanner: 'Сканер', scanner_hint: 'Наведите камеру на штрихкод', barcode_placeholder: 'Штрихкод', search: 'Найти',
+        scanner_failed: 'Не удалось распознать. Введите вручную.', camera_error: 'Не удалось получить доступ к камере',
+        about_you: 'О себе', name: 'Имя', age: 'Возраст', gender: 'Пол', female: 'Женский', male: 'Мужской',
+        height: 'Рост (см)', weight: 'Вес (кг)', name_placeholder: 'Введите имя', age_placeholder: 'Введите возраст',
+        height_placeholder: 'Введите рост', weight_placeholder: 'Введите вес',
+        start: 'Начать', data_local: 'Данные только в твоём телефоне', language: 'Язык',
+        error_fill: 'Пожалуйста, заполните все поля корректно',
+        tab_today: 'Сегодня', tab_activity: 'Активность', tab_weight: 'Вес',
+        progress: 'Прогресс', water_title: 'Вода', meals: 'Продукты',
+        water_placeholder: 'Введи мл', smart_water: 'Умная вода',
+        save_template: 'Сохранить шаблон', clear: 'Очистить', per_100g: 'На 100 грамм:',
+        protein_short: 'Б', fat_short: 'Ж', carbs_short: 'У', kcal_short: 'Ккал',
+        weight_grams: 'Вес (грамм)', add_food: 'Добавить', food_name_placeholder: 'Название продукта',
+        empty_food: 'Добавьте первый продукт', template_name: 'Название шаблона:', no_templates: 'Нет сохранённых шаблонов',
+        delete_product: 'Удалить продукт?', product_not_found: 'Товар не найден',
+        smart_search: 'Умный поиск', results: 'Результатов',
+        activity: 'Активность', sedentary: 'Сидячий', light: 'Умеренный', moderate: 'Активный', very_active: 'Очень активный',
+        workout: 'Тренировка', workout_intensity: 'Интенсивность тренировки',
+        workout_light: 'Лёгкая', workout_moderate: 'Умеренная', workout_intense: 'Интенсивная',
+        calories: 'Калории', protein: 'Белки', fat: 'Жиры', carbs: 'Углеводы', water: 'Вода',
+        apply_today: 'Применить на сегодня',
+        weight_log: 'Журнал веса', set_goal: 'Задать цель', start_weight: 'Старт', current_weight: 'Сейчас',
+        change: 'Изменение', to_goal: 'До цели', history: 'История',
+        overwrite_weight: 'Запись на эту дату уже есть. Заменить?', enter_goal: 'Введите целевой вес (кг):',
+        bmi_underweight_severe: 'Выраженный дефицит', bmi_underweight: 'Недостаточный вес', bmi_normal: 'Норма',
+        bmi_overweight: 'Избыточный вес', bmi_obese_i: 'Ожирение I ст.', bmi_obese_ii: 'Ожирение II ст.', bmi_obese_iii: 'Ожирение III ст.',
+        profile: 'Профиль', goal: 'Цель', lose: 'Похудение', maintain: 'Поддержание', gain: 'Набор',
+        delete_photo: 'Удалить фото', delete_account: 'Удалить аккаунт',
+        confirm_delete: 'Точно удалить все данные? Это нельзя отменить.',
+        settings: 'Настройки', export_data: 'Скачать данные', import_data: 'Загрузить данные', my_products: 'Мои продукты',
+        about: 'О приложении',
+        morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
+        no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
+        photo_too_large: 'Фото слишком большое. Максимум 3 МБ.'
+    },
+    en: {
+        save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On',
+        total: 'TOTAL', now_temp: 'Now', steps: 'Steps', temperature: 'Temperature',
+        base_norm: 'Base norm', water_norm: 'Water norm',
+        kcal: 'kcal', g: 'g', ml: 'ml', kg: 'kg', cm: 'cm',
+        scanner: 'Scanner', scanner_hint: 'Point camera at barcode', barcode_placeholder: 'Barcode', search: 'Search',
+        scanner_failed: 'Could not scan. Enter manually.', camera_error: 'Could not access camera',
+        about_you: 'About you', name: 'Name', age: 'Age', gender: 'Gender', female: 'Female', male: 'Male',
+        height: 'Height (cm)', weight: 'Weight (kg)', name_placeholder: 'Enter name', age_placeholder: 'Enter age',
+        height_placeholder: 'Enter height', weight_placeholder: 'Enter weight',
+        start: 'Start', data_local: 'Data stored locally', language: 'Language',
+        error_fill: 'Please fill in all fields correctly',
+        tab_today: 'Today', tab_activity: 'Activity', tab_weight: 'Weight',
+        progress: 'Progress', water_title: 'Water', meals: 'Meals',
+        water_placeholder: 'Enter ml', smart_water: 'Smart Water',
+        save_template: 'Save Template', clear: 'Clear', per_100g: 'Per 100g:',
+        protein_short: 'P', fat_short: 'F', carbs_short: 'C', kcal_short: 'Kcal',
+        weight_grams: 'Weight (g)', add_food: 'Add Food', food_name_placeholder: 'Food name',
+        empty_food: 'Add your first food', template_name: 'Template name:', no_templates: 'No saved templates',
+        delete_product: 'Delete product?', product_not_found: 'Product not found',
+        smart_search: 'Smart Search', results: 'Results',
+        activity: 'Activity', sedentary: 'Sedentary', light: 'Light', moderate: 'Moderate', very_active: 'Very Active',
+        workout: 'Workout', workout_intensity: 'Workout intensity',
+        workout_light: 'Light', workout_moderate: 'Moderate', workout_intense: 'Intense',
+        calories: 'Calories', protein: 'Protein', fat: 'Fat', carbs: 'Carbs', water: 'Water',
+        apply_today: 'Apply Today',
+        weight_log: 'Weight Log', set_goal: 'Set Goal', start_weight: 'Start', current_weight: 'Current',
+        change: 'Change', to_goal: 'To Goal', history: 'History',
+        overwrite_weight: 'Entry for this date already exists. Replace?', enter_goal: 'Enter target weight (kg):',
+        bmi_underweight_severe: 'Severe underweight', bmi_underweight: 'Underweight', bmi_normal: 'Normal',
+        bmi_overweight: 'Overweight', bmi_obese_i: 'Obese I', bmi_obese_ii: 'Obese II', bmi_obese_iii: 'Obese III',
+        profile: 'Profile', goal: 'Goal', lose: 'Lose', maintain: 'Maintain', gain: 'Gain',
+        delete_photo: 'Delete Photo', delete_account: 'Delete Account',
+        confirm_delete: 'Delete all data? This cannot be undone.',
+        settings: 'Settings', export_data: 'Export Data', import_data: 'Import Data', my_products: 'My Products',
+        about: 'About',
+        morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night',
+        no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight',
+        photo_too_large: 'Photo too large. Maximum 3 MB.'
+    },
+    cn: {
+        save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开',
+        total: '总计', now_temp: '当前', steps: '步数', temperature: '温度',
+        base_norm: '基础量', water_norm: '饮水量',
+        kcal: '千卡', g: '克', ml: '毫升', kg: '公斤', cm: '厘米',
+        scanner: '扫描器', scanner_hint: '将相机对准条码', barcode_placeholder: '条码', search: '搜索',
+        scanner_failed: '无法扫描，请手动输入', camera_error: '无法访问相机',
+        about_you: '关于你', name: '姓名', age: '年龄', gender: '性别', female: '女', male: '男',
+        height: '身高 (cm)', weight: '体重 (kg)', name_placeholder: '输入姓名', age_placeholder: '输入年龄',
+        height_placeholder: '输入身高', weight_placeholder: '输入体重',
+        start: '开始', data_local: '数据仅保存在本地', language: '语言',
+        error_fill: '请正确填写所有字段',
+        tab_today: '今天', tab_activity: '活动', tab_weight: '体重',
+        progress: '进度', water_title: '水', meals: '食物',
+        water_placeholder: '输入毫升', smart_water: '智能饮水',
+        save_template: '保存模板', clear: '清空', per_100g: '每100克:',
+        protein_short: '蛋', fat_short: '脂', carbs_short: '碳', kcal_short: '卡',
+        weight_grams: '重量 (克)', add_food: '添加食物', food_name_placeholder: '食物名称',
+        empty_food: '添加第一个食物', template_name: '模板名称:', no_templates: '无保存的模板',
+        delete_product: '删除产品？', product_not_found: '未找到商品',
+        smart_search: '智能搜索', results: '结果数',
+        activity: '活动', sedentary: '久坐', light: '轻度', moderate: '中度', very_active: '非常活跃',
+        workout: '训练', workout_intensity: '训练强度',
+        workout_light: '轻度', workout_moderate: '中度', workout_intense: '高强度',
+        calories: '卡路里', protein: '蛋白质', fat: '脂肪', carbs: '碳水', water: '水',
+        apply_today: '今日应用',
+        weight_log: '体重记录', set_goal: '设定目标', start_weight: '起始', current_weight: '当前',
+        change: '变化', to_goal: '距目标', history: '历史',
+        overwrite_weight: '该日期已有记录。替换？', enter_goal: '输入目标体重 (kg):',
+        bmi_underweight_severe: '严重偏瘦', bmi_underweight: '偏瘦', bmi_normal: '正常',
+        bmi_overweight: '超重', bmi_obese_i: '肥胖I度', bmi_obese_ii: '肥胖II度', bmi_obese_iii: '肥胖III度',
+        profile: '个人资料', goal: '目标', lose: '减重', maintain: '保持', gain: '增重',
+        delete_photo: '删除照片', delete_account: '删除账户',
+        confirm_delete: '确定删除所有数据？此操作无法撤销。',
+        settings: '设置', export_data: '导出数据', import_data: '导入数据', my_products: '我的产品',
+        about: '关于',
+        morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安',
+        no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量',
+        photo_too_large: '照片太大。最大 3 MB。'
     }
-  }
+};
 
-  function renderRings() {
-    let totals = {kcal:0, protein:0, fat:0, carbs:0};
-    todayFoods.forEach(f=>{ totals.kcal+=f.kcal||0; totals.protein+=f.protein||0; totals.fat+=f.fat||0; totals.carbs+=f.carbs||0; });
-    let rings = [
-      {id:'ringKcal', val:totals.kcal, max:dailyTargets.kcal, col:'#FF6B6B', label:'Ккал'},
-      {id:'ringProt', val:totals.protein, max:dailyTargets.protein, col:'#00F0FF', label:'Белки'},
-      {id:'ringFat', val:totals.fat, max:dailyTargets.fat, col:'#FFD93D', label:'Жиры'},
-      {id:'ringCarbs', val:totals.carbs, max:dailyTargets.carbs, col:'#00FFC8', label:'Углеводы'},
-      {id:'ringWater', val:waterAmount, max:dailyTargets.water, col:'#B400FF', label:'Вода'}
-    ];
-    let html = '';
-    rings.forEach(r=>{ html+=`<div class="ring-container"><canvas id="${r.id}" class="ring-canvas" width="100" height="100"></canvas><div class="ring-label">${r.label}</div><div class="ring-value">${Math.round(r.val)}/${r.max}</div></div>`; });
-    $('ringsContainer').innerHTML = html;
-    rings.forEach(r=> drawRing(r.id, r.val, r.max, r.col) );
-    $('waterCurrent').innerText = waterAmount;
-    $('waterGoal').innerText = dailyTargets.water + ' мл';
-  }
+let currentLang = 'ru';
+let currentProfile = null;
+let dailyTargets = { kcal: 1500, protein: 80, fat: 45, carbs: 150, water: 1820 };
+let todayFoods = [];
+let weightHistory = [];
+let chartInstance = null;
+let productsDB = [];
+let mealTemplates = [];
+let zxingReader = null;
+let quaggaActive = false;
+let scanningActive = false;
+let scanTimeout = null;
+let dailyActivity = 1.375;
+let workoutEnabled = false;
+let workoutIntensity = 'light';
+let currentSteps = 8000;
+let currentTemp = 22;
+let waterAmount = 0;
+let greetingTimeout = null;
+let searchDebounce = null;
+let smartSearchEnabled = false;
+let smartSearchResults = 10;
+let smartWaterEnabled = false;
 
-  window.addWater = (ml) => { waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water)); renderRings(); };
-  window.addFood = () => {
-    let name = $('foodName').value.trim(), weight = parseFloat($('foodWeight').value);
-    if(!name || !weight) return;
-    todayFoods.push({name, weight, kcal: weight*2.5, protein: weight*0.1, fat: weight*0.05, carbs: weight*0.3});
-    renderFoodList(); renderRings();
-    $('foodName').value = $('foodWeight').value = '';
-  };
-  function renderFoodList() {
-    $('foodListContainer').innerHTML = todayFoods.map((f,i)=>`<div class="food-item"><span>${f.name} ${f.weight}г</span><span onclick="deleteFood(${i})" style="cursor:pointer;color:#FF6B6B;">✕</span></div>`).join('');
-  }
-  window.deleteFood = (i) => { todayFoods.splice(i,1); renderFoodList(); renderRings(); };
+function i18n(key) { return translations[currentLang]?.[key] || key; }
 
-  // Старт
-  renderRings();
-  renderFoodList();
+function updateAllI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = i18n(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = i18n(el.dataset.i18nPlaceholder); });
+    if (currentProfile) { updateGreeting(); renderDashboard(); renderTemplates(); updateWeightStatsAndList(); updateBMI(); updateActivityUI(); }
+}
+
+function vibrate(d = 10) { if (navigator.vibrate) navigator.vibrate(d); }
+
+function setLanguage(l) { currentLang = l; localStorage.setItem('fitcat_lang', l); updateLanguageButtons(); updateAllI18n(); }
+function setSetupLanguage(l) { setLanguage(l); }
+function setSettingsLanguage(l) { setLanguage(l); }
+
+function updateLanguageButtons() {
+    document.querySelectorAll('#setupPage .lang-btn, #settingsPage .lang-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`setupLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active');
+    document.getElementById(`settingsLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active');
+}
+
+function selectSetupGender(g) {
+    document.querySelectorAll('#setupGenderControl .segmented-option').forEach(el=>el.classList.remove('active'));
+    document.querySelector(`#setupGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active');
+    document.getElementById('setupGender').value=g;
+}
+
+function selectProfileGender(g) {
+    document.querySelectorAll('#profileGenderControl .segmented-option').forEach(el=>el.classList.remove('active'));
+    document.querySelector(`#profileGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active');
+    document.getElementById('profileGender').value=g;
+}
+
+function selectProfileGoal(g) {
+    document.querySelectorAll('#profileGoalControl .segmented-option').forEach(el=>el.classList.remove('active'));
+    document.querySelector(`#profileGoalControl .segmented-option[data-goal="${g}"]`).classList.add('active');
+    document.getElementById('profileGoal').value=g;
+}
+
+function selectWorkoutIntensity(i) {
+    document.querySelectorAll('#workoutIntensityControl .segmented-option').forEach(el=>el.classList.remove('active'));
+    document.querySelector(`#workoutIntensityControl .segmented-option[data-intensity="${i}"]`).classList.add('active');
+    document.getElementById('workoutIntensity').value=i;
+    workoutIntensity=i; localStorage.setItem('workoutIntensity', i);
+    calculateTargets(); renderDashboard(); updateWaterHint();
+    if(smartWaterEnabled) updateWaterCalculation();
+}
+
+function getWorkoutCalories(i) { return i === 'light' ? 150 : i === 'moderate' ? 250 : 400; }
+function getWorkoutWater(i) { return i === 'light' ? 150 : i === 'moderate' ? 250 : 400; }
+function getGoalMultiplier(g) { return g === 'lose' ? 0.85 : g === 'gain' ? 1.10 : 1.0; }
+
+function updateStreak() {
+    let s = parseInt(localStorage.getItem('fitcat_streak')||'0'), lo = localStorage.getItem('fitcat_lastOpen'), t = new Date().toDateString(), y = new Date(Date.now()-86400000).toDateString();
+    if(!lo) s=1; else if(lo===t){} else if(lo===y) s=Math.min(s+1,5); else s=1;
+    localStorage.setItem('fitcat_streak',s); localStorage.setItem('fitcat_lastOpen',t);
+    let e = document.getElementById('streakEmoji'); 
+    if(e) { 
+        let c,ch;
+        if(s===1){c='none';ch='🕯️'} else if(s===2){c='red';ch='🔥'} else if(s===3){c='yellow';ch='🔥'} else if(s===4){c='purple';ch='🔥'} else{c='rainbow';ch='🔥'} 
+        e.className='streak-emoji '+c+' fade-in'; e.textContent=ch; e.title=s+' '+(currentLang==='ru'?'дн.':currentLang==='en'?'days':'天');
+        requestAnimationFrame(()=>e.classList.remove('fade-in')); 
+    }
+}
+
+function getInitials(n) { if(!n) return '🐱'; let p=n.trim().split(/\s+/); return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.slice(0,2).toUpperCase(); }
+
+function updateHeaderPhoto() { 
+    let h=document.getElementById('headerPhoto'), s=localStorage.getItem('profilePhoto'); 
+    h.innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="header-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; 
+}
+
+function uploadPhoto() { document.getElementById('photoInput').click(); }
+
+function handlePhotoUpload(ev) { 
+    let f=ev.target.files[0]; if(!f) return;
+    if(f.size>3*1024*1024){alert(i18n('photo_too_large'));return} 
+    let r=new FileReader();
+    r.onload=e=>{localStorage.setItem('profilePhoto',e.target.result); document.getElementById('profilePhoto').innerHTML=`<img src="${e.target.result}" alt="Profile">`; updateHeaderPhoto(); vibrate();}; 
+    r.readAsDataURL(f); 
+}
+
+function deletePhoto() { 
+    localStorage.removeItem('profilePhoto'); 
+    document.getElementById('profilePhoto').innerHTML=`<span class="profile-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`; 
+    updateHeaderPhoto(); vibrate(); 
+}
+
+function toggleCard(id) { 
+    let c=document.getElementById(id==='waterCard'?'waterContent':'mealsContent'); 
+    if(c){c.classList.toggle('collapsed'); localStorage.setItem('card_'+id+'_collapsed', c.classList.contains('collapsed'));} 
+}
+
+function addWater(ml) { 
+    waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water));
+    localStorage.setItem('waterAmount',waterAmount); 
+    updateWaterDisplay(); 
+    renderProgressBars(); 
+    vibrate(); 
+}
+
+function setManualWater() { 
+    let ml=parseInt(document.getElementById('manualWaterInput').value);
+    if(!isNaN(ml)&&ml>=0){waterAmount=Math.min(ml,dailyTargets.water); localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();}
+    document.getElementById('manualWaterInput').value=''; 
+}
+
+function updateWaterDisplay() {
+    document.getElementById('waterCurrent').innerText = waterAmount;
+    document.getElementById('waterGoalDisplay').innerText = dailyTargets.water;
+    drawWaterRing();
+}
+
+function openSmartWater() {
+    document.getElementById('smartWaterModal').style.display='flex';
+    document.getElementById('smartWaterToggle').checked = smartWaterEnabled;
+    document.getElementById('smartWaterToggleLabel').innerText = i18n(smartWaterEnabled?'on':'off');
+    document.getElementById('smartWaterSettings').style.display = smartWaterEnabled?'block':'none';
+    document.getElementById('waterBaseOnly').style.display = smartWaterEnabled?'none':'block';
+    document.getElementById('baseOnlyWater').innerText = (Math.round(currentProfile.weight*35))+' '+i18n('ml');
+    document.getElementById('tempSlider').value = currentTemp;
+    document.getElementById('stepsSlider').value = currentSteps;
+    updateTempDisplay(); updateStepsDisplay(); updateWaterCalculation();
+}
+
+function closeSmartWater() { document.getElementById('smartWaterModal').style.display='none'; calculateTargets(); updateWaterDisplay(); renderProgressBars(); }
+
+function updateTempDisplay() {
+    currentTemp=parseInt(document.getElementById('tempSlider').value);
+    document.getElementById('tempDisplay').innerText = currentTemp+'°C';
+    updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
+}
+
+function updateStepsDisplay() {
+    currentSteps=parseInt(document.getElementById('stepsSlider').value);
+    document.getElementById('stepsDisplay').innerText = currentSteps.toLocaleString();
+    updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
+}
+
+function getTempBonus(t) { if(t<0) return 0; if(t<15) return 0; if(t<20) return 50; if(t<25) return 150; if(t<30) return 300; return 500; }
+function getStepsBonus(s) { if(s<2500) return 0; if(s<5000) return 50; if(s<7500) return 100; if(s<10000) return 150; if(s<12500) return 200; if(s<15000) return 250; return 300; }
+
+function updateWaterCalculation() {
+    if(!currentProfile) return;
+    let base=Math.round(currentProfile.weight*35), total=base+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0);
+    document.getElementById('baseWaterNorm').innerText = base+' '+i18n('ml');
+    document.getElementById('tempBonus').innerText = '+'+getTempBonus(currentTemp)+' '+i18n('ml');
+    document.getElementById('stepsBonus').innerText = '+'+getStepsBonus(currentSteps)+' '+i18n('ml');
+    document.getElementById('totalWaterNorm').innerText = total+' '+i18n('ml');
+}
+
+function applySmartWaterSettings() { if(!smartWaterEnabled) return; currentSteps=parseInt(document.getElementById('stepsSlider').value); currentTemp=parseInt(document.getElementById('tempSlider').value); localStorage.setItem('currentSteps',currentSteps); localStorage.setItem('currentTemp',currentTemp); calculateTargets(); }
+
+function updateWaterHint() { 
+    let h=document.getElementById('smartWaterHint'); 
+    if(smartWaterEnabled) { let b=dailyTargets.water-Math.round(currentProfile.weight*35)-getStepsBonus(currentSteps); h.innerText = b>0?`${i18n('smart_water')}: +${b} ${i18n('ml')}`:''; } 
+    else h.innerText=''; 
+}
+
+function selectDailyActivity(el) {
+    document.querySelectorAll('#activityPage .activity-daily-item').forEach(i=>i.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function applyDailyActivity() { 
+    let s=document.querySelector('#activityPage .activity-daily-item.selected'); if(!s) return;
+    dailyActivity=parseFloat(s.dataset.activity); localStorage.setItem('dailyActivity',dailyActivity);
+    workoutEnabled=document.getElementById('workoutToggle').checked;
+    workoutIntensity=document.getElementById('workoutIntensity').value;
+    localStorage.setItem('workoutEnabled',workoutEnabled); localStorage.setItem('workoutIntensity',workoutIntensity);
+    calculateTargets(); renderDashboard(); updateActivityUI(); showPage('mainPage'); vibrate(); 
+}
+
+function updateActivityUI() {
+    let tabs=document.querySelectorAll('.tab'); if(tabs.length>=3) { let n=['sedentary','light','moderate','very_active'], idx=[1.2,1.375,1.55,1.725].indexOf(dailyActivity); if(idx>=0) tabs[1].innerHTML = i18n(n[idx]); }
+    if(currentProfile) { document.querySelectorAll('#activityPage .activity-daily-item').forEach(el=>el.classList.toggle('selected', parseFloat(el.dataset.activity)===dailyActivity)); }
+    document.getElementById('workoutToggle').checked = workoutEnabled;
+    document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off');
+    document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none';
+    selectWorkoutIntensity(workoutIntensity);
+}
+
+function showProfile() {
+    if(!currentProfile) return;
+    document.getElementById('profileName').value=currentProfile.name||'';
+    document.getElementById('profileAge').value=currentProfile.age||'';
+    document.getElementById('profileGender').value=currentProfile.gender||'female';
+    selectProfileGender(currentProfile.gender||'female');
+    document.getElementById('profileGoal').value=currentProfile.goal||'lose';
+    selectProfileGoal(currentProfile.goal||'lose');
+    document.getElementById('profileHeight').value=currentProfile.height||'';
+    document.getElementById('profileWeight').value=currentProfile.weight||'';
+    let s=localStorage.getItem('profilePhoto');
+    document.getElementById('profilePhoto').innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="profile-initials">${getInitials(currentProfile.name)}</span>`;
+    showPage('profilePage');
+}
+
+function saveProfile() {
+    let n=document.getElementById('profileName').value.trim(), a=parseInt(document.getElementById('profileAge').value), g=document.getElementById('profileGender').value, goal=document.getElementById('profileGoal').value, h=parseFloat(document.getElementById('profileHeight').value), w=parseFloat(document.getElementById('profileWeight').value);
+    if(!n||!a||a<10||a>100||!g||!goal||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
+    currentProfile = {...currentProfile, name:n, age:a, gender:g, goal:goal, height:h, weight:w};
+    saveAllData(); calculateTargets(); renderDashboard(); updateGreeting(); updateHeaderPhoto(); updateBMI(); showPage('mainPage'); vibrate();
+}
+
+function deleteAccount() { if(confirm(i18n('confirm_delete'))){ localStorage.clear(); location.reload(); } }
+
+function calculateBMI() { if(!currentProfile) return 0; let h=currentProfile.height/100; return currentProfile.weight/(h*h); }
+
+function getBMICategory(bmi) {
+    if(bmi<16) return i18n('bmi_underweight_severe'); if(bmi<18.5) return i18n('bmi_underweight'); if(bmi<25) return i18n('bmi_normal');
+    if(bmi<30) return i18n('bmi_overweight'); if(bmi<35) return i18n('bmi_obese_i'); if(bmi<40) return i18n('bmi_obese_ii'); return i18n('bmi_obese_iii');
+}
+
+function updateBMI() {
+    let bmi=calculateBMI();
+    document.getElementById('bmiValue').innerText=bmi.toFixed(1);
+    document.getElementById('bmiCategory').innerText=getBMICategory(bmi);
+    let pct=Math.min(100,Math.max(0,((bmi-16)/(40-16))*100));
+    document.getElementById('bmiMarker').style.left=pct+'%';
+    document.getElementById('bmiTooltip').innerText=getBMICategory(bmi);
+}
+
+function showBMITooltip() { let t=document.getElementById('bmiTooltip'); t.style.opacity='1'; setTimeout(()=>t.style.opacity='',1500); }
+
+function loadProductsDB() { let s=localStorage.getItem('fitcat_products'); if(s) productsDB=JSON.parse(s); }
+function saveProductsDB() { localStorage.setItem('fitcat_products', JSON.stringify(productsDB)); }
+
+function addToProductsDB(n,p,f,c,k) {
+    if(!productsDB.find(x=>x.name.toLowerCase()===n.toLowerCase())){
+        productsDB.push({name:n,protein:p,fat:f,carbs:c,kcal:k});
+        saveProductsDB();
+    }
+}
+
+function openSmartSearch() {
+    document.getElementById('smartSearchModal').style.display='flex';
+    document.getElementById('smartSearchToggle').checked = smartSearchEnabled;
+    document.getElementById('smartSearchToggleLabel').innerText = i18n(smartSearchEnabled?'on':'off');
+    document.getElementById('smartSearchSettings').style.display = smartSearchEnabled?'block':'none';
+    document.getElementById('resultsSlider').value = smartSearchResults;
+    document.getElementById('resultsDisplay').innerText = smartSearchResults;
+}
+
+function closeSmartSearch() { 
+    document.getElementById('smartSearchModal').style.display='none'; 
+    smartSearchEnabled=document.getElementById('smartSearchToggle').checked; 
+    smartSearchResults=parseInt(document.getElementById('resultsSlider').value); 
+    localStorage.setItem('smartSearchEnabled',smartSearchEnabled); 
+    localStorage.setItem('smartSearchResults',smartSearchResults); 
+}
+
+function openAbout() { document.getElementById('aboutModal').style.display='flex'; }
+function closeAbout() { document.getElementById('aboutModal').style.display='none'; }
+
+function fillFromProduct(name) { 
+    let p=productsDB.find(x=>x.name===name); 
+    if(p){
+        document.getElementById('foodName').value=p.name;
+        document.getElementById('foodProt100').value=p.protein;
+        document.getElementById('foodFat100').value=p.fat;
+        document.getElementById('foodCarb100').value=p.carbs;
+        document.getElementById('foodKcal100').value=p.kcal;
+    } 
+    document.getElementById('autocompleteList').style.display='none'; 
+}
+
+function fillFromOFF(name,kcal,prot,fat,carbs) {
+    document.getElementById('foodName').value=name;
+    document.getElementById('foodProt100').value=prot||0;
+    document.getElementById('foodFat100').value=fat||0;
+    document.getElementById('foodCarb100').value=carbs||0;
+    document.getElementById('foodKcal100').value=kcal||0;
+    document.getElementById('autocompleteList').style.display='none';
+}
+
+function setupAutocomplete() {
+    let inp=document.getElementById('foodName'), list=document.getElementById('autocompleteList');
+    inp.addEventListener('input', function() {
+        let val=this.value.trim(); if(val.length<2){ list.style.display='none'; return; }
+        if(!smartSearchEnabled) { 
+            let m=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,5); 
+            if(!m.length) list.style.display='none'; 
+            else { 
+                list.innerHTML=m.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); 
+                list.style.display='block'; 
+            } 
+            return; 
+        }
+        inp.placeholder='🔍 '+i18n('search')+'...'; inp.style.borderColor='#4FACFE'; 
+        if(searchDebounce) clearTimeout(searchDebounce);
+        searchDebounce=setTimeout(()=>{
+            let local=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,3);
+            fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(val)}&json=1&page_size=${smartSearchResults}&search_simple=1&search_fields=product_name`)
+            .then(r=>r.json()).then(d=>{
+                let items=[]; if(d.products) items=d.products.filter(p=>p.product_name).map(p=>({name:p.product_name,brand:p.brands,kcal:p.nutriments?.['energy-kcal_100g']||0,prot:p.nutriments?.proteins_100g||0,fat:p.nutriments?.fat_100g||0,carbs:p.nutriments?.carbohydrates_100g||0})).slice(0,smartSearchResults);
+                let all=[...local.map(p=>({name:p.name,isLocal:true,...p})), ...items];
+                if(!all.length) { inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); }
+                else { 
+                    inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';
+                    list.innerHTML=all.map(p=>p.isLocal?`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`:`<div class="autocomplete-item" onclick="fillFromOFF('${p.name.replace(/'/g,"\\'")}',${p.kcal},${p.prot},${p.fat},${p.carbs})"><span class="off-name">🌍 ${p.name}</span><span class="off-brand">${p.brand||''}</span></div>`).join(''); 
+                    list.style.display='block'; 
+                }
+            }).catch(()=>{ if(!local.length){ inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); } else { list.innerHTML=local.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; } });
+        },400);
+    });
+    document.addEventListener('click', e=>{ if(!inp.contains(e.target)&&!list.contains(e.target)) list.style.display='none'; });
+}
+
+function loadTemplates() { let s=localStorage.getItem('fitcat_templates'); if(s) mealTemplates=JSON.parse(s); }
+function saveTemplates() { localStorage.setItem('fitcat_templates', JSON.stringify(mealTemplates)); }
+
+function renderTemplates() { 
+    let c=document.getElementById('templatesBar'); 
+    c.innerHTML = mealTemplates.length ? mealTemplates.map((tm,i)=>`<div class="template-btn" onclick="loadTemplate(${i})">${tm.name}</div><div class="template-btn" onclick="deleteTemplate(${i})" style="padding:8px;">✕</div>`).join('') : `<div class="text-small" style="width:100%;text-align:center;margin-bottom:16px;">${i18n('no_templates')}</div>`; 
+}
+
+function saveTemplate() { if(!todayFoods.length){ alert(i18n('no_dishes')); return; } let n=prompt(i18n('template_name'),'Шаблон '+(mealTemplates.length+1)); if(!n) return; mealTemplates.push({name:n, foods:JSON.parse(JSON.stringify(todayFoods))}); saveTemplates(); renderTemplates(); vibrate(); }
+function loadTemplate(i) { todayFoods=JSON.parse(JSON.stringify(mealTemplates[i].foods)); saveAllData(); renderDashboard(); vibrate(); }
+function deleteTemplate(i) { mealTemplates.splice(i,1); saveTemplates(); renderTemplates(); }
+function clearTodayFoods() { if(confirm(i18n('clear')+'?')){ todayFoods=[]; saveAllData(); renderDashboard(); vibrate(); } }
+
+function addFood() {
+    let n=document.getElementById('foodName').value; if(!n){ alert(i18n('enter_name')); return; }
+    let p=parseFloat(document.getElementById('foodProt100').value)||0, f=parseFloat(document.getElementById('foodFat100').value)||0, c=parseFloat(document.getElementById('foodCarb100').value)||0, k=parseFloat(document.getElementById('foodKcal100').value)||0, w=parseFloat(document.getElementById('foodWeight').value)||0;
+    if(w<=0){ alert(i18n('enter_weight')); return; } let m=w/100;
+    todayFoods.push({name:n,weight:w, protein:Math.round(p*m*10)/10, fat:Math.round(f*m*10)/10, carbs:Math.round(c*m*10)/10, kcal:Math.round(k*m), checked:false});
+    addToProductsDB(n,p,f,c,k); saveAllData(); renderDashboard();
+    document.getElementById('foodName').value=document.getElementById('foodProt100').value=document.getElementById('foodFat100').value=document.getElementById('foodCarb100').value=document.getElementById('foodKcal100').value=document.getElementById('foodWeight').value='';
+    vibrate();
+}
+
+function toggleFood(i) { todayFoods[i].checked=!todayFoods[i].checked; saveAllData(); renderProgressBars(); renderFoodList(); vibrate(); }
+function deleteFood(i) { todayFoods.splice(i,1); saveAllData(); renderDashboard(); }
+
+function renderFoodList() {
+    let h=''; todayFoods.forEach((f,i)=>{ h+=`<div class="food-item"><div class="food-toggle ${f.checked?'checked':''}" onclick="toggleFood(${i})"></div><div class="food-info"><div class="food-name">${f.name} (${f.weight}${i18n('g')})</div><div class="food-macros">${i18n('protein_short')}:${f.protein} ${i18n('fat_short')}:${f.fat} ${i18n('carbs_short')}:${f.carbs} ${f.kcal} ${i18n('kcal')}</div></div><span class="food-delete" onclick="deleteFood(${i})">✕</span></div>`; });
+    document.getElementById('foodListContainer').innerHTML = h || `<div class="text-center text-small" style="padding:20px;">${i18n('empty_food')}</div>`;
+}
+
+function openScanner() { document.getElementById('scannerModal').style.display='flex'; startScanner(); }
+function closeScanner() { document.getElementById('scannerModal').style.display='none'; stopScanner(); }
+
+async function startScanner() {
+    let v=document.getElementById('scannerVideo'); scanningActive=true;
+    try{ 
+        let s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); 
+        v.srcObject=s; v.play();
+        zxingReader=new ZXing.BrowserMultiFormatReader(); 
+        zxingReader.decodeFromVideoDevice(null,v,r=>{if(r&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.text)}});
+        Quagga.init({inputStream:{name:'Live',type:'LiveStream',target:v},decoder:{readers:['ean_reader','ean_8_reader','upc_reader']},locate:true,numOfWorkers:2,frequency:10},e=>{if(!e){quaggaActive=true;Quagga.start()}});
+        Quagga.onDetected(r=>{if(r?.codeResult?.code&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.codeResult.code)}});
+        scanTimeout=setTimeout(()=>{if(scanningActive)document.getElementById('scannerHint').innerText=i18n('scanner_failed')},8000);
+    }catch(e){alert(i18n('camera_error'));closeScanner();}
+}
+
+function stopScanner() { 
+    scanningActive=false; if(scanTimeout)clearTimeout(scanTimeout); 
+    if(zxingReader){zxingReader.reset();zxingReader=null} 
+    if(quaggaActive){Quagga.stop();quaggaActive=false} 
+    let v=document.getElementById('scannerVideo'); if(v?.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null} 
+}
+
+async function lookupBarcode(b) { 
+    if(!b) return; 
+    try{ 
+        let r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${b}.json`); 
+        let d=await r.json(); 
+        if(d.product){ 
+            let p=d.product; 
+            document.getElementById('foodName').value=p.product_name||''; 
+            document.getElementById('foodKcal100').value=p.nutriments?.['energy-kcal_100g']||''; 
+            document.getElementById('foodProt100').value=p.nutriments?.proteins_100g||''; 
+            document.getElementById('foodFat100').value=p.nutriments?.fat_100g||''; 
+            document.getElementById('foodCarb100').value=p.nutriments?.carbohydrates_100g||''; 
+            vibrate(); 
+        } else alert(i18n('product_not_found')); 
+    } catch(e) { alert(i18n('product_not_found')); } 
+}
+
+function setWeightGoal() { 
+    let c=currentProfile?.targetWeight||(currentProfile?.startWeight*0.9).toFixed(1); 
+    let g=prompt(i18n('enter_goal'),c); 
+    if(g&&!isNaN(g)&&g>=30&&g<=500){ currentProfile.targetWeight=parseFloat(g); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); } 
+}
+
+function updateWeightStatsAndList() {
+    let goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55;
+    if(weightHistory.length){ 
+        let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), start=s[0].weight, cur=s[s.length-1].weight, ch=cur-start, tg=cur-goal;
+        document.getElementById('startWeightStat').innerText=start.toFixed(1)+' '+i18n('kg');
+        document.getElementById('currentWeightStat').innerText=cur.toFixed(1)+' '+i18n('kg');
+        let ce=document.getElementById('weightChangeStat'); ce.innerText=(ch>0?'+':'')+ch.toFixed(1)+' '+i18n('kg'); ce.style.color=ch<0?'#6BCB77':(ch>0?'#F85149':'#9CA3AF');
+        let ge=document.getElementById('toGoalStat'); ge.innerText=tg.toFixed(1)+' '+i18n('kg'); ge.style.color=tg<=0?'#6BCB77':'#9CA3AF';
+    } else ['startWeightStat','currentWeightStat','weightChangeStat','toGoalStat'].forEach(id=>document.getElementById(id).innerText='---');
+    let l=document.getElementById('weightHistoryList');
+    if(!weightHistory.length) l.innerHTML='<div class="text-center text-small">'+i18n('empty_food')+'</div>';
+    else l.innerHTML = [...weightHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((e,i)=>`<div class="weight-history-item"><span class="weight-history-date">${e.date}</span><span class="weight-history-value">${e.weight} ${i18n('kg')}</span><span class="weight-history-delete" onclick="deleteWeightEntry(${i})">✕</span></div>`).join('');
+    updateBMI();
+}
+
+function deleteWeightEntry(i) { weightHistory.splice(i,1); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); }
+
+function addWeightEntry() { 
+    let w=parseFloat(document.getElementById('newWeight').value), d=document.getElementById('weightDate').value||new Date().toISOString().split('T')[0]; 
+    if(!w||w<30||w>500) return; 
+    let ex=weightHistory.findIndex(e=>e.date===d); if(ex>=0&&!confirm(i18n('overwrite_weight'))) return; 
+    if(ex>=0) weightHistory.splice(ex,1); 
+    weightHistory.push({date:d,weight:w}); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); 
+    document.getElementById('newWeight').value=''; vibrate(); 
+}
+
+function renderWeightChart() {
+    let canvas=document.getElementById('weightChart'), ctx=canvas.getContext('2d'); 
+    if(chartInstance) chartInstance.destroy(); 
+    if(!weightHistory.length) return;
+    let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55, col='#4FACFE';
+    if(s.length>1){ let f=s[0].weight, l=s[s.length-1].weight; if(l<f) col='#6BCB77'; else if(l>f) col='#F85149'; }
+    let w=s.map(e=>e.weight), min=Math.min(...w,goal)-1, max=Math.max(...w,goal)+1, grad=ctx.createLinearGradient(0,0,0,canvas.height);
+    grad.addColorStop(0,col+'B3'); grad.addColorStop(0.4,col+'60'); grad.addColorStop(0.7,col+'20'); grad.addColorStop(1,col+'00');
+    chartInstance = new Chart(ctx, { type:'line', data:{ labels:s.map(e=>e.date), datasets:[ { label:i18n('weight')+' ('+i18n('kg')+')', data:s.map(e=>e.weight), borderColor:col, backgroundColor:grad, tension:0.3, fill:true, pointBackgroundColor:col, pointBorderColor:'#0D1117', pointRadius:5 }, { label:i18n('set_goal'), data:s.map(()=>goal), borderColor:'#FFD93D', borderDash:[5,5], borderWidth:2, pointRadius:0, fill:false } ] }, options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ min,max, ticks:{ color:'#9CA3AF' } } } } });
+}
+
+function loadData() {
+    currentProfile=JSON.parse(localStorage.getItem('fitnessProfile')||'null');
+    todayFoods=JSON.parse(localStorage.getItem('todayFoods')||'[]');
+    weightHistory=JSON.parse(localStorage.getItem('weightHistory')||'[]');
+    if(currentProfile && !currentProfile.goal) currentProfile.goal = 'lose';
+}
+
+function saveAllData() { 
+    if(currentProfile) localStorage.setItem('fitnessProfile',JSON.stringify(currentProfile)); 
+    localStorage.setItem('todayFoods',JSON.stringify(todayFoods)); 
+    localStorage.setItem('weightHistory',JSON.stringify(weightHistory)); 
+}
+
+function checkDateReset() { 
+    let ld=localStorage.getItem('lastDate'), td=new Date().toDateString(); 
+    if(ld!==td){ 
+        todayFoods=[]; localStorage.setItem('waterAmount',0); waterAmount=0; 
+        workoutEnabled=false; localStorage.setItem('workoutEnabled',false); 
+        localStorage.setItem('lastDate',td); saveAllData(); 
+    } 
+}
+
+function updateGreeting() {
+    if(greetingTimeout) clearTimeout(greetingTimeout); 
+    let h=new Date().getHours(), k='day'; 
+    if(h>=5&&h<12) k='morning'; else if(h>=12&&h<18) k='day'; else if(h>=18&&h<23) k='evening'; else k='night';
+    let s1=document.getElementById('greetingSlide1'), s2=document.getElementById('greetingSlide2'), strek=document.getElementById('streakEmoji'), name=currentProfile?.name||'';
+    if(strek){ strek.style.opacity='0'; strek.classList.add('fade-in'); } 
+    s1.innerHTML=`<h1>${i18n(k)}, ${name}</h1>`; s2.innerHTML='<h1>FitCat</h1>'; 
+    s1.classList.remove('hidden'); s2.classList.remove('visible');
+    greetingTimeout=setTimeout(()=>{ s1.classList.add('hidden'); s2.classList.add('visible'); if(strek){ strek.style.display='inline-block'; requestAnimationFrame(()=>{ strek.style.opacity='1'; strek.classList.remove('fade-in'); }); } updateStreak(); },3500);
+}
+
+function completeSetup() {
+    try{ 
+        let n=document.getElementById('setupName').value.trim(), a=parseInt(document.getElementById('setupAge').value), g=document.getElementById('setupGender').value, h=parseFloat(document.getElementById('setupHeight').value), w=parseFloat(document.getElementById('setupWeight').value);
+        if(!n||!a||a<10||a>100||!g||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
+        currentProfile = { name:n, age:a, gender:g, goal:'lose', height:h, weight:w, startWeight:w, targetWeight:Math.round(w*0.9*10)/10 };
+        calculateTargets(); saveAllData(); localStorage.setItem('lastDate',new Date().toDateString());
+        document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block';
+        updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); vibrate();
+    } catch(e) { alert('Ошибка'); }
+}
+
+function calculateTargets() {
+    if(!currentProfile) return;
+    let p=currentProfile, bmr=p.gender==='female'?447.6+9.2*p.weight+3.1*p.height-4.3*p.age:88.36+13.4*p.weight+4.8*p.height-5.7*p.age;
+    let tdee=bmr*dailyActivity + (workoutEnabled?getWorkoutCalories(workoutIntensity):0);
+    let waterBase=Math.round(p.weight*35), waterTotal=waterBase;
+    if(smartWaterEnabled) waterTotal = waterBase+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0);
+    else waterTotal = waterBase + (workoutEnabled?getWorkoutWater(workoutIntensity):0);
+    let goalMult = getGoalMultiplier(currentProfile.goal||'lose');
+    dailyTargets = { kcal: Math.round(tdee * goalMult), protein: Math.round(p.weight*1.8), fat: Math.round(p.weight*0.9), carbs: Math.round((tdee*goalMult - p.weight*1.8*4 - p.weight*0.9*9)/4), water: waterTotal };
+    if(waterAmount>dailyTargets.water) waterAmount=dailyTargets.water;
+}
+
+function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
+
+// ========== КОЛЬЦЕВЫЕ ПРОГРЕСС-БАРЫ ==========
+function drawRing(canvasId, current, target, color1, color2, unit) {
+    let canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+    let ctx = canvas.getContext('2d');
+    let w = canvas.width, h = canvas.height;
+    let centerX = w/2, centerY = h/2;
+    let radius = Math.min(w,h)/2 - 6;
+    let lineWidth = 8;
+    
+    ctx.clearRect(0, 0, w, h);
+    
+    // Фоновое кольцо
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(48, 54, 61, 0.4)';
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    
+    // Прогресс
+    let pct = Math.min(current / target, 1);
+    let start = -0.5 * Math.PI;
+    let end = start + (2 * Math.PI * pct);
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, start, end);
+    
+    let gradient = ctx.createConicGradient(start, centerX, centerY);
+    gradient.addColorStop(0, color1);
+    gradient.addColorStop(1, color2);
+    
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    
+    // Свечение
+    ctx.shadowColor = color1;
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+}
+
+function drawWaterRing() {
+    let canvas = document.getElementById('waterRingCanvas');
+    if(!canvas) return;
+    let ctx = canvas.getContext('2d');
+    let w = 140, h = 140;
+    let centerX = 70, centerY = 70;
+    let radius = 58;
+    let lineWidth = 10;
+    
+    ctx.clearRect(0, 0, w, h);
+    
+    // Фон
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(48, 54, 61, 0.4)';
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    
+    // Прогресс
+    let pct = Math.min(waterAmount / dailyTargets.water, 1);
+    let start = -0.5 * Math.PI;
+    let end = start + (2 * Math.PI * pct);
+    
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, start, end);
+    
+    let gradient = ctx.createConicGradient(start, centerX, centerY);
+    gradient.addColorStop(0, '#00F2FE');
+    gradient.addColorStop(1, '#4FACFE');
+    
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    
+    ctx.shadowColor = '#00F2FE';
+    ctx.shadowBlur = 15;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+}
+
+function renderProgressBars() {
+    let c={kcal:0,protein:0,fat:0,carbs:0}; 
+    todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
+    
+    let cont=document.getElementById('progressBars');
+    let html = `
+        <div class="rings-container">
+            <div class="ring-item">
+                <div class="ring-canvas-container">
+                    <canvas id="ringKcal" class="ring-canvas" width="100" height="100"></canvas>
+                    <div class="ring-value">${Math.round(c.kcal)}</div>
+                </div>
+                <div class="ring-label">🔥 ${i18n('calories')}</div>
+                <div class="ring-target">/${dailyTargets.kcal} ${i18n('kcal')}</div>
+            </div>
+            <div class="ring-item">
+                <div class="ring-canvas-container">
+                    <canvas id="ringProtein" class="ring-canvas" width="100" height="100"></canvas>
+                    <div class="ring-value">${Math.round(c.protein)}</div>
+                </div>
+                <div class="ring-label">🥩 ${i18n('protein')}</div>
+                <div class="ring-target">/${dailyTargets.protein} ${i18n('g')}</div>
+            </div>
+            <div class="ring-item">
+                <div class="ring-canvas-container">
+                    <canvas id="ringFat" class="ring-canvas" width="100" height="100"></canvas>
+                    <div class="ring-value">${Math.round(c.fat)}</div>
+                </div>
+                <div class="ring-label">🥑 ${i18n('fat')}</div>
+                <div class="ring-target">/${dailyTargets.fat} ${i18n('g')}</div>
+            </div>
+            <div class="ring-item">
+                <div class="ring-canvas-container">
+                    <canvas id="ringCarbs" class="ring-canvas" width="100" height="100"></canvas>
+                    <div class="ring-value">${Math.round(c.carbs)}</div>
+                </div>
+                <div class="ring-label">🍚 ${i18n('carbs')}</div>
+                <div class="ring-target">/${dailyTargets.carbs} ${i18n('g')}</div>
+            </div>
+        </div>
+    `;
+    cont.innerHTML = html;
+    
+    // Рисуем кольца
+    requestAnimationFrame(() => {
+        drawRing('ringKcal', c.kcal, dailyTargets.kcal, '#FF6B6B', '#FF8E53', i18n('kcal'));
+        drawRing('ringProtein', c.protein, dailyTargets.protein, '#4FACFE', '#00F2FE', i18n('g'));
+        drawRing('ringFat', c.fat, dailyTargets.fat, '#FFD93D', '#FFB347', i18n('g'));
+        drawRing('ringCarbs', c.carbs, dailyTargets.carbs, '#6BCB77', '#9B59B6', i18n('g'));
+        drawWaterRing();
+    });
+}
+
+function switchTab(tab, ev) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    if(ev&&ev.currentTarget) ev.currentTarget.classList.add('active');
+    document.getElementById('todayPage').classList.toggle('active', tab==='today');
+    document.getElementById('activityPage').classList.toggle('active', tab==='activity');
+    document.getElementById('weightPage').classList.toggle('active', tab==='weight');
+    if(tab==='weight'){ updateWeightStatsAndList(); renderWeightChart(); updateBMI(); }
+    if(tab==='activity'&&currentProfile){ updateActivityUI(); }
+}
+
+function showPage(pageId) {
+    document.getElementById('mainPage').style.display=(pageId==='mainPage')?'block':'none';
+    document.getElementById('settingsPage').style.display=pageId==='settingsPage'?'block':'none';
+    document.getElementById('profilePage').style.display=pageId==='profilePage'?'block':'none';
+    document.getElementById('productsPage').style.display='none';
+    if(pageId==='mainPage'){
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        document.querySelector('.tab:first-child')?.classList.add('active');
+        document.getElementById('todayPage').classList.add('active');
+        document.getElementById('activityPage').classList.remove('active');
+        document.getElementById('weightPage').classList.remove('active');
+    }
+}
+
+function showProductsManager() {
+    document.getElementById('mainPage').style.display='none';
+    document.getElementById('settingsPage').style.display='none';
+    document.getElementById('productsPage').style.display='block';
+    renderProductsList();
+}
+
+function renderProductsList() {
+    let c=document.getElementById('productsList'); 
+    if(!productsDB.length){ c.innerHTML=`<div class="text-center text-small">${i18n('no_templates')}</div>`; return; }
+    c.innerHTML = productsDB.map((p,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:rgba(1,4,9,0.3);border-radius:20px;margin-bottom:8px;backdrop-filter:blur(10px);"><div><div style="font-weight:600;">${p.name}</div><div style="font-size:12px;color:#9CA3AF;">${p.protein}/${p.fat}/${p.carbs} ${p.kcal}${i18n('kcal')}</div></div><div style="display:flex;gap:8px;"><button class="btn-small" onclick="editProduct(${i})">✏️</button><button class="btn-small" onclick="deleteProduct(${i})">🗑️</button></div></div>`).join('');
+}
+
+function editProduct(i) { 
+    let p=productsDB[i], n=prompt(i18n('name'),p.name); if(n)p.name=n; 
+    let prot=prompt(i18n('protein'),p.protein); if(prot)p.protein=parseFloat(prot); 
+    let fat=prompt(i18n('fat'),p.fat); if(fat)p.fat=parseFloat(fat); 
+    let carbs=prompt(i18n('carbs'),p.carbs); if(carbs)p.carbs=parseFloat(carbs); 
+    let kcal=prompt(i18n('calories'),p.kcal); if(kcal)p.kcal=parseFloat(kcal); 
+    saveProductsDB(); renderProductsList(); 
+}
+
+function deleteProduct(i) { if(confirm(i18n('delete_product'))){ productsDB.splice(i,1); saveProductsDB(); renderProductsList(); } }
+
+function exportData() { 
+    let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); 
+    a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); 
+}
+
+function importData() { 
+    let i=document.createElement('input'); i.type='file'; i.accept='.json'; 
+    i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; 
+    i.click(); 
+}
+
+// Глобальные функции
+window.setLanguage=setLanguage;
+window.setSetupLanguage=setSetupLanguage;
+window.setSettingsLanguage=setSettingsLanguage;
+window.selectSetupGender=selectSetupGender;
+window.selectProfileGender=selectProfileGender;
+window.selectProfileGoal=selectProfileGoal;
+window.selectWorkoutIntensity=selectWorkoutIntensity;
+window.completeSetup=completeSetup;
+window.switchTab=switchTab;
+window.showProfile=showProfile;
+window.saveProfile=saveProfile;
+window.deleteAccount=deleteAccount;
+window.toggleCard=toggleCard;
+window.addWater=addWater;
+window.setManualWater=setManualWater;
+window.openSmartWater=openSmartWater;
+window.closeSmartWater=closeSmartWater;
+window.selectDailyActivity=selectDailyActivity;
+window.applyDailyActivity=applyDailyActivity;
+window.uploadPhoto=uploadPhoto;
+window.handlePhotoUpload=handlePhotoUpload;
+window.deletePhoto=deletePhoto;
+window.openSmartSearch=openSmartSearch;
+window.closeSmartSearch=closeSmartSearch;
+window.openAbout=openAbout;
+window.closeAbout=closeAbout;
+window.fillFromProduct=fillFromProduct;
+window.fillFromOFF=fillFromOFF;
+window.saveTemplate=saveTemplate;
+window.loadTemplate=loadTemplate;
+window.deleteTemplate=deleteTemplate;
+window.clearTodayFoods=clearTodayFoods;
+window.addFood=addFood;
+window.toggleFood=toggleFood;
+window.deleteFood=deleteFood;
+window.openScanner=openScanner;
+window.closeScanner=closeScanner;
+window.lookupBarcode=lookupBarcode;
+window.setWeightGoal=setWeightGoal;
+window.deleteWeightEntry=deleteWeightEntry;
+window.addWeightEntry=addWeightEntry;
+window.showPage=showPage;
+window.showProductsManager=showProductsManager;
+window.editProduct=editProduct;
+window.deleteProduct=deleteProduct;
+window.exportData=exportData;
+window.importData=importData;
+window.showBMITooltip=showBMITooltip;
+
+window.onload = function() {
+    let sl = localStorage.getItem('fitcat_lang')||'ru'; setLanguage(sl);
+    smartSearchEnabled = localStorage.getItem('smartSearchEnabled')==='true';
+    smartSearchResults = parseInt(localStorage.getItem('smartSearchResults')||'10');
+    smartWaterEnabled = localStorage.getItem('smartWaterEnabled')==='true';
+    loadData(); loadProductsDB(); loadTemplates(); setupAutocomplete();
+    dailyActivity = parseFloat(localStorage.getItem('dailyActivity')||'1.375');
+    workoutEnabled = localStorage.getItem('workoutEnabled')==='true';
+    workoutIntensity = localStorage.getItem('workoutIntensity')||'light';
+    currentSteps = parseInt(localStorage.getItem('currentSteps')||'8000');
+    currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
+    waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
+    
+    if(!currentProfile){
+        document.getElementById('setupPage').style.display='block';
+        document.getElementById('mainPage').style.display='none';
+    } else {
+        document.getElementById('setupPage').style.display='none';
+        document.getElementById('mainPage').style.display='block';
+        calculateTargets(); renderDashboard(); renderTemplates(); checkDateReset(); 
+        updateGreeting(); updateActivityUI(); updateWaterHint(); updateHeaderPhoto(); updateBMI(); updateWaterDisplay();
+    }
+    updateStreak();
+    
+    function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
+    genTicks('tempTicks',50); genTicks('stepsTicks',20); genTicks('resultsTicks',45);
+    
+    document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
+    document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
+    document.getElementById('resultsSlider')?.addEventListener('input', function(){ document.getElementById('resultsDisplay').innerText=this.value; smartSearchResults=parseInt(this.value); });
+    
+    document.getElementById('smartWaterToggle')?.addEventListener('change', function(){ 
+        smartWaterEnabled=this.checked; 
+        document.getElementById('smartWaterToggleLabel').innerText=i18n(smartWaterEnabled?'on':'off'); 
+        document.getElementById('smartWaterSettings').style.display=smartWaterEnabled?'block':'none'; 
+        document.getElementById('waterBaseOnly').style.display=smartWaterEnabled?'none':'block'; 
+        localStorage.setItem('smartWaterEnabled',smartWaterEnabled); 
+        if(!smartWaterEnabled){ calculateTargets(); updateWaterDisplay(); renderProgressBars(); } 
+        else { applySmartWaterSettings(); } 
+    });
+    
+    document.getElementById('smartSearchToggle')?.addEventListener('change', function(){ 
+        smartSearchEnabled=this.checked; 
+        document.getElementById('smartSearchToggleLabel').innerText=i18n(smartSearchEnabled?'on':'off'); 
+        document.getElementById('smartSearchSettings').style.display=smartSearchEnabled?'block':'none'; 
+        localStorage.setItem('smartSearchEnabled',smartSearchEnabled); 
+    });
+    
+    document.getElementById('workoutToggle')?.addEventListener('change', function() {
+        workoutEnabled = this.checked;
+        document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off');
+        document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none';
+        localStorage.setItem('workoutEnabled', workoutEnabled);
+        calculateTargets(); renderDashboard(); updateWaterHint();
+        if(smartWaterEnabled) updateWaterCalculation();
+    });
+    
+    if(localStorage.getItem('card_waterCard_collapsed')==='true') document.getElementById('waterContent')?.classList.add('collapsed');
+    if(localStorage.getItem('card_mealsCard_collapsed')==='true') document.getElementById('mealsContent')?.classList.add('collapsed');
+    
+    let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
+    
+    updateAllI18n();
+};
+
+})();
 </script>
 </body>
 </html>
