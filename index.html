@@ -129,8 +129,8 @@ input[type="date"] { color-scheme: dark; }
 .page.active { display: block; }
 .swipe-container {
   position: relative;
-  overflow: visible;           /* убираем hidden */
-  clip-path: inset(0px);       /* скрываем всё, что за пределами */
+  overflow: visible;
+  clip-path: inset(-40px -40px -48px -40px);  /* верх, право, низ, лево — отрицательные значения РАСШИРЯЮТ область */
   touch-action: pan-y;
   min-height: 500px;
 }
