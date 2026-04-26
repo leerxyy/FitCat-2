@@ -1410,7 +1410,7 @@ function renderProgressBars() {
       const pct = b.tar > 0 ? (b.cur / b.tar) * 100 : 0;
       const displayPct = Math.min(pct, 100);
       const col = getBarColor(pct); // теперь передаём реальный процент, не min
-      const percentText = pct > 100 ? '≥100%' : Math.round(pct) + '%';
+      const percentText = Math.round(pct) + '%';
       h += `<div class="bar-group" id="bar-group-${b.cls}">
               <div class="flex" style="justify-content:space-between;">
                 <span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span>
@@ -1433,7 +1433,7 @@ function renderProgressBars() {
     const pct = b.tar > 0 ? (b.cur / b.tar) * 100 : 0;
     const displayPct = Math.min(pct, 100);
     const col = getBarColor(pct);
-    const percentText = pct > 100 ? '≥100%' : Math.round(pct) + '%';
+    const percentText = Math.round(pct) + '%';
 
     group.querySelector('.flex span:first-child').innerText = `${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`;
     const pr = group.querySelector('.bar-percent');
