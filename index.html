@@ -53,7 +53,7 @@ h2 { font-size: 18px; font-weight: 600; color: #9CA3AF; margin-bottom: 16px; let
   padding: 20px 18px;
   margin-bottom: 20px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  transform: translateZ(0); /* ← добавляет новый stacking context */
+  isolation: isolate; /* ← тоже новый stacking context */
 }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
 .card-header h2 { margin: 0; }
