@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
 <title>FitCat</title>
 <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;FitCat&quot;,&quot;short_name&quot;:&quot;FitCat&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0D1117&quot;,&quot;theme_color&quot;:&quot;#0D1117&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230D1117'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%234FACFE'%3E🐱%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;100x100&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,18 +10,20 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230D1117'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='%234FACFE'%3E🐱%3C/text%3E%3C/svg%3E">
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: #0D1117; min-height: 100vh; }
 body {
-    background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #E6EDF3; padding: 16px 12px 40px; min-height: 100vh;
-    -webkit-font-smoothing: antialiased; touch-action: pan-y;
+  background: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #E6EDF3; padding: 16px 12px 40px; min-height: 100vh; -webkit-font-smoothing: antialiased;
 }
 body::before {
-    content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 50%, #16213E 100%);
-    z-index: -1; animation: bgPulse 8s ease-in-out infinite; background-size: 200% 200%;
+  content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #0D1117 0%, #1A1B2F 50%, #16213E 100%);
+  z-index: -1; animation: bgPulse 8s ease-in-out infinite; background-size: 200% 200%;
 }
 @keyframes bgPulse { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .app { max-width: 480px; margin: 0 auto; animation: fadeIn 0.5s ease-out; }
@@ -29,62 +31,106 @@ body::before {
 .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; width: 100%; }
 .greeting-wrapper { position: relative; height: 48px; min-width: 180px; overflow: visible; }
 .greeting-slide { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; transition: transform 0.4s ease, opacity 0.3s ease; opacity: 1; transform: translateY(0); }
-.greeting-slide h1 { font-size: 26px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word; background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #A855F7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% 100%; animation: textShimmer 4s ease-in-out infinite; }
+.greeting-slide h1 {
+  font-size: 26px; font-weight: 700; margin: 0; line-height: 1.2; word-break: break-word;
+  background: linear-gradient(135deg, #00F2FE 0%, #4FACFE 50%, #A855F7 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; background-size: 200% 100%; animation: textShimmer 4s ease-in-out infinite;
+}
 @keyframes textShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .greeting-slide.hidden { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 .greeting-slide.next { transform: translateY(100%); opacity: 0; }
 .greeting-slide.next.visible { transform: translateY(0); opacity: 1; }
 .header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 h2 { font-size: 18px; font-weight: 600; color: #9CA3AF; margin-bottom: 16px; letter-spacing: -0.3px; }
-.card { background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 20px 18px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+.card {
+  background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 20px 18px; margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; cursor: pointer; }
 .card-header h2 { margin: 0; }
 .card-content { transition: all 0.3s; overflow: hidden; }
 .card-content.collapsed { display: none; }
 .input-group { margin-bottom: 18px; position: relative; }
 label { display: block; font-size: 13px; font-weight: 500; color: #9CA3AF; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-input, select { width: 100%; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px; padding: 14px 16px; font-size: 16px; color: #E6EDF3; outline: none; transition: all 0.25s ease; -webkit-appearance: none; font-family: inherit; backdrop-filter: blur(5px); }
+input, select {
+  width: 100%; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px;
+  padding: 14px 16px; font-size: 16px; color: #E6EDF3; outline: none; transition: all 0.25s ease;
+  -webkit-appearance: none; font-family: inherit; backdrop-filter: blur(5px);
+}
 input:focus { border-color: #4FACFE; box-shadow: 0 0 0 3px rgba(79,172,254,0.2); }
 input::placeholder { color: #6B7280; opacity: 0.7; }
 input[type="date"] { color-scheme: dark; }
 .segmented-control { display: flex; background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 16px; padding: 4px; }
-.segmented-option { flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 500; color: #9CA3AF; cursor: pointer; transition: all 0.2s ease; }
+.segmented-option {
+  flex: 1; text-align: center; padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 500;
+  color: #9CA3AF; cursor: pointer; transition: all 0.2s ease;
+}
 .segmented-option.active { background: #4FACFE; color: #0D1117; }
-.btn-primary, .btn-secondary, .btn-small, .water-btn { transition: transform 0.15s ease, box-shadow 0.2s ease; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.btn-primary, .btn-secondary, .btn-small, .water-btn {
+  transition: transform 0.15s ease, box-shadow 0.2s ease; -webkit-tap-highlight-color: transparent;
+}
 .btn-primary:active, .btn-secondary:active, .btn-small:active, .water-btn:active { transform: scale(0.98); }
-.btn-primary { width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; text-align: center; background: #1A2027; color: #E6EDF3; position: relative; z-index: 1; border: 2px solid transparent; background-clip: padding-box; }
-.btn-primary::before { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(90deg, #00F2FE, #4FACFE, #A855F7, #00F2FE); background-size: 300% 100%; border-radius: 40px; z-index: -1; animation: borderShimmer 4s linear infinite; }
+.btn-primary {
+  width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
+  cursor: pointer; margin-bottom: 10px; -webkit-appearance: none; text-align: center;
+  background: #1A2027; color: #E6EDF3; position: relative; z-index: 1; border: 2px solid transparent; background-clip: padding-box;
+}
+.btn-primary::before {
+  content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(90deg, #00F2FE, #4FACFE, #A855F7, #00F2FE);
+  background-size: 300% 100%; border-radius: 40px; z-index: -1; animation: borderShimmer 4s linear infinite;
+}
 @keyframes borderShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
 .btn-primary:hover { transform: scale(1.01); box-shadow: 0 0 25px rgba(79,172,254,0.3); }
-.btn-secondary { width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 10px; background: transparent; border: 1px solid #30363D; color: #E6EDF3; }
-.btn-small { background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px; padding: 10px 16px; font-size: 14px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px); }
+.btn-secondary {
+  width: 100%; border: none; border-radius: 40px; padding: 16px 24px; font-size: 16px; font-weight: 700;
+  cursor: pointer; margin-bottom: 10px; background: transparent; border: 1px solid #30363D; color: #E6EDF3;
+}
+.btn-small {
+  background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+  padding: 10px 16px; font-size: 14px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
+}
 .lang-btn { flex: 1; }
 .lang-btn.active { background: #4FACFE; border-color: #4FACFE; color: #0D1117; }
 .btn-danger { background: transparent; border: 1px solid #F85149; color: #F85149; }
+.water-buttons { display: flex; gap: 8px; margin: 12px 0; }
+.water-btn {
+  flex: 1; background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px;
+  padding: 10px; font-size: 16px; font-weight: 600; color: #E6EDF3; cursor: pointer; text-align: center;
+}
+.water-manual { display: flex; gap: 8px; margin-top: 8px; }
+.water-manual input { flex: 2; }
+.water-manual button { flex: 1; }
 .progress-bar-container { height: 10px; background: rgba(33, 38, 45, 0.6); border-radius: 10px; margin: 8px 0 16px; overflow: hidden; }
-.progress-bar { height: 100%; border-radius: 10px; transition: width 0.6s ease; background-size: 300% 100% !important; animation: barShimmer 4s ease-in-out infinite; width: 0%; }
+.progress-bar {
+  height: 100%; border-radius: 10px; transition: width 0.6s ease; background-size: 300% 100% !important;
+  animation: barShimmer 4s ease-in-out infinite; width: 0%;
+}
 .bar-kcal { background-image: linear-gradient(90deg, #FF6B6B, #FF8E53, #FFB347, #FF6B6B) !important; }
 .bar-protein { background-image: linear-gradient(90deg, #4FACFE, #00F2FE, #7FC8FF, #4FACFE) !important; }
 .bar-fat { background-image: linear-gradient(90deg, #FFD93D, #FFB347, #FFA500, #FFD93D) !important; }
 .bar-carbs { background-image: linear-gradient(90deg, #6BCB77, #4D96FF, #9B59B6, #6BCB77) !important; }
 .bar-water { background-image: linear-gradient(90deg, #00F2FE, #4FACFE, #7FC8FF, #00F2FE) !important; }
 @keyframes barShimmer { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-.water-buttons { display: flex; gap: 8px; margin: 12px 0; }
-.water-btn { flex: 1; background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 30px; padding: 10px; font-size: 16px; font-weight: 600; color: #E6EDF3; cursor: pointer; text-align: center; }
-.water-manual { display: flex; gap: 8px; margin-top: 8px; }
-.water-manual input { flex: 2; }
-.water-manual button { flex: 1; }
 .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.tab { flex: 1; text-align: center; padding: 12px; background: rgba(33, 38, 45, 0.6); border-radius: 20px; cursor: pointer; font-weight: 600; color: #9CA3AF; transition: all 0.2s ease; }
+.tab {
+  flex: 1; text-align: center; padding: 12px; background: rgba(33, 38, 45, 0.6);
+  border-radius: 20px; cursor: pointer; font-weight: 600; color: #9CA3AF; transition: all 0.2s ease;
+}
 .tab.active { background: #4FACFE; color: #0D1117; }
 .page { display: none; }
 .page.active { display: block; }
-.swipe-container { position: relative; overflow: hidden; touch-action: pan-y; min-height: 500px; }
-.swipe-wrapper { display: flex; transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1); will-change: transform; }
-.swipe-page { flex: 0 0 100%; width: 100%; }
 .food-list { margin: 16px 0; }
-.food-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5); border-radius: 16px; margin-bottom: 8px; }
-.food-toggle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.food-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5);
+  border-radius: 16px; margin-bottom: 8px;
+}
+.food-toggle {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4FACFE; background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 .food-toggle.checked { background: #4FACFE; border-color: #4FACFE; }
 .food-toggle.checked::after { content: '✓'; color: #0D1117; font-size: 16px; font-weight: bold; }
 .food-info { flex: 1; }
@@ -92,14 +138,26 @@ input[type="date"] { color-scheme: dark; }
 .food-macros { font-size: 12px; color: #9CA3AF; }
 .food-delete { color: #F85149; cursor: pointer; padding: 8px; font-size: 18px; }
 .templates-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; min-height: 40px; }
-.template-btn { background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px; padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px); }
-.profile-photo { width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE; margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.template-btn {
+  background: rgba(26, 32, 39, 0.8); border: 1px solid #30363D; border-radius: 20px;
+  padding: 8px 14px; font-size: 13px; color: #E6EDF3; cursor: pointer; backdrop-filter: blur(5px);
+}
+.profile-photo {
+  width: 100px; height: 100px; border-radius: 50%; background: #1A2027; border: 3px solid #4FACFE;
+  margin: 0 auto 8px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
 .profile-photo img { width: 100%; height: 100%; object-fit: cover; }
 .profile-initials { font-size: 40px; font-weight: 600; color: #E6EDF3; line-height: 1; }
-.header-photo { width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.header-photo {
+  width: 48px; height: 48px; border-radius: 50%; background: #1A2027; border: 2px solid #4FACFE;
+  cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
 .header-photo img { width: 100%; height: 100%; object-fit: cover; }
 .header-initials { font-size: 20px; font-weight: 600; color: #E6EDF3; line-height: 1; }
-.streak-emoji { font-size: 28px; line-height: 1; display: inline-block; cursor: pointer; transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1; }
+.streak-emoji {
+  font-size: 28px; line-height: 1; display: inline-block; cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.5s ease; flex-shrink: 0; opacity: 1;
+}
 .streak-emoji.fade-in { opacity: 0; }
 .streak-emoji.none { filter: drop-shadow(0 0 8px #6B7280); }
 .streak-emoji.red { filter: drop-shadow(0 0 15px #FF4500); animation: glowPulse 2s infinite; }
@@ -107,62 +165,93 @@ input[type="date"] { color-scheme: dark; }
 .streak-emoji.purple { filter: drop-shadow(0 0 25px #A855F7); animation: glowPulse 1.2s infinite; }
 .streak-emoji.rainbow { animation: rainbowGlow 3s linear infinite, glowPulse 1.5s infinite; }
 @keyframes glowPulse { 0%,100%{opacity:0.8} 50%{opacity:1} }
-@keyframes rainbowGlow { 0%{filter:drop-shadow(0 0 20px #F00)} 25%{filter:drop-shadow(0 0 20px #FF0)} 50%{filter:drop-shadow(0 0 20px #0FF)} 75%{filter:drop-shadow(0 0 20px #80F)} 100%{filter:drop-shadow(0 0 20px #F00)} }
+@keyframes rainbowGlow {
+  0%{filter:drop-shadow(0 0 20px #F00)} 25%{filter:drop-shadow(0 0 20px #FF0)}
+  50%{filter:drop-shadow(0 0 20px #0FF)} 75%{filter:drop-shadow(0 0 20px #80F)}
+  100%{filter:drop-shadow(0 0 20px #F00)}
+}
 .bmi-container { margin: 16px 0 8px; }
 .bmi-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
 .bmi-value { font-size: 24px; font-weight: 700; }
 .bmi-category { font-size: 16px; font-weight: 500; }
 .bmi-scale { position: relative; height: 24px; margin: 8px 0; cursor: pointer; }
-.bmi-gradient { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px; }
-.bmi-marker { position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px; transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease; }
+.bmi-gradient {
+  position: absolute; top: 0; left: 0; right: 0; height: 8px;
+  background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); border-radius: 4px;
+}
+.bmi-marker {
+  position: absolute; top: -4px; width: 4px; height: 16px; background: white; border-radius: 2px;
+  transform: translateX(-50%); box-shadow: 0 0 8px rgba(255,255,255,0.5); transition: left 0.3s ease;
+}
 .bmi-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: #9CA3AF; }
-.bmi-tooltip { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027; border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.bmi-tooltip {
+  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1A2027;
+  border: 1px solid #4FACFE; border-radius: 12px; padding: 6px 12px; font-size: 14px;
+  white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
 .bmi-scale:hover .bmi-tooltip { opacity: 1; }
 .activity-daily-options { display: flex; flex-direction: column; gap: 12px; }
-.activity-daily-item { background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s ease; }
+.activity-daily-item {
+  background: rgba(1, 4, 9, 0.6); border: 1px solid #30363D; border-radius: 18px;
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+  backdrop-filter: blur(5px); transition: all 0.2s ease;
+}
 .activity-daily-item.selected { border-color: #4FACFE; background: rgba(79,172,254,0.1); }
-.divider-line { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
-.fasting-status { padding: 16px; background: rgba(1,4,9,0.4); border-radius: 16px; margin-top: 16px; text-align: center; }
-.fasting-timer { font-size: 24px; font-weight: 700; margin: 8px 0; }
-.journal-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; cursor: pointer; }
-.journal-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: #E6EDF3; }
-.journal-content { transition: all 0.3s; overflow: hidden; }
-.journal-content.collapsed { display: none; }
-.nutrition-chart-container { margin: 16px 0; }
-.nutrition-switch { display: flex; gap: 8px; margin: 12px 0; }
-.nutrition-switch .btn-small { flex: 1; }
-.nutrition-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px; }
-.nutrition-history-date { font-size: 14px; color: #9CA3AF; }
-.nutrition-history-value { font-weight: 600; font-size: 14px; margin-right: auto; padding-left: 8px; }
-.nutrition-history-delete { color: #F85149; cursor: pointer; padding: 4px 8px; font-size: 16px; }
-.weight-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px; }
+.weight-history-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+  background: rgba(1, 4, 9, 0.4); border-radius: 12px; margin-bottom: 6px;
+}
 .weight-history-date { font-size: 14px; color: #9CA3AF; }
 .weight-history-value { font-weight: 600; font-size: 16px; margin-right: auto; padding-left: 8px; }
 .weight-history-delete { color: #F85149; cursor: pointer; padding: 4px 8px; font-size: 16px; }
 .slider-container { padding: 20px 0; }
 .slider-labels { display: flex; justify-content: space-between; margin-bottom: 12px; color: #9CA3AF; font-size: 12px; }
 .slider-wrapper { position: relative; height: 40px; margin-top: 4px; }
-.slider-gradient { position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%); }
+.slider-gradient {
+  position: absolute; top: 50%; left: 0; right: 0; height: 8px; border-radius: 4px; transform: translateY(-50%);
+}
 .temp-gradient { background: linear-gradient(to right, #4FACFE, #6BCB77, #FFD93D, #FF8E53, #F85149); }
 .steps-gradient { background: linear-gradient(to right, #6BCB77, #4D96FF, #9B59B6); }
 .search-gradient { background: linear-gradient(to right, #4FACFE, #A855F7); }
-.slider-ticks { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); pointer-events: none; padding: 0 2px; }
+.slider-ticks {
+  position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between;
+  transform: translateY(-50%); pointer-events: none; padding: 0 2px;
+}
 .tick { width: 2px; height: 12px; background: rgba(255,255,255,0.3); }
-input[type=range] { position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%); background: transparent; z-index: 2; -webkit-appearance: none; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer; }
+input[type=range] {
+  position: absolute; top: 50%; left: 0; right: 0; width: 100%; transform: translateY(-50%);
+  background: transparent; z-index: 2; -webkit-appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px; background: white; border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 2px solid #4FACFE; cursor: pointer;
+}
 .slider-value { text-align: center; margin-top: 16px; font-size: 18px; font-weight: 600; }
 .profile-header { display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 16px; }
 .profile-header .btn-small { position: absolute; left: 0; }
 .profile-header h2 { margin: 0; text-align: center; }
-.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D; border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none; }
-.autocomplete-item { padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex; justify-content: space-between; align-items: center; }
+.autocomplete-list {
+  position: absolute; top: 100%; left: 0; right: 0; background: #1A2027; border: 1px solid #30363D;
+  border-radius: 16px; margin-top: 4px; max-height: 240px; overflow-y: auto; z-index: 200; display: none;
+}
+.autocomplete-item {
+  padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #30363D; display: flex;
+  justify-content: space-between; align-items: center;
+}
 .autocomplete-item:hover { background: rgba(79,172,254,0.2); }
 .autocomplete-item .off-name { font-weight: 500; }
 .autocomplete-item .off-brand { font-size: 12px; color: #9CA3AF; margin-left: 8px; }
 .apple-switch { position: relative; display: inline-block; width: 51px; height: 31px; }
 .apple-switch input { opacity: 0; width: 0; height: 0; }
-.apple-switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D; border-radius: 31px; transition: 0.25s; }
-.apple-switch .slider:before { position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px; background-color: white; border-radius: 50%; transition: 0.25s; }
+.apple-switch .slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(48, 54, 61, 0.8); border: 1px solid #30363D;
+  border-radius: 31px; transition: 0.25s;
+}
+.apple-switch .slider:before {
+  position: absolute; content: ""; height: 27px; width: 27px; left: 1px; bottom: 1px;
+  background-color: white; border-radius: 50%; transition: 0.25s;
+}
 .apple-switch input:checked + .slider { background-color: #4FACFE; border-color: #4FACFE; }
 .apple-switch input:checked + .slider:before { transform: translateX(20px); }
 .toggle-label { margin-left: 12px; font-size: 14px; color: #9CA3AF; }
@@ -170,9 +259,19 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 .text-center { text-align: center; }
 .text-small { font-size: 13px; color: #9CA3AF; }
 .mb-2 { margin-bottom: 8px; }
-.scanner-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117; z-index: 1000; display: none; flex-direction: column; }
-.smart-water-modal, .about-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95); z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
-.about-content { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px; padding: 24px 20px; margin-top: 20px; }
+.scanner-container {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0D1117;
+  z-index: 1000; display: none; flex-direction: column;
+}
+.smart-water-modal, .about-modal, .friend-progress-modal {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(13,17,23,0.95);
+  z-index: 1000; display: none; flex-direction: column; padding: 20px; overflow-y: auto;
+}
+.about-content {
+  background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(12px);
+  border: 1px solid rgba(48, 54, 61, 0.5); border-radius: 24px;
+  padding: 24px 20px; margin-top: 20px;
+}
 .about-content h3 { font-size: 18px; font-weight: 600; color: #E6EDF3; margin-top: 20px; margin-bottom: 12px; }
 .about-content h3:first-of-type { margin-top: 0; }
 .about-content p { font-size: 14px; line-height: 1.6; color: #B0B8C1; margin-bottom: 12px; }
@@ -181,162 +280,597 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 .about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
-.fasting-section { margin-top: 24px; }
+/* Стили для списка друзей */
+.friend-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5);
+  border-radius: 16px; margin-bottom: 8px; cursor: pointer;
+}
+.friend-item .friend-name { font-weight: 500; flex: 1; }
+.friend-item .friend-status { font-size: 12px; color: #9CA3AF; }
 </style>
 </head>
 <body>
 <div class="app">
-<!-- Модалки -->
-<div id="scannerModal" class="scanner-container"><div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div><video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video><div style="padding:20px;text-align:center;"><div style="display:flex;gap:8px;"><input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" style="flex:2;"><button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)" style="flex:1;" data-i18n="search">Найти</button></div><div id="scannerHint" style="margin-top:12px;color:#9CA3AF;" data-i18n="scanner_hint">Наведите камеру</div><button class="btn-secondary" onclick="closeScanner()" style="margin-top:12px;" data-i18n="cancel">Отмена</button></div></div>
-<div id="smartWaterModal" class="smart-water-modal"><div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_water">Умная вода</h2><button class="btn-small" onclick="closeSmartWater()" data-i18n="close">Закрыть</button></div><div class="card"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;"><span data-i18n="enable">Включить</span><div style="display:flex; align-items:center;"><label class="apple-switch"><input type="checkbox" id="smartWaterToggle"><span class="slider"></span></label><span class="toggle-label" id="smartWaterToggleLabel" data-i18n="off">Выкл</span></div></div><div id="smartWaterSettings" style="display:none;"><div class="slider-container"><div class="slider-labels"><span>🥶 -10°</span><span>0°</span><span>10°</span><span>20°</span><span>30°</span><span>🔥 40°+</span></div><div class="slider-wrapper"><div class="slider-gradient temp-gradient"></div><div class="slider-ticks" id="tempTicks"></div><input type="range" id="tempSlider" min="-10" max="40" value="22" step="1"></div><div class="slider-value"><span data-i18n="now_temp">Сейчас</span>: <span id="tempDisplay">22°C</span></div></div><div class="slider-container"><div class="slider-labels"><span>0</span><span>5k</span><span>10k</span><span>15k</span><span>20k+</span></div><div class="slider-wrapper"><div class="slider-gradient steps-gradient"></div><div class="slider-ticks" id="stepsTicks"></div><input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100"></div><div class="slider-value"><span data-i18n="steps">Шаги</span>: <span id="stepsDisplay">8 000</span></div></div><div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;"><div class="flex" style="justify-content:space-between;"><span data-i18n="base_norm">Базовая норма</span>: <span id="baseWaterNorm">1820 мл</span></div><div class="flex" style="justify-content:space-between;"><span data-i18n="temperature">Температура</span>: <span id="tempBonus">+150 мл</span></div><div class="flex" style="justify-content:space-between;"><span data-i18n="steps">Шаги</span>: <span id="stepsBonus">+150 мл</span></div><div class="flex" style="justify-content:space-between;font-weight:700;margin-top:8px;"><span data-i18n="total">ИТОГО</span>: <span id="totalWaterNorm">2120 мл</span></div></div></div><div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;margin-top:20px;" id="waterBaseOnly"><div class="flex" style="justify-content:space-between;"><span data-i18n="water_norm">Норма воды</span>: <span id="baseOnlyWater">1820 мл</span></div></div></div></div>
-<div id="smartSearchModal" class="smart-water-modal"><div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_search">Умный поиск</h2><button class="btn-small" onclick="closeSmartSearch()" data-i18n="close">Закрыть</button></div><div class="card"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;"><span data-i18n="enable">Включить</span><div style="display:flex; align-items:center;"><label class="apple-switch"><input type="checkbox" id="smartSearchToggle"><span class="slider"></span></label><span class="toggle-label" id="smartSearchToggleLabel" data-i18n="off">Выкл</span></div></div><div id="smartSearchSettings" style="display:none;"><div class="slider-container"><div class="slider-labels"><span>5</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div><div class="slider-wrapper"><div class="slider-gradient search-gradient"></div><div class="slider-ticks" id="resultsTicks"></div><input type="range" id="resultsSlider" min="5" max="50" value="10" step="1"></div><div class="slider-value"><span data-i18n="results">Результатов</span>: <span id="resultsDisplay">10</span></div></div></div></div></div>
-<div id="aboutModal" class="about-modal"><div style="display:flex;justify-content:space-between;margin-bottom:16px;"><h2 data-i18n="about">О приложении</h2><button class="btn-small" onclick="closeAbout()" data-i18n="close">Закрыть</button></div><div class="about-content"><h3>Disclaimer</h3><p>FitCat is not a medical application. All calculations (calories, macronutrients, water intake, BMI) are based on general formulas and provided for informational purposes only. They do not constitute medical advice, diagnosis, or treatment.</p><p>Always consult a qualified healthcare professional before making any changes to your diet, exercise routine, or lifestyle. The developer assumes no liability for any consequences resulting from the use of this application.</p><h3>Third-Party Services & Libraries</h3><p>This application uses the following open-source libraries and services:</p><ul><li>OpenFoodFacts (world.openfoodfacts.org) — food product database. Used for barcode scanning and product search.</li><li>ZXing (Zebra Crossing) — barcode scanning library (Apache License 2.0).</li><li>QuaggaJS — barcode scanning library (MIT License).</li><li>Chart.js — charting library (MIT License).</li></ul><p>All product data is provided by OpenFoodFacts and may not be complete or accurate. The developer is not responsible for the accuracy of third-party data.</p><h3>Data Privacy</h3><p>All personal data (profile, food diary, weight history, photos) is stored exclusively on your device using browser localStorage. No data is transmitted to any server or third party. The developer does not have access to your data.</p><h3>No Warranty</h3><p>This software is provided "as is", without warranty of any kind, express or implied. In no event shall the developer be liable for any claim, damages, or other liability arising from the use of the software.</p><div class="divider"></div><p class="text-center">FitCat v2.0</p></div></div>
 
-<!-- Страница настройки -->
+<!-- Модальные окна -->
+<div id="scannerModal" class="scanner-container">
+  <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
+  <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
+  <div style="padding:20px;text-align:center;">
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" style="flex:2;">
+      <button class="btn-small" onclick="lookupBarcode(document.getElementById('manualBarcode').value)" style="flex:1;" data-i18n="search">Найти</button>
+    </div>
+    <div id="scannerHint" style="margin-top:12px;color:#9CA3AF;" data-i18n="scanner_hint">Наведите камеру</div>
+    <button class="btn-secondary" onclick="closeScanner()" style="margin-top:12px;" data-i18n="cancel">Отмена</button>
+  </div>
+</div>
+
+<div id="smartWaterModal" class="smart-water-modal">
+  <div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_water">Умная вода</h2><button class="btn-small" onclick="closeSmartWater()" data-i18n="close">Закрыть</button></div>
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <span data-i18n="enable">Включить</span>
+      <div style="display:flex; align-items:center;">
+        <label class="apple-switch"><input type="checkbox" id="smartWaterToggle"><span class="slider"></span></label>
+        <span class="toggle-label" id="smartWaterToggleLabel" data-i18n="off">Выкл</span>
+      </div>
+    </div>
+    <div id="smartWaterSettings" style="display:none;">
+      <div class="slider-container">
+        <div class="slider-labels"><span>🥶 -10°</span><span>0°</span><span>10°</span><span>20°</span><span>30°</span><span>🔥 40°+</span></div>
+        <div class="slider-wrapper"><div class="slider-gradient temp-gradient"></div><div class="slider-ticks" id="tempTicks"></div><input type="range" id="tempSlider" min="-10" max="40" value="22" step="1"></div>
+        <div class="slider-value"><span data-i18n="now_temp">Сейчас</span>: <span id="tempDisplay">22°C</span></div>
+      </div>
+      <div class="slider-container">
+        <div class="slider-labels"><span>0</span><span>5k</span><span>10k</span><span>15k</span><span>20k+</span></div>
+        <div class="slider-wrapper"><div class="slider-gradient steps-gradient"></div><div class="slider-ticks" id="stepsTicks"></div><input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100"></div>
+        <div class="slider-value"><span data-i18n="steps">Шаги</span>: <span id="stepsDisplay">8 000</span></div>
+      </div>
+      <div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;">
+        <div class="flex" style="justify-content:space-between;"><span data-i18n="base_norm">Базовая норма</span>: <span id="baseWaterNorm">1820 мл</span></div>
+        <div class="flex" style="justify-content:space-between;"><span data-i18n="temperature">Температура</span>: <span id="tempBonus">+150 мл</span></div>
+        <div class="flex" style="justify-content:space-between;"><span data-i18n="steps">Шаги</span>: <span id="stepsBonus">+150 мл</span></div>
+        <div class="flex" style="justify-content:space-between;font-weight:700;margin-top:8px;"><span data-i18n="total">ИТОГО</span>: <span id="totalWaterNorm">2120 мл</span></div>
+      </div>
+    </div>
+    <div style="padding:16px;background:rgba(1,4,9,0.4);border-radius:16px;margin-top:20px;" id="waterBaseOnly">
+      <div class="flex" style="justify-content:space-between;"><span data-i18n="water_norm">Норма воды</span>: <span id="baseOnlyWater">1820 мл</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="smartSearchModal" class="smart-water-modal">
+  <div style="display:flex;justify-content:space-between;margin-bottom:24px;"><h2 data-i18n="smart_search">Умный поиск</h2><button class="btn-small" onclick="closeSmartSearch()" data-i18n="close">Закрыть</button></div>
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <span data-i18n="enable">Включить</span>
+      <div style="display:flex; align-items:center;">
+        <label class="apple-switch"><input type="checkbox" id="smartSearchToggle"><span class="slider"></span></label>
+        <span class="toggle-label" id="smartSearchToggleLabel" data-i18n="off">Выкл</span>
+      </div>
+    </div>
+    <div id="smartSearchSettings" style="display:none;">
+      <div class="slider-container">
+        <div class="slider-labels"><span>5</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div>
+        <div class="slider-wrapper"><div class="slider-gradient search-gradient"></div><div class="slider-ticks" id="resultsTicks"></div><input type="range" id="resultsSlider" min="5" max="50" value="10" step="1"></div>
+        <div class="slider-value"><span data-i18n="results">Результатов</span>: <span id="resultsDisplay">10</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="aboutModal" class="about-modal">
+  <div style="display:flex;justify-content:space-between;margin-bottom:16px;"><h2 data-i18n="about">О приложении</h2><button class="btn-small" onclick="closeAbout()" data-i18n="close">Закрыть</button></div>
+  <div class="about-content">
+    <h3>Disclaimer</h3>
+    <p>FitCat is not a medical application. All calculations (calories, macronutrients, water intake, BMI) are based on general formulas and provided for informational purposes only. They do not constitute medical advice, diagnosis, or treatment.</p>
+    <p>Always consult a qualified healthcare professional before making any changes to your diet, exercise routine, or lifestyle. The developer assumes no liability for any consequences resulting from the use of this application.</p>
+    <h3>Third-Party Services & Libraries</h3>
+    <p>This application uses the following open-source libraries and services:</p>
+    <ul><li>OpenFoodFacts (world.openfoodfacts.org) — food product database.</li><li>ZXing (Zebra Crossing) — barcode scanning library (Apache License 2.0).</li><li>QuaggaJS — barcode scanning library (MIT License).</li><li>Chart.js — charting library (MIT License).</li></ul>
+    <p>All product data is provided by OpenFoodFacts and may not be complete or accurate.</p>
+    <h3>Data Privacy</h3>
+    <p>All personal data (profile, food diary, weight history, photos) is stored exclusively on your device using browser localStorage. No data is transmitted to any server or third party. The developer does not have access to your data.</p>
+    <h3>No Warranty</h3>
+    <p>This software is provided "as is", without warranty of any kind.</p>
+    <div class="divider"></div>
+    <p class="text-center">FitCat v1.1</p>
+  </div>
+</div>
+
+<!-- Модальное окно прогресса друга -->
+<div id="friendProgressModal" class="friend-progress-modal">
+  <div style="display:flex; justify-content:space-between; margin-bottom:24px;">
+    <h2 id="friendModalName">Прогресс друга</h2>
+    <button class="btn-small" onclick="closeFriendProgress()">Закрыть</button>
+  </div>
+  <div class="card" id="friendProgressBars"></div>
+</div>
+
+<!-- Страницы приложения -->
 <div id="setupPage">
-    <h1>FitCat</h1>
-    <div class="card"><h2 data-i18n="about_you">О себе</h2><div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="setupName" data-i18n-placeholder="name_placeholder" placeholder="Введите имя"></div><div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="setupAge" data-i18n-placeholder="age_placeholder" placeholder="Введите возраст" min="10" max="100"></div><div class="input-group"><label data-i18n="gender">Пол</label><div class="segmented-control" id="setupGenderControl"><div class="segmented-option active" data-gender="female" onclick="selectSetupGender('female')" data-i18n="female">Женский</div><div class="segmented-option" data-gender="male" onclick="selectSetupGender('male')" data-i18n="male">Мужской</div></div><input type="hidden" id="setupGender" value="female"></div><div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="setupHeight" data-i18n-placeholder="height_placeholder" placeholder="Введите рост" min="100" max="250"></div><div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="setupWeight" data-i18n-placeholder="weight_placeholder" placeholder="Введите вес" min="30" max="500" step="0.1"></div></div>
-    <button class="btn-primary" onclick="completeSetup()" data-i18n="start">Начать</button>
-    <div class="text-center text-small" style="margin-top:16px;" data-i18n="data_local">Данные только в твоём телефоне</div>
-    <div class="card" style="margin-top:20px;"><h2 data-i18n="language">Язык</h2><div class="flex"><button class="btn-small lang-btn active" id="setupLangRu" onclick="setSetupLanguage('ru')">🇷🇺</button><button class="btn-small lang-btn" id="setupLangEn" onclick="setSetupLanguage('en')">🇬🇧</button><button class="btn-small lang-btn" id="setupLangCn" onclick="setSetupLanguage('cn')">🇨🇳</button></div></div>
+  <h1>FitCat</h1>
+  <div class="card">
+    <h2 data-i18n="about_you">О себе</h2>
+    <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="setupName" data-i18n-placeholder="name_placeholder" placeholder="Введите имя"></div>
+    <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="setupAge" data-i18n-placeholder="age_placeholder" placeholder="Введите возраст" min="10" max="100"></div>
+    <div class="input-group"><label data-i18n="gender">Пол</label>
+      <div class="segmented-control" id="setupGenderControl">
+        <div class="segmented-option active" data-gender="female" onclick="selectSetupGender('female')" data-i18n="female">Женский</div>
+        <div class="segmented-option" data-gender="male" onclick="selectSetupGender('male')" data-i18n="male">Мужской</div>
+      </div>
+      <input type="hidden" id="setupGender" value="female">
+    </div>
+    <div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="setupHeight" data-i18n-placeholder="height_placeholder" placeholder="Введите рост" min="100" max="250"></div>
+    <div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="setupWeight" data-i18n-placeholder="weight_placeholder" placeholder="Введите вес" min="30" max="500" step="0.1"></div>
+  </div>
+  <button class="btn-primary" onclick="completeSetup()" data-i18n="start">Начать</button>
+  <div class="text-center text-small" style="margin-top:16px;" data-i18n="data_local">Данные только в твоём телефоне</div>
+  <div class="card" style="margin-top:20px;">
+    <h2 data-i18n="language">Язык</h2>
+    <div class="flex">
+      <button class="btn-small lang-btn active" id="setupLangRu" onclick="setSetupLanguage('ru')">🇷🇺</button>
+      <button class="btn-small lang-btn" id="setupLangEn" onclick="setSetupLanguage('en')">🇬🇧</button>
+      <button class="btn-small lang-btn" id="setupLangCn" onclick="setSetupLanguage('cn')">🇨🇳</button>
+    </div>
+  </div>
 </div>
 
-<!-- Главная страница -->
 <div id="mainPage" style="display:none;">
-    <div class="header-row"><div style="flex:1; min-width:0;"><div class="greeting-wrapper"><div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div><div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div></div></div><div class="header-actions"><span id="streakEmoji" class="streak-emoji none fade-in">🕯️</span><div class="header-photo" id="headerPhoto" onclick="showProfile()"><span id="headerInitials" class="header-initials"></span></div></div></div>
-    
-    <div class="tabs">
-        <div class="tab active" data-tab="today" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
-        <div class="tab" data-tab="activity" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
-        <div class="tab" data-tab="analytics" onclick="switchTab('analytics', event)" data-i18n="analytics">Аналитика</div>
+  <div class="header-row">
+    <div style="flex:1; min-width:0;"><div class="greeting-wrapper"><div class="greeting-slide" id="greetingSlide1"><h1>FitCat</h1></div><div class="greeting-slide next" id="greetingSlide2"><h1>FitCat</h1></div></div></div>
+    <div class="header-actions"><span id="streakEmoji" class="streak-emoji none fade-in">🕯️</span><div class="header-photo" id="headerPhoto" onclick="showProfile()"><span id="headerInitials" class="header-initials">🐱</span></div></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('today', event)" data-i18n="tab_today">Сегодня</div>
+    <div class="tab" onclick="switchTab('activity', event)" data-i18n="tab_activity">Активность</div>
+    <div class="tab" onclick="switchTab('weight', event)" data-i18n="tab_weight">Вес</div>
+    <div class="tab" onclick="switchTab('friends', event)">Друзья</div>
+  </div>
+
+  <div id="todayPage" class="page active">
+    <div class="card"><h2 data-i18n="progress">Прогресс</h2><div id="progressBars"></div></div>
+
+    <div class="card" id="waterCard">
+      <div class="card-header" onclick="toggleCard('waterCard')"><h2 data-i18n="water_title">Вода</h2><button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button></div>
+      <div class="card-content" id="waterContent">
+        <div style="text-align:center;margin:12px 0;"><span style="font-size:28px;font-weight:700;" id="waterCurrent">0</span><span style="color:#9CA3AF;"> / </span><span style="font-size:20px;" id="waterGoal">1820 <span data-i18n="ml">мл</span></span></div>
+        <div class="water-buttons"><div class="water-btn" onclick="addWater(-50)">−50</div><div class="water-btn" onclick="addWater(50)">+50</div><div class="water-btn" onclick="addWater(100)">+100</div><div class="water-btn" onclick="addWater(200)">+200</div></div>
+        <div class="water-manual"><input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10"><button class="btn-small" onclick="setManualWater()">✓</button></div>
+        <div id="smartWaterHint" class="text-small" style="margin-top:12px;"></div>
+      </div>
     </div>
 
-    <div class="swipe-container" id="swipeContainer">
-        <div class="swipe-wrapper" id="swipeWrapper">
-            <!-- Today Page -->
-            <div class="swipe-page" data-page="0">
-                <div id="todayPage" class="page active">
-                    <div class="card"><h2 data-i18n="progress">Прогресс</h2><div id="progressBars"></div></div>
-                    <div class="card" id="waterCard">
-                        <div class="card-header" onclick="toggleCard('waterCard')"><h2 data-i18n="water_title">Вода</h2><button class="btn-small" onclick="event.stopPropagation();openSmartWater()">⚙️</button></div>
-                        <div class="card-content" id="waterContent">
-                            <div style="text-align:center;margin:12px 0;"><span style="font-size:28px;font-weight:700;" id="waterCurrent">0</span><span style="color:#9CA3AF;"> / </span><span style="font-size:20px;" id="waterGoal">1820 <span data-i18n="ml">мл</span></span></div>
-                            <div class="water-buttons"><div class="water-btn" onclick="addWater(-50)">-50</div><div class="water-btn" onclick="addWater(50)">+50</div><div class="water-btn" onclick="addWater(100)">+100</div><div class="water-btn" onclick="addWater(200)">+200</div></div>
-                            <div class="water-manual"><input type="number" id="manualWaterInput" data-i18n-placeholder="water_placeholder" placeholder="Введи мл" min="0" step="10"><button class="btn-small" onclick="setManualWater()">✓</button></div>
-                            <div id="smartWaterHint" class="text-small" style="margin-top:12px;"></div>
-                        </div>
-                    </div>
-                    <div class="card" id="mealsCard">
-                        <div class="card-header" onclick="toggleCard('mealsCard')"><h2 data-i18n="meals">Продукты</h2><button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button></div>
-                        <div class="card-content" id="mealsContent">
-                            <div class="templates-bar" id="templatesBar"></div>
-                            <div style="display:flex;gap:8px;margin-bottom:12px;"><button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button><button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button><button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button></div>
-                            <div class="food-list" id="foodListContainer"></div>
-                            <div class="add-food-form" style="display:flex;flex-direction:column;gap:8px;">
-                                <div class="input-group" style="position: relative;"><input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off"><div id="autocompleteList" class="autocomplete-list"></div></div>
-                                <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
-                                <div style="display:flex;gap:8px;"><input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1"><input type="number" id="foodFat100" data-i18n-placeholder="fat_short" placeholder="Ж" step="0.1"><input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1"><input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал"></div>
-                                <div style="display:flex;gap:8px;"><input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;"></div>
-                                <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Activity Page -->
-            <div class="swipe-page" data-page="1">
-                <div id="activityPage" class="page">
-                    <div class="card">
-                        <h2 data-i18n="activity">Активность</h2>
-                        <div class="activity-daily-options">
-                            <div class="activity-daily-item" data-activity="1.2" onclick="setDailyActivity(1.2, this)" data-i18n="sedentary">Сидячий</div>
-                            <div class="activity-daily-item" data-activity="1.375" onclick="setDailyActivity(1.375, this)" data-i18n="light">Умеренный</div>
-                            <div class="activity-daily-item" data-activity="1.55" onclick="setDailyActivity(1.55, this)" data-i18n="moderate">Активный</div>
-                            <div class="activity-daily-item" data-activity="1.725" onclick="setDailyActivity(1.725, this)" data-i18n="very_active">Очень активный</div>
-                        </div>
-                        <div class="workout-section">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;"><span data-i18n="workout">Тренировка</span><div style="display:flex; align-items:center;"><label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label><span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span></div></div>
-                            <div id="workoutSettings" style="display:none;"><label style="display:block; margin-bottom:8px;" data-i18n="workout_intensity">Интенсивность тренировки</label><div class="segmented-control" id="workoutIntensityControl"><div class="segmented-option active" data-intensity="light" onclick="setWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div><div class="segmented-option" data-intensity="moderate" onclick="setWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div><div class="segmented-option" data-intensity="intense" onclick="setWorkoutIntensity('intense')" data-i18n="workout_intense">Интенсивная</div></div><input type="hidden" id="workoutIntensity" value="light"></div>
-                        </div>
-                        <div class="divider-line"></div>
-                        <div class="fasting-section">
-                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;"><span data-i18n="fasting">Интервальное голодание</span><div style="display:flex; align-items:center;"><label class="apple-switch"><input type="checkbox" id="fastingToggle"><span class="slider"></span></label><span class="toggle-label" id="fastingToggleLabel" data-i18n="off">Выкл</span></div></div>
-                            <div id="fastingSettings" style="display:none;">
-                                <label style="display:block; margin-bottom:8px;" data-i18n="fasting_mode">Режим</label>
-                                <div class="segmented-control" id="fastingModeControl">
-                                    <div class="segmented-option active" data-mode="168" onclick="setFastingMode('168')">16:8</div>
-                                    <div class="segmented-option" data-mode="1410" onclick="setFastingMode('1410')">14:10</div>
-                                    <div class="segmented-option" data-mode="186" onclick="setFastingMode('186')">18:6</div>
-                                    <div class="segmented-option" data-mode="204" onclick="setFastingMode('204')">20:4</div>
-                                </div>
-                                <input type="hidden" id="fastingMode" value="168">
-                                <label style="display:block; margin-top:16px; margin-bottom:8px;" data-i18n="fasting_start">Начало окна</label>
-                                <input type="time" id="fastingStartTime" value="12:00" style="margin-bottom:16px;">
-                                <div class="fasting-status" id="fastingStatusBox">
-                                    <div id="fastingStatusText" data-i18n="fasting_eating">Можно есть</div>
-                                    <div class="fasting-timer" id="fastingTimer">--:--</div>
-                                    <div class="text-small" id="fastingWindowText">12:00 – 20:00</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Analytics Page -->
-            <div class="swipe-page" data-page="2">
-                <div id="analyticsPage" class="page">
-                    <!-- Вес -->
-                    <div class="card">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2><button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button></div>
-                        <div id="weightStats" style="margin-bottom:12px;padding:12px;background:rgba(1,4,9,0.4);border-radius:16px;"><div class="flex" style="justify-content:space-around;text-align:center;"><div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:20px;font-weight:700;" id="startWeightStat">---</div></div><div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:20px;font-weight:700;" id="currentWeightStat">---</div></div><div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:20px;font-weight:700;" id="weightChangeStat">---</div></div><div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:20px;font-weight:700;" id="toGoalStat">---</div></div></div></div>
-                        <div class="bmi-container"><div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div><div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()"><div class="bmi-gradient"></div><div class="bmi-marker" id="bmiMarker" style="left:0%;"></div><div class="bmi-tooltip" id="bmiTooltip">Норма</div></div><div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div></div>
-                        <div class="flex mb-2"><input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;"><input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.6);border:1px solid #30363D;border-radius:16px;color:#E6EDF3;"><button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button></div>
-                        <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
-                        <div class="journal-header" onclick="toggleJournal('weightHistory')"><h3 data-i18n="history">История</h3></div>
-                        <div class="journal-content" id="weightHistoryContent"><div id="weightHistoryList"></div></div>
-                    </div>
-                    <!-- Питание -->
-                    <div class="card">
-                        <h2 data-i18n="nutrition_journal">Журнал питания</h2>
-                        <div class="nutrition-switch">
-                            <button class="btn-small active" data-nutrition="kcal" onclick="switchNutritionChart('kcal')"><span data-i18n="calories">Калории</span></button>
-                            <button class="btn-small" data-nutrition="protein" onclick="switchNutritionChart('protein')"><span data-i18n="protein">Белки</span></button>
-                            <button class="btn-small" data-nutrition="fat" onclick="switchNutritionChart('fat')"><span data-i18n="fat">Жиры</span></button>
-                            <button class="btn-small" data-nutrition="carbs" onclick="switchNutritionChart('carbs')"><span data-i18n="carbs">Углеводы</span></button>
-                        </div>
-                        <canvas id="nutritionChart" style="width:100%;height:200px;"></canvas>
-                        <div class="journal-header" onclick="toggleJournal('nutritionHistory')"><h3 data-i18n="nutrition_history">История питания</h3></div>
-                        <div class="journal-content" id="nutritionHistoryContent"><div id="nutritionHistoryList"></div></div>
-                    </div>
-                </div>
-            </div>
+    <div class="card" id="mealsCard">
+      <div class="card-header" onclick="toggleCard('mealsCard')"><h2 data-i18n="meals">Продукты</h2><button class="btn-small" onclick="event.stopPropagation();openSmartSearch()">⚙️</button></div>
+      <div class="card-content" id="mealsContent">
+        <div class="templates-bar" id="templatesBar"></div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button class="btn-small" onclick="saveTemplate()" style="flex:1;" data-i18n="save_template">Сохранить шаблон</button>
+          <button class="btn-small" onclick="clearTodayFoods()" style="flex:1;" data-i18n="clear">Очистить</button>
+          <button class="btn-small" onclick="openScanner()" style="flex:1;" data-i18n="scanner">📷 Сканер</button>
         </div>
+        <div class="food-list" id="foodListContainer"></div>
+        <div class="add-food-form" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="input-group" style="position: relative;"><input type="text" id="foodName" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" autocomplete="off"><div id="autocompleteList" class="autocomplete-list"></div></div>
+          <div style="font-size:13px;color:#9CA3AF;" data-i18n="per_100g">На 100 грамм:</div>
+          <div style="display:flex;gap:8px;">
+            <input type="number" id="foodProt100" data-i18n-placeholder="protein_short" placeholder="Б" step="0.1">
+            <input type="number" id="foodFat100" data-i18n-placeholder="fat_short" placeholder="Ж" step="0.1">
+            <input type="number" id="foodCarb100" data-i18n-placeholder="carbs_short" placeholder="У" step="0.1">
+            <input type="number" id="foodKcal100" data-i18n-placeholder="kcal_short" placeholder="Ккал">
+          </div>
+          <div style="display:flex;gap:8px;"><input type="number" id="foodWeight" data-i18n-placeholder="weight_grams" placeholder="Вес (грамм)" step="1" min="1" style="flex:1;"></div>
+          <button class="btn-primary" onclick="addFood()" data-i18n="add_food">Добавить</button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div id="activityPage" class="page">
+    <div class="card">
+      <h2 data-i18n="activity">Активность</h2>
+      <div class="activity-daily-options">
+        <div class="activity-daily-item" data-activity="1.2" onclick="selectDailyActivity(this)" data-i18n="sedentary">Сидячий</div>
+        <div class="activity-daily-item" data-activity="1.375" onclick="selectDailyActivity(this)" data-i18n="light">Умеренный</div>
+        <div class="activity-daily-item" data-activity="1.55" onclick="selectDailyActivity(this)" data-i18n="moderate">Активный</div>
+        <div class="activity-daily-item" data-activity="1.725" onclick="selectDailyActivity(this)" data-i18n="very_active">Очень активный</div>
+      </div>
+      <div class="workout-section">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <span data-i18n="workout">Тренировка</span>
+          <div style="display:flex; align-items:center;">
+            <label class="apple-switch"><input type="checkbox" id="workoutToggle"><span class="slider"></span></label>
+            <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
+          </div>
+        </div>
+        <div id="workoutSettings" style="display:none;">
+          <label style="display:block; margin-bottom:8px;" data-i18n="workout_intensity">Интенсивность тренировки</label>
+          <div class="segmented-control" id="workoutIntensityControl">
+            <div class="segmented-option active" data-intensity="light" onclick="selectWorkoutIntensity('light')" data-i18n="workout_light">Лёгкая</div>
+            <div class="segmented-option" data-intensity="moderate" onclick="selectWorkoutIntensity('moderate')" data-i18n="workout_moderate">Умеренная</div>
+            <div class="segmented-option" data-intensity="intense" onclick="selectWorkoutIntensity('intense')" data-i18n="workout_intense">Интенсивная</div>
+          </div>
+          <input type="hidden" id="workoutIntensity" value="light">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="applyDailyActivity()" style="margin-top:20px;" data-i18n="apply_today">Применить на сегодня</button>
+    </div>
+  </div>
+
+  <div id="weightPage" class="page">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h2 style="margin:0;" data-i18n="weight_log">Журнал веса</h2><button class="btn-small" onclick="setWeightGoal()" data-i18n="set_goal">Задать цель</button></div>
+      <div id="weightStats" style="margin-bottom:12px;padding:12px;background:rgba(1,4,9,0.4);border-radius:16px;">
+        <div class="flex" style="justify-content:space-around;text-align:center;">
+          <div><div class="text-small" data-i18n="start_weight">Старт</div><div style="font-size:20px;font-weight:700;" id="startWeightStat">---</div></div>
+          <div><div class="text-small" data-i18n="current_weight">Сейчас</div><div style="font-size:20px;font-weight:700;" id="currentWeightStat">---</div></div>
+          <div><div class="text-small" data-i18n="change">Изменение</div><div style="font-size:20px;font-weight:700;" id="weightChangeStat">---</div></div>
+          <div><div class="text-small" data-i18n="to_goal">До цели</div><div style="font-size:20px;font-weight:700;" id="toGoalStat">---</div></div>
+        </div>
+      </div>
+      <div class="bmi-container">
+        <div class="bmi-header"><span class="bmi-value" id="bmiValue">---</span><span class="bmi-category" id="bmiCategory">---</span></div>
+        <div class="bmi-scale" id="bmiScale" onclick="showBMITooltip()"><div class="bmi-gradient"></div><div class="bmi-marker" id="bmiMarker" style="left:0%;"></div><div class="bmi-tooltip" id="bmiTooltip">Норма</div></div>
+        <div class="bmi-labels"><span>16</span><span>18.5</span><span>25</span><span>30</span><span>35</span><span>40</span></div>
+      </div>
+      <div class="flex mb-2">
+        <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" style="flex:2;">
+        <input type="date" id="weightDate" style="flex:2;padding:14px 16px;background:rgba(1,4,9,0.6);border:1px solid #30363D;border-radius:16px;color:#E6EDF3;">
+        <button class="btn-small" onclick="addWeightEntry()" style="flex:1;">+</button>
+      </div>
+      <canvas id="weightChart" style="width:100%;height:200px;"></canvas>
+      <div style="margin-top:16px;"><h3 data-i18n="history">История</h3><div id="weightHistoryList"></div></div>
+    </div>
+  </div>
+
+  <!-- Страница "Друзья" -->
+  <div id="friendsPage" class="page">
+    <div class="card">
+      <h2>Друзья</h2>
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <input type="text" id="friendUidInput" placeholder="UID друга" style="flex:2;">
+        <button class="btn-small" onclick="addFriend()">+</button>
+      </div>
+      <div id="friendsList"></div>
+      <div id="friendsOfflineMsg" style="display:none; text-align:center; color:#F85149;">Нет интернета</div>
+    </div>
+  </div>
 </div>
 
-<!-- Страница профиля -->
-<div id="profilePage" style="display:none;"><div class="card"><div class="profile-header"><button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button><h2 data-i18n="profile">Профиль</h2><div style="width:60px;"></div></div><div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()"><span id="profileInitials" class="profile-initials"></span></div><input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)"><div style="text-align:center;margin-bottom:16px;"><button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button></div><div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="profileName"></div><div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="profileAge" min="10" max="100"></div><div class="input-group"><label data-i18n="gender">Пол</label><div class="segmented-control" id="profileGenderControl"><div class="segmented-option" data-gender="female" onclick="selectProfileGender('female')" data-i18n="female">Женский</div><div class="segmented-option" data-gender="male" onclick="selectProfileGender('male')" data-i18n="male">Мужской</div></div><input type="hidden" id="profileGender" value="female"></div><div class="input-group"><label data-i18n="goal">Цель</label><div class="segmented-control" id="profileGoalControl"><div class="segmented-option active" data-goal="lose" onclick="selectProfileGoal('lose')" data-i18n="lose">Похудение</div><div class="segmented-option" data-goal="maintain" onclick="selectProfileGoal('maintain')" data-i18n="maintain">Поддержание</div><div class="segmented-option" data-goal="gain" onclick="selectProfileGoal('gain')" data-i18n="gain">Набор</div></div><input type="hidden" id="profileGoal" value="lose"></div><div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="profileHeight" min="100" max="250"></div><div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="profileWeight" min="30" max="500" step="0.1"></div><button class="btn-primary" onclick="saveProfile()" data-i18n="save">Сохранить</button><button class="btn-secondary" onclick="showPage('settingsPage')" data-i18n="settings">Настройки</button><button class="btn-secondary btn-danger" onclick="deleteAccount()" data-i18n="delete_account">Удалить аккаунт</button></div></div>
-
-<!-- Страница настроек -->
-<div id="settingsPage" style="display:none;"><div class="card"><h2 data-i18n="settings">Настройки</h2><button class="btn-secondary" onclick="exportData()" data-i18n="export_data">Скачать данные</button><button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button><button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button><button class="btn-secondary" onclick="openAbout()" data-i18n="about">О приложении</button><h2 style="margin-top:24px;" data-i18n="language">Язык</h2><div class="flex"><button class="btn-small lang-btn" id="settingsLangRu" onclick="setSettingsLanguage('ru')">🇷🇺</button><button class="btn-small lang-btn" id="settingsLangEn" onclick="setSettingsLanguage('en')">🇬🇧</button><button class="btn-small lang-btn" id="settingsLangCn" onclick="setSettingsLanguage('cn')">🇨🇳</button></div><button class="btn-primary" onclick="showPage('mainPage')" style="margin-top:24px;" data-i18n="back">← Назад</button></div></div>
-
-<!-- Страница продуктов -->
-<div id="productsPage" style="display:none;"><div class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><button class="btn-small" onclick="showPage('settingsPage')" data-i18n="back">← Назад</button><h2 data-i18n="my_products">Мои продукты</h2></div><div id="productsList"></div></div></div>
+<div id="profilePage" style="display:none;">
+  <div class="card">
+    <div class="profile-header"><button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button><h2 data-i18n="profile">Профиль</h2><div style="width:60px;"></div></div>
+    <div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()"><span id="profileInitials" class="profile-initials">🐱</span></div>
+    <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+    <div style="text-align:center;margin-bottom:16px;"><button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button></div>
+    <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="profileName"></div>
+    <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="profileAge" min="10" max="100"></div>
+    <div class="input-group"><label data-i18n="gender">Пол</label>
+      <div class="segmented-control" id="profileGenderControl">
+        <div class="segmented-option" data-gender="female" onclick="selectProfileGender('female')" data-i18n="female">Женский</div>
+        <div class="segmented-option" data-gender="male" onclick="selectProfileGender('male')" data-i18n="male">Мужской</div>
+      </div>
+      <input type="hidden" id="profileGender" value="female">
+    </div>
+    <div class="input-group"><label data-i18n="goal">Цель</label>
+      <div class="segmented-control" id="profileGoalControl">
+        <div class="segmented-option active" data-goal="lose" onclick="selectProfileGoal('lose')" data-i18n="lose">Похудение</div>
+        <div class="segmented-option" data-goal="maintain" onclick="selectProfileGoal('maintain')" data-i18n="maintain">Поддержание</div>
+        <div class="segmented-option" data-goal="gain" onclick="selectProfileGoal('gain')" data-i18n="gain">Набор</div>
+      </div>
+      <input type="hidden" id="profileGoal" value="lose">
+    </div>
+    <div class="input-group"><label data-i18n="height">Рост (см)</label><input type="number" id="profileHeight" min="100" max="250"></div>
+    <div class="input-group"><label data-i18n="weight">Вес (кг)</label><input type="number" id="profileWeight" min="30" max="500" step="0.1"></div>
+    <button class="btn-primary" onclick="saveProfile()" data-i18n="save">Сохранить</button>
+    <button class="btn-secondary" onclick="showPage('settingsPage')" data-i18n="settings">Настройки</button>
+    <button class="btn-secondary btn-danger" onclick="deleteAccount()" data-i18n="delete_account">Удалить аккаунт</button>
+  </div>
 </div>
+
+<div id="settingsPage" style="display:none;">
+  <div class="card">
+    <h2 data-i18n="settings">Настройки</h2>
+    <button class="btn-secondary" onclick="exportData()" data-i18n="export_data">Скачать данные</button>
+    <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
+    <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
+    <button class="btn-secondary" onclick="openAbout()" data-i18n="about">О приложении</button>
+    <div style="margin-top:12px;">
+      <span>Мой код для друзей:</span>
+      <code id="myUidCode" style="background:#1A2027; padding:4px 8px; border-radius:8px;"></code>
+      <button class="btn-small" onclick="navigator.clipboard.writeText(myUid)">Копировать</button>
+    </div>
+    <h2 style="margin-top:24px;" data-i18n="language">Язык</h2>
+    <div class="flex">
+      <button class="btn-small lang-btn" id="settingsLangRu" onclick="setSettingsLanguage('ru')">🇷🇺</button>
+      <button class="btn-small lang-btn" id="settingsLangEn" onclick="setSettingsLanguage('en')">🇬🇧</button>
+      <button class="btn-small lang-btn" id="settingsLangCn" onclick="setSettingsLanguage('cn')">🇨🇳</button>
+    </div>
+    <button class="btn-primary" onclick="showPage('mainPage')" style="margin-top:24px;" data-i18n="back">← Назад</button>
+  </div>
+</div>
+
+<div id="productsPage" style="display:none;">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><button class="btn-small" onclick="showPage('settingsPage')" data-i18n="back">← Назад</button><h2 data-i18n="my_products">Мои продукты</h2></div>
+    <div id="productsList"></div>
+  </div>
+</div>
+
+</div> <!-- .app -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register("data:application/javascript,self.addEventListener('install',e=>{e.waitUntil(caches.open('fitcat-v1').then(c=>c.addAll(['.'],{cache:'reload'})));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!=='fitcat-v1').map(n=>caches.delete(n)))));clients.claim()});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline'))))});"); }); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register("data:application/javascript,self.addEventListener('install',e=>{e.waitUntil(caches.open('fitcat-v1').then(c=>c.addAll(['.'],{cache:'reload'})));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!=='fitcat-v1').map(n=>caches.delete(n)))));clients.claim()});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline'))))});");
+  });
+}
 
 (function(){
 'use strict';
 
+// ---------- Инициализация Firebase ----------
+firebase.initializeApp({
+  databaseURL: "YOUR_FIREBASE_DATABASE_URL"
+});
+const db = firebase.database();
+
+// ---------- UID пользователя ----------
+function getMyUid() {
+  let uid = localStorage.getItem('fitcat_myUid');
+  if (!uid) {
+    uid = 'user_' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('fitcat_myUid', uid);
+  }
+  return uid;
+}
+const myUid = getMyUid();
+
+// ---------- Публикация прогресса в Firebase ----------
+function publishMyProgress() {
+  if (!navigator.onLine) return;
+  const data = {
+    name: currentProfile?.name || 'Аноним',
+    dailyTargets: dailyTargets,
+    todayFoods: todayFoods,
+    waterAmount: waterAmount,
+    online: true,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP
+  };
+  db.ref(`publicProgress/${myUid}`).update(data);
+  db.ref(`publicProgress/${myUid}`).onDisconnect().update({
+    online: false,
+    lastSeen: firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+// ---------- Работа с друзьями ----------
+function getFriends() {
+  return JSON.parse(localStorage.getItem('fitcat_friends') || '[]');
+}
+function saveFriends(list) {
+  localStorage.setItem('fitcat_friends', JSON.stringify(list));
+}
+
+function addFriend() {
+  const input = document.getElementById('friendUidInput');
+  const newUid = input.value.trim();
+  if (!newUid) return;
+  let friends = getFriends();
+  if (!friends.includes(newUid)) {
+    friends.push(newUid);
+    saveFriends(friends);
+    input.value = '';
+    loadFriendsPage();
+  }
+}
+
+function removeFriend(uid) {
+  let friends = getFriends().filter(f => f !== uid);
+  saveFriends(friends);
+  loadFriendsPage();
+}
+
+function timeAgo(timestamp) {
+  if (!timestamp) return 'давно';
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return 'только что';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} мин`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ч`;
+  return `${Math.floor(hours / 24)} дн`;
+}
+
+function loadFriendsPage() {
+  const container = document.getElementById('friendsList');
+  const offlineMsg = document.getElementById('friendsOfflineMsg');
+  if (!navigator.onLine) {
+    container.innerHTML = '';
+    offlineMsg.style.display = 'block';
+    return;
+  }
+  offlineMsg.style.display = 'none';
+  const friends = getFriends();
+  container.innerHTML = '';
+  friends.forEach(friendUid => {
+    db.ref(`publicProgress/${friendUid}`).on('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      let friendEl = document.getElementById(`friend-${friendUid}`);
+      if (!friendEl) {
+        friendEl = document.createElement('div');
+        friendEl.id = `friend-${friendUid}`;
+        friendEl.className = 'friend-item';
+        friendEl.innerHTML = `
+          <div class="friend-name"></div>
+          <div class="friend-status"></div>
+          <button class="btn-small" style="margin-left:auto;">✕</button>
+        `;
+        friendEl.querySelector('button').addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeFriend(friendUid);
+        });
+        friendEl.addEventListener('click', () => showFriendProgress(friendUid));
+        container.appendChild(friendEl);
+      }
+      const nameEl = friendEl.querySelector('.friend-name');
+      const statusEl = friendEl.querySelector('.friend-status');
+      nameEl.textContent = data.name || 'Аноним';
+      const isOnline = data.online;
+      statusEl.innerHTML = isOnline ? '🟢 Онлайн' : `⚫ ${timeAgo(data.lastSeen)} назад`;
+    });
+  });
+}
+
+function showFriendProgress(uid) {
+  db.ref(`publicProgress/${uid}`).once('value').then(snap => {
+    const data = snap.val();
+    if (!data) return alert('Данные недоступны');
+    document.getElementById('friendModalName').textContent = data.name || 'Друг';
+    const origTargets = dailyTargets;
+    const origFoods = todayFoods;
+    const origWater = waterAmount;
+    dailyTargets = data.dailyTargets || origTargets;
+    todayFoods = data.todayFoods || [];
+    waterAmount = data.waterAmount || 0;
+
+    const modalBars = document.getElementById('friendProgressBars');
+    modalBars.innerHTML = '<div id="tempProgressBars"></div>';
+    const oldProgressBars = document.getElementById('progressBars');
+    if (oldProgressBars) oldProgressBars.id = '';
+    document.getElementById('tempProgressBars').id = 'progressBars';
+    renderProgressBars();
+    document.getElementById('progressBars').id = 'tempProgressBars';
+    if (oldProgressBars) oldProgressBars.id = 'progressBars';
+
+    dailyTargets = origTargets;
+    todayFoods = origFoods;
+    waterAmount = origWater;
+
+    document.getElementById('friendProgressModal').style.display = 'flex';
+  });
+}
+
+function closeFriendProgress() {
+  document.getElementById('friendProgressModal').style.display = 'none';
+}
+
+// ---------- Остальной код FitCat ----------
 const translations = {
-    ru: { save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл', total: 'ИТОГО', now_temp: 'Сейчас', steps: 'Шаги', temperature: 'Температура', base_norm: 'Базовая норма', water_norm: 'Норма воды', kcal: 'ккал', g: 'г', ml: 'мл', kg: 'кг', cm: 'см', scanner: 'Сканер', scanner_hint: 'Наведите камеру на штрихкод', barcode_placeholder: 'Штрихкод', search: 'Найти', scanner_failed: 'Не удалось распознать. Введите вручную.', camera_error: 'Не удалось получить доступ к камере', about_you: 'О себе', name: 'Имя', age: 'Возраст', gender: 'Пол', female: 'Женский', male: 'Мужской', height: 'Рост (см)', weight: 'Вес (кг)', name_placeholder: 'Введите имя', age_placeholder: 'Введите возраст', height_placeholder: 'Введите рост', weight_placeholder: 'Введите вес', start: 'Начать', data_local: 'Данные только в твоём телефоне', language: 'Язык', error_fill: 'Пожалуйста, заполните все поля корректно', tab_today: 'Сегодня', tab_activity: 'Активность', analytics: 'Аналитика', progress: 'Прогресс', water_title: 'Вода', meals: 'Продукты', water_placeholder: 'Введи мл', smart_water: 'Умная вода', save_template: 'Сохранить шаблон', clear: 'Очистить', per_100g: 'На 100 грамм:', protein_short: 'Б', fat_short: 'Ж', carbs_short: 'У', kcal_short: 'Ккал', weight_grams: 'Вес (грамм)', add_food: 'Добавить', food_name_placeholder: 'Название продукта', empty_food: 'Добавьте первый продукт', template_name: 'Название шаблона:', no_templates: 'Нет сохранённых шаблонов', delete_product: 'Удалить продукт?', product_not_found: 'Товар не найден', smart_search: 'Умный поиск', results: 'Результатов', activity: 'Активность', sedentary: 'Сидячий', light: 'Умеренный', moderate: 'Активный', very_active: 'Очень активный', workout: 'Тренировка', workout_intensity: 'Интенсивность тренировки', workout_light: 'Лёгкая', workout_moderate: 'Умеренная', workout_intense: 'Интенсивная', calories: 'Калории', protein: 'Белки', fat: 'Жиры', carbs: 'Углеводы', water: 'Вода', weight_log: 'Журнал веса', set_goal: 'Задать цель', start_weight: 'Старт', current_weight: 'Сейчас', change: 'Изменение', to_goal: 'До цели', history: 'История', overwrite_weight: 'Запись на эту дату уже есть. Заменить?', enter_goal: 'Введите целевой вес (кг):', bmi_underweight_severe: 'Выраженный дефицит', bmi_underweight: 'Недостаточный вес', bmi_normal: 'Норма', bmi_overweight: 'Избыточный вес', bmi_obese_i: 'Ожирение I ст.', bmi_obese_ii: 'Ожирение II ст.', bmi_obese_iii: 'Ожирение III ст.', profile: 'Профиль', goal: 'Цель', lose: 'Похудение', maintain: 'Поддержание', gain: 'Набор', delete_photo: 'Удалить фото', delete_account: 'Удалить аккаунт', confirm_delete: 'Точно удалить все данные? Это нельзя отменить.', settings: 'Настройки', export_data: 'Скачать данные', import_data: 'Загрузить данные', my_products: 'Мои продукты', about: 'О приложении', morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи', no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес', photo_too_large: 'Фото слишком большое. Максимум 3 МБ.', fasting: 'Интервальное голодание', fasting_mode: 'Режим', fasting_start: 'Начало окна', fasting_eating: 'Можно есть', fasting_fasting: 'Голодание', fasting_ends: 'До конца', fasting_starts: 'Начнётся через', nutrition_journal: 'Журнал питания', nutrition_history: 'История питания' },
-    en: { save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On', total: 'TOTAL', now_temp: 'Now', steps: 'Steps', temperature: 'Temperature', base_norm: 'Base norm', water_norm: 'Water norm', kcal: 'kcal', g: 'g', ml: 'ml', kg: 'kg', cm: 'cm', scanner: 'Scanner', scanner_hint: 'Point camera at barcode', barcode_placeholder: 'Barcode', search: 'Search', scanner_failed: 'Could not scan. Enter manually.', camera_error: 'Could not access camera', about_you: 'About you', name: 'Name', age: 'Age', gender: 'Gender', female: 'Female', male: 'Male', height: 'Height (cm)', weight: 'Weight (kg)', name_placeholder: 'Enter name', age_placeholder: 'Enter age', height_placeholder: 'Enter height', weight_placeholder: 'Enter weight', start: 'Start', data_local: 'Data stored locally', language: 'Language', error_fill: 'Please fill in all fields correctly', tab_today: 'Today', tab_activity: 'Activity', analytics: 'Analytics', progress: 'Progress', water_title: 'Water', meals: 'Meals', water_placeholder: 'Enter ml', smart_water: 'Smart Water', save_template: 'Save Template', clear: 'Clear', per_100g: 'Per 100g:', protein_short: 'P', fat_short: 'F', carbs_short: 'C', kcal_short: 'Kcal', weight_grams: 'Weight (g)', add_food: 'Add Food', food_name_placeholder: 'Food name', empty_food: 'Add your first food', template_name: 'Template name:', no_templates: 'No saved templates', delete_product: 'Delete product?', product_not_found: 'Product not found', smart_search: 'Smart Search', results: 'Results', activity: 'Activity', sedentary: 'Sedentary', light: 'Light', moderate: 'Moderate', very_active: 'Very Active', workout: 'Workout', workout_intensity: 'Workout intensity', workout_light: 'Light', workout_moderate: 'Moderate', workout_intense: 'Intense', calories: 'Calories', protein: 'Protein', fat: 'Fat', carbs: 'Carbs', water: 'Water', weight_log: 'Weight Log', set_goal: 'Set Goal', start_weight: 'Start', current_weight: 'Current', change: 'Change', to_goal: 'To Goal', history: 'History', overwrite_weight: 'Entry for this date already exists. Replace?', enter_goal: 'Enter target weight (kg):', bmi_underweight_severe: 'Severe underweight', bmi_underweight: 'Underweight', bmi_normal: 'Normal', bmi_overweight: 'Overweight', bmi_obese_i: 'Obese I', bmi_obese_ii: 'Obese II', bmi_obese_iii: 'Obese III', profile: 'Profile', goal: 'Goal', lose: 'Lose', maintain: 'Maintain', gain: 'Gain', delete_photo: 'Delete Photo', delete_account: 'Delete Account', confirm_delete: 'Delete all data? This cannot be undone.', settings: 'Settings', export_data: 'Export Data', import_data: 'Import Data', my_products: 'My Products', about: 'About', morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night', no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight', photo_too_large: 'Photo too large. Maximum 3 MB.', fasting: 'Intermittent Fasting', fasting_mode: 'Mode', fasting_start: 'Window start', fasting_eating: 'Eating', fasting_fasting: 'Fasting', fasting_ends: 'Ends in', fasting_starts: 'Starts in', nutrition_journal: 'Nutrition Journal', nutrition_history: 'Nutrition History' },
-    cn: { save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开', total: '总计', now_temp: '当前', steps: '步数', temperature: '温度', base_norm: '基础量', water_norm: '饮水量', kcal: '千卡', g: '克', ml: '毫升', kg: '公斤', cm: '厘米', scanner: '扫描器', scanner_hint: '将相机对准条码', barcode_placeholder: '条码', search: '搜索', scanner_failed: '无法扫描，请手动输入', camera_error: '无法访问相机', about_you: '关于你', name: '姓名', age: '年龄', gender: '性别', female: '女', male: '男', height: '身高 (cm)', weight: '体重 (kg)', name_placeholder: '输入姓名', age_placeholder: '输入年龄', height_placeholder: '输入身高', weight_placeholder: '输入体重', start: '开始', data_local: '数据仅保存在本地', language: '语言', error_fill: '请正确填写所有字段', tab_today: '今天', tab_activity: '活动', analytics: '分析', progress: '进度', water_title: '水', meals: '食物', water_placeholder: '输入毫升', smart_water: '智能饮水', save_template: '保存模板', clear: '清空', per_100g: '每100克:', protein_short: '蛋', fat_short: '脂', carbs_short: '碳', kcal_short: '卡', weight_grams: '重量 (克)', add_food: '添加食物', food_name_placeholder: '食物名称', empty_food: '添加第一个食物', template_name: '模板名称:', no_templates: '无保存的模板', delete_product: '删除产品？', product_not_found: '未找到商品', smart_search: '智能搜索', results: '结果数', activity: '活动', sedentary: '久坐', light: '轻度', moderate: '中度', very_active: '非常活跃', workout: '训练', workout_intensity: '训练强度', workout_light: '轻度', workout_moderate: '中度', workout_intense: '高强度', calories: '卡路里', protein: '蛋白质', fat: '脂肪', carbs: '碳水', water: '水', weight_log: '体重记录', set_goal: '设定目标', start_weight: '起始', current_weight: '当前', change: '变化', to_goal: '距目标', history: '历史', overwrite_weight: '该日期已有记录。替换？', enter_goal: '输入目标体重 (kg):', bmi_underweight_severe: '严重偏瘦', bmi_underweight: '偏瘦', bmi_normal: '正常', bmi_overweight: '超重', bmi_obese_i: '肥胖I度', bmi_obese_ii: '肥胖II度', bmi_obese_iii: '肥胖III度', profile: '个人资料', goal: '目标', lose: '减重', maintain: '保持', gain: '增重', delete_photo: '删除照片', delete_account: '删除账户', confirm_delete: '确定删除所有数据？此操作无法撤销。', settings: '设置', export_data: '导出数据', import_data: '导入数据', my_products: '我的产品', about: '关于', morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安', no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量', photo_too_large: '照片太大。最大 3 MB。', fasting: '间歇性断食', fasting_mode: '模式', fasting_start: '开始时间', fasting_eating: '可进食', fasting_fasting: '断食中', fasting_ends: '剩余', fasting_starts: '开始于', nutrition_journal: '饮食记录', nutrition_history: '饮食历史' }
+  ru: {
+    save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
+    total: 'ИТОГО', now_temp: 'Сейчас', steps: 'Шаги', temperature: 'Температура', base_norm: 'Базовая норма', water_norm: 'Норма воды',
+    kcal: 'ккал', g: 'г', ml: 'мл', kg: 'кг', cm: 'см',
+    scanner: 'Сканер', scanner_hint: 'Наведите камеру на штрихкод', barcode_placeholder: 'Штрихкод', search: 'Найти',
+    scanner_failed: 'Не удалось распознать. Введите вручную.', camera_error: 'Не удалось получить доступ к камере',
+    about_you: 'О себе', name: 'Имя', age: 'Возраст', gender: 'Пол', female: 'Женский', male: 'Мужской',
+    height: 'Рост (см)', weight: 'Вес (кг)', name_placeholder: 'Введите имя', age_placeholder: 'Введите возраст',
+    height_placeholder: 'Введите рост', weight_placeholder: 'Введите вес',
+    start: 'Начать', data_local: 'Данные только в твоём телефоне', language: 'Язык',
+    error_fill: 'Пожалуйста, заполните все поля корректно',
+    tab_today: 'Сегодня', tab_activity: 'Активность', tab_weight: 'Вес',
+    progress: 'Прогресс', water_title: 'Вода', meals: 'Продукты',
+    water_placeholder: 'Введи мл', smart_water: 'Умная вода',
+    save_template: 'Сохранить шаблон', clear: 'Очистить', per_100g: 'На 100 грамм:',
+    protein_short: 'Б', fat_short: 'Ж', carbs_short: 'У', kcal_short: 'Ккал',
+    weight_grams: 'Вес (грамм)', add_food: 'Добавить', food_name_placeholder: 'Название продукта',
+    empty_food: 'Добавьте первый продукт', template_name: 'Название шаблона:', no_templates: 'Нет сохранённых шаблонов',
+    delete_product: 'Удалить продукт?', product_not_found: 'Товар не найден',
+    smart_search: 'Умный поиск', results: 'Результатов',
+    activity: 'Активность', sedentary: 'Сидячий', light: 'Умеренный', moderate: 'Активный', very_active: 'Очень активный',
+    workout: 'Тренировка', workout_intensity: 'Интенсивность тренировки',
+    workout_light: 'Лёгкая', workout_moderate: 'Умеренная', workout_intense: 'Интенсивная',
+    calories: 'Калории', protein: 'Белки', fat: 'Жиры', carbs: 'Углеводы', water: 'Вода',
+    apply_today: 'Применить на сегодня',
+    weight_log: 'Журнал веса', set_goal: 'Задать цель', start_weight: 'Старт', current_weight: 'Сейчас',
+    change: 'Изменение', to_goal: 'До цели', history: 'История',
+    overwrite_weight: 'Запись на эту дату уже есть. Заменить?', enter_goal: 'Введите целевой вес (кг):',
+    bmi_underweight_severe: 'Выраженный дефицит', bmi_underweight: 'Недостаточный вес', bmi_normal: 'Норма',
+    bmi_overweight: 'Избыточный вес', bmi_obese_i: 'Ожирение I ст.', bmi_obese_ii: 'Ожирение II ст.', bmi_obese_iii: 'Ожирение III ст.',
+    profile: 'Профиль', goal: 'Цель', lose: 'Похудение', maintain: 'Поддержание', gain: 'Набор',
+    delete_photo: 'Удалить фото', delete_account: 'Удалить аккаунт',
+    confirm_delete: 'Точно удалить все данные? Это нельзя отменить.',
+    settings: 'Настройки', export_data: 'Скачать данные', import_data: 'Загрузить данные', my_products: 'Мои продукты',
+    about: 'О приложении',
+    morning: 'Доброе утро', day: 'Добрый день', evening: 'Добрый вечер', night: 'Доброй ночи',
+    no_dishes: 'Нет блюд', enter_name: 'Введите название', enter_weight: 'Введите вес',
+    photo_too_large: 'Фото слишком большое. Максимум 3 МБ.'
+  },
+  en: {
+    save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On',
+    total: 'TOTAL', now_temp: 'Now', steps: 'Steps', temperature: 'Temperature', base_norm: 'Base norm', water_norm: 'Water norm',
+    kcal: 'kcal', g: 'g', ml: 'ml', kg: 'kg', cm: 'cm',
+    scanner: 'Scanner', scanner_hint: 'Point camera at barcode', barcode_placeholder: 'Barcode', search: 'Search',
+    scanner_failed: 'Could not scan. Enter manually.', camera_error: 'Could not access camera',
+    about_you: 'About you', name: 'Name', age: 'Age', gender: 'Gender', female: 'Female', male: 'Male',
+    height: 'Height (cm)', weight: 'Weight (kg)', name_placeholder: 'Enter name', age_placeholder: 'Enter age',
+    height_placeholder: 'Enter height', weight_placeholder: 'Enter weight',
+    start: 'Start', data_local: 'Data stored locally', language: 'Language',
+    error_fill: 'Please fill in all fields correctly',
+    tab_today: 'Today', tab_activity: 'Activity', tab_weight: 'Weight',
+    progress: 'Progress', water_title: 'Water', meals: 'Meals',
+    water_placeholder: 'Enter ml', smart_water: 'Smart Water',
+    save_template: 'Save Template', clear: 'Clear', per_100g: 'Per 100g:',
+    protein_short: 'P', fat_short: 'F', carbs_short: 'C', kcal_short: 'Kcal',
+    weight_grams: 'Weight (g)', add_food: 'Add Food', food_name_placeholder: 'Food name',
+    empty_food: 'Add your first food', template_name: 'Template name:', no_templates: 'No saved templates',
+    delete_product: 'Delete product?', product_not_found: 'Product not found',
+    smart_search: 'Smart Search', results: 'Results',
+    activity: 'Activity', sedentary: 'Sedentary', light: 'Light', moderate: 'Moderate', very_active: 'Very Active',
+    workout: 'Workout', workout_intensity: 'Workout intensity', workout_light: 'Light', workout_moderate: 'Moderate', workout_intense: 'Intense',
+    calories: 'Calories', protein: 'Protein', fat: 'Fat', carbs: 'Carbs', water: 'Water',
+    apply_today: 'Apply Today',
+    weight_log: 'Weight Log', set_goal: 'Set Goal', start_weight: 'Start', current_weight: 'Current',
+    change: 'Change', to_goal: 'To Goal', history: 'History',
+    overwrite_weight: 'Entry for this date already exists. Replace?', enter_goal: 'Enter target weight (kg):',
+    bmi_underweight_severe: 'Severe underweight', bmi_underweight: 'Underweight', bmi_normal: 'Normal',
+    bmi_overweight: 'Overweight', bmi_obese_i: 'Obese I', bmi_obese_ii: 'Obese II', bmi_obese_iii: 'Obese III',
+    profile: 'Profile', goal: 'Goal', lose: 'Lose', maintain: 'Maintain', gain: 'Gain',
+    delete_photo: 'Delete Photo', delete_account: 'Delete Account', confirm_delete: 'Delete all data? This cannot be undone.',
+    settings: 'Settings', export_data: 'Export Data', import_data: 'Import Data', my_products: 'My Products', about: 'About',
+    morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night',
+    no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight', photo_too_large: 'Photo too large. Maximum 3 MB.'
+  },
+  cn: {
+    save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开',
+    total: '总计', now_temp: '当前', steps: '步数', temperature: '温度', base_norm: '基础量', water_norm: '饮水量',
+    kcal: '千卡', g: '克', ml: '毫升', kg: '公斤', cm: '厘米',
+    scanner: '扫描器', scanner_hint: '将相机对准条码', barcode_placeholder: '条码', search: '搜索',
+    scanner_failed: '无法扫描，请手动输入', camera_error: '无法访问相机',
+    about_you: '关于你', name: '姓名', age: '年龄', gender: '性别', female: '女', male: '男',
+    height: '身高 (cm)', weight: '体重 (kg)', name_placeholder: '输入姓名', age_placeholder: '输入年龄',
+    height_placeholder: '输入身高', weight_placeholder: '输入体重',
+    start: '开始', data_local: '数据仅保存在本地', language: '语言',
+    error_fill: '请正确填写所有字段',
+    tab_today: '今天', tab_activity: '活动', tab_weight: '体重',
+    progress: '进度', water_title: '水', meals: '食物',
+    water_placeholder: '输入毫升', smart_water: '智能饮水',
+    save_template: '保存模板', clear: '清空', per_100g: '每100克:',
+    protein_short: '蛋', fat_short: '脂', carbs_short: '碳', kcal_short: '卡',
+    weight_grams: '重量 (克)', add_food: '添加食物', food_name_placeholder: '食物名称',
+    empty_food: '添加第一个食物', template_name: '模板名称:', no_templates: '无保存的模板',
+    delete_product: '删除产品？', product_not_found: '未找到商品',
+    smart_search: '智能搜索', results: '结果数',
+    activity: '活动', sedentary: '久坐', light: '轻度', moderate: '中度', very_active: '非常活跃',
+    workout: '训练', workout_intensity: '训练强度', workout_light: '轻度', workout_moderate: '中度', workout_intense: '高强度',
+    calories: '卡路里', protein: '蛋白质', fat: '脂肪', carbs: '碳水', water: '水',
+    apply_today: '今日应用',
+    weight_log: '体重记录', set_goal: '设定目标', start_weight: '起始', current_weight: '当前',
+    change: '变化', to_goal: '距目标', history: '历史',
+    overwrite_weight: '该日期已有记录。替换？', enter_goal: '输入目标体重 (kg):',
+    bmi_underweight_severe: '严重偏瘦', bmi_underweight: '偏瘦', bmi_normal: '正常',
+    bmi_overweight: '超重', bmi_obese_i: '肥胖I度', bmi_obese_ii: '肥胖II度', bmi_obese_iii: '肥胖III度',
+    profile: '个人资料', goal: '目标', lose: '减重', maintain: '保持', gain: '增重',
+    delete_photo: '删除照片', delete_account: '删除账户', confirm_delete: '确定删除所有数据？此操作无法撤销。',
+    settings: '设置', export_data: '导出数据', import_data: '导入数据', my_products: '我的产品', about: '关于',
+    morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安',
+    no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量', photo_too_large: '照片太大。最大 3 MB。'
+  }
 };
 
 let currentLang = 'ru';
@@ -344,9 +878,7 @@ let currentProfile = null;
 let dailyTargets = { kcal: 1500, protein: 80, fat: 45, carbs: 150, water: 1820 };
 let todayFoods = [];
 let weightHistory = [];
-let nutritionHistory = [];
 let chartInstance = null;
-let nutritionChartInstance = null;
 let productsDB = [];
 let mealTemplates = [];
 let zxingReader = null;
@@ -356,9 +888,6 @@ let scanTimeout = null;
 let dailyActivity = 1.375;
 let workoutEnabled = false;
 let workoutIntensity = 'light';
-let fastingEnabled = false;
-let fastingMode = '168';
-let fastingStartTime = '12:00';
 let currentSteps = 8000;
 let currentTemp = 22;
 let waterAmount = 0;
@@ -367,198 +896,657 @@ let searchDebounce = null;
 let smartSearchEnabled = false;
 let smartSearchResults = 10;
 let smartWaterEnabled = false;
-let currentPage = 0;
-let swipeStartX = 0, swipeStartY = 0, swipeCurrentX = 0, isSwiping = false, swipeDirection = null;
-const SWIPE_THRESHOLD = 30, DIRECTION_LOCK_THRESHOLD = 10;
 
-function i18n(k) { return translations[currentLang]?.[k] || k; }
-function updateAllI18n() { document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n(el.dataset.i18n)); document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n(el.dataset.i18nPlaceholder)); if (currentProfile) { updateGreeting(); renderDashboard(); renderTemplates(); updateWeightStatsAndList(); updateBMI(); updateActivityUI(); updateFastingUI(); updateNutritionHistoryList(); updateHeaderPhoto(); } }
+function i18n(key) { return translations[currentLang]?.[key] || key; }
+function updateAllI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = i18n(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = i18n(el.dataset.i18nPlaceholder); });
+  if (currentProfile) { updateGreeting(); renderDashboard(); renderTemplates(); updateWeightStatsAndList(); updateBMI(); updateActivityUI(); }
+}
 function vibrate(d = 10) { if (navigator.vibrate) navigator.vibrate(d); }
+function getBarColor(p) { return (p >= 90 && p <= 110) ? '#6BCB77' : ((p >= 70 && p < 90) || (p > 110 && p <= 130)) ? '#FFD93D' : '#F85149'; }
 function setLanguage(l) { currentLang = l; localStorage.setItem('fitcat_lang', l); updateLanguageButtons(); updateAllI18n(); }
 function setSetupLanguage(l) { setLanguage(l); }
 function setSettingsLanguage(l) { setLanguage(l); }
-function updateLanguageButtons() { document.querySelectorAll('#setupPage .lang-btn, #settingsPage .lang-btn').forEach(b => b.classList.remove('active')); document.getElementById(`setupLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active'); document.getElementById(`settingsLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active'); }
-function selectSetupGender(g) { document.querySelectorAll('#setupGenderControl .segmented-option').forEach(el=>el.classList.remove('active')); document.querySelector(`#setupGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active'); document.getElementById('setupGender').value=g; }
-function selectProfileGender(g) { document.querySelectorAll('#profileGenderControl .segmented-option').forEach(el=>el.classList.remove('active')); document.querySelector(`#profileGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active'); document.getElementById('profileGender').value=g; }
-function selectProfileGoal(g) { document.querySelectorAll('#profileGoalControl .segmented-option').forEach(el=>el.classList.remove('active')); document.querySelector(`#profileGoalControl .segmented-option[data-goal="${g}"]`).classList.add('active'); document.getElementById('profileGoal').value=g; calculateTargets(); renderDashboard(); }
-function setWorkoutIntensity(i) { document.querySelectorAll('#workoutIntensityControl .segmented-option').forEach(el=>el.classList.remove('active')); document.querySelector(`#workoutIntensityControl .segmented-option[data-intensity="${i}"]`).classList.add('active'); document.getElementById('workoutIntensity').value=i; workoutIntensity=i; localStorage.setItem('workoutIntensity', i); calculateTargets(); renderDashboard(); updateWaterHint(); if(smartWaterEnabled) updateWaterCalculation(); }
-function setFastingMode(m) { document.querySelectorAll('#fastingModeControl .segmented-option').forEach(el=>el.classList.remove('active')); document.querySelector(`#fastingModeControl .segmented-option[data-mode="${m}"]`).classList.add('active'); document.getElementById('fastingMode').value=m; fastingMode=m; localStorage.setItem('fastingMode', m); updateFastingUI(); }
-function setDailyActivity(val, el) { document.querySelectorAll('#activityPage .activity-daily-item').forEach(i=>i.classList.remove('selected')); el.classList.add('selected'); dailyActivity=val; localStorage.setItem('dailyActivity', dailyActivity); calculateTargets(); renderDashboard(); updateActivityUI(); }
+function updateLanguageButtons() {
+  document.querySelectorAll('#setupPage .lang-btn, #settingsPage .lang-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`setupLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active');
+  document.getElementById(`settingsLang${currentLang==='ru'?'Ru':currentLang==='en'?'En':'Cn'}`)?.classList.add('active');
+}
+function selectSetupGender(g) {
+  document.querySelectorAll('#setupGenderControl .segmented-option').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`#setupGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active');
+  document.getElementById('setupGender').value=g;
+}
+function selectProfileGender(g) {
+  document.querySelectorAll('#profileGenderControl .segmented-option').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`#profileGenderControl .segmented-option[data-gender="${g}"]`).classList.add('active');
+  document.getElementById('profileGender').value=g;
+}
+function selectProfileGoal(g) {
+  document.querySelectorAll('#profileGoalControl .segmented-option').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`#profileGoalControl .segmented-option[data-goal="${g}"]`).classList.add('active');
+  document.getElementById('profileGoal').value=g;
+}
+function selectWorkoutIntensity(i) {
+  document.querySelectorAll('#workoutIntensityControl .segmented-option').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`#workoutIntensityControl .segmented-option[data-intensity="${i}"]`).classList.add('active');
+  document.getElementById('workoutIntensity').value=i;
+  workoutIntensity=i; localStorage.setItem('workoutIntensity', i);
+  calculateTargets(); renderDashboard(); updateWaterHint();
+  if(smartWaterEnabled) updateWaterCalculation();
+}
 function getWorkoutCalories(i) { return i === 'light' ? 150 : i === 'moderate' ? 250 : 400; }
 function getWorkoutWater(i) { return i === 'light' ? 150 : i === 'moderate' ? 250 : 400; }
 function getGoalMultiplier(g) { return g === 'lose' ? 0.85 : g === 'gain' ? 1.10 : 1.0; }
-function updateStreak() { let s = parseInt(localStorage.getItem('fitcat_streak')||'0'), lo = localStorage.getItem('fitcat_lastOpen'), t = new Date().toDateString(), y = new Date(Date.now()-86400000).toDateString(); if(!lo) s=1; else if(lo===t){} else if(lo===y) s=Math.min(s+1,5); else s=1; localStorage.setItem('fitcat_streak',s); localStorage.setItem('fitcat_lastOpen',t); let e = document.getElementById('streakEmoji'); if(e) { let c,ch; if(s===1){c='none';ch='🕯️'} else if(s===2){c='red';ch='🔥'} else if(s===3){c='yellow';ch='🔥'} else if(s===4){c='purple';ch='🔥'} else{c='rainbow';ch='🔥'} e.className='streak-emoji '+c+' fade-in'; e.textContent=ch; e.title=s+' '+(currentLang==='ru'?'дн.':currentLang==='en'?'days':'天'); requestAnimationFrame(()=>e.classList.remove('fade-in')); } }
-function getInitials(n) { if(!n) return ''; let p=n.trim().split(/\s+/); return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.slice(0,2).toUpperCase(); }
-function updateHeaderPhoto() { let h=document.getElementById('headerPhoto'); let s=localStorage.getItem('profilePhoto'); let initials=document.getElementById('headerInitials'); if(s) { h.innerHTML=`<img src="${s}" alt="Profile">`; } else { let init=getInitials(currentProfile?.name||''); h.innerHTML=`<span class="header-initials">${init}</span>`; } if(initials) { let init=getInitials(currentProfile?.name||''); initials.innerText=init; } }
+
+function updateStreak() {
+  let s = parseInt(localStorage.getItem('fitcat_streak')||'0'), lo = localStorage.getItem('fitcat_lastOpen'), t = new Date().toDateString(), y = new Date(Date.now()-86400000).toDateString();
+  if(!lo) s=1; else if(lo===t){} else if(lo===y) s=Math.min(s+1,5); else s=1;
+  localStorage.setItem('fitcat_streak',s); localStorage.setItem('fitcat_lastOpen',t);
+  let e = document.getElementById('streakEmoji'); if(e) { let c,ch;
+    if(s===1){c='none';ch='🕯️'} else if(s===2){c='red';ch='🔥'} else if(s===3){c='yellow';ch='🔥'}
+    else if(s===4){c='purple';ch='🔥'} else{c='rainbow';ch='🔥'}
+    e.className='streak-emoji '+c+' fade-in'; e.textContent=ch; e.title=s+' '+(currentLang==='ru'?'дн.':currentLang==='en'?'days':'天');
+    requestAnimationFrame(()=>e.classList.remove('fade-in'));
+  }
+}
+
+function getInitials(n) { if(!n) return '🐱'; let p=n.trim().split(/\s+/); return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.slice(0,2).toUpperCase(); }
+function updateHeaderPhoto() {
+  let h=document.getElementById('headerPhoto'), s=localStorage.getItem('profilePhoto');
+  h.innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="header-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`;
+}
 function uploadPhoto() { document.getElementById('photoInput').click(); }
-function handlePhotoUpload(ev) { let f=ev.target.files[0]; if(!f) return; if(f.size>3*1024*1024){alert(i18n('photo_too_large'));return} let r=new FileReader(); r.onload=e=>{localStorage.setItem('profilePhoto',e.target.result); updateHeaderPhoto(); let pp=document.getElementById('profilePhoto'); if(pp) pp.innerHTML=`<img src="${e.target.result}" alt="Profile">`; vibrate();}; r.readAsDataURL(f); }
-function deletePhoto() { localStorage.removeItem('profilePhoto'); updateHeaderPhoto(); let pp=document.getElementById('profilePhoto'); if(pp) { let init=getInitials(currentProfile?.name||''); pp.innerHTML=`<span class="profile-initials">${init}</span>`; } vibrate(); }
-function toggleCard(id) { let c=document.getElementById(id==='waterCard'?'waterContent':'mealsContent'); if(c){c.classList.toggle('collapsed'); localStorage.setItem('card_'+id+'_collapsed', c.classList.contains('collapsed'));} }
-function toggleJournal(type) { let content = document.getElementById(type + 'Content'); if(content) { content.classList.toggle('collapsed'); localStorage.setItem('journal_' + type + '_collapsed', content.classList.contains('collapsed')); } }
-function addWater(ml) { waterAmount = Math.max(0, waterAmount + ml); localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate(); }
-function setManualWater() { let ml=parseInt(document.getElementById('manualWaterInput').value); if(!isNaN(ml)&&ml>=0){waterAmount=ml; localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();} document.getElementById('manualWaterInput').value=''; }
-function updateWaterDisplay() { let wc=document.getElementById('waterCurrent'); if(wc) wc.innerText = waterAmount; let wg=document.getElementById('waterGoal'); if(wg) wg.innerHTML = dailyTargets.water + ' ' + i18n('ml'); }
-function openSmartWater() { document.getElementById('smartWaterModal').style.display='flex'; document.getElementById('smartWaterToggle').checked = smartWaterEnabled; document.getElementById('smartWaterToggleLabel').innerText = i18n(smartWaterEnabled?'on':'off'); document.getElementById('smartWaterSettings').style.display = smartWaterEnabled?'block':'none'; document.getElementById('waterBaseOnly').style.display = smartWaterEnabled?'none':'block'; if(currentProfile) document.getElementById('baseOnlyWater').innerText = (Math.round(currentProfile.weight*35))+' '+i18n('ml'); document.getElementById('tempSlider').value = currentTemp; document.getElementById('stepsSlider').value = currentSteps; updateTempDisplay(); updateStepsDisplay(); updateWaterCalculation(); }
-function closeSmartWater() { document.getElementById('smartWaterModal').style.display='none'; calculateTargets(); updateWaterDisplay(); renderProgressBars(); }
-function updateTempDisplay() { currentTemp=parseInt(document.getElementById('tempSlider').value); document.getElementById('tempDisplay').innerText = currentTemp+'°C'; updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings(); }
-function updateStepsDisplay() { currentSteps=parseInt(document.getElementById('stepsSlider').value); document.getElementById('stepsDisplay').innerText = currentSteps.toLocaleString(); updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings(); }
+function handlePhotoUpload(ev) {
+  let f=ev.target.files[0]; if(!f) return;
+  if(f.size>3*1024*1024){alert(i18n('photo_too_large'));return}
+  let r=new FileReader();
+  r.onload=e=>{localStorage.setItem('profilePhoto',e.target.result);
+    document.getElementById('profilePhoto').innerHTML=`<img src="${e.target.result}" alt="Profile">`;
+    updateHeaderPhoto(); vibrate();};
+  r.readAsDataURL(f);
+}
+function deletePhoto() {
+  localStorage.removeItem('profilePhoto');
+  document.getElementById('profilePhoto').innerHTML=`<span class="profile-initials">${currentProfile?getInitials(currentProfile.name):'🐱'}</span>`;
+  updateHeaderPhoto(); vibrate();
+}
+function toggleCard(id) {
+  let c=document.getElementById(id==='waterCard'?'waterContent':'mealsContent');
+  if(c){c.classList.toggle('collapsed'); localStorage.setItem('card_'+id+'_collapsed', c.classList.contains('collapsed'));}
+}
+function addWater(ml) {
+  waterAmount = Math.max(0, Math.min(waterAmount+ml, dailyTargets.water));
+  localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();
+  publishMyProgress();
+}
+function setManualWater() {
+  let ml=parseInt(document.getElementById('manualWaterInput').value);
+  if(!isNaN(ml)&&ml>=0){waterAmount=Math.min(ml,dailyTargets.water);
+    localStorage.setItem('waterAmount',waterAmount); updateWaterDisplay(); renderProgressBars(); vibrate();}
+  document.getElementById('manualWaterInput').value='';
+  publishMyProgress();
+}
+function updateWaterDisplay() {
+  document.getElementById('waterCurrent').innerText = waterAmount;
+  document.getElementById('waterGoal').innerHTML = dailyTargets.water + ' ' + i18n('ml');
+}
+function openSmartWater() {
+  document.getElementById('smartWaterModal').style.display='flex';
+  document.getElementById('smartWaterToggle').checked = smartWaterEnabled;
+  document.getElementById('smartWaterToggleLabel').innerText = i18n(smartWaterEnabled?'on':'off');
+  document.getElementById('smartWaterSettings').style.display = smartWaterEnabled?'block':'none';
+  document.getElementById('waterBaseOnly').style.display = smartWaterEnabled?'none':'block';
+  document.getElementById('baseOnlyWater').innerText = (Math.round(currentProfile.weight*35))+' '+i18n('ml');
+  document.getElementById('tempSlider').value = currentTemp;
+  document.getElementById('stepsSlider').value = currentSteps;
+  updateTempDisplay(); updateStepsDisplay(); updateWaterCalculation();
+}
+function closeSmartWater() {
+  document.getElementById('smartWaterModal').style.display='none';
+  calculateTargets(); updateWaterDisplay(); renderProgressBars();
+}
+function updateTempDisplay() {
+  currentTemp=parseInt(document.getElementById('tempSlider').value);
+  document.getElementById('tempDisplay').innerText = currentTemp+'°C';
+  updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
+}
+function updateStepsDisplay() {
+  currentSteps=parseInt(document.getElementById('stepsSlider').value);
+  document.getElementById('stepsDisplay').innerText = currentSteps.toLocaleString();
+  updateWaterCalculation(); if(smartWaterEnabled) applySmartWaterSettings();
+}
 function getTempBonus(t) { if(t<0) return 0; if(t<15) return 0; if(t<20) return 50; if(t<25) return 150; if(t<30) return 300; return 500; }
 function getStepsBonus(s) { if(s<2500) return 0; if(s<5000) return 50; if(s<7500) return 100; if(s<10000) return 150; if(s<12500) return 200; if(s<15000) return 250; return 300; }
-function updateWaterCalculation() { if(!currentProfile) return; let base=Math.round(currentProfile.weight*35), total=base+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0); document.getElementById('baseWaterNorm').innerText = base+' '+i18n('ml'); document.getElementById('tempBonus').innerText = '+'+getTempBonus(currentTemp)+' '+i18n('ml'); document.getElementById('stepsBonus').innerText = '+'+getStepsBonus(currentSteps)+' '+i18n('ml'); document.getElementById('totalWaterNorm').innerText = total+' '+i18n('ml'); }
-function applySmartWaterSettings() { if(!smartWaterEnabled) return; currentSteps=parseInt(document.getElementById('stepsSlider').value); currentTemp=parseInt(document.getElementById('tempSlider').value); localStorage.setItem('currentSteps',currentSteps); localStorage.setItem('currentTemp',currentTemp); calculateTargets(); }
-function updateWaterHint() { let h=document.getElementById('smartWaterHint'); if(smartWaterEnabled) { let b=dailyTargets.water-Math.round(currentProfile.weight*35)-getStepsBonus(currentSteps); h.innerText = b>0?`${i18n('smart_water')}: +${b} ${i18n('ml')}`:''; } else h.innerText=''; }
-function updateActivityUI() { if(currentProfile) { document.querySelectorAll('#activityPage .activity-daily-item').forEach(el=>el.classList.toggle('selected', parseFloat(el.dataset.activity)===dailyActivity)); } document.getElementById('workoutToggle').checked = workoutEnabled; document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off'); document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none'; document.querySelectorAll('#workoutIntensityControl .segmented-option').forEach(el=>{ el.classList.toggle('active', el.dataset.intensity===workoutIntensity); }); }
-function updateFastingUI() {
-    document.getElementById('fastingToggle').checked = fastingEnabled;
-    document.getElementById('fastingToggleLabel').innerText = i18n(fastingEnabled?'on':'off');
-    document.getElementById('fastingSettings').style.display = fastingEnabled?'block':'none';
-    document.getElementById('fastingStartTime').value = fastingStartTime;
-    document.querySelectorAll('#fastingModeControl .segmented-option').forEach(el=>{ el.classList.toggle('active', el.dataset.mode===fastingMode); });
-    updateFastingStatus();
+function updateWaterCalculation() {
+  if(!currentProfile) return;
+  let base=Math.round(currentProfile.weight*35), total=base+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0);
+  document.getElementById('baseWaterNorm').innerText = base+' '+i18n('ml');
+  document.getElementById('tempBonus').innerText = '+'+getTempBonus(currentTemp)+' '+i18n('ml');
+  document.getElementById('stepsBonus').innerText = '+'+getStepsBonus(currentSteps)+' '+i18n('ml');
+  document.getElementById('totalWaterNorm').innerText = total+' '+i18n('ml');
 }
-function updateFastingStatus() {
-    if (!fastingEnabled) return;
-    let now = new Date();
-    let [h, m] = fastingStartTime.split(':').map(Number);
-    let start = new Date(); start.setHours(h, m, 0, 0);
-    let modes = { '168': 8, '1410': 10, '186': 6, '204': 4 };
-    let hours = modes[fastingMode] || 8;
-    let end = new Date(start.getTime() + hours * 60 * 60 * 1000);
-    let statusText = document.getElementById('fastingStatusText');
-    let timerEl = document.getElementById('fastingTimer');
-    let windowText = document.getElementById('fastingWindowText');
-    windowText.innerText = `${fastingStartTime} – ${end.getHours().toString().padStart(2,'0')}:${end.getMinutes().toString().padStart(2,'0')}`;
-    if (now >= start && now <= end) { statusText.innerText = i18n('fasting_eating'); statusText.style.color = '#6BCB77'; let diff = end - now; let mins = Math.floor(diff / 60000); timerEl.innerText = `${Math.floor(mins/60)}:${(mins%60).toString().padStart(2,'0')}`; }
-    else { statusText.innerText = i18n('fasting_fasting'); statusText.style.color = '#F85149'; let nextStart = new Date(start); if (now > end) nextStart.setDate(nextStart.getDate() + 1); let diff = nextStart - now; let mins = Math.floor(diff / 60000); timerEl.innerText = `${Math.floor(mins/60)}:${(mins%60).toString().padStart(2,'0')}`; }
+function applySmartWaterSettings() { if(!smartWaterEnabled) return;
+  currentSteps=parseInt(document.getElementById('stepsSlider').value);
+  currentTemp=parseInt(document.getElementById('tempSlider').value);
+  localStorage.setItem('currentSteps',currentSteps); localStorage.setItem('currentTemp',currentTemp);
+  calculateTargets();
 }
-function showProfile() { if(!currentProfile) return; document.getElementById('profileName').value=currentProfile.name||''; document.getElementById('profileAge').value=currentProfile.age||''; document.getElementById('profileGender').value=currentProfile.gender||'female'; selectProfileGender(currentProfile.gender||'female'); document.getElementById('profileGoal').value=currentProfile.goal||'lose'; selectProfileGoal(currentProfile.goal||'lose'); document.getElementById('profileHeight').value=currentProfile.height||''; document.getElementById('profileWeight').value=currentProfile.weight||''; let s=localStorage.getItem('profilePhoto'); let pp=document.getElementById('profilePhoto'); if(s) { pp.innerHTML=`<img src="${s}" alt="Profile">`; } else { let init=getInitials(currentProfile.name); pp.innerHTML=`<span class="profile-initials">${init}</span>`; } showPage('profilePage'); }
-function saveProfile() { let n=document.getElementById('profileName').value.trim(), a=parseInt(document.getElementById('profileAge').value), g=document.getElementById('profileGender').value, goal=document.getElementById('profileGoal').value, h=parseFloat(document.getElementById('profileHeight').value), w=parseFloat(document.getElementById('profileWeight').value); if(!n||!a||a<10||a>100||!g||!goal||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; } currentProfile = {...currentProfile, name:n, age:a, gender:g, goal:goal, height:h, weight:w}; saveAllData(); calculateTargets(); renderDashboard(); updateGreeting(); updateHeaderPhoto(); updateBMI(); showPage('mainPage'); vibrate(); }
+function updateWaterHint() {
+  let h=document.getElementById('smartWaterHint');
+  if(smartWaterEnabled) {
+    let b=dailyTargets.water-Math.round(currentProfile.weight*35)-getStepsBonus(currentSteps);
+    h.innerText = b>0?`${i18n('smart_water')}: +${b} ${i18n('ml')}`:'';
+  } else h.innerText='';
+}
+function selectDailyActivity(el) {
+  document.querySelectorAll('#activityPage .activity-daily-item').forEach(i=>i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function applyDailyActivity() {
+  let s=document.querySelector('#activityPage .activity-daily-item.selected');
+  if(!s) return;
+  dailyActivity=parseFloat(s.dataset.activity);
+  localStorage.setItem('dailyActivity',dailyActivity);
+  workoutEnabled=document.getElementById('workoutToggle').checked;
+  workoutIntensity=document.getElementById('workoutIntensity').value;
+  localStorage.setItem('workoutEnabled',workoutEnabled);
+  localStorage.setItem('workoutIntensity',workoutIntensity);
+  calculateTargets(); renderDashboard(); updateActivityUI();
+  showPage('mainPage'); vibrate();
+  publishMyProgress();
+}
+function updateActivityUI() {
+  let tabs=document.querySelectorAll('.tab'); if(tabs.length>=3) {
+    let n=['sedentary','light','moderate','very_active'], idx=[1.2,1.375,1.55,1.725].indexOf(dailyActivity);
+    if(idx>=0) tabs[1].innerHTML = i18n(n[idx]);
+  }
+  if(currentProfile) {
+    document.querySelectorAll('#activityPage .activity-daily-item').forEach(el=>el.classList.toggle('selected', parseFloat(el.dataset.activity)===dailyActivity));
+  }
+  document.getElementById('workoutToggle').checked = workoutEnabled;
+  document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off');
+  document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none';
+  selectWorkoutIntensity(workoutIntensity);
+}
+function showProfile() {
+  if(!currentProfile) return;
+  document.getElementById('profileName').value=currentProfile.name||'';
+  document.getElementById('profileAge').value=currentProfile.age||'';
+  document.getElementById('profileGender').value=currentProfile.gender||'female';
+  selectProfileGender(currentProfile.gender||'female');
+  document.getElementById('profileGoal').value=currentProfile.goal||'lose';
+  selectProfileGoal(currentProfile.goal||'lose');
+  document.getElementById('profileHeight').value=currentProfile.height||'';
+  document.getElementById('profileWeight').value=currentProfile.weight||'';
+  let s=localStorage.getItem('profilePhoto');
+  document.getElementById('profilePhoto').innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="profile-initials">${getInitials(currentProfile.name)}</span>`;
+  showPage('profilePage');
+}
+function saveProfile() {
+  let n=document.getElementById('profileName').value.trim(),
+    a=parseInt(document.getElementById('profileAge').value),
+    g=document.getElementById('profileGender').value,
+    goal=document.getElementById('profileGoal').value,
+    h=parseFloat(document.getElementById('profileHeight').value),
+    w=parseFloat(document.getElementById('profileWeight').value);
+  if(!n||!a||a<10||a>100||!g||!goal||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
+  currentProfile = {...currentProfile, name:n, age:a, gender:g, goal:goal, height:h, weight:w};
+  saveAllData(); calculateTargets(); renderDashboard(); updateGreeting();
+  updateHeaderPhoto(); updateBMI(); showPage('mainPage'); vibrate();
+  publishMyProgress();
+}
 function deleteAccount() { if(confirm(i18n('confirm_delete'))){ localStorage.clear(); location.reload(); } }
 function calculateBMI() { if(!currentProfile) return 0; let h=currentProfile.height/100; return currentProfile.weight/(h*h); }
-function getBMICategory(bmi) { if(bmi<16) return i18n('bmi_underweight_severe'); if(bmi<18.5) return i18n('bmi_underweight'); if(bmi<25) return i18n('bmi_normal'); if(bmi<30) return i18n('bmi_overweight'); if(bmi<35) return i18n('bmi_obese_i'); if(bmi<40) return i18n('bmi_obese_ii'); return i18n('bmi_obese_iii'); }
-function updateBMI() { let bmi=calculateBMI(); document.getElementById('bmiValue').innerText=bmi.toFixed(1); document.getElementById('bmiCategory').innerText=getBMICategory(bmi); let pct=Math.min(100,Math.max(0,((bmi-16)/(40-16))*100)); document.getElementById('bmiMarker').style.left=pct+'%'; document.getElementById('bmiTooltip').innerText=getBMICategory(bmi); }
+function getBMICategory(bmi) {
+  if(bmi<16) return i18n('bmi_underweight_severe'); if(bmi<18.5) return i18n('bmi_underweight'); if(bmi<25) return i18n('bmi_normal');
+  if(bmi<30) return i18n('bmi_overweight'); if(bmi<35) return i18n('bmi_obese_i'); if(bmi<40) return i18n('bmi_obese_ii'); return i18n('bmi_obese_iii');
+}
+function updateBMI() {
+  let bmi=calculateBMI();
+  document.getElementById('bmiValue').innerText=bmi.toFixed(1);
+  document.getElementById('bmiCategory').innerText=getBMICategory(bmi);
+  let pct=Math.min(100,Math.max(0,((bmi-16)/(40-16))*100));
+  document.getElementById('bmiMarker').style.left=pct+'%';
+  document.getElementById('bmiTooltip').innerText=getBMICategory(bmi);
+}
 function showBMITooltip() { let t=document.getElementById('bmiTooltip'); t.style.opacity='1'; setTimeout(()=>t.style.opacity='',1500); }
 function loadProductsDB() { let s=localStorage.getItem('fitcat_products'); if(s) productsDB=JSON.parse(s); }
 function saveProductsDB() { localStorage.setItem('fitcat_products', JSON.stringify(productsDB)); }
-function addToProductsDB(n,p,f,c,k) { if(!productsDB.find(x=>x.name.toLowerCase()===n.toLowerCase())){ productsDB.push({name:n,protein:p,fat:f,carbs:c,kcal:k}); saveProductsDB(); } }
-function openSmartSearch() { document.getElementById('smartSearchModal').style.display='flex'; document.getElementById('smartSearchToggle').checked = smartSearchEnabled; document.getElementById('smartSearchToggleLabel').innerText = i18n(smartSearchEnabled?'on':'off'); document.getElementById('smartSearchSettings').style.display = smartSearchEnabled?'block':'none'; document.getElementById('resultsSlider').value = smartSearchResults; document.getElementById('resultsDisplay').innerText = smartSearchResults; }
-function closeSmartSearch() { document.getElementById('smartSearchModal').style.display='none'; smartSearchEnabled=document.getElementById('smartSearchToggle').checked; smartSearchResults=parseInt(document.getElementById('resultsSlider').value); localStorage.setItem('smartSearchEnabled',smartSearchEnabled); localStorage.setItem('smartSearchResults',smartSearchResults); }
+function addToProductsDB(n,p,f,c,k) {
+  if(!productsDB.find(x=>x.name.toLowerCase()===n.toLowerCase())){
+    productsDB.push({name:n,protein:p,fat:f,carbs:c,kcal:k}); saveProductsDB();
+  }
+}
+function openSmartSearch() {
+  document.getElementById('smartSearchModal').style.display='flex';
+  document.getElementById('smartSearchToggle').checked = smartSearchEnabled;
+  document.getElementById('smartSearchToggleLabel').innerText = i18n(smartSearchEnabled?'on':'off');
+  document.getElementById('smartSearchSettings').style.display = smartSearchEnabled?'block':'none';
+  document.getElementById('resultsSlider').value = smartSearchResults;
+  document.getElementById('resultsDisplay').innerText = smartSearchResults;
+}
+function closeSmartSearch() {
+  document.getElementById('smartSearchModal').style.display='none';
+  smartSearchEnabled=document.getElementById('smartSearchToggle').checked;
+  smartSearchResults=parseInt(document.getElementById('resultsSlider').value);
+  localStorage.setItem('smartSearchEnabled',smartSearchEnabled);
+  localStorage.setItem('smartSearchResults',smartSearchResults);
+}
 function openAbout() { document.getElementById('aboutModal').style.display='flex'; }
 function closeAbout() { document.getElementById('aboutModal').style.display='none'; }
-function fillFromProduct(name) { let p=productsDB.find(x=>x.name===name); if(p){ document.getElementById('foodName').value=p.name; document.getElementById('foodProt100').value=p.protein; document.getElementById('foodFat100').value=p.fat; document.getElementById('foodCarb100').value=p.carbs; document.getElementById('foodKcal100').value=p.kcal; } document.getElementById('autocompleteList').style.display='none'; }
-function fillFromOFF(name,kcal,prot,fat,carbs) { document.getElementById('foodName').value=name; document.getElementById('foodProt100').value=prot||0; document.getElementById('foodFat100').value=fat||0; document.getElementById('foodCarb100').value=carbs||0; document.getElementById('foodKcal100').value=kcal||0; document.getElementById('autocompleteList').style.display='none'; }
-function setupAutocomplete() { let inp=document.getElementById('foodName'), list=document.getElementById('autocompleteList'); inp.addEventListener('input', function() { let val=this.value.trim(); if(val.length<2){ list.style.display='none'; return; } if(!smartSearchEnabled) { let m=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,5); if(!m.length) list.style.display='none'; else { list.innerHTML=m.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; } return; } inp.placeholder='🔍 '+i18n('search')+'...'; inp.style.borderColor='#4FACFE'; if(searchDebounce) clearTimeout(searchDebounce); searchDebounce=setTimeout(()=>{ let local=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,3); fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(val)}&json=1&page_size=${smartSearchResults}&search_simple=1&search_fields=product_name`).then(r=>r.json()).then(d=>{ let items=[]; if(d.products) items=d.products.filter(p=>p.product_name).map(p=>({name:p.product_name,brand:p.brands,kcal:p.nutriments?.['energy-kcal_100g']||0,prot:p.nutriments?.proteins_100g||0,fat:p.nutriments?.fat_100g||0,carbs:p.nutriments?.carbohydrates_100g||0})).slice(0,smartSearchResults); let all=[...local.map(p=>({name:p.name,isLocal:true,...p})), ...items]; if(!all.length) { inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); } else { inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D'; list.innerHTML=all.map(p=>p.isLocal?`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`:`<div class="autocomplete-item" onclick="fillFromOFF('${p.name.replace(/'/g,"\\'")}',${p.kcal},${p.prot},${p.fat},${p.carbs})"><span class="off-name">🌍 ${p.name}</span><span class="off-brand">${p.brand||''}</span></div>`).join(''); list.style.display='block'; } }).catch(()=>{ if(!local.length){ inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); } else { list.innerHTML=local.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; } }); },400); }); document.addEventListener('click', e=>{ if(!inp.contains(e.target)&&!list.contains(e.target)) list.style.display='none'; }); }
+function fillFromProduct(name) {
+  let p=productsDB.find(x=>x.name===name); if(p){
+    document.getElementById('foodName').value=p.name;
+    document.getElementById('foodProt100').value=p.protein;
+    document.getElementById('foodFat100').value=p.fat;
+    document.getElementById('foodCarb100').value=p.carbs;
+    document.getElementById('foodKcal100').value=p.kcal;
+  }
+  document.getElementById('autocompleteList').style.display='none';
+}
+function fillFromOFF(name,kcal,prot,fat,carbs) {
+  document.getElementById('foodName').value=name;
+  document.getElementById('foodProt100').value=prot||0;
+  document.getElementById('foodFat100').value=fat||0;
+  document.getElementById('foodCarb100').value=carbs||0;
+  document.getElementById('foodKcal100').value=kcal||0;
+  document.getElementById('autocompleteList').style.display='none';
+}
+function setupAutocomplete() {
+  let inp=document.getElementById('foodName'), list=document.getElementById('autocompleteList');
+  inp.addEventListener('input', function() {
+    let val=this.value.trim(); if(val.length<2){ list.style.display='none'; return; }
+    if(!smartSearchEnabled) {
+      let m=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,5);
+      if(!m.length) list.style.display='none';
+      else {
+        list.innerHTML=m.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join('');
+        list.style.display='block';
+      }
+      return;
+    }
+    inp.placeholder='🔍 '+i18n('search')+'...';
+    inp.style.borderColor='#4FACFE';
+    if(searchDebounce) clearTimeout(searchDebounce);
+    searchDebounce=setTimeout(()=>{
+      let local=productsDB.filter(p=>p.name.toLowerCase().includes(val.toLowerCase())).slice(0,3);
+      fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(val)}&json=1&page_size=${smartSearchResults}&search_simple=1&search_fields=product_name`)
+      .then(r=>r.json()).then(d=>{
+        let items=[];
+        if(d.products) items=d.products.filter(p=>p.product_name).map(p=>({name:p.product_name,brand:p.brands,kcal:p.nutriments?.['energy-kcal_100g']||0,prot:p.nutriments?.proteins_100g||0,fat:p.nutriments?.fat_100g||0,carbs:p.nutriments?.carbohydrates_100g||0})).slice(0,smartSearchResults);
+        let all=[...local.map(p=>({name:p.name,isLocal:true,...p})), ...items];
+        if(!all.length) { inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); }
+        else {
+          inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';
+          list.innerHTML=all.map(p=>p.isLocal?`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`:`<div class="autocomplete-item" onclick="fillFromOFF('${p.name.replace(/'/g,"\\'")}',${p.kcal},${p.prot},${p.fat},${p.carbs})"><span class="off-name">🌍 ${p.name}</span><span class="off-brand">${p.brand||''}</span></div>`).join('');
+          list.style.display='block';
+        }
+      }).catch(()=>{
+        if(!local.length){ inp.placeholder='❌ '+i18n('product_not_found'); inp.style.borderColor='#F85149'; list.style.display='none'; setTimeout(()=>{inp.placeholder=i18n('food_name_placeholder'); inp.style.borderColor='#30363D';},1500); }
+        else { list.innerHTML=local.map(p=>`<div class="autocomplete-item" onclick="fillFromProduct('${p.name}')"><span class="off-name">📦 ${p.name}</span></div>`).join(''); list.style.display='block'; }
+      });
+    },400);
+  });
+  document.addEventListener('click', e=>{ if(!inp.contains(e.target)&&!list.contains(e.target)) list.style.display='none'; });
+}
+
 function loadTemplates() { let s=localStorage.getItem('fitcat_templates'); if(s) mealTemplates=JSON.parse(s); }
 function saveTemplates() { localStorage.setItem('fitcat_templates', JSON.stringify(mealTemplates)); }
-function renderTemplates() { let c=document.getElementById('templatesBar'); c.innerHTML = mealTemplates.length ? mealTemplates.map((tm,i)=>`<div class="template-btn" onclick="loadTemplate(${i})">${tm.name}</div><div class="template-btn" onclick="deleteTemplate(${i})" style="padding:8px;">✕</div>`).join('') : `<div class="text-small" style="width:100%;text-align:center;margin-bottom:16px;">${i18n('no_templates')}</div>`; }
-function saveTemplate() { if(!todayFoods.length){ alert(i18n('no_dishes')); return; } let n=prompt(i18n('template_name'),'Шаблон '+(mealTemplates.length+1)); if(!n) return; mealTemplates.push({name:n, foods:JSON.parse(JSON.stringify(todayFoods))}); saveTemplates(); renderTemplates(); vibrate(); }
-function loadTemplate(i) { todayFoods=JSON.parse(JSON.stringify(mealTemplates[i].foods)); saveAllData(); renderDashboard(); vibrate(); }
+function renderTemplates() {
+  let c=document.getElementById('templatesBar');
+  c.innerHTML = mealTemplates.length ? mealTemplates.map((tm,i)=>`<div class="template-btn" onclick="loadTemplate(${i})">${tm.name}</div><div class="template-btn" onclick="deleteTemplate(${i})" style="padding:8px;">✕</div>`).join('') : `<div class="text-small" style="width:100%;text-align:center;margin-bottom:16px;">${i18n('no_templates')}</div>`;
+}
+function saveTemplate() {
+  if(!todayFoods.length){ alert(i18n('no_dishes')); return; }
+  let n=prompt(i18n('template_name'),'Шаблон '+(mealTemplates.length+1));
+  if(!n) return;
+  mealTemplates.push({name:n, foods:JSON.parse(JSON.stringify(todayFoods))});
+  saveTemplates(); renderTemplates(); vibrate();
+  publishMyProgress();
+}
+function loadTemplate(i) {
+  todayFoods=JSON.parse(JSON.stringify(mealTemplates[i].foods));
+  saveAllData(); renderDashboard(); vibrate();
+  publishMyProgress();
+}
 function deleteTemplate(i) { mealTemplates.splice(i,1); saveTemplates(); renderTemplates(); }
-function clearTodayFoods() { if(confirm(i18n('clear')+'?')){ todayFoods=[]; saveAllData(); renderDashboard(); vibrate(); } }
-function addFood() { let n=document.getElementById('foodName').value; if(!n){ alert(i18n('enter_name')); return; } let p=parseFloat(document.getElementById('foodProt100').value)||0, f=parseFloat(document.getElementById('foodFat100').value)||0, c=parseFloat(document.getElementById('foodCarb100').value)||0, k=parseFloat(document.getElementById('foodKcal100').value)||0, w=parseFloat(document.getElementById('foodWeight').value)||0; if(w<=0){ alert(i18n('enter_weight')); return; } let m=w/100; todayFoods.push({name:n,weight:w, protein:Math.round(p*m*10)/10, fat:Math.round(f*m*10)/10, carbs:Math.round(c*m*10)/10, kcal:Math.round(k*m), checked:false}); addToProductsDB(n,p,f,c,k); saveAllData(); renderDashboard(); document.getElementById('foodName').value=document.getElementById('foodProt100').value=document.getElementById('foodFat100').value=document.getElementById('foodCarb100').value=document.getElementById('foodKcal100').value=document.getElementById('foodWeight').value=''; vibrate(); }
-function toggleFood(i) { todayFoods[i].checked=!todayFoods[i].checked; saveAllData(); renderProgressBars(); renderFoodList(); vibrate(); }
-function deleteFood(i) { todayFoods.splice(i,1); saveAllData(); renderDashboard(); }
-function renderFoodList() { let h=''; todayFoods.forEach((f,i)=>{ h+=`<div class="food-item"><div class="food-toggle ${f.checked?'checked':''}" onclick="toggleFood(${i})"></div><div class="food-info"><div class="food-name">${f.name} (${f.weight}${i18n('g')})</div><div class="food-macros">${i18n('protein_short')}:${f.protein} ${i18n('fat_short')}:${f.fat} ${i18n('carbs_short')}:${f.carbs} ${f.kcal} ${i18n('kcal')}</div></div><span class="food-delete" onclick="deleteFood(${i})">✕</span></div>`; }); document.getElementById('foodListContainer').innerHTML = h || `<div class="text-center text-small" style="padding:20px;">${i18n('empty_food')}</div>`; }
+function clearTodayFoods() {
+  if(confirm(i18n('clear')+'?')){ todayFoods=[]; saveAllData(); renderDashboard(); vibrate(); publishMyProgress(); }
+}
+function addFood() {
+  let n=document.getElementById('foodName').value; if(!n){ alert(i18n('enter_name')); return; }
+  let p=parseFloat(document.getElementById('foodProt100').value)||0,
+      f=parseFloat(document.getElementById('foodFat100').value)||0,
+      c=parseFloat(document.getElementById('foodCarb100').value)||0,
+      k=parseFloat(document.getElementById('foodKcal100').value)||0,
+      w=parseFloat(document.getElementById('foodWeight').value)||0;
+  if(w<=0){ alert(i18n('enter_weight')); return; }
+  let m=w/100;
+  todayFoods.push({name:n,weight:w, protein:Math.round(p*m*10)/10, fat:Math.round(f*m*10)/10, carbs:Math.round(c*m*10)/10, kcal:Math.round(k*m), checked:false});
+  addToProductsDB(n,p,f,c,k); saveAllData(); renderDashboard();
+  document.getElementById('foodName').value=document.getElementById('foodProt100').value=document.getElementById('foodFat100').value=document.getElementById('foodCarb100').value=document.getElementById('foodKcal100').value=document.getElementById('foodWeight').value='';
+  vibrate();
+  publishMyProgress();
+}
+function toggleFood(i) { todayFoods[i].checked=!todayFoods[i].checked; saveAllData(); renderProgressBars(); renderFoodList(); vibrate(); publishMyProgress(); }
+function deleteFood(i) { todayFoods.splice(i,1); saveAllData(); renderDashboard(); publishMyProgress(); }
+function renderFoodList() {
+  let h=''; todayFoods.forEach((f,i)=>{ h+=`<div class="food-item"><div class="food-toggle ${f.checked?'checked':''}" onclick="toggleFood(${i})"></div><div class="food-info"><div class="food-name">${f.name} (${f.weight}${i18n('g')})</div><div class="food-macros">${i18n('protein_short')}:${f.protein} ${i18n('fat_short')}:${f.fat} ${i18n('carbs_short')}:${f.carbs} ${f.kcal} ${i18n('kcal')}</div></div><span class="food-delete" onclick="deleteFood(${i})">✕</span></div>`; });
+  document.getElementById('foodListContainer').innerHTML = h || `<div class="text-center text-small" style="padding:20px;">${i18n('empty_food')}</div>`;
+}
 function openScanner() { document.getElementById('scannerModal').style.display='flex'; startScanner(); }
 function closeScanner() { document.getElementById('scannerModal').style.display='none'; stopScanner(); }
-async function startScanner() { let v=document.getElementById('scannerVideo'); scanningActive=true; try{ let s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); v.srcObject=s; v.play(); zxingReader=new ZXing.BrowserMultiFormatReader(); zxingReader.decodeFromVideoDevice(null,v,r=>{if(r&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.text)}}); Quagga.init({inputStream:{name:'Live',type:'LiveStream',target:v},decoder:{readers:['ean_reader','ean_8_reader','upc_reader']},locate:true,numOfWorkers:2,frequency:10},e=>{if(!e){quaggaActive=true;Quagga.start()}}); Quagga.onDetected(r=>{if(r?.codeResult?.code&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.codeResult.code)}}); scanTimeout=setTimeout(()=>{if(scanningActive)document.getElementById('scannerHint').innerText=i18n('scanner_failed')},8000); }catch(e){alert(i18n('camera_error'));closeScanner();} }
+async function startScanner() {
+  let v=document.getElementById('scannerVideo'); scanningActive=true;
+  try{ let s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); v.srcObject=s; v.play();
+    zxingReader=new ZXing.BrowserMultiFormatReader();
+    zxingReader.decodeFromVideoDevice(null,v,r=>{if(r&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.text)}});
+    Quagga.init({inputStream:{name:'Live',type:'LiveStream',target:v},decoder:{readers:['ean_reader','ean_8_reader','upc_reader']},locate:true,numOfWorkers:2,frequency:10},e=>{if(!e){quaggaActive=true;Quagga.start()}});
+    Quagga.onDetected(r=>{if(r?.codeResult?.code&&scanningActive){stopScanner();closeScanner();lookupBarcode(r.codeResult.code)}});
+    scanTimeout=setTimeout(()=>{if(scanningActive)document.getElementById('scannerHint').innerText=i18n('scanner_failed')},8000);
+  }catch(e){alert(i18n('camera_error'));closeScanner();}
+}
 function stopScanner() { scanningActive=false; if(scanTimeout)clearTimeout(scanTimeout); if(zxingReader){zxingReader.reset();zxingReader=null} if(quaggaActive){Quagga.stop();quaggaActive=false} let v=document.getElementById('scannerVideo'); if(v?.srcObject){v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null} }
 async function lookupBarcode(b) { if(!b) return; try{ let r=await fetch(`https://world.openfoodfacts.org/api/v0/product/${b}.json`); let d=await r.json(); if(d.product){ let p=d.product; document.getElementById('foodName').value=p.product_name||''; document.getElementById('foodKcal100').value=p.nutriments?.['energy-kcal_100g']||''; document.getElementById('foodProt100').value=p.nutriments?.proteins_100g||''; document.getElementById('foodFat100').value=p.nutriments?.fat_100g||''; document.getElementById('foodCarb100').value=p.nutriments?.carbohydrates_100g||''; vibrate(); } else alert(i18n('product_not_found')); } catch(e) { alert(i18n('product_not_found')); } }
-function setWeightGoal() { let c=currentProfile?.targetWeight||(currentProfile?.startWeight*0.9).toFixed(1); let g=prompt(i18n('enter_goal'),c); if(g&&!isNaN(g)&&g>=30&&g<=500){ currentProfile.targetWeight=parseFloat(g); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); } }
-function updateWeightStatsAndList() { let goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55; if(weightHistory.length){ let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), start=s[0].weight, cur=s[s.length-1].weight, ch=cur-start, tg=cur-goal; document.getElementById('startWeightStat').innerText=start.toFixed(1)+' '+i18n('kg'); document.getElementById('currentWeightStat').innerText=cur.toFixed(1)+' '+i18n('kg'); let ce=document.getElementById('weightChangeStat'); ce.innerText=(ch>0?'+':'')+ch.toFixed(1)+' '+i18n('kg'); ce.style.color=ch<0?'#6BCB77':(ch>0?'#F85149':'#9CA3AF'); let ge=document.getElementById('toGoalStat'); ge.innerText=tg.toFixed(1)+' '+i18n('kg'); ge.style.color=tg<=0?'#6BCB77':'#9CA3AF'; } else ['startWeightStat','currentWeightStat','weightChangeStat','toGoalStat'].forEach(id=>document.getElementById(id).innerText='---'); let l=document.getElementById('weightHistoryList'); if(!weightHistory.length) l.innerHTML='<div class="text-center text-small">'+i18n('empty_food')+'</div>'; else l.innerHTML = [...weightHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((e,i)=>`<div class="weight-history-item"><span class="weight-history-date">${e.date}</span><span class="weight-history-value">${e.weight} ${i18n('kg')}</span><span class="weight-history-delete" onclick="deleteWeightEntry(${i})">✕</span></div>`).join(''); updateBMI(); }
+
+function setWeightGoal() {
+  let c=currentProfile?.targetWeight||(currentProfile?.startWeight*0.9).toFixed(1);
+  let g=prompt(i18n('enter_goal'),c); if(g&&!isNaN(g)&&g>=30&&g<=500){
+    currentProfile.targetWeight=parseFloat(g); saveAllData();
+    updateWeightStatsAndList(); renderWeightChart();
+  }
+}
+function updateWeightStatsAndList() {
+  let goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55;
+  if(weightHistory.length){ let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), start=s[0].weight, cur=s[s.length-1].weight, ch=cur-start, tg=cur-goal;
+    document.getElementById('startWeightStat').innerText=start.toFixed(1)+' '+i18n('kg');
+    document.getElementById('currentWeightStat').innerText=cur.toFixed(1)+' '+i18n('kg');
+    let ce=document.getElementById('weightChangeStat'); ce.innerText=(ch>0?'+':'')+ch.toFixed(1)+' '+i18n('kg'); ce.style.color=ch<0?'#6BCB77':(ch>0?'#F85149':'#9CA3AF');
+    let ge=document.getElementById('toGoalStat'); ge.innerText=tg.toFixed(1)+' '+i18n('kg'); ge.style.color=tg<=0?'#6BCB77':'#9CA3AF';
+  } else ['startWeightStat','currentWeightStat','weightChangeStat','toGoalStat'].forEach(id=>document.getElementById(id).innerText='---');
+  let l=document.getElementById('weightHistoryList');
+  if(!weightHistory.length) l.innerHTML='<div class="text-center text-small">'+i18n('empty_food')+'</div>';
+  else l.innerHTML = [...weightHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((e,i)=>`<div class="weight-history-item"><span class="weight-history-date">${e.date}</span><span class="weight-history-value">${e.weight} ${i18n('kg')}</span><span class="weight-history-delete" onclick="deleteWeightEntry(${i})">✕</span></div>`).join('');
+  updateBMI();
+}
 function deleteWeightEntry(i) { weightHistory.splice(i,1); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); }
-function addWeightEntry() { let w=parseFloat(document.getElementById('newWeight').value), d=document.getElementById('weightDate').value||new Date().toISOString().split('T')[0]; if(!w||w<30||w>500) return; let ex=weightHistory.findIndex(e=>e.date===d); if(ex>=0&&!confirm(i18n('overwrite_weight'))) return; if(ex>=0) weightHistory.splice(ex,1); weightHistory.push({date:d,weight:w}); saveAllData(); updateWeightStatsAndList(); renderWeightChart(); document.getElementById('newWeight').value=''; vibrate(); }
-function renderWeightChart() { let canvas=document.getElementById('weightChart'), ctx=canvas.getContext('2d'); if(chartInstance) chartInstance.destroy(); if(!weightHistory.length) return; let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)), goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55, col='#4FACFE'; if(s.length>1){ let f=s[0].weight, l=s[s.length-1].weight; if(l<f) col='#6BCB77'; else if(l>f) col='#F85149'; } let w=s.map(e=>e.weight), min=Math.min(...w,goal)-1, max=Math.max(...w,goal)+1, grad=ctx.createLinearGradient(0,0,0,canvas.height); grad.addColorStop(0,col+'B3'); grad.addColorStop(0.4,col+'60'); grad.addColorStop(0.7,col+'20'); grad.addColorStop(1,col+'00'); chartInstance = new Chart(ctx, { type:'line', data:{ labels:s.map(e=>e.date), datasets:[ { label:i18n('weight'), data:s.map(e=>e.weight), borderColor:col, backgroundColor:grad, tension:0.3, fill:true, pointBackgroundColor:col, pointBorderColor:'#0D1117', pointRadius:5 }, { label:i18n('set_goal'), data:s.map(()=>goal), borderColor:'#FFD93D', borderDash:[5,5], borderWidth:2, pointRadius:0, fill:false } ] }, options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ min,max, ticks:{ color:'#9CA3AF' } } } } }); }
-function switchNutritionChart(type) { document.querySelectorAll('.nutrition-switch .btn-small').forEach(b=>b.classList.remove('active')); document.querySelector(`.nutrition-switch .btn-small[data-nutrition="${type}"]`).classList.add('active'); renderNutritionChart(type); }
-function renderNutritionChart(type='kcal') { let canvas=document.getElementById('nutritionChart'), ctx=canvas.getContext('2d'); if(nutritionChartInstance) nutritionChartInstance.destroy(); if(!nutritionHistory.length) return; let s=[...nutritionHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)); let values=s.map(e=>e[type]||0); let colors = { kcal: '#FF6B6B', protein: '#4FACFE', fat: '#FFD93D', carbs: '#6BCB77' }; let labels = { kcal: i18n('calories'), protein: i18n('protein'), fat: i18n('fat'), carbs: i18n('carbs') }; let max=Math.max(...values, 1); let grad=ctx.createLinearGradient(0,0,0,canvas.height); grad.addColorStop(0,colors[type]+'B3'); grad.addColorStop(0.4,colors[type]+'60'); grad.addColorStop(0.7,colors[type]+'20'); grad.addColorStop(1,colors[type]+'00'); nutritionChartInstance = new Chart(ctx, { type:'bar', data:{ labels:s.map(e=>e.date), datasets:[{ label:labels[type], data:values, backgroundColor:grad, borderColor:colors[type], borderWidth:2, borderRadius:8 }] }, options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ beginAtZero:true, max:max+10, ticks:{ color:'#9CA3AF' } } } } }); }
-function saveNutritionForToday() { let today=new Date().toISOString().split('T')[0]; let c={kcal:0,protein:0,fat:0,carbs:0}; todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } }); let ex=nutritionHistory.findIndex(e=>e.date===today); if(ex>=0) nutritionHistory[ex]={date:today, ...c}; else nutritionHistory.push({date:today, ...c}); localStorage.setItem('nutritionHistory', JSON.stringify(nutritionHistory)); }
-function updateNutritionHistoryList() { let l=document.getElementById('nutritionHistoryList'); if(!nutritionHistory.length) l.innerHTML='<div class="text-center text-small">'+i18n('empty_food')+'</div>'; else l.innerHTML = [...nutritionHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((e,i)=>`<div class="nutrition-history-item"><span class="nutrition-history-date">${e.date}</span><span class="nutrition-history-value">${e.kcal} ${i18n('kcal')} (${i18n('protein_short')}:${e.protein} ${i18n('fat_short')}:${e.fat} ${i18n('carbs_short')}:${e.carbs})</span><span class="nutrition-history-delete" onclick="deleteNutritionEntry(${i})">✕</span></div>`).join(''); }
-function deleteNutritionEntry(i) { nutritionHistory.splice(i,1); localStorage.setItem('nutritionHistory', JSON.stringify(nutritionHistory)); updateNutritionHistoryList(); renderNutritionChart(); }
-function loadData() { currentProfile=JSON.parse(localStorage.getItem('fitnessProfile')||'null'); todayFoods=JSON.parse(localStorage.getItem('todayFoods')||'[]'); weightHistory=JSON.parse(localStorage.getItem('weightHistory')||'[]'); nutritionHistory=JSON.parse(localStorage.getItem('nutritionHistory')||'[]'); if(currentProfile && !currentProfile.goal) currentProfile.goal = 'lose'; }
-function saveAllData() { if(currentProfile) localStorage.setItem('fitnessProfile',JSON.stringify(currentProfile)); localStorage.setItem('todayFoods',JSON.stringify(todayFoods)); localStorage.setItem('weightHistory',JSON.stringify(weightHistory)); localStorage.setItem('nutritionHistory', JSON.stringify(nutritionHistory)); }
-function checkDateReset() { let ld=localStorage.getItem('lastDate'), td=new Date().toDateString(); if(ld!==td){ saveNutritionForToday(); todayFoods=[]; localStorage.setItem('waterAmount',0); waterAmount=0; workoutEnabled=false; fastingEnabled=false; localStorage.setItem('workoutEnabled',false); localStorage.setItem('fastingEnabled',false); localStorage.setItem('lastDate',td); saveAllData(); renderProgressBars(); renderFoodList(); updateWaterDisplay(); } else { let today=new Date().toISOString().split('T')[0]; if(!nutritionHistory.find(e=>e.date===today)) { saveNutritionForToday(); } } }
-function updateGreeting() { if(greetingTimeout) clearTimeout(greetingTimeout); let h=new Date().getHours(), k='day'; if(h>=5&&h<12) k='morning'; else if(h>=12&&h<18) k='day'; else if(h>=18&&h<23) k='evening'; else k='night'; let s1=document.getElementById('greetingSlide1'), s2=document.getElementById('greetingSlide2'), strek=document.getElementById('streakEmoji'), name=currentProfile?.name||''; if(strek){ strek.style.opacity='0'; strek.classList.add('fade-in'); } s1.innerHTML=`<h1>${i18n(k)}, ${name}</h1>`; s2.innerHTML='<h1>FitCat</h1>'; s1.classList.remove('hidden'); s2.classList.remove('visible'); greetingTimeout=setTimeout(()=>{ s1.classList.add('hidden'); s2.classList.add('visible'); if(strek){ strek.style.display='inline-block'; requestAnimationFrame(()=>{ strek.style.opacity='1'; strek.classList.remove('fade-in'); }); } updateStreak(); },3500); }
-function completeSetup() { try{ let n=document.getElementById('setupName').value.trim(), a=parseInt(document.getElementById('setupAge').value), g=document.getElementById('setupGender').value, h=parseFloat(document.getElementById('setupHeight').value), w=parseFloat(document.getElementById('setupWeight').value); if(!n||!a||a<10||a>100||!g||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; } currentProfile = { name:n, age:a, gender:g, goal:'lose', height:h, weight:w, startWeight:w, targetWeight:Math.round(w*0.9*10)/10 }; calculateTargets(); saveAllData(); localStorage.setItem('lastDate',new Date().toDateString()); document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block'; updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateFastingUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); initSwipe(); vibrate(); } catch(e) { alert('Ошибка'); } }
-function calculateTargets() { if(!currentProfile) return; let p=currentProfile, bmr=p.gender==='female'?447.6+9.2*p.weight+3.1*p.height-4.3*p.age:88.36+13.4*p.weight+4.8*p.height-5.7*p.age; let tdee=bmr*dailyActivity + (workoutEnabled?getWorkoutCalories(workoutIntensity):0); let waterBase=Math.round(p.weight*35), waterTotal=waterBase; if(smartWaterEnabled) waterTotal = waterBase+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0); else waterTotal = waterBase + (workoutEnabled?getWorkoutWater(workoutIntensity):0); let goalMult = getGoalMultiplier(currentProfile.goal||'lose'); dailyTargets = { kcal: Math.round(tdee * goalMult), protein: Math.round(p.weight*1.8), fat: Math.round(p.weight*0.9), carbs: Math.round((tdee*goalMult - p.weight*1.8*4 - p.weight*0.9*9)/4), water: waterTotal }; }
+function addWeightEntry() {
+  let w=parseFloat(document.getElementById('newWeight').value), d=document.getElementById('weightDate').value||new Date().toISOString().split('T')[0];
+  if(!w||w<30||w>500) return;
+  let ex=weightHistory.findIndex(e=>e.date===d); if(ex>=0&&!confirm(i18n('overwrite_weight'))) return;
+  if(ex>=0) weightHistory.splice(ex,1);
+  weightHistory.push({date:d,weight:w}); saveAllData(); updateWeightStatsAndList(); renderWeightChart();
+  document.getElementById('newWeight').value=''; vibrate();
+}
+function renderWeightChart() {
+  let canvas=document.getElementById('weightChart'), ctx=canvas.getContext('2d');
+  if(chartInstance) chartInstance.destroy(); if(!weightHistory.length) return;
+  let s=[...weightHistory].sort((a,b)=>new Date(a.date)-new Date(b.date)),
+      goal=currentProfile?.targetWeight||currentProfile?.startWeight*0.9||55, col='#4FACFE';
+  if(s.length>1){ let f=s[0].weight, l=s[s.length-1].weight; if(l<f) col='#6BCB77'; else if(l>f) col='#F85149'; }
+  let w=s.map(e=>e.weight), min=Math.min(...w,goal)-1, max=Math.max(...w,goal)+1,
+      grad=ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,col+'B3'); grad.addColorStop(0.4,col+'60'); grad.addColorStop(0.7,col+'20'); grad.addColorStop(1,col+'00');
+  chartInstance = new Chart(ctx, { type:'line', data:{
+    labels:s.map(e=>e.date), datasets:[ { label:i18n('weight')+' ('+i18n('kg')+')', data:s.map(e=>e.weight), borderColor:col, backgroundColor:grad, tension:0.3, fill:true, pointBackgroundColor:col, pointBorderColor:'#0D1117', pointRadius:5 },
+    { label:i18n('set_goal'), data:s.map(()=>goal), borderColor:'#FFD93D', borderDash:[5,5], borderWidth:2, pointRadius:0, fill:false } ] },
+    options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#E6EDF3' } } }, scales:{ x:{ ticks:{ color:'#9CA3AF' } }, y:{ min,max, ticks:{ color:'#9CA3AF' } } } }
+  });
+}
+function loadData() {
+  currentProfile=JSON.parse(localStorage.getItem('fitnessProfile')||'null');
+  todayFoods=JSON.parse(localStorage.getItem('todayFoods')||'[]');
+  weightHistory=JSON.parse(localStorage.getItem('weightHistory')||'[]');
+  if(currentProfile && !currentProfile.goal) currentProfile.goal = 'lose';
+}
+function saveAllData() { if(currentProfile) localStorage.setItem('fitnessProfile',JSON.stringify(currentProfile));
+  localStorage.setItem('todayFoods',JSON.stringify(todayFoods)); localStorage.setItem('weightHistory',JSON.stringify(weightHistory)); }
+function checkDateReset() { let ld=localStorage.getItem('lastDate'), td=new Date().toDateString();
+  if(ld!==td){ todayFoods=[]; localStorage.setItem('waterAmount',0); waterAmount=0;
+  workoutEnabled=false; localStorage.setItem('workoutEnabled',false);
+  localStorage.setItem('lastDate',td); saveAllData(); } }
+function updateGreeting() {
+  if(greetingTimeout) clearTimeout(greetingTimeout); let h=new Date().getHours(), k='day';
+  if(h>=5&&h<12) k='morning'; else if(h>=12&&h<18) k='day'; else if(h>=18&&h<23) k='evening'; else k='night';
+  let s1=document.getElementById('greetingSlide1'), s2=document.getElementById('greetingSlide2'),
+      strek=document.getElementById('streakEmoji'), name=currentProfile?.name||'';
+  if(strek){ strek.style.opacity='0'; strek.classList.add('fade-in'); }
+  s1.innerHTML=`<h1>${i18n(k)}, ${name}</h1>`;
+  s2.innerHTML='<h1>FitCat</h1>'; s1.classList.remove('hidden'); s2.classList.remove('visible');
+  greetingTimeout=setTimeout(()=>{ s1.classList.add('hidden'); s2.classList.add('visible');
+    if(strek){ strek.style.display='inline-block'; requestAnimationFrame(()=>{ strek.style.opacity='1'; strek.classList.remove('fade-in'); }); }
+    updateStreak(); },3500);
+}
+function completeSetup() {
+  try{ let n=document.getElementById('setupName').value.trim(),
+        a=parseInt(document.getElementById('setupAge').value),
+        g=document.getElementById('setupGender').value,
+        h=parseFloat(document.getElementById('setupHeight').value),
+        w=parseFloat(document.getElementById('setupWeight').value);
+    if(!n||!a||a<10||a>100||!g||!h||h<100||h>250||!w||w<30||w>500){ alert(i18n('error_fill')); return; }
+    currentProfile = { name:n, age:a, gender:g, goal:'lose', height:h, weight:w, startWeight:w, targetWeight:Math.round(w*0.9*10)/10 };
+    calculateTargets(); saveAllData(); localStorage.setItem('lastDate',new Date().toDateString());
+    document.getElementById('setupPage').style.display='none';
+    document.getElementById('mainPage').style.display='block';
+    updateGreeting(); renderDashboard(); renderTemplates(); updateActivityUI(); updateHeaderPhoto(); updateBMI(); updateStreak(); vibrate();
+    publishMyProgress();
+  } catch(e) { alert('Ошибка'); }
+}
+function calculateTargets() {
+  if(!currentProfile) return;
+  let p=currentProfile,
+      bmr=p.gender==='female'?447.6+9.2*p.weight+3.1*p.height-4.3*p.age:88.36+13.4*p.weight+4.8*p.height-5.7*p.age;
+  let tdee=bmr*dailyActivity + (workoutEnabled?getWorkoutCalories(workoutIntensity):0);
+  let waterBase=Math.round(p.weight*35), waterTotal=waterBase;
+  if(smartWaterEnabled) waterTotal = waterBase+getTempBonus(currentTemp)+getStepsBonus(currentSteps)+(workoutEnabled?getWorkoutWater(workoutIntensity):0);
+  else waterTotal = waterBase + (workoutEnabled?getWorkoutWater(workoutIntensity):0);
+  let goalMult = getGoalMultiplier(currentProfile.goal||'lose');
+  dailyTargets = {
+    kcal: Math.round(tdee * goalMult),
+    protein: Math.round(p.weight*1.8),
+    fat: Math.round(p.weight*0.9),
+    carbs: Math.round((tdee*goalMult - p.weight*1.8*4 - p.weight*0.9*9)/4),
+    water: waterTotal
+  };
+  if(waterAmount>dailyTargets.water) waterAmount=dailyTargets.water;
+  publishMyProgress();
+}
 function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
-function getBarColor(p) { return (p >= 90 && p <= 110) ? '#6BCB77' : ((p >= 70 && p < 90) || (p > 110 && p <= 130)) ? '#FFD93D' : '#F85149'; }
-function renderProgressBars() { let c={kcal:0,protein:0,fat:0,carbs:0}; todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } }); let bars=[ {l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'}, {l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'}, {l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'}, {l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'}, {l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'} ]; let cont=document.getElementById('progressBars'); if(!cont.querySelector('.progress-bar')) { let h=''; bars.forEach(b=>{ let pct=(b.cur/b.tar)*100, col=getBarColor(pct); h+=`<div class="bar-group" id="bar-group-${b.cls}"><div class="flex" style="justify-content:space-between;"><span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span><span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span></div><div class="progress-bar-container"><div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:0;"></div></div></div>`; }); cont.innerHTML=h; requestAnimationFrame(()=>{ bars.forEach(b=>{ let bar=document.getElementById(`bar-${b.cls}`); if(bar) bar.style.width=Math.min((b.cur/b.tar)*100,100)+'%'; }); }); } else { bars.forEach(b=>{ let pct=Math.min((b.cur/b.tar)*100,100), col=getBarColor(pct), g=document.getElementById(`bar-group-${b.cls}`); if(g){ g.querySelector('.flex span:first-child').innerText=`${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`; let pr=g.querySelector('.bar-percent'); pr.innerText=Math.round(pct)+'%'; pr.style.color=col; document.getElementById(`bar-${b.cls}`).style.width=pct+'%'; } }); } }
-function initSwipe() { const c=document.getElementById('swipeContainer'), w=document.getElementById('swipeWrapper'); if(!c||!w) return; c.addEventListener('touchstart', hs, {passive:true}); c.addEventListener('touchmove', hm, {passive:false}); c.addEventListener('touchend', he); updateSwipePosition(0); }
-function hs(e) { const t=e.target; if(t.closest('button')||t.closest('input')||t.closest('select')||t.closest('.food-toggle')||t.closest('.food-delete')||t.closest('.activity-daily-item')||t.closest('.segmented-option')||t.closest('.tab')||t.closest('canvas')) return; swipeStartX=e.touches[0].clientX; swipeStartY=e.touches[0].clientY; isSwiping=true; swipeDirection=null; }
-function hm(e) { if(!isSwiping) return; let cx=e.touches[0].clientX, cy=e.touches[0].clientY, dx=cx-swipeStartX, dy=cy-swipeStartY; if(swipeDirection===null){ if(Math.abs(dx)>DIRECTION_LOCK_THRESHOLD||Math.abs(dy)>DIRECTION_LOCK_THRESHOLD) swipeDirection=Math.abs(dx)>Math.abs(dy)?'horizontal':'vertical'; } if(swipeDirection==='horizontal'){ e.preventDefault(); let w=document.getElementById('swipeWrapper'), cw=document.getElementById('swipeContainer').offsetWidth, co=-currentPage*cw, drag=Math.max(-cw*2, Math.min(0, co+dx)); w.style.transition='none'; w.style.transform=`translateX(${drag}px)`; swipeCurrentX=cx; } }
-function he(e) { if(!isSwiping||swipeDirection!=='horizontal'){ isSwiping=false; return; } isSwiping=false; let dx=swipeCurrentX-swipeStartX, w=document.getElementById('swipeWrapper'); w.style.transition=''; if(Math.abs(dx)>SWIPE_THRESHOLD){ if(dx>0&&currentPage>0) currentPage--; else if(dx<0&&currentPage<2) currentPage++; } updateSwipePosition(currentPage); updateTabsFromSwipe(currentPage); }
-function updateSwipePosition(p) { let w=document.getElementById('swipeWrapper'), c=document.getElementById('swipeContainer'); if(w&&c){ w.style.transform=`translateX(${-p*c.offsetWidth}px)`; } currentPage=p; }
-function updateTabsFromSwipe(p) { let tabs=['today','activity','analytics']; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tabs[p])); document.getElementById('todayPage').classList.toggle('active', p===0); document.getElementById('activityPage').classList.toggle('active', p===1); document.getElementById('analyticsPage').classList.toggle('active', p===2); if(p===2){ updateWeightStatsAndList(); renderWeightChart(); updateBMI(); updateNutritionHistoryList(); renderNutritionChart(); } if(p===1) updateFastingStatus(); }
-function switchTab(tab, ev) { if(ev) ev.stopPropagation(); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add('active'); let m={'today':0,'activity':1,'analytics':2}; currentPage=m[tab]||0; updateSwipePosition(currentPage); document.getElementById('todayPage').classList.toggle('active', currentPage===0); document.getElementById('activityPage').classList.toggle('active', currentPage===1); document.getElementById('analyticsPage').classList.toggle('active', currentPage===2); if(currentPage===2){ updateWeightStatsAndList(); renderWeightChart(); updateBMI(); updateNutritionHistoryList(); renderNutritionChart(); } if(currentPage===1) updateFastingStatus(); }
-function showPage(pageId) { document.getElementById('mainPage').style.display=(pageId==='mainPage')?'block':'none'; document.getElementById('settingsPage').style.display=pageId==='settingsPage'?'block':'none'; document.getElementById('profilePage').style.display=pageId==='profilePage'?'block':'none'; document.getElementById('productsPage').style.display='none'; if(pageId==='mainPage'){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelector('.tab:first-child')?.classList.add('active'); currentPage=0; updateSwipePosition(0); document.getElementById('todayPage').classList.add('active'); document.getElementById('activityPage').classList.remove('active'); document.getElementById('analyticsPage').classList.remove('active'); } }
-function showProductsManager() { document.getElementById('mainPage').style.display='none'; document.getElementById('settingsPage').style.display='none'; document.getElementById('productsPage').style.display='block'; renderProductsList(); }
-function renderProductsList() { let c=document.getElementById('productsList'); if(!productsDB.length){ c.innerHTML=`<div class="text-center text-small">${i18n('no_templates')}</div>`; return; } c.innerHTML = productsDB.map((p,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(1,4,9,0.5);border-radius:16px;margin-bottom:8px;"><div><div style="font-weight:500;">${p.name}</div><div style="font-size:12px;color:#9CA3AF;">${p.protein}/${p.fat}/${p.carbs} ${p.kcal}${i18n('kcal')}</div></div><div style="display:flex;gap:8px;"><button class="btn-small" onclick="editProduct(${i})">✏️</button><button class="btn-small" onclick="deleteProduct(${i})">🗑️</button></div></div>`).join(''); }
+function renderProgressBars() {
+  let c={kcal:0,protein:0,fat:0,carbs:0}; todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
+  let bars=[ {l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
+    {l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'},
+    {l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'},
+    {l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'},
+    {l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'} ];
+  let cont=document.getElementById('progressBars');
+  if(!cont.querySelector('.progress-bar')) {
+    let h=''; bars.forEach(b=>{ let pct=(b.cur/b.tar)*100, col=getBarColor(pct);
+      h+=`<div class="bar-group" id="bar-group-${b.cls}"><div class="flex" style="justify-content:space-between;"><span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span><span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span></div><div class="progress-bar-container"><div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:0;"></div></div></div>`; });
+    cont.innerHTML=h;
+    requestAnimationFrame(()=>{ bars.forEach(b=>{ let bar=document.getElementById(`bar-${b.cls}`); if(bar) bar.style.width=Math.min((b.cur/b.tar)*100,100)+'%'; }); });
+  } else {
+    bars.forEach(b=>{ let pct=Math.min((b.cur/b.tar)*100,100), col=getBarColor(pct), g=document.getElementById(`bar-group-${b.cls}`);
+      if(g){ g.querySelector('.flex span:first-child').innerText=`${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`;
+        let pr=g.querySelector('.bar-percent'); pr.innerText=Math.round(pct)+'%'; pr.style.color=col;
+        document.getElementById(`bar-${b.cls}`).style.width=pct+'%'; } });
+  }
+}
+
+function switchTab(tab, ev) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (ev && ev.currentTarget) ev.currentTarget.classList.add('active');
+  document.getElementById('todayPage').classList.remove('active');
+  document.getElementById('activityPage').classList.remove('active');
+  document.getElementById('weightPage').classList.remove('active');
+  document.getElementById('friendsPage').classList.remove('active');
+  if (tab === 'today') {
+    document.getElementById('todayPage').classList.add('active');
+  } else if (tab === 'activity') {
+    document.getElementById('activityPage').classList.add('active');
+    if (currentProfile) updateActivityUI();
+  } else if (tab === 'weight') {
+    document.getElementById('weightPage').classList.add('active');
+    updateWeightStatsAndList(); renderWeightChart(); updateBMI();
+  } else if (tab === 'friends') {
+    document.getElementById('friendsPage').classList.add('active');
+    loadFriendsPage();
+  }
+}
+
+function showPage(pageId) {
+  document.getElementById('mainPage').style.display=(pageId==='mainPage')?'block':'none';
+  document.getElementById('settingsPage').style.display=pageId==='settingsPage'?'block':'none';
+  document.getElementById('profilePage').style.display=pageId==='profilePage'?'block':'none';
+  document.getElementById('productsPage').style.display='none';
+  if(pageId==='mainPage'){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('.tab:first-child')?.classList.add('active');
+    document.getElementById('todayPage').classList.add('active');
+    document.getElementById('activityPage').classList.remove('active');
+    document.getElementById('weightPage').classList.remove('active');
+    document.getElementById('friendsPage').classList.remove('active');
+  }
+}
+
+function showProductsManager() {
+  document.getElementById('mainPage').style.display='none'; document.getElementById('settingsPage').style.display='none';
+  document.getElementById('productsPage').style.display='block'; renderProductsList();
+}
+function renderProductsList() {
+  let c=document.getElementById('productsList'); if(!productsDB.length){ c.innerHTML=`<div class="text-center text-small">${i18n('no_templates')}</div>`; return; }
+  c.innerHTML = productsDB.map((p,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:rgba(1,4,9,0.5);border-radius:16px;margin-bottom:8px;"><div><div style="font-weight:500;">${p.name}</div><div style="font-size:12px;color:#9CA3AF;">${p.protein}/${p.fat}/${p.carbs} ${p.kcal}${i18n('kcal')}</div></div><div style="display:flex;gap:8px;"><button class="btn-small" onclick="editProduct(${i})">✏️</button><button class="btn-small" onclick="deleteProduct(${i})">🗑️</button></div></div>`).join('');
+}
 function editProduct(i) { let p=productsDB[i], n=prompt(i18n('name'),p.name); if(n)p.name=n; let prot=prompt(i18n('protein'),p.protein); if(prot)p.protein=parseFloat(prot); let fat=prompt(i18n('fat'),p.fat); if(fat)p.fat=parseFloat(fat); let carbs=prompt(i18n('carbs'),p.carbs); if(carbs)p.carbs=parseFloat(carbs); let kcal=prompt(i18n('calories'),p.kcal); if(kcal)p.kcal=parseFloat(kcal); saveProductsDB(); renderProductsList(); }
 function deleteProduct(i) { if(confirm(i18n('delete_product'))){ productsDB.splice(i,1); saveProductsDB(); renderProductsList(); } }
-function exportData() { let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,nutrition:nutritionHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); }
-function importData() { let i=document.createElement('input'); i.type='file'; i.accept='.json'; i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; nutritionHistory=d.nutrition||[]; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; i.click(); }
+function exportData() { let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); }
+function importData() { let i=document.createElement('input'); i.type='file'; i.accept='.json'; i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; i.click(); }
 
-window.setLanguage=setLanguage; window.setSetupLanguage=setSetupLanguage; window.setSettingsLanguage=setSettingsLanguage;
-window.selectSetupGender=selectSetupGender; window.selectProfileGender=selectProfileGender; window.selectProfileGoal=selectProfileGoal;
-window.setWorkoutIntensity=setWorkoutIntensity; window.setFastingMode=setFastingMode; window.setDailyActivity=setDailyActivity;
-window.completeSetup=completeSetup; window.switchTab=switchTab; window.showProfile=showProfile; window.saveProfile=saveProfile;
-window.deleteAccount=deleteAccount; window.toggleCard=toggleCard; window.toggleJournal=toggleJournal;
-window.addWater=addWater; window.setManualWater=setManualWater; window.openSmartWater=openSmartWater; window.closeSmartWater=closeSmartWater;
-window.uploadPhoto=uploadPhoto; window.handlePhotoUpload=handlePhotoUpload; window.deletePhoto=deletePhoto;
-window.openSmartSearch=openSmartSearch; window.closeSmartSearch=closeSmartSearch;
-window.openAbout=openAbout; window.closeAbout=closeAbout; window.fillFromProduct=fillFromProduct; window.fillFromOFF=fillFromOFF;
-window.saveTemplate=saveTemplate; window.loadTemplate=loadTemplate; window.deleteTemplate=deleteTemplate; window.clearTodayFoods=clearTodayFoods;
-window.addFood=addFood; window.toggleFood=toggleFood; window.deleteFood=deleteFood; window.openScanner=openScanner;
-window.closeScanner=closeScanner; window.lookupBarcode=lookupBarcode; window.setWeightGoal=setWeightGoal;
-window.deleteWeightEntry=deleteWeightEntry; window.addWeightEntry=addWeightEntry;
-window.switchNutritionChart=switchNutritionChart; window.deleteNutritionEntry=deleteNutritionEntry;
-window.showPage=showPage; window.showProductsManager=showProductsManager;
-window.editProduct=editProduct; window.deleteProduct=deleteProduct;
-window.exportData=exportData; window.importData=importData; window.showBMITooltip=showBMITooltip;
+window.setLanguage=setLanguage;
+window.setSetupLanguage=setSetupLanguage;
+window.setSettingsLanguage=setSettingsLanguage;
+window.selectSetupGender=selectSetupGender;
+window.selectProfileGender=selectProfileGender;
+window.selectProfileGoal=selectProfileGoal;
+window.selectWorkoutIntensity=selectWorkoutIntensity;
+window.completeSetup=completeSetup;
+window.switchTab=switchTab;
+window.showProfile=showProfile;
+window.saveProfile=saveProfile;
+window.deleteAccount=deleteAccount;
+window.toggleCard=toggleCard;
+window.addWater=addWater;
+window.setManualWater=setManualWater;
+window.openSmartWater=openSmartWater;
+window.closeSmartWater=closeSmartWater;
+window.selectDailyActivity=selectDailyActivity;
+window.applyDailyActivity=applyDailyActivity;
+window.uploadPhoto=uploadPhoto;
+window.handlePhotoUpload=handlePhotoUpload;
+window.deletePhoto=deletePhoto;
+window.openSmartSearch=openSmartSearch;
+window.closeSmartSearch=closeSmartSearch;
+window.openAbout=openAbout;
+window.closeAbout=closeAbout;
+window.fillFromProduct=fillFromProduct;
+window.fillFromOFF=fillFromOFF;
+window.saveTemplate=saveTemplate;
+window.loadTemplate=loadTemplate;
+window.deleteTemplate=deleteTemplate;
+window.clearTodayFoods=clearTodayFoods;
+window.addFood=addFood;
+window.toggleFood=toggleFood;
+window.deleteFood=deleteFood;
+window.openScanner=openScanner;
+window.closeScanner=closeScanner;
+window.lookupBarcode=lookupBarcode;
+window.setWeightGoal=setWeightGoal;
+window.deleteWeightEntry=deleteWeightEntry;
+window.addWeightEntry=addWeightEntry;
+window.showPage=showPage;
+window.showProductsManager=showProductsManager;
+window.editProduct=editProduct;
+window.deleteProduct=deleteProduct;
+window.exportData=exportData;
+window.importData=importData;
+window.showBMITooltip=showBMITooltip;
+window.addFriend=addFriend;
+window.removeFriend=removeFriend;
+window.showFriendProgress=showFriendProgress;
+window.closeFriendProgress=closeFriendProgress;
 
 window.onload = function() {
-    let sl = localStorage.getItem('fitcat_lang')||'ru'; setLanguage(sl);
-    smartSearchEnabled = localStorage.getItem('smartSearchEnabled')==='true';
-    smartSearchResults = parseInt(localStorage.getItem('smartSearchResults')||'10');
-    smartWaterEnabled = localStorage.getItem('smartWaterEnabled')==='true';
-    loadData(); loadProductsDB(); loadTemplates(); setupAutocomplete();
-    dailyActivity = parseFloat(localStorage.getItem('dailyActivity')||'1.375');
-    workoutEnabled = localStorage.getItem('workoutEnabled')==='true';
-    workoutIntensity = localStorage.getItem('workoutIntensity')||'light';
-    fastingEnabled = localStorage.getItem('fastingEnabled')==='true';
-    fastingMode = localStorage.getItem('fastingMode')||'168';
-    fastingStartTime = localStorage.getItem('fastingStartTime')||'12:00';
-    currentSteps = parseInt(localStorage.getItem('currentSteps')||'8000');
-    currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
-    waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
-    
-    if(!currentProfile){ document.getElementById('setupPage').style.display='block'; document.getElementById('mainPage').style.display='none'; }
-    else { document.getElementById('setupPage').style.display='none'; document.getElementById('mainPage').style.display='block';
-        calculateTargets(); renderDashboard(); renderTemplates(); checkDateReset(); updateGreeting(); updateActivityUI(); updateFastingUI();
-        updateWaterHint(); updateHeaderPhoto(); updateBMI(); updateWaterDisplay(); updateWeightStatsAndList(); renderWeightChart();
-        updateNutritionHistoryList(); renderNutritionChart(); initSwipe(); }
-    updateStreak();
-    
-    function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
-    genTicks('tempTicks',50); genTicks('stepsTicks',20); genTicks('resultsTicks',45);
-    document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
-    document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
-    document.getElementById('resultsSlider')?.addEventListener('input', function(){ document.getElementById('resultsDisplay').innerText=this.value; smartSearchResults=parseInt(this.value); });
-    document.getElementById('smartWaterToggle')?.addEventListener('change', function(){ smartWaterEnabled=this.checked; document.getElementById('smartWaterToggleLabel').innerText=i18n(smartWaterEnabled?'on':'off'); document.getElementById('smartWaterSettings').style.display=smartWaterEnabled?'block':'none'; document.getElementById('waterBaseOnly').style.display=smartWaterEnabled?'none':'block'; localStorage.setItem('smartWaterEnabled',smartWaterEnabled); if(!smartWaterEnabled){ calculateTargets(); updateWaterDisplay(); renderProgressBars(); } else { applySmartWaterSettings(); } });
-    document.getElementById('smartSearchToggle')?.addEventListener('change', function(){ smartSearchEnabled=this.checked; document.getElementById('smartSearchToggleLabel').innerText=i18n(smartSearchEnabled?'on':'off'); document.getElementById('smartSearchSettings').style.display=smartSearchEnabled?'block':'none'; localStorage.setItem('smartSearchEnabled',smartSearchEnabled); });
-    document.getElementById('workoutToggle')?.addEventListener('change', function() { workoutEnabled = this.checked; document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off'); document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none'; localStorage.setItem('workoutEnabled', workoutEnabled); calculateTargets(); renderDashboard(); updateWaterHint(); if(smartWaterEnabled) updateWaterCalculation(); });
-    document.getElementById('fastingToggle')?.addEventListener('change', function() { fastingEnabled = this.checked; document.getElementById('fastingToggleLabel').innerText = i18n(fastingEnabled?'on':'off'); document.getElementById('fastingSettings').style.display = fastingEnabled?'block':'none'; localStorage.setItem('fastingEnabled', fastingEnabled); updateFastingStatus(); });
-    document.getElementById('fastingStartTime')?.addEventListener('change', function() { fastingStartTime = this.value; localStorage.setItem('fastingStartTime', fastingStartTime); updateFastingStatus(); });
-    setInterval(() => { if(fastingEnabled) updateFastingStatus(); }, 60000);
-    
-    if(localStorage.getItem('card_waterCard_collapsed')==='true') document.getElementById('waterContent')?.classList.add('collapsed');
-    if(localStorage.getItem('card_mealsCard_collapsed')==='true') document.getElementById('mealsContent')?.classList.add('collapsed');
-    if(localStorage.getItem('journal_weightHistory_collapsed')==='true') document.getElementById('weightHistoryContent')?.classList.add('collapsed');
-    if(localStorage.getItem('journal_nutritionHistory_collapsed')==='true') document.getElementById('nutritionHistoryContent')?.classList.add('collapsed');
-    
-    let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
-    updateAllI18n();
+  let sl = localStorage.getItem('fitcat_lang')||'ru';
+  setLanguage(sl);
+  smartSearchEnabled = localStorage.getItem('smartSearchEnabled')==='true';
+  smartSearchResults = parseInt(localStorage.getItem('smartSearchResults')||'10');
+  smartWaterEnabled = localStorage.getItem('smartWaterEnabled')==='true';
+  loadData(); loadProductsDB(); loadTemplates(); setupAutocomplete();
+  dailyActivity = parseFloat(localStorage.getItem('dailyActivity')||'1.375');
+  workoutEnabled = localStorage.getItem('workoutEnabled')==='true';
+  workoutIntensity = localStorage.getItem('workoutIntensity')||'light';
+  currentSteps = parseInt(localStorage.getItem('currentSteps')||'8000');
+  currentTemp = parseInt(localStorage.getItem('currentTemp')||'22');
+  waterAmount = parseInt(localStorage.getItem('waterAmount')||'0');
+
+  if(!currentProfile){
+    document.getElementById('setupPage').style.display='block';
+    document.getElementById('mainPage').style.display='none';
+  } else {
+    document.getElementById('setupPage').style.display='none';
+    document.getElementById('mainPage').style.display='block';
+    calculateTargets(); renderDashboard(); renderTemplates();
+    checkDateReset(); updateGreeting(); updateActivityUI();
+    updateWaterHint(); updateHeaderPhoto(); updateBMI();
+    updateWaterDisplay();
+  }
+  updateStreak();
+  function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
+  genTicks('tempTicks',50); genTicks('stepsTicks',20); genTicks('resultsTicks',45);
+
+  document.getElementById('tempSlider')?.addEventListener('input', updateTempDisplay);
+  document.getElementById('stepsSlider')?.addEventListener('input', updateStepsDisplay);
+  document.getElementById('resultsSlider')?.addEventListener('input', function(){
+    document.getElementById('resultsDisplay').innerText=this.value;
+    smartSearchResults=parseInt(this.value);
+  });
+
+  document.getElementById('smartWaterToggle')?.addEventListener('change', function(){
+    smartWaterEnabled=this.checked;
+    document.getElementById('smartWaterToggleLabel').innerText=i18n(smartWaterEnabled?'on':'off');
+    document.getElementById('smartWaterSettings').style.display=smartWaterEnabled?'block':'none';
+    document.getElementById('waterBaseOnly').style.display=smartWaterEnabled?'none':'block';
+    localStorage.setItem('smartWaterEnabled',smartWaterEnabled);
+    if(!smartWaterEnabled){ calculateTargets(); updateWaterDisplay(); renderProgressBars(); }
+    else { applySmartWaterSettings(); }
+  });
+  document.getElementById('smartSearchToggle')?.addEventListener('change', function(){
+    smartSearchEnabled=this.checked;
+    document.getElementById('smartSearchToggleLabel').innerText=i18n(smartSearchEnabled?'on':'off');
+    document.getElementById('smartSearchSettings').style.display=smartSearchEnabled?'block':'none';
+    localStorage.setItem('smartSearchEnabled',smartSearchEnabled);
+  });
+  document.getElementById('workoutToggle')?.addEventListener('change', function() {
+    workoutEnabled = this.checked;
+    document.getElementById('workoutToggleLabel').innerText = i18n(workoutEnabled?'on':'off');
+    document.getElementById('workoutSettings').style.display = workoutEnabled?'block':'none';
+    localStorage.setItem('workoutEnabled', workoutEnabled);
+    calculateTargets(); renderDashboard(); updateWaterHint();
+    if(smartWaterEnabled) updateWaterCalculation();
+  });
+
+  if(localStorage.getItem('card_waterCard_collapsed')==='true') document.getElementById('waterContent')?.classList.add('collapsed');
+  if(localStorage.getItem('card_mealsCard_collapsed')==='true') document.getElementById('mealsContent')?.classList.add('collapsed');
+
+  let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
+  updateAllI18n();
+  document.getElementById('myUidCode').textContent = myUid;
+  publishMyProgress();
+  window.addEventListener('online', () => { publishMyProgress(); });
 };
+
 })();
 </script>
 </body>
