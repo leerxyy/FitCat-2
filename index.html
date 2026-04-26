@@ -1387,11 +1387,22 @@ function renderProgressBars() {
               <span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span>
             </div>
             <div class="progress-bar-container">
-              <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:${pct}%;"></div>
+              <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:0%;"></div>
             </div>
           </div>`;
   });
   cont.innerHTML = h;
+
+  // Запускаем анимацию заполнения
+  bars.forEach(b => {
+    const barEl = document.getElementById(`bar-${b.cls}`);
+    if (barEl) {
+      requestAnimationFrame(() => {
+        const pct = Math.min((b.cur/b.tar)*100, 100);
+        barEl.style.width = pct + '%';
+      });
+    }
+  });
 }
 
 function switchTab(tab, ev) {
