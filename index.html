@@ -607,10 +607,21 @@ const db = firebase.database();
 // ==================== УНИКАЛЬНЫЙ ID ПОЛЬЗОВАТЕЛЯ ====================
 function getMyUid() {
   let uid = localStorage.getItem('fitcat_myUid');
-  if (!uid) {
-    uid = 'user_' + Math.random().toString(36).substring(2, 10);
-    localStorage.setItem('fitcat_myUid', uid);
+  // Если UID уже существует и состоит ровно из 11 цифр – используем его
+  if (uid && /^\d{11}$/.test(uid)) {
+    return uid;
   }
+  // Иначе генерируем новый: 8 + ГГММДД + 4 случайные цифры
+  const now = new Date();
+  const y = String(now.getFullYear()).slice(-2);
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  let rand = '';
+  for (let i = 0; i < 4; i++) {
+    rand += Math.floor(Math.random() * 10);
+  }
+  uid = '8' + y + m + d + rand;
+  localStorage.setItem('fitcat_myUid', uid);
   return uid;
 }
 const myUid = getMyUid();
