@@ -286,6 +286,14 @@ input[type=range]::-webkit-slider-thumb {
 }
 .friend-item .friend-name { font-weight: 500; flex: 1; }
 .friend-item .friend-status { font-size: 12px; color: #9CA3AF; }
+.progress-bar.bar-glow {
+  animation: glowFlash 0.8s ease-out;
+}
+@keyframes glowFlash {
+  0% { box-shadow: 0 0 12px rgba(255, 255, 255, 0.8); }
+  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+  100% { box-shadow: 0 0 0px rgba(255, 255, 255, 0); }
+}
 </style>
 </head>
 <body>
@@ -1366,41 +1374,63 @@ function calculateTargets() {
   publishMyProgress();
 }
 function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
+let prevBarWidths = {}; // запоминаем текущие проценты
+
 function renderProgressBars() {
   let c={kcal:0,protein:0,fat:0,carbs:0};
   todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
-  let bars=[
-    {l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
-    {l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'},
-    {l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'},
-    {l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'},
-    {l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'}
+  const bars=[
+    {key:'kcal', l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
+    {key:'protein', l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'},
+    {key:'fat', l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'},
+    {key:'carbs', l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'},
+    {key:'water', l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'}
   ];
-  let cont = document.getElementById('progressBars');
-  let h = '';
-  bars.forEach(b => {
-    let pct = Math.min((b.cur/b.tar)*100, 100);
-    let col = getBarColor(pct);
-    h += `<div class="bar-group" id="bar-group-${b.cls}">
-            <div class="flex" style="justify-content:space-between;">
-              <span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span>
-              <span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span>
-            </div>
-            <div class="progress-bar-container">
-              <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:0%;"></div>
-            </div>
-          </div>`;
-  });
-  cont.innerHTML = h;
 
-  // Запускаем анимацию заполнения
+  const cont = document.getElementById('progressBars');
+
+  // Если контейнер пуст – создаём HTML в первый раз
+  if (!cont.querySelector('.bar-group')) {
+    let h = '';
+    bars.forEach(b => {
+      const pct = Math.min((b.cur/b.tar)*100, 100);
+      const col = getBarColor(pct);
+      h += `<div class="bar-group" id="bar-group-${b.cls}">
+              <div class="flex" style="justify-content:space-between;">
+                <span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span>
+                <span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:${pct}%;"></div>
+              </div>
+            </div>`;
+      prevBarWidths[b.key] = pct;
+    });
+    cont.innerHTML = h;
+    return;
+  }
+
+  // Обновляем существующие элементы
   bars.forEach(b => {
+    const group = document.getElementById(`bar-group-${b.cls}`);
+    if (!group) return;
+    const newPct = Math.min((b.cur/b.tar)*100, 100);
+    const col = getBarColor(newPct);
+    group.querySelector('.flex span:first-child').innerText = `${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`;
+    const pr = group.querySelector('.bar-percent');
+    pr.innerText = Math.round(newPct) + '%';
+    pr.style.color = col;
     const barEl = document.getElementById(`bar-${b.cls}`);
     if (barEl) {
-      requestAnimationFrame(() => {
-        const pct = Math.min((b.cur/b.tar)*100, 100);
-        barEl.style.width = pct + '%';
-      });
+      const oldPct = prevBarWidths[b.key] || 0;
+      // Запускаем плавное изменение ширины (transition уже есть в CSS)
+      barEl.style.width = newPct + '%';
+      // Добавляем свечение, если значение изменилось
+      if (Math.abs(newPct - oldPct) > 0.1) {
+        barEl.classList.add('bar-glow');
+        setTimeout(() => barEl.classList.remove('bar-glow'), 800);
+      }
+      prevBarWidths[b.key] = newPct;
     }
   });
 }
