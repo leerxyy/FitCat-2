@@ -923,7 +923,13 @@ function updateAllI18n() {
   if (currentProfile) { updateGreeting(); renderDashboard(); renderTemplates(); updateWeightStatsAndList(); updateBMI(); updateActivityUI(); }
 }
 function vibrate(d = 10) { if (navigator.vibrate) navigator.vibrate(d); }
-function getBarColor(p) { return (p >= 90 && p <= 110) ? '#6BCB77' : ((p >= 70 && p < 90) || (p > 110 && p <= 130)) ? '#FFD93D' : '#F85149'; }
+function getBarColor(p) {
+  if (p > 110) return '#F85149'; // сильный перебор
+  if (p > 100) return '#FF8E53'; // умеренный перебор
+  if (p >= 90 && p <= 110) return '#6BCB77'; // норма
+  if ((p >= 70 && p < 90) || (p > 110 && p <= 130)) return '#FFD93D'; // внимание
+  return '#F85149'; // сильный недобор
+}
 function setLanguage(l) { currentLang = l; localStorage.setItem('fitcat_lang', l); updateLanguageButtons(); updateAllI18n(); }
 function setSetupLanguage(l) { setLanguage(l); }
 function setSettingsLanguage(l) { setLanguage(l); }
@@ -1374,17 +1380,25 @@ function calculateTargets() {
   publishMyProgress();
 }
 function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
-let prevBarWidths = {}; // запоминаем текущие проценты
+let prevBarWidths = {};
 
 function renderProgressBars() {
-  let c={kcal:0,protein:0,fat:0,carbs:0};
-  todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
-  const bars=[
-    {key:'kcal', l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
-    {key:'protein', l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'},
-    {key:'fat', l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'},
-    {key:'carbs', l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'},
-    {key:'water', l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'}
+  let c = { kcal: 0, protein: 0, fat: 0, carbs: 0 };
+  todayFoods.forEach(f => {
+    if (f.checked) {
+      c.kcal += f.kcal || 0;
+      c.protein += f.protein || 0;
+      c.fat += f.fat || 0;
+      c.carbs += f.carbs || 0;
+    }
+  });
+
+  const bars = [
+    { key: 'kcal', l: i18n('calories'), cur: c.kcal, tar: dailyTargets.kcal, u: i18n('kcal'), cls: 'bar-kcal' },
+    { key: 'protein', l: i18n('protein'), cur: c.protein, tar: dailyTargets.protein, u: i18n('g'), cls: 'bar-protein' },
+    { key: 'fat', l: i18n('fat'), cur: c.fat, tar: dailyTargets.fat, u: i18n('g'), cls: 'bar-fat' },
+    { key: 'carbs', l: i18n('carbs'), cur: c.carbs, tar: dailyTargets.carbs, u: i18n('g'), cls: 'bar-carbs' },
+    { key: 'water', l: i18n('water'), cur: waterAmount, tar: dailyTargets.water, u: i18n('ml'), cls: 'bar-water' }
   ];
 
   const cont = document.getElementById('progressBars');
@@ -1393,47 +1407,65 @@ function renderProgressBars() {
   if (!cont.querySelector('.bar-group')) {
     let h = '';
     bars.forEach(b => {
-      const pct = Math.min((b.cur/b.tar)*100, 100);
-      const col = getBarColor(pct);
+      const pct = b.tar > 0 ? (b.cur / b.tar) * 100 : 0;
+      const displayPct = Math.min(pct, 100);
+      const col = getBarColor(pct); // теперь передаём реальный процент, не min
+      const percentText = pct > 100 ? '≥100%' : Math.round(pct) + '%';
       h += `<div class="bar-group" id="bar-group-${b.cls}">
               <div class="flex" style="justify-content:space-between;">
                 <span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span>
-                <span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span>
+                <span class="bar-percent" style="color:${col}">${percentText}</span>
               </div>
               <div class="progress-bar-container">
-                <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:${pct}%;"></div>
+                <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:${displayPct}%;"></div>
               </div>
             </div>`;
-      prevBarWidths[b.key] = pct;
+      prevBarWidths[b.key] = displayPct;
     });
     cont.innerHTML = h;
     return;
   }
 
-  // Обновляем существующие элементы
+  // Обновление существующих элементов
   bars.forEach(b => {
     const group = document.getElementById(`bar-group-${b.cls}`);
     if (!group) return;
-    const newPct = Math.min((b.cur/b.tar)*100, 100);
-    const col = getBarColor(newPct);
+    const pct = b.tar > 0 ? (b.cur / b.tar) * 100 : 0;
+    const displayPct = Math.min(pct, 100);
+    const col = getBarColor(pct);
+    const percentText = pct > 100 ? '≥100%' : Math.round(pct) + '%';
+
     group.querySelector('.flex span:first-child').innerText = `${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`;
     const pr = group.querySelector('.bar-percent');
-    pr.innerText = Math.round(newPct) + '%';
+    pr.innerText = percentText;
     pr.style.color = col;
+
     const barEl = document.getElementById(`bar-${b.cls}`);
     if (barEl) {
       const oldPct = prevBarWidths[b.key] || 0;
-      // Запускаем плавное изменение ширины (transition уже есть в CSS)
-      barEl.style.width = newPct + '%';
-      // Добавляем свечение, если значение изменилось
-      if (Math.abs(newPct - oldPct) > 0.1) {
+      barEl.style.width = displayPct + '%';
+      // Цвет полосы меняем динамически, если есть переизбыток
+      if (pct > 110) {
+        barEl.style.background = '#F85149'; // ярко-красный при сильном переборе
+        barEl.style.boxShadow = '0 0 12px #F85149';
+      } else if (pct > 100) {
+        barEl.style.background = '#FF8E53'; // оранжевый при небольшом переборе
+        barEl.style.boxShadow = '0 0 10px #FF8E53';
+      } else {
+        barEl.style.background = ''; // вернуть стандартный градиент из CSS
+        barEl.style.boxShadow = '';
+      }
+
+      if (Math.abs(displayPct - oldPct) > 0.1) {
         barEl.classList.add('bar-glow');
         setTimeout(() => barEl.classList.remove('bar-glow'), 800);
       }
-      prevBarWidths[b.key] = newPct;
+      prevBarWidths[b.key] = displayPct;
     }
   });
 }
+
+
 
 function switchTab(tab, ev) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
