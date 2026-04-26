@@ -280,7 +280,6 @@ input[type=range]::-webkit-slider-thumb {
 .about-content li::before { content: '·'; position: absolute; left: 8px; color: #4FACFE; font-weight: bold; font-size: 18px; }
 .about-content .divider { height: 1px; background: rgba(48, 54, 61, 0.5); margin: 20px 0; }
 .workout-section { margin-top: 24px; }
-/* Стили для списка друзей */
 .friend-item {
   display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(1, 4, 9, 0.5);
   border-radius: 16px; margin-bottom: 8px; cursor: pointer;
@@ -292,7 +291,6 @@ input[type=range]::-webkit-slider-thumb {
 <body>
 <div class="app">
 
-<!-- Модальные окна -->
 <div id="scannerModal" class="scanner-container">
   <div style="padding:16px;display:flex;justify-content:space-between;background:#1A2027;"><h2 data-i18n="scanner">Сканер</h2><button class="btn-small" onclick="closeScanner()" data-i18n="close">Закрыть</button></div>
   <video id="scannerVideo" style="flex:1;width:100%;object-fit:cover;" playsinline></video>
@@ -379,7 +377,6 @@ input[type=range]::-webkit-slider-thumb {
   </div>
 </div>
 
-<!-- Модальное окно прогресса друга -->
 <div id="friendProgressModal" class="friend-progress-modal">
   <div style="display:flex; justify-content:space-between; margin-bottom:24px;">
     <h2 id="friendModalName">Прогресс друга</h2>
@@ -388,7 +385,6 @@ input[type=range]::-webkit-slider-thumb {
   <div class="card" id="friendProgressBars"></div>
 </div>
 
-<!-- Страницы приложения -->
 <div id="setupPage">
   <h1>FitCat</h1>
   <div class="card">
@@ -526,12 +522,12 @@ input[type=range]::-webkit-slider-thumb {
     </div>
   </div>
 
-  <!-- Страница "Друзья" -->
+  <!-- Страница Друзья -->
   <div id="friendsPage" class="page">
     <div class="card">
       <h2>Друзья</h2>
       <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <input type="text" id="friendUidInput" placeholder="UID друга" style="flex:2;">
+        <input type="text" id="friendUidInput" placeholder="Введите UID" style="flex:2;">
         <button class="btn-small" onclick="addFriend()">+</button>
       </div>
       <div id="friendsList"></div>
@@ -544,8 +540,11 @@ input[type=range]::-webkit-slider-thumb {
   <div class="card">
     <div class="profile-header"><button class="btn-small" onclick="showPage('mainPage')" data-i18n="back">← Назад</button><h2 data-i18n="profile">Профиль</h2><div style="width:60px;"></div></div>
     <div class="profile-photo" id="profilePhoto" onclick="uploadPhoto()"><span id="profileInitials" class="profile-initials">🐱</span></div>
-    <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+    <div style="text-align:center; margin-bottom:8px; font-size:13px; color:#9CA3AF; word-break:break-all;">
+      UID: <span id="profileUidDisplay"></span>
+    </div>
     <div style="text-align:center;margin-bottom:16px;"><button class="btn-small" onclick="deletePhoto()" data-i18n="delete_photo">Удалить фото</button></div>
+    <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
     <div class="input-group"><label data-i18n="name">Имя</label><input type="text" id="profileName"></div>
     <div class="input-group"><label data-i18n="age">Возраст</label><input type="number" id="profileAge" min="10" max="100"></div>
     <div class="input-group"><label data-i18n="gender">Пол</label>
@@ -578,11 +577,6 @@ input[type=range]::-webkit-slider-thumb {
     <button class="btn-secondary" onclick="importData()" data-i18n="import_data">Загрузить данные</button>
     <button class="btn-secondary" onclick="showProductsManager()" data-i18n="my_products">Мои продукты</button>
     <button class="btn-secondary" onclick="openAbout()" data-i18n="about">О приложении</button>
-    <div style="margin-top:12px;">
-      <span>Мой код для друзей:</span>
-      <code id="myUidCode" style="background:#1A2027; padding:4px 8px; border-radius:8px;"></code>
-      <button class="btn-small" onclick="navigator.clipboard.writeText(myUid)">Копировать</button>
-    </div>
     <h2 style="margin-top:24px;" data-i18n="language">Язык</h2>
     <div class="flex">
       <button class="btn-small lang-btn" id="settingsLangRu" onclick="setSettingsLanguage('ru')">🇷🇺</button>
@@ -604,22 +598,13 @@ input[type=range]::-webkit-slider-thumb {
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register("data:application/javascript,self.addEventListener('install',e=>{e.waitUntil(caches.open('fitcat-v1').then(c=>c.addAll(['.'],{cache:'reload'})));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!=='fitcat-v1').map(n=>caches.delete(n)))));clients.claim()});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>new Response('Offline'))))});");
-  });
-}
-
-(function(){
-'use strict';
-
-// ---------- Инициализация Firebase ----------
+// ==================== ИНИЦИАЛИЗАЦИЯ FIREBASE ====================
 firebase.initializeApp({
-  databaseURL: "https://fitcat-4a360-default-rtdb.asia-southeast1.firebasedatabase.app"
+  databaseURL: "https://fitcat-4a360-default-rtdb.asia-southeast1.firebasedatabase.app/"
 });
 const db = firebase.database();
 
-// ---------- UID пользователя ----------
+// ==================== УНИКАЛЬНЫЙ ID ПОЛЬЗОВАТЕЛЯ ====================
 function getMyUid() {
   let uid = localStorage.getItem('fitcat_myUid');
   if (!uid) {
@@ -630,7 +615,7 @@ function getMyUid() {
 }
 const myUid = getMyUid();
 
-// ---------- Публикация прогресса в Firebase ----------
+// ==================== ПУБЛИКАЦИЯ ПРОГРЕССА ====================
 function publishMyProgress() {
   if (!navigator.onLine) return;
   const data = {
@@ -648,7 +633,7 @@ function publishMyProgress() {
   });
 }
 
-// ---------- Работа с друзьями ----------
+// ==================== РАБОТА С ДРУЗЬЯМИ ====================
 function getFriends() {
   return JSON.parse(localStorage.getItem('fitcat_friends') || '[]');
 }
@@ -660,6 +645,10 @@ function addFriend() {
   const input = document.getElementById('friendUidInput');
   const newUid = input.value.trim();
   if (!newUid) return;
+  if (newUid === myUid) {
+    alert('Нельзя добавить самого себя');
+    return;
+  }
   let friends = getFriends();
   if (!friends.includes(newUid)) {
     friends.push(newUid);
@@ -722,7 +711,7 @@ function loadFriendsPage() {
       const statusEl = friendEl.querySelector('.friend-status');
       nameEl.textContent = data.name || 'Аноним';
       const isOnline = data.online;
-      statusEl.innerHTML = isOnline ? '🟢 Онлайн' : `⚫ ${timeAgo(data.lastSeen)} назад`;
+      statusEl.innerHTML = isOnline ? '🟢 Онлайн' : `⚫ ${timeAgo(data.lastSeen)}`;
     });
   });
 }
@@ -760,11 +749,12 @@ function closeFriendProgress() {
   document.getElementById('friendProgressModal').style.display = 'none';
 }
 
-// ---------- Остальной код FitCat ----------
+// ==================== ПЕРЕВОДЫ ====================
 const translations = {
   ru: {
     save: 'Сохранить', cancel: 'Отмена', close: 'Закрыть', back: '← Назад', enable: 'Включить', off: 'Выкл', on: 'Вкл',
-    total: 'ИТОГО', now_temp: 'Сейчас', steps: 'Шаги', temperature: 'Температура', base_norm: 'Базовая норма', water_norm: 'Норма воды',
+    total: 'ИТОГО', now_temp: 'Сейчас', steps: 'Шаги', temperature: 'Температура',
+    base_norm: 'Базовая норма', water_norm: 'Норма воды',
     kcal: 'ккал', g: 'г', ml: 'мл', kg: 'кг', cm: 'см',
     scanner: 'Сканер', scanner_hint: 'Наведите камеру на штрихкод', barcode_placeholder: 'Штрихкод', search: 'Найти',
     scanner_failed: 'Не удалось распознать. Введите вручную.', camera_error: 'Не удалось получить доступ к камере',
@@ -803,7 +793,8 @@ const translations = {
   },
   en: {
     save: 'Save', cancel: 'Cancel', close: 'Close', back: '← Back', enable: 'Enable', off: 'Off', on: 'On',
-    total: 'TOTAL', now_temp: 'Now', steps: 'Steps', temperature: 'Temperature', base_norm: 'Base norm', water_norm: 'Water norm',
+    total: 'TOTAL', now_temp: 'Now', steps: 'Steps', temperature: 'Temperature',
+    base_norm: 'Base norm', water_norm: 'Water norm',
     kcal: 'kcal', g: 'g', ml: 'ml', kg: 'kg', cm: 'cm',
     scanner: 'Scanner', scanner_hint: 'Point camera at barcode', barcode_placeholder: 'Barcode', search: 'Search',
     scanner_failed: 'Could not scan. Enter manually.', camera_error: 'Could not access camera',
@@ -822,7 +813,8 @@ const translations = {
     delete_product: 'Delete product?', product_not_found: 'Product not found',
     smart_search: 'Smart Search', results: 'Results',
     activity: 'Activity', sedentary: 'Sedentary', light: 'Light', moderate: 'Moderate', very_active: 'Very Active',
-    workout: 'Workout', workout_intensity: 'Workout intensity', workout_light: 'Light', workout_moderate: 'Moderate', workout_intense: 'Intense',
+    workout: 'Workout', workout_intensity: 'Workout intensity',
+    workout_light: 'Light', workout_moderate: 'Moderate', workout_intense: 'Intense',
     calories: 'Calories', protein: 'Protein', fat: 'Fat', carbs: 'Carbs', water: 'Water',
     apply_today: 'Apply Today',
     weight_log: 'Weight Log', set_goal: 'Set Goal', start_weight: 'Start', current_weight: 'Current',
@@ -831,14 +823,18 @@ const translations = {
     bmi_underweight_severe: 'Severe underweight', bmi_underweight: 'Underweight', bmi_normal: 'Normal',
     bmi_overweight: 'Overweight', bmi_obese_i: 'Obese I', bmi_obese_ii: 'Obese II', bmi_obese_iii: 'Obese III',
     profile: 'Profile', goal: 'Goal', lose: 'Lose', maintain: 'Maintain', gain: 'Gain',
-    delete_photo: 'Delete Photo', delete_account: 'Delete Account', confirm_delete: 'Delete all data? This cannot be undone.',
-    settings: 'Settings', export_data: 'Export Data', import_data: 'Import Data', my_products: 'My Products', about: 'About',
+    delete_photo: 'Delete Photo', delete_account: 'Delete Account',
+    confirm_delete: 'Delete all data? This cannot be undone.',
+    settings: 'Settings', export_data: 'Export Data', import_data: 'Import Data', my_products: 'My Products',
+    about: 'About',
     morning: 'Good morning', day: 'Good afternoon', evening: 'Good evening', night: 'Good night',
-    no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight', photo_too_large: 'Photo too large. Maximum 3 MB.'
+    no_dishes: 'No dishes', enter_name: 'Enter name', enter_weight: 'Enter weight',
+    photo_too_large: 'Photo too large. Maximum 3 MB.'
   },
   cn: {
     save: '保存', cancel: '取消', close: '关闭', back: '← 返回', enable: '启用', off: '关', on: '开',
-    total: '总计', now_temp: '当前', steps: '步数', temperature: '温度', base_norm: '基础量', water_norm: '饮水量',
+    total: '总计', now_temp: '当前', steps: '步数', temperature: '温度',
+    base_norm: '基础量', water_norm: '饮水量',
     kcal: '千卡', g: '克', ml: '毫升', kg: '公斤', cm: '厘米',
     scanner: '扫描器', scanner_hint: '将相机对准条码', barcode_placeholder: '条码', search: '搜索',
     scanner_failed: '无法扫描，请手动输入', camera_error: '无法访问相机',
@@ -857,7 +853,8 @@ const translations = {
     delete_product: '删除产品？', product_not_found: '未找到商品',
     smart_search: '智能搜索', results: '结果数',
     activity: '活动', sedentary: '久坐', light: '轻度', moderate: '中度', very_active: '非常活跃',
-    workout: '训练', workout_intensity: '训练强度', workout_light: '轻度', workout_moderate: '中度', workout_intense: '高强度',
+    workout: '训练', workout_intensity: '训练强度',
+    workout_light: '轻度', workout_moderate: '中度', workout_intense: '高强度',
     calories: '卡路里', protein: '蛋白质', fat: '脂肪', carbs: '碳水', water: '水',
     apply_today: '今日应用',
     weight_log: '体重记录', set_goal: '设定目标', start_weight: '起始', current_weight: '当前',
@@ -866,10 +863,13 @@ const translations = {
     bmi_underweight_severe: '严重偏瘦', bmi_underweight: '偏瘦', bmi_normal: '正常',
     bmi_overweight: '超重', bmi_obese_i: '肥胖I度', bmi_obese_ii: '肥胖II度', bmi_obese_iii: '肥胖III度',
     profile: '个人资料', goal: '目标', lose: '减重', maintain: '保持', gain: '增重',
-    delete_photo: '删除照片', delete_account: '删除账户', confirm_delete: '确定删除所有数据？此操作无法撤销。',
-    settings: '设置', export_data: '导出数据', import_data: '导入数据', my_products: '我的产品', about: '关于',
+    delete_photo: '删除照片', delete_account: '删除账户',
+    confirm_delete: '确定删除所有数据？此操作无法撤销。',
+    settings: '设置', export_data: '导出数据', import_data: '导入数据', my_products: '我的产品',
+    about: '关于',
     morning: '早上好', day: '下午好', evening: '晚上好', night: '晚安',
-    no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量', photo_too_large: '照片太大。最大 3 MB。'
+    no_dishes: '没有菜肴', enter_name: '请输入名称', enter_weight: '请输入重量',
+    photo_too_large: '照片太大。最大 3 MB。'
   }
 };
 
@@ -1082,6 +1082,7 @@ function showProfile() {
   document.getElementById('profileWeight').value=currentProfile.weight||'';
   let s=localStorage.getItem('profilePhoto');
   document.getElementById('profilePhoto').innerHTML = s?`<img src="${s}" alt="Profile">`:`<span class="profile-initials">${getInitials(currentProfile.name)}</span>`;
+  document.getElementById('profileUidDisplay').textContent = myUid;
   showPage('profilePage');
 }
 function saveProfile() {
@@ -1355,24 +1356,31 @@ function calculateTargets() {
 }
 function renderDashboard() { renderProgressBars(); renderFoodList(); updateWaterDisplay(); updateWaterHint(); }
 function renderProgressBars() {
-  let c={kcal:0,protein:0,fat:0,carbs:0}; todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
-  let bars=[ {l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
+  let c={kcal:0,protein:0,fat:0,carbs:0};
+  todayFoods.forEach(f=>{ if(f.checked){ c.kcal+=f.kcal||0; c.protein+=f.protein||0; c.fat+=f.fat||0; c.carbs+=f.carbs||0; } });
+  let bars=[
+    {l:i18n('calories'), cur:c.kcal, tar:dailyTargets.kcal, u:i18n('kcal'), cls:'bar-kcal'},
     {l:i18n('protein'), cur:c.protein, tar:dailyTargets.protein, u:i18n('g'), cls:'bar-protein'},
     {l:i18n('fat'), cur:c.fat, tar:dailyTargets.fat, u:i18n('g'), cls:'bar-fat'},
     {l:i18n('carbs'), cur:c.carbs, tar:dailyTargets.carbs, u:i18n('g'), cls:'bar-carbs'},
-    {l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'} ];
-  let cont=document.getElementById('progressBars');
-  if(!cont.querySelector('.progress-bar')) {
-    let h=''; bars.forEach(b=>{ let pct=(b.cur/b.tar)*100, col=getBarColor(pct);
-      h+=`<div class="bar-group" id="bar-group-${b.cls}"><div class="flex" style="justify-content:space-between;"><span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span><span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span></div><div class="progress-bar-container"><div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:0;"></div></div></div>`; });
-    cont.innerHTML=h;
-    requestAnimationFrame(()=>{ bars.forEach(b=>{ let bar=document.getElementById(`bar-${b.cls}`); if(bar) bar.style.width=Math.min((b.cur/b.tar)*100,100)+'%'; }); });
-  } else {
-    bars.forEach(b=>{ let pct=Math.min((b.cur/b.tar)*100,100), col=getBarColor(pct), g=document.getElementById(`bar-group-${b.cls}`);
-      if(g){ g.querySelector('.flex span:first-child').innerText=`${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}`;
-        let pr=g.querySelector('.bar-percent'); pr.innerText=Math.round(pct)+'%'; pr.style.color=col;
-        document.getElementById(`bar-${b.cls}`).style.width=pct+'%'; } });
-  }
+    {l:i18n('water'), cur:waterAmount, tar:dailyTargets.water, u:i18n('ml'), cls:'bar-water'}
+  ];
+  let cont = document.getElementById('progressBars');
+  let h = '';
+  bars.forEach(b => {
+    let pct = Math.min((b.cur/b.tar)*100, 100);
+    let col = getBarColor(pct);
+    h += `<div class="bar-group" id="bar-group-${b.cls}">
+            <div class="flex" style="justify-content:space-between;">
+              <span>${b.l} ${Math.round(b.cur)}/${b.tar} ${b.u}</span>
+              <span class="bar-percent" style="color:${col}">${Math.round(pct)}%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar ${b.cls}" id="bar-${b.cls}" style="width:${pct}%;"></div>
+            </div>
+          </div>`;
+  });
+  cont.innerHTML = h;
 }
 
 function switchTab(tab, ev) {
@@ -1382,18 +1390,10 @@ function switchTab(tab, ev) {
   document.getElementById('activityPage').classList.remove('active');
   document.getElementById('weightPage').classList.remove('active');
   document.getElementById('friendsPage').classList.remove('active');
-  if (tab === 'today') {
-    document.getElementById('todayPage').classList.add('active');
-  } else if (tab === 'activity') {
-    document.getElementById('activityPage').classList.add('active');
-    if (currentProfile) updateActivityUI();
-  } else if (tab === 'weight') {
-    document.getElementById('weightPage').classList.add('active');
-    updateWeightStatsAndList(); renderWeightChart(); updateBMI();
-  } else if (tab === 'friends') {
-    document.getElementById('friendsPage').classList.add('active');
-    loadFriendsPage();
-  }
+  if (tab === 'today') document.getElementById('todayPage').classList.add('active');
+  else if (tab === 'activity') { document.getElementById('activityPage').classList.add('active'); if (currentProfile) updateActivityUI(); }
+  else if (tab === 'weight') { document.getElementById('weightPage').classList.add('active'); updateWeightStatsAndList(); renderWeightChart(); updateBMI(); }
+  else if (tab === 'friends') { document.getElementById('friendsPage').classList.add('active'); loadFriendsPage(); }
 }
 
 function showPage(pageId) {
@@ -1424,6 +1424,7 @@ function deleteProduct(i) { if(confirm(i18n('delete_product'))){ productsDB.spli
 function exportData() { let data={profile:currentProfile,foods:todayFoods,weight:weightHistory,products:productsDB,templates:mealTemplates}, b=new Blob([JSON.stringify(data)],{type:'application/json'}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fitcat_backup.json'; a.click(); }
 function importData() { let i=document.createElement('input'); i.type='file'; i.accept='.json'; i.onchange=e=>{ let f=e.target.files[0], r=new FileReader(); r.onload=ev=>{ let d=JSON.parse(ev.target.result); currentProfile=d.profile; todayFoods=d.foods; weightHistory=d.weight; productsDB=d.products||[]; mealTemplates=d.templates||[]; saveAllData(); saveProductsDB(); saveTemplates(); location.reload(); }; r.readAsText(f); }; i.click(); }
 
+// Глобальные переменные
 window.setLanguage=setLanguage;
 window.setSetupLanguage=setSetupLanguage;
 window.setSettingsLanguage=setSettingsLanguage;
@@ -1501,6 +1502,7 @@ window.onload = function() {
     checkDateReset(); updateGreeting(); updateActivityUI();
     updateWaterHint(); updateHeaderPhoto(); updateBMI();
     updateWaterDisplay();
+    document.getElementById('profileUidDisplay') && (document.getElementById('profileUidDisplay').textContent = myUid);
   }
   updateStreak();
   function genTicks(id,c){ let el=document.getElementById(id); if(el){ el.innerHTML=''; for(let i=0;i<=c;i++) el.innerHTML+='<span class="tick"></span>'; } }
@@ -1542,12 +1544,9 @@ window.onload = function() {
 
   let d=document.getElementById('weightDate'); if(d) d.value = new Date().toISOString().split('T')[0];
   updateAllI18n();
-  document.getElementById('myUidCode').textContent = myUid;
   publishMyProgress();
   window.addEventListener('online', () => { publishMyProgress(); });
 };
-
-})();
 </script>
 </body>
 </html>
