@@ -270,11 +270,45 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
 .nutrition-switch .btn-small { flex: 1; }
 
 /* Стили для тренировок */
-.workout-day-card { cursor: pointer; }
-.workout-exercise-item { transition: background 0.2s; }
-.workout-exercise-item:hover { background: rgba(79,172,254,0.1); }
-.workout-exercise-item .food-toggle { width: 24px; height: 24px; }
-.beta-section { margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(48, 54, 61, 0.5); }
+.workout-day-card { cursor: default; }
+.workout-day-header { cursor: pointer; padding: 8px 0; }
+.workout-exercise-item { 
+  display: flex; align-items: center; gap: 8px; padding: 8px 0; 
+  border-bottom: 1px solid rgba(48,54,61,0.2); 
+}
+.workout-exercise-item .exercise-name { flex: 1; font-size: 14px; font-weight: 500; }
+.workout-exercise-item .exercise-details { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
+.workout-set-dots { display: flex; gap: 6px; margin-left: 8px; }
+.workout-set-dot {
+  width: 28px; height: 28px; border-radius: 50%; 
+  border: 2px solid #4FACFE; background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: #9CA3AF;
+  transition: all 0.2s ease;
+}
+.workout-set-dot.completed { 
+  background: #4FACFE; border-color: #4FACFE; color: #0D1117; 
+  box-shadow: 0 0 8px rgba(79,172,254,0.5);
+}
+.workout-exercise-progress { 
+  height: 4px; background: rgba(33,38,45,0.6); border-radius: 4px; 
+  margin-top: 6px; overflow: hidden; 
+}
+.workout-exercise-progress-bar { 
+  height: 100%; border-radius: 4px; transition: width 0.4s ease; 
+  background: linear-gradient(90deg, #4FACFE, #00F2FE); 
+}
+.workout-day-progress { 
+  height: 6px; background: rgba(33,38,45,0.6); border-radius: 6px; 
+  margin: 12px 0; overflow: hidden; 
+}
+.workout-day-progress-bar { 
+  height: 100%; border-radius: 6px; transition: width 0.5s ease; 
+  background: linear-gradient(90deg, #4FACFE, #A855F7); 
+}
+.workout-actions { 
+  display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; 
+}
 </style>
 </head>
 <body>
@@ -329,19 +363,15 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px;
   <div class="swipe-container" id="swipeContainer">
     <div class="swipe-wrapper" id="swipeWrapper">
       <!-- 0. Тренировки -->
-      <div class="swipe-page" data-page="0"><div id="workoutPage" class="page active">
-        <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <h2 style="margin:0;">🏋️ Тренировки</h2>
-            <div style="display:flex; gap:8px;">
-              <button class="btn-small" onclick="importWorkoutExcel()">📥 Импорт Excel</button>
-              <button class="btn-small" onclick="exportWorkoutExcel()">📤 Экспорт</button>
-              <button class="btn-small" onclick="clearWorkoutPlan()">🗑️</button>
-            </div>
-          </div>
-          <div id="weeklyWorkoutPlan"></div>
-        </div>
-      </div></div>
+ <!-- 0. Тренировки -->
+<div class="swipe-page" data-page="0"><div id="workoutPage" class="page active">
+  <div class="card">
+    <div style="margin-bottom:16px;">
+      <h2 style="margin:0;">🏋️ Тренировки</h2>
+    </div>
+    <div id="weeklyWorkoutPlan"></div>
+  </div>
+</div></div>
 
       <!-- 1. Сегодня -->
       <div class="swipe-page" data-page="1"><div id="todayPage" class="page">
@@ -684,7 +714,8 @@ let smartSearchResults = 10;
 let smartWaterEnabled = false;
 
 // ==================== ТРЕНИРОВКИ ====================
-let workoutPlan = { days: [[],[],[],[],[],[],[]] }; // ПН-ВС
+let workoutPlan = { days: [[],[],[],[],[],[],[]] };
+let expandedDays = {}; // отслеживаем развёрнутые дни
 
 function loadWorkoutPlan() {
   const saved = localStorage.getItem('workoutPlan');
@@ -702,56 +733,124 @@ function renderWorkoutPlan() {
   let html = '';
   
   workoutPlan.days.forEach((exercises, idx) => {
-    const completed = exercises.filter(e => e.done).length;
-    const total = exercises.length;
-    const percent = total ? (completed / total) * 100 : 0;
+    const totalSets = exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
+    const completedSets = exercises.reduce((sum, ex) => sum + (ex.completedSets || 0), 0);
+    const totalExercises = exercises.length;
+    const completedExercises = exercises.filter(e => (e.completedSets || 0) >= (e.sets || 0)).length;
+    const dayPercent = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+    const isExpanded = expandedDays[idx] || false;
     
     html += `
-      <div class="card workout-day-card" style="margin-bottom:12px; padding:14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleWorkoutDay(${idx})">
-          <strong style="font-size:16px;">${dayNames[idx]}</strong>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:14px; color:#9CA3AF;">${total ? completed+'/'+total : 'отдых'}</span>
-            ${total ? '<span style="font-size:12px; color:#4FACFE;">▼</span>' : '<button class="btn-small" onclick="event.stopPropagation(); addExercisePrompt('+idx+')" style="padding:4px 10px;">+</button>'}
+      <div style="background:rgba(1,4,9,0.4); border:1px solid #30363D; border-radius:16px; padding:14px; margin-bottom:10px;">
+        <div class="workout-day-header" onclick="toggleWorkoutDay(${idx})" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="font-size:15px;">${dayNames[idx]}</strong>
+            ${totalExercises > 0 ? `<div style="font-size:12px; color:#9CA3AF; margin-top:2px;">${completedExercises}/${totalExercises} упр. · ${completedSets}/${totalSets} подх.</div>` : '<div style="font-size:12px; color:#9CA3AF;">Нет данных</div>'}
           </div>
+          <span style="font-size:12px; color:#4FACFE;">${isExpanded ? '▲' : '▼'}</span>
         </div>
-        <div id="workout-day-${idx}" style="display:none; margin-top:12px;">
-          ${total ? `
-            <div class="progress-bar-container" style="height:6px; margin:8px 0;">
-              <div class="progress-bar" style="width:${percent}%; background:#4FACFE; border-radius:10px; transition:width 0.3s;"></div>
-            </div>
-            <div style="margin-bottom:8px; font-size:13px; color:#9CA3AF;">${Math.round(percent)}% выполнено</div>
-            ${exercises.map((ex, i) => `
-              <div class="workout-exercise-item" style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(48,54,61,0.3);">
-                <div class="food-toggle ${ex.done?'checked':''}" onclick="event.stopPropagation(); toggleExercise(${idx}, ${i})" style="width:24px;height:24px;"></div>
+        
+        ${totalSets > 0 ? `
+          <div class="workout-day-progress">
+            <div class="workout-day-progress-bar" style="width:${dayPercent}%;"></div>
+          </div>
+        ` : ''}
+        
+        <div id="workout-day-${idx}" style="display:${isExpanded ? 'block' : 'none'};">
+          ${exercises.map((ex, i) => {
+            const exPercent = ex.sets > 0 ? Math.round(((ex.completedSets || 0) / ex.sets) * 100) : 0;
+            return `
+              <div class="workout-exercise-item">
                 <div style="flex:1;">
-                  <div style="font-weight:500; font-size:14px;">${ex.name || 'Упражнение'}</div>
-                  <div style="font-size:12px; color:#9CA3AF;">${ex.sets} подхода × ${ex.reps} ${ex.weight ? '· '+ex.weight : ''}</div>
+                  <div class="exercise-name">${ex.name || 'Упражнение'}</div>
+                  <div class="exercise-details">${ex.sets} подх. × ${ex.reps} ${ex.weight ? '· ' + ex.weight : ''}</div>
+                  <div class="workout-exercise-progress">
+                    <div class="workout-exercise-progress-bar" style="width:${exPercent}%;"></div>
+                  </div>
                 </div>
-                <button class="btn-small" onclick="event.stopPropagation(); editExercise(${idx}, ${i})" style="padding:4px 8px;">✏️</button>
-                <button class="btn-small" onclick="event.stopPropagation(); deleteExercise(${idx}, ${i})" style="padding:4px 8px; color:#F85149;">✕</button>
+                <div class="workout-set-dots">
+                  ${Array.from({length: ex.sets}, (_, s) => `
+                    <div class="workout-set-dot ${(ex.completedSets || 0) > s ? 'completed' : ''}" 
+                         onclick="event.stopPropagation(); toggleSet(${idx}, ${i}, ${s})">
+                      ${s + 1}
+                    </div>
+                  `).join('')}
+                </div>
+                <button class="btn-small" onclick="event.stopPropagation(); editExercise(${idx}, ${i})" style="padding:4px 8px; font-size:12px;">✏️</button>
+                <button class="btn-small" onclick="event.stopPropagation(); deleteExercise(${idx}, ${i})" style="padding:4px 8px; font-size:12px; color:#F85149;">✕</button>
               </div>
-            `).join('')}
-            <button class="btn-small" onclick="addExercisePrompt(${idx})" style="margin-top:12px; width:100%;">+ Добавить упражнение</button>
-          ` : '<div style="color:#9CA3AF; text-align:center; padding:16px;">День отдыха</div>'}
+            `;
+          }).join('')}
+          <button class="btn-small" onclick="addExercisePrompt(${idx})" style="margin-top:12px; width:100%;">+ Упражнение</button>
         </div>
+        
+        ${totalExercises === 0 ? `
+          <div id="workout-day-${idx}" style="display:${isExpanded ? 'block' : 'none'}; text-align:center; padding:12px 0;">
+            <div style="color:#9CA3AF; margin-bottom:12px;">День отдыха</div>
+            <button class="btn-small" onclick="addExercisePrompt(${idx})">+ Добавить</button>
+          </div>
+        ` : ''}
       </div>`;
   });
   
   container.innerHTML = html;
+  
+  // Кнопки действий внизу
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'workout-actions';
+  actionsDiv.innerHTML = `
+    <button class="btn-small" onclick="importWorkoutExcel()" style="flex:1;">📥 Импорт</button>
+    <button class="btn-small" onclick="exportWorkoutExcel()" style="flex:1;">📤 Экспорт</button>
+    <button class="btn-small" onclick="clearWorkoutPlan()" style="flex:1;">🗑️ Сброс</button>
+  `;
+  container.appendChild(actionsDiv);
 }
 
 function toggleWorkoutDay(idx) {
+  expandedDays[idx] = !expandedDays[idx];
+  localStorage.setItem('expandedWorkoutDays', JSON.stringify(expandedDays));
   const el = document.getElementById('workout-day-' + idx);
   if (el) {
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    el.style.display = expandedDays[idx] ? 'block' : 'none';
   }
+  // Перерендерим только этот день для обновления стрелки
+  renderWorkoutPlan();
+  // Восстановим состояние развернутых дней
+  Object.keys(expandedDays).forEach(dayIdx => {
+    if (expandedDays[dayIdx]) {
+      const dayEl = document.getElementById('workout-day-' + dayIdx);
+      if (dayEl) dayEl.style.display = 'block';
+    }
+  });
 }
 
-function toggleExercise(dayIdx, exIdx) {
-  workoutPlan.days[dayIdx][exIdx].done = !workoutPlan.days[dayIdx][exIdx].done;
+function toggleSet(dayIdx, exIdx, setIdx) {
+  const ex = workoutPlan.days[dayIdx][exIdx];
+  if (!ex) return;
+  
+  // Если кликнули на уже выполненный подход и это последний выполненный - отменяем
+  if (ex.completedSets === setIdx + 1) {
+    ex.completedSets = setIdx;
+  } 
+  // Если кликнули на следующий невыполненный - выполняем
+  else if (ex.completedSets === setIdx) {
+    ex.completedSets = setIdx + 1;
+  }
+  // В остальных случаях - устанавливаем на этот подход
+  else {
+    ex.completedSets = setIdx + 1;
+  }
+  
   saveWorkoutPlan();
   renderWorkoutPlan();
+  // Восстановим развернутые дни
+  Object.keys(expandedDays).forEach(dayIdx => {
+    if (expandedDays[dayIdx]) {
+      const dayEl = document.getElementById('workout-day-' + dayIdx);
+      if (dayEl) dayEl.style.display = 'block';
+    }
+  });
+  vibrate();
 }
 
 function addExercisePrompt(dayIdx) {
@@ -766,11 +865,14 @@ function addExercisePrompt(dayIdx) {
     sets: sets,
     reps: reps,
     weight: weight,
-    done: false
+    completedSets: 0
   });
   
+  expandedDays[dayIdx] = true;
+  localStorage.setItem('expandedWorkoutDays', JSON.stringify(expandedDays));
   saveWorkoutPlan();
   renderWorkoutPlan();
+  vibrate();
 }
 
 function editExercise(dayIdx, exIdx) {
@@ -786,7 +888,8 @@ function editExercise(dayIdx, exIdx) {
     name: name.trim(),
     sets: sets,
     reps: reps,
-    weight: weight
+    weight: weight,
+    completedSets: Math.min(ex.completedSets || 0, sets)
   };
   
   saveWorkoutPlan();
@@ -804,6 +907,8 @@ function deleteExercise(dayIdx, exIdx) {
 function clearWorkoutPlan() {
   if (confirm('Удалить ВЕСЬ план тренировок? Это нельзя отменить.')) {
     workoutPlan = { days: [[],[],[],[],[],[],[]] };
+    expandedDays = {};
+    localStorage.removeItem('expandedWorkoutDays');
     saveWorkoutPlan();
     renderWorkoutPlan();
   }
@@ -826,25 +931,21 @@ function importWorkoutExcel() {
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
         
-        // Ожидаемый формат: строка заголовков [День, Название, Подходы, Повторения, Вес]
-        // День: ПН, ВТ, СР, ЧТ, ПТ, СБ, ВС или 1-7
-        const dayMap = { 'пн': 0, 'вт': 1, 'ср': 2, 'чт': 3, 'пт': 4, 'сб': 5, 'вс': 6, '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6 };
+        const dayMap = { 'пн':0,'вт':1,'ср':2,'чт':3,'пт':4,'сб':5,'вс':6,'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6 };
         const newPlan = { days: [[],[],[],[],[],[],[]] };
         
         jsonData.forEach((row, idx) => {
-          if (idx === 0) return; // пропускаем заголовок
-          if (!row || row.length < 2) return;
-          
+          if (idx === 0 || !row || row.length < 2) return;
           const dayKey = String(row[0] || '').toLowerCase().trim();
           const dayIdx = dayMap[dayKey];
-          if (dayIdx === undefined || dayIdx === null) return;
+          if (dayIdx === undefined) return;
           
           newPlan.days[dayIdx].push({
             name: String(row[1] || 'Упражнение').trim(),
             sets: parseInt(row[2]) || 3,
             reps: String(row[3] || '8-10').trim(),
             weight: String(row[4] || '').trim(),
-            done: false
+            completedSets: 0
           });
         });
         
@@ -866,18 +967,11 @@ function importWorkoutExcel() {
 // Экспорт в Excel
 function exportWorkoutExcel() {
   const dayNames = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
-  const data = [['День', 'Упражнение', 'Подходы', 'Повторения', 'Вес', 'Выполнено']];
+  const data = [['День', 'Упражнение', 'Подходы', 'Повторения', 'Вес', 'Выполнено подх.']];
   
   workoutPlan.days.forEach((exercises, idx) => {
     exercises.forEach(ex => {
-      data.push([
-        dayNames[idx],
-        ex.name,
-        ex.sets,
-        ex.reps,
-        ex.weight,
-        ex.done ? 'Да' : 'Нет'
-      ]);
+      data.push([dayNames[idx], ex.name, ex.sets, ex.reps, ex.weight, ex.completedSets || 0]);
     });
   });
   
