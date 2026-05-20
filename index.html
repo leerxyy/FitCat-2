@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Реалистичный позвоночник 3D</title>
+  <title>Голографический позвоночник</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #0a0a14; font-family: system-ui, sans-serif; }
+    body { margin: 0; overflow: hidden; background: #000000; font-family: system-ui, sans-serif; }
     #info {
-      position: absolute; bottom: 16px; left: 16px; color: rgba(255,255,255,0.8);
-      background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 16px;
-      border-radius: 20px; font-size: 13px; pointer-events: none;
+      position: absolute; bottom: 16px; left: 16px; color: rgba(100,180,255,0.9);
+      background: rgba(0,20,40,0.5); backdrop-filter: blur(8px); padding: 8px 16px;
+      border-radius: 20px; font-size: 13px; pointer-events: none; border: 1px solid rgba(80,160,255,0.3);
     }
   </style>
 </head>
@@ -29,23 +29,20 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // ---------- СЦЕНА ----------
+    // ---------- СЦЕНА С ЧЁРНЫМ ФОНОМ ----------
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0d0d1a);
-    scene.fog = new THREE.Fog(0x0d0d1a, 6, 20);
+    scene.background = new THREE.Color(0x000000);
 
     const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 50);
     camera.position.set(4.5, 3, 7);
     camera.lookAt(0, 2.3, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.enabled = false; // голограммам тени не нужны
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMapping = THREE.NoToneMapping;
     document.body.appendChild(renderer.domElement);
 
     // Управление
@@ -59,7 +56,7 @@
     controls.maxDistance = 14;
     controls.maxPolarAngle = Math.PI;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.3;
+    controls.autoRotateSpeed = 0.4;
     controls.update();
 
     controls.addEventListener('start', () => (controls.autoRotate = false));
@@ -68,198 +65,122 @@
       window.rotTimeout = setTimeout(() => (controls.autoRotate = true), 2500);
     });
 
-    // ---------- ОКРУЖЕНИЕ ----------
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envGeom = new THREE.SphereGeometry(10, 32, 32);
-    const envMat = new THREE.ShaderMaterial({
-      side: THREE.BackSide,
-      vertexShader: `varying vec3 vPos; void main() { vPos = (modelMatrix * vec4(position, 1.0)).xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-      fragmentShader: `varying vec3 vPos; void main() { float y = normalize(vPos).y; gl_FragColor = vec4(mix(vec3(0.01,0.01,0.04), vec3(0.5,0.6,0.85), smoothstep(-0.1,0.5,y)), 1.0); }`
-    });
-    const envScene = new THREE.Scene();
-    envScene.add(new THREE.Mesh(envGeom, envMat));
-    const envMap = pmremGenerator.fromScene(envScene, 0.04).texture;
-    scene.environment = envMap;
-
-    // ---------- ОСВЕЩЕНИЕ ----------
-    scene.add(new THREE.AmbientLight(0x303050));
-
-    const key = new THREE.DirectionalLight(0xfff5e8, 1.5);
-    key.position.set(5, 9, 7);
-    key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
-    key.shadow.camera.near = 0.5;
-    key.shadow.camera.far = 30;
-    key.shadow.camera.left = -8;
-    key.shadow.camera.right = 8;
-    key.shadow.camera.top = 8;
-    key.shadow.camera.bottom = -8;
-    key.shadow.bias = -0.0001;
-    scene.add(key);
-
-    const fill = new THREE.DirectionalLight(0xccddff, 0.6);
-    fill.position.set(-4, 2, -2);
-    scene.add(fill);
-
-    const rim = new THREE.DirectionalLight(0xffccaa, 0.5);
-    rim.position.set(-2, 5, -5);
-    scene.add(rim);
-
-    // ---------- ТЕКСТУРА КОСТИ ----------
-    function createBoneTexture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d');
-
-      // Базовый цвет слоновой кости
-      ctx.fillStyle = '#e8dcc8';
-      ctx.fillRect(0, 0, 512, 512);
-
-      // Шум и поры
-      const imgData = ctx.getImageData(0, 0, 512, 512);
-      for (let i = 0; i < imgData.data.length; i += 4) {
-        const x = (i / 4) % 512;
-        const y = Math.floor(i / 4 / 512);
-        const n1 = (Math.sin(x * 0.2 + y * 0.18) * 43758.5453) % 1;
-        const n2 = (Math.sin(x * 0.35 + y * 0.28) * 25421.631) % 1;
-        const n3 = (Math.sin(x * 0.5 + y * 0.45) * 19283.471) % 1;
-        const noise = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
-        const variation = (noise - 0.5) * 30;
-        imgData.data[i] = Math.min(255, Math.max(210, imgData.data[i] + variation));
-        imgData.data[i + 1] = Math.min(255, Math.max(185, imgData.data[i + 1] + variation * 0.9));
-        imgData.data[i + 2] = Math.min(255, Math.max(160, imgData.data[i + 2] + variation * 0.8));
-      }
-      ctx.putImageData(imgData, 0, 0);
-
-      // Лёгкие линии роста
-      ctx.strokeStyle = 'rgba(180,160,130,0.06)';
-      ctx.lineWidth = 1;
-      for (let y = 0; y < 512; y += 8 + Math.floor(Math.random() * 6)) {
-        ctx.beginPath();
-        ctx.moveTo(0, y + Math.sin(y * 0.05) * 3);
-        for (let x = 0; x < 512; x += 8) {
-          ctx.lineTo(x, y + Math.sin(y * 0.05 + x * 0.02) * 4);
-        }
-        ctx.stroke();
-      }
-
-      const tex = new THREE.CanvasTexture(canvas);
-      tex.wrapS = THREE.RepeatWrapping;
-      tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(2, 2);
-      return tex;
-    }
-
-    const boneTex = createBoneTexture();
-
-    // Материал кости (классический PBR, без странных шейдеров)
-    const boneMaterial = new THREE.MeshStandardMaterial({
-      map: boneTex,
-      roughness: 0.5,
-      metalness: 0.03,
-      color: new THREE.Color(1, 0.96, 0.88),
-      envMap: envMap,
-      envMapIntensity: 0.6,
+    // ---------- ГОЛОГРАФИЧЕСКИЙ МАТЕРИАЛ (светящийся голубой) ----------
+    const hologramMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.2,
+      metalness: 0.1,
+      color: new THREE.Color(0x00aaff),
+      emissive: new THREE.Color(0x0055cc),
+      emissiveIntensity: 1.5,
+      transparent: true,
+      opacity: 0.85,
     });
 
-    // Материал дисков
-    const discMaterial = new THREE.MeshStandardMaterial({
-      roughness: 0.35,
-      metalness: 0.05,
-      color: new THREE.Color(0xd4c5a8),
-      envMap: envMap,
-      envMapIntensity: 0.4,
+    // Материал для дисков (чуть ярче)
+    const discHoloMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.15,
+      metalness: 0.15,
+      color: new THREE.Color(0x44ccff),
+      emissive: new THREE.Color(0x0088ee),
+      emissiveIntensity: 1.8,
       transparent: true,
       opacity: 0.9,
     });
 
-    // Материал нервов
-    const nerveMaterial = new THREE.MeshStandardMaterial({
-      roughness: 0.25,
+    // Материал нервов (более яркий)
+    const nerveHoloMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.1,
       metalness: 0.0,
-      color: new THREE.Color(0xf5e6a3),
-      emissive: new THREE.Color(0x1a1000),
-      emissiveIntensity: 0.2,
-      envMap: envMap,
-      envMapIntensity: 0.3,
+      color: new THREE.Color(0x88ddff),
+      emissive: new THREE.Color(0x44aaff),
+      emissiveIntensity: 2.0,
+      transparent: true,
+      opacity: 0.95,
     });
 
     // ---------- ГЕОМЕТРИЯ ПОЗВОНКА ----------
     function createVertebraGeometry(type = 'thoracic') {
       const group = new THREE.Group();
 
-      // Размеры по отделам
-      let bodyRadius, bodyHeight, archWidth, archDepth, spineLength, transverseLength;
+      let bodyRadius, bodyHeight, archWidth, spineLength, transverseLength;
       if (type === 'cervical') {
         bodyRadius = 0.38; bodyHeight = 0.24;
-        archWidth = 0.65; archDepth = 0.5; spineLength = 0.3; transverseLength = 0.45;
+        spineLength = 0.3; transverseLength = 0.45;
       } else if (type === 'thoracic') {
         bodyRadius = 0.48; bodyHeight = 0.28;
-        archWidth = 0.8; archDepth = 0.6; spineLength = 0.5; transverseLength = 0.55;
-      } else { // lumbar
+        spineLength = 0.5; transverseLength = 0.55;
+      } else {
         bodyRadius = 0.6; bodyHeight = 0.32;
-        archWidth = 0.95; archDepth = 0.75; spineLength = 0.65; transverseLength = 0.7;
+        spineLength = 0.65; transverseLength = 0.7;
       }
 
-      // 1. Тело позвонка (цилиндр с фаской)
-      const bodyGeom = new THREE.CylinderGeometry(bodyRadius, bodyRadius, bodyHeight, 20, 1, false);
-      const body = new THREE.Mesh(bodyGeom, boneMaterial);
-      body.castShadow = true;
-      body.receiveShadow = true;
+      // Тело позвонка
+      const bodyGeom = new THREE.CylinderGeometry(bodyRadius, bodyRadius, bodyHeight, 20);
+      const body = new THREE.Mesh(bodyGeom, hologramMaterial);
       group.add(body);
 
-      // 2. Дуга позвонка (тонкий цилиндр позади тела)
-      const archGeom = new THREE.TorusGeometry(bodyRadius * 0.65, 0.08, 8, 16, Math.PI);
-      const arch = new THREE.Mesh(archGeom, boneMaterial);
+      // Дуга (проволочная для голографического эффекта)
+      const archGeom = new THREE.TorusGeometry(bodyRadius * 0.65, 0.04, 8, 16, Math.PI);
+      const arch = new THREE.Mesh(archGeom, hologramMaterial);
       arch.position.z = -bodyRadius * 0.15;
       arch.rotation.x = Math.PI / 2;
       arch.rotation.z = Math.PI;
-      arch.castShadow = true;
-      arch.receiveShadow = true;
       group.add(arch);
 
-      // 3. Остистый отросток (назад)
-      const spineGeom = new THREE.ConeGeometry(0.08, spineLength, 8, 4);
-      const spine = new THREE.Mesh(spineGeom, boneMaterial);
+      // Остистый отросток
+      const spineGeom = new THREE.ConeGeometry(0.06, spineLength, 8, 4);
+      const spine = new THREE.Mesh(spineGeom, hologramMaterial);
       spine.position.z = -bodyRadius - spineLength * 0.35;
       spine.rotation.x = Math.PI / 2;
-      spine.castShadow = true;
-      spine.receiveShadow = true;
       group.add(spine);
 
-      // 4. Поперечные отростки
+      // Поперечные отростки
       [-1, 1].forEach(side => {
-        const transGeom = new THREE.CylinderGeometry(0.06, 0.06, transverseLength, 8);
-        const trans = new THREE.Mesh(transGeom, boneMaterial);
+        const transGeom = new THREE.CylinderGeometry(0.04, 0.04, transverseLength, 8);
+        const trans = new THREE.Mesh(transGeom, hologramMaterial);
         trans.position.x = side * (bodyRadius + transverseLength * 0.3);
         trans.position.z = -bodyRadius * 0.1;
         trans.rotation.z = Math.PI / 2;
-        trans.castShadow = true;
-        trans.receiveShadow = true;
         group.add(trans);
       });
 
       return group;
     }
 
-    // ---------- ПОСТРОЕНИЕ ПОЗВОНОЧНИКА ----------
+    // ---------- ПОСТРОЕНИЕ ПОЗВОНОЧНИКА С ПРАВИЛЬНЫМИ ИЗГИБАМИ ----------
     const spineGroup = new THREE.Group();
     scene.add(spineGroup);
 
-    const totalVertebrae = 24;
+    const totalVertebrae = 24; // 7 шейных + 12 грудных + 5 поясничных
     const vertSpacing = 0.56;
 
-    // Точки кривой позвоночника
+    // Точки кривой с анатомически правильными изгибами
     const curvePoints = [];
     for (let i = 0; i < totalVertebrae; i++) {
-      const t = i / (totalVertebrae - 1);
+      const t = i / (totalVertebrae - 1); // 0 = C1 (верх), 1 = L5 (низ)
       const y = i * vertSpacing;
+      
       let z = 0;
-      if (t < 0.35) z = Math.sin((t / 0.35) * Math.PI * 0.75) * 0.7;
-      else if (t < 0.7) z = 0.7 * Math.cos(((t - 0.35) / 0.35) * Math.PI * 0.65) - 0.15;
-      else z = -0.15 + Math.sin(((t - 0.7) / 0.3) * Math.PI * 0.8) * 0.55;
-      const x = Math.sin(t * Math.PI * 2) * 0.03;
+      
+      if (t < 0.29) {
+        // Шейный отдел (C1-C7): лордоз — изгиб ВПЕРЁД (положительный Z)
+        const cervicalT = t / 0.29;
+        z = Math.sin(cervicalT * Math.PI * 0.85) * 0.65;
+      } else if (t < 0.79) {
+        // Грудной отдел (T1-T12): кифоз — изгиб НАЗАД (отрицательный Z)
+        const thoracicT = (t - 0.29) / 0.5;
+        // Плавный переход от +0.2 к -0.75 и обратно к -0.1
+        z = 0.2 * Math.cos(thoracicT * Math.PI * 0.3) - 
+            0.75 * Math.sin(thoracicT * Math.PI * 0.85);
+      } else {
+        // Поясничный отдел (L1-L5): лордоз — изгиб ВПЕРЁД (положительный Z)
+        const lumbarT = (t - 0.79) / 0.21;
+        z = -0.1 + Math.sin(lumbarT * Math.PI * 0.9) * 0.7;
+      }
+      
+      // Минимальное боковое смещение для естественности
+      const x = Math.sin(t * Math.PI * 1.8) * 0.02;
+      
       curvePoints.push(new THREE.Vector3(x, y, z));
     }
 
@@ -280,28 +201,24 @@
         const discX = (pos.x + nextPos.x) / 2;
         const discRadius = type === 'lumbar' ? 0.58 : type === 'cervical' ? 0.36 : 0.46;
         const discGeom = new THREE.CylinderGeometry(discRadius, discRadius * 1.03, 0.18, 20);
-        const disc = new THREE.Mesh(discGeom, discMaterial);
+        const disc = new THREE.Mesh(discGeom, discHoloMaterial);
         disc.position.set(discX, discY, discZ);
-        disc.castShadow = true;
-        disc.receiveShadow = true;
         spineGroup.add(disc);
       }
     }
 
     // ---------- НЕРВНАЯ СИСТЕМА ----------
     const spinalCurve = new THREE.CatmullRomCurve3(curvePoints);
-    const cordGeom = new THREE.TubeGeometry(spinalCurve, 100, 0.2, 10, false);
-    const spinalCord = new THREE.Mesh(cordGeom, nerveMaterial);
-    spinalCord.castShadow = true;
-    spinalCord.receiveShadow = true;
+    const cordGeom = new THREE.TubeGeometry(spinalCurve, 100, 0.18, 10, false);
+    const spinalCord = new THREE.Mesh(cordGeom, nerveHoloMaterial);
     spineGroup.add(spinalCord);
 
     // Нервные корешки
-    const rootGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.6, 6);
+    const rootGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.6, 6);
     for (let i = 0; i < totalVertebrae - 1; i++) {
       const pos = curvePoints[i].clone();
-      pos.z -= 0.1;
-      pos.y -= 0.05;
+      pos.z -= 0.08;
+      pos.y -= 0.04;
 
       const directions = [
         new THREE.Vector3(-0.8, -0.15, 0.15).normalize(),
@@ -309,58 +226,101 @@
       ];
 
       directions.forEach(dir => {
-        const root = new THREE.Mesh(rootGeom, nerveMaterial);
+        const root = new THREE.Mesh(rootGeom, nerveHoloMaterial);
         root.position.copy(pos.clone().add(dir.clone().multiplyScalar(0.35)));
         root.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-        root.castShadow = true;
-        root.receiveShadow = true;
         spineGroup.add(root);
       });
     }
 
-    // ---------- КРЕСТЕЦ И КОПЧИК ----------
+    // Крестец и копчик
     const sacrumGeom = new THREE.CylinderGeometry(0.55, 0.7, 0.5, 10);
-    const sacrum = new THREE.Mesh(sacrumGeom, boneMaterial);
-    sacrum.position.set(0, -0.5, 0.35);
-    sacrum.castShadow = true;
-    sacrum.receiveShadow = true;
+    const sacrum = new THREE.Mesh(sacrumGeom, hologramMaterial);
+    sacrum.position.set(0, -0.5, 0.3);
+    sacrum.rotation.x = 0.3;
     spineGroup.add(sacrum);
 
     const coccyxGeom = new THREE.ConeGeometry(0.35, 0.6, 8);
-    const coccyx = new THREE.Mesh(coccyxGeom, boneMaterial);
-    coccyx.position.set(0, -1.0, 0.45);
-    coccyx.rotation.x = 0.25;
-    coccyx.castShadow = true;
-    coccyx.receiveShadow = true;
+    const coccyx = new THREE.Mesh(coccyxGeom, hologramMaterial);
+    coccyx.position.set(0, -1.0, 0.4);
+    coccyx.rotation.x = 0.5;
     spineGroup.add(coccyx);
 
-    // ---------- ПОДСТАВКА ----------
-    const floorGeom = new THREE.CircleGeometry(4, 32);
-    const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x181830,
-      roughness: 0.9,
-      metalness: 0.1,
+    // ---------- СВЕТЯЩИЕСЯ ЧАСТИЦЫ ВОКРУГ ПОЗВОНОЧНИКА ----------
+    const particlesGeom = new THREE.BufferGeometry();
+    const particlesCount = 300;
+    const particlesPositions = new Float32Array(particlesCount * 3);
+    
+    for (let i = 0; i < particlesCount; i++) {
+      const t = Math.random();
+      const pointOnCurve = spinalCurve.getPoint(t);
+      particlesPositions[i * 3] = pointOnCurve.x + (Math.random() - 0.5) * 2;
+      particlesPositions[i * 3 + 1] = pointOnCurve.y + (Math.random() - 0.5) * 2;
+      particlesPositions[i * 3 + 2] = pointOnCurve.z + (Math.random() - 0.5) * 2;
+    }
+    
+    particlesGeom.setAttribute('position', new THREE.BufferAttribute(particlesPositions, 3));
+    
+    const particlesMat = new THREE.PointsMaterial({
+      color: 0x66ccff,
+      size: 0.03,
+      blending: THREE.AdditiveBlending,
       depthWrite: false,
       transparent: true,
-      opacity: 0.25,
-      envMap: envMap,
-      envMapIntensity: 0.4,
+      opacity: 0.6,
     });
-    const floor = new THREE.Mesh(floorGeom, floorMat);
-    floor.receiveShadow = true;
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -1.6;
-    scene.add(floor);
+    
+    const particles = new THREE.Points(particlesGeom, particlesMat);
+    spineGroup.add(particles);
+
+    // ---------- ЛЁГКОЕ СВЕЧЕНИЕ ВОКРУГ МОДЕЛИ ----------
+    const glowGeom = new THREE.SphereGeometry(2.5, 32, 32);
+    const glowMat = new THREE.ShaderMaterial({
+      uniforms: {},
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vPosition = position;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        void main() {
+          float intensity = pow(0.7 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
+          gl_FragColor = vec4(0.2, 0.5, 1.0, intensity * 0.15);
+        }
+      `,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      depthWrite: false,
+    });
+    const glowSphere = new THREE.Mesh(glowGeom, glowMat);
+    glowSphere.position.set(0, 2.3, 0);
+    scene.add(glowSphere);
 
     // ---------- АНИМАЦИЯ ----------
     function animate() {
       requestAnimationFrame(animate);
+      
+      // Лёгкое мерцание частиц
+      particles.rotation.y += 0.0005;
+      particles.rotation.x += 0.0002;
+      
+      // Пульсация свечения
+      const time = Date.now() * 0.001;
+      particlesMat.opacity = 0.4 + Math.sin(time * 2) * 0.2;
+      
       controls.update();
       renderer.render(scene, camera);
     }
     animate();
 
-    // Двойной тап — сброс
+    // Двойной тап — сброс камеры
     let lastTap = 0;
     window.addEventListener('touchstart', e => {
       if (Date.now() - lastTap < 300 && e.touches.length === 1) {
