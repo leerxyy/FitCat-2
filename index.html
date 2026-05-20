@@ -223,12 +223,20 @@
                 const ti = (index - 7) / 11;
                 return { bodyW: 1.3 + ti * 0.6, bodyH: 0.35 + ti * 0.05, bodyD: 1.0 + ti * 0.5, transLen: 1.0 + ti * 0.6, spinLen: 0.5 + ti * 0.3, spinAngle: 0.5 + ti * 0.3, canalR: 0.28 - ti * 0.03, spacing: 0.5, type: 'thoracic' };
             } else if (index < 24) {
-                const li = (index - 19) / 4;
-                return { bodyW: 2.0 + li * 0.4, bodyH: 0.5 + li * 0.05, bodyD: 1.5 + li * 0.3, transLen: 1.5 + li * 0.4, spinLen: 0.7 + li * 0.1, spinAngle: 0.15, canalR: 0.28 - li * 0.02, spacing: 0.55, type: 'lumbar' };
-            } else {
-                return { bodyW: 2.2, bodyH: 0.6, bodyD: 1.6, transLen: 1.8, spinLen: 0.5, spinAngle: 0.2, canalR: 0.22, spacing: 0.3, type: 'sacral' };
-            }
-        }
+    // Поясничные позвонки L1-L5: более реалистичные пропорции
+                 const li = (index - 19) / 4;   // 0..1
+                 return {
+                    bodyW: 1.65 + li * 0.3,    // ширина тела
+                    bodyH: 0.48 + li * 0.04,   // высота тела (передне-задний размер)
+                    bodyD: 1.3 + li * 0.25,    // глубина тела
+                    transLen: 1.3 + li * 0.3,  // поперечные отростки
+                    spinLen: 0.65 + li * 0.1,  // остистый отросток
+                    spinAngle: 0.08,           // угол наклона остистого отростка (почти горизонтален)
+                    canalR: 0.26 - li * 0.02,
+                    spacing: 0.6,              // расстояние между позвонками
+                    type: 'lumbar'
+            };
+         }
 
         // Create vertebra
         function createVertebraDetailed(index) {
