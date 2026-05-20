@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Позвоночник 1:1</title>
+  <title>Реалистичный позвоночник 3D</title>
   <style>
-    body { margin:0; overflow:hidden; background:#050510; }
+    body { margin: 0; overflow: hidden; background: #0a0a14; font-family: system-ui, sans-serif; }
     #info {
-      position:absolute; bottom:12px; left:12px; color:white;
-      background:rgba(0,0,0,0.7); padding:8px 16px;
-      border-radius:20px; font-size:13px; font-family:sans-serif;
+      position: absolute; bottom: 16px; left: 16px; color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 16px;
+      border-radius: 20px; font-size: 13px; pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <div id="info">🦴 Вращай | 🔍 Зум | Двойной тап — сброс</div>
+  <div id="info">🦴 Вращай | 🔍 Зум двумя пальцами | Двойной тап — сброс</div>
 
-  <!-- Загружаем Three.js напрямую -->
   <script type="importmap">
     {
       "imports": {
@@ -30,287 +29,327 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // ---------- БАЗОВЫЕ НАСТРОЙКИ ----------
+    // ---------- СЦЕНА ----------
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x06060f);
+    scene.background = new THREE.Color(0x0d0d1a);
+    scene.fog = new THREE.Fog(0x0d0d1a, 6, 20);
 
-    const camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 0.1, 50);
-    camera.position.set(5, 3.2, 7.5);
-    camera.lookAt(0, 2.2, 0);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 50);
+    camera.position.set(4.5, 3, 7);
+    camera.lookAt(0, 2.3, 0);
 
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      powerPreference: "high-performance" 
-    });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.1;
     document.body.appendChild(renderer.domElement);
 
     // Управление
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 2.15, 0);
+    controls.target.set(0, 2.3, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
-    controls.rotateSpeed = 0.65;
-    controls.zoomSpeed = 1.1;
-    controls.minDistance = 3.2;
+    controls.rotateSpeed = 0.6;
+    controls.zoomSpeed = 1.2;
+    controls.minDistance = 2.8;
     controls.maxDistance = 14;
+    controls.maxPolarAngle = Math.PI;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.3;
     controls.update();
 
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.35;
+    controls.addEventListener('start', () => (controls.autoRotate = false));
+    controls.addEventListener('end', () => {
+      clearTimeout(window.rotTimeout);
+      window.rotTimeout = setTimeout(() => (controls.autoRotate = true), 2500);
+    });
 
-    // ---------- HDR ОКРУЖЕНИЕ ----------
+    // ---------- ОКРУЖЕНИЕ ----------
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color(0x0a0a1a);
-    const envGeo = new THREE.SphereGeometry(10, 32, 32);
+    const envGeom = new THREE.SphereGeometry(10, 32, 32);
     const envMat = new THREE.ShaderMaterial({
       side: THREE.BackSide,
-      vertexShader: `
-        varying vec3 vWorldPos;
-        void main() {
-          vec4 worldPos = modelMatrix * vec4(position, 1.0);
-          vWorldPos = worldPos.xyz;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vWorldPos;
-        void main() {
-          float y = normalize(vWorldPos).y;
-          float t = smoothstep(-0.2, 0.6, y);
-          vec3 bottom = vec3(0.02, 0.02, 0.08);
-          vec3 top = vec3(0.55, 0.65, 0.9);
-          gl_FragColor = vec4(mix(bottom, top, t), 1.0);
-        }
-      `
+      vertexShader: `varying vec3 vPos; void main() { vPos = (modelMatrix * vec4(position, 1.0)).xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `varying vec3 vPos; void main() { float y = normalize(vPos).y; gl_FragColor = vec4(mix(vec3(0.01,0.01,0.04), vec3(0.5,0.6,0.85), smoothstep(-0.1,0.5,y)), 1.0); }`
     });
-    envScene.add(new THREE.Mesh(envGeo, envMat));
+    const envScene = new THREE.Scene();
+    envScene.add(new THREE.Mesh(envGeom, envMat));
     const envMap = pmremGenerator.fromScene(envScene, 0.04).texture;
     scene.environment = envMap;
 
     // ---------- ОСВЕЩЕНИЕ ----------
-    scene.add(new THREE.AmbientLight(0x334466));
+    scene.add(new THREE.AmbientLight(0x303050));
 
-    const keyLight = new THREE.DirectionalLight(0xffeedd, 1.4);
-    keyLight.position.set(6, 10, 7);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(1024, 1024);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 30;
-    keyLight.shadow.camera.left = -8;
-    keyLight.shadow.camera.right = 8;
-    keyLight.shadow.camera.top = 8;
-    keyLight.shadow.camera.bottom = -8;
-    scene.add(keyLight);
+    const key = new THREE.DirectionalLight(0xfff5e8, 1.5);
+    key.position.set(5, 9, 7);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = 30;
+    key.shadow.camera.left = -8;
+    key.shadow.camera.right = 8;
+    key.shadow.camera.top = 8;
+    key.shadow.camera.bottom = -8;
+    key.shadow.bias = -0.0001;
+    scene.add(key);
 
-    scene.add(new THREE.DirectionalLight(0xccddff, 0.65).position.set(-4, 1, -3));
-    scene.add(new THREE.DirectionalLight(0xffccaa, 0.55).position.set(-1, 6, -6));
+    const fill = new THREE.DirectionalLight(0xccddff, 0.6);
+    fill.position.set(-4, 2, -2);
+    scene.add(fill);
+
+    const rim = new THREE.DirectionalLight(0xffccaa, 0.5);
+    rim.position.set(-2, 5, -5);
+    scene.add(rim);
 
     // ---------- ТЕКСТУРА КОСТИ ----------
-    const boneCanvas = document.createElement('canvas');
-    boneCanvas.width = 512;
-    boneCanvas.height = 512;
-    const ctx = boneCanvas.getContext('2d');
-    const imgData = ctx.createImageData(512, 512);
-    for (let i = 0; i < imgData.data.length; i += 4) {
-      const x = (i/4) % 512, y = Math.floor((i/4)/512);
-      const n1 = Math.sin(x*0.15 + y*0.12) * 43758.5453 % 1;
-      const n2 = Math.sin(x*0.3 + y*0.25) * 25421.631 % 1;
-      const noise = n1*0.7 + n2*0.3;
-      imgData.data[i] = 220 + (noise-0.5)*28;
-      imgData.data[i+1] = 195 + (noise-0.5)*25;
-      imgData.data[i+2] = 165 + (noise-0.5)*23;
-      imgData.data[i+3] = 255;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    const boneTex = new THREE.CanvasTexture(boneCanvas);
-    boneTex.wrapS = THREE.RepeatWrapping;
-    boneTex.wrapT = THREE.RepeatWrapping;
-    boneTex.repeat.set(2, 2);
+    function createBoneTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
 
-    // ---------- SSS МАТЕРИАЛ ----------
-    const boneMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        map: { value: boneTex },
-        envMap: { value: envMap },
-      },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewDir;
-        varying vec2 vUv;
-        void main() {
-          vec4 worldPos = modelMatrix * vec4(position, 1.0);
-          vNormal = normalize(mat3(modelMatrix) * normal);
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vViewDir = normalize(-mvPosition.xyz);
-          vUv = uv;
-          gl_Position = projectionMatrix * mvPosition;
+      // Базовый цвет слоновой кости
+      ctx.fillStyle = '#e8dcc8';
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Шум и поры
+      const imgData = ctx.getImageData(0, 0, 512, 512);
+      for (let i = 0; i < imgData.data.length; i += 4) {
+        const x = (i / 4) % 512;
+        const y = Math.floor(i / 4 / 512);
+        const n1 = (Math.sin(x * 0.2 + y * 0.18) * 43758.5453) % 1;
+        const n2 = (Math.sin(x * 0.35 + y * 0.28) * 25421.631) % 1;
+        const n3 = (Math.sin(x * 0.5 + y * 0.45) * 19283.471) % 1;
+        const noise = n1 * 0.5 + n2 * 0.3 + n3 * 0.2;
+        const variation = (noise - 0.5) * 30;
+        imgData.data[i] = Math.min(255, Math.max(210, imgData.data[i] + variation));
+        imgData.data[i + 1] = Math.min(255, Math.max(185, imgData.data[i + 1] + variation * 0.9));
+        imgData.data[i + 2] = Math.min(255, Math.max(160, imgData.data[i + 2] + variation * 0.8));
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Лёгкие линии роста
+      ctx.strokeStyle = 'rgba(180,160,130,0.06)';
+      ctx.lineWidth = 1;
+      for (let y = 0; y < 512; y += 8 + Math.floor(Math.random() * 6)) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + Math.sin(y * 0.05) * 3);
+        for (let x = 0; x < 512; x += 8) {
+          ctx.lineTo(x, y + Math.sin(y * 0.05 + x * 0.02) * 4);
         }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        varying vec3 vViewDir;
-        varying vec2 vUv;
-        uniform sampler2D map;
-        uniform samplerCube envMap;
-        void main() {
-          vec3 N = normalize(vNormal);
-          vec3 V = normalize(vViewDir);
-          vec3 L = normalize(vec3(0.5, 0.8, 0.6));
-          
-          float NdotL = max(0.0, dot(N, L));
-          float NdotV = max(0.0, dot(N, V));
-          
-          float sss = max(0.0, dot(V, -L)) * (1.0 - NdotL) * 0.45;
-          sss *= smoothstep(0.0, 1.0, NdotV);
-          
-          vec3 albedo = texture2D(map, vUv).rgb * vec3(0.93, 0.84, 0.72);
-          vec3 ambient = albedo * vec3(0.2, 0.22, 0.3) * 0.7;
-          vec3 diffuse = albedo * NdotL * 1.1;
-          vec3 sssColor = vec3(1.0, 0.6, 0.27) * sss * 0.8;
-          
-          vec3 R = reflect(-V, N);
-          vec3 envColor = textureCube(envMap, R).rgb;
-          float fresnel = pow(1.0 - NdotV, 3.0);
-          vec3 specular = mix(vec3(0.04), albedo, fresnel) * envColor * 0.45;
-          
-          vec3 final = ambient + diffuse + sssColor + specular;
-          final = final / (final + vec3(1.0));
-          gl_FragColor = vec4(final, 1.0);
-        }
-      `
+        ctx.stroke();
+      }
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(2, 2);
+      return tex;
+    }
+
+    const boneTex = createBoneTexture();
+
+    // Материал кости (классический PBR, без странных шейдеров)
+    const boneMaterial = new THREE.MeshStandardMaterial({
+      map: boneTex,
+      roughness: 0.5,
+      metalness: 0.03,
+      color: new THREE.Color(1, 0.96, 0.88),
+      envMap: envMap,
+      envMapIntensity: 0.6,
+    });
+
+    // Материал дисков
+    const discMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.35,
+      metalness: 0.05,
+      color: new THREE.Color(0xd4c5a8),
+      envMap: envMap,
+      envMapIntensity: 0.4,
+      transparent: true,
+      opacity: 0.9,
+    });
+
+    // Материал нервов
+    const nerveMaterial = new THREE.MeshStandardMaterial({
+      roughness: 0.25,
+      metalness: 0.0,
+      color: new THREE.Color(0xf5e6a3),
+      emissive: new THREE.Color(0x1a1000),
+      emissiveIntensity: 0.2,
+      envMap: envMap,
+      envMapIntensity: 0.3,
     });
 
     // ---------- ГЕОМЕТРИЯ ПОЗВОНКА ----------
-    function createVertebra(type = 'thoracic') {
-      const s = new THREE.Shape();
-      let bw = 0.55, bd = 0.48, hw = 0.4, hh = 0.45;
-      if (type === 'cervical') { bw=0.5; bd=0.4; hw=0.45; hh=0.5; }
-      if (type === 'lumbar') { bw=0.7; bd=0.6; hw=0.42; hh=0.5; }
-      
-      s.moveTo(-bw, -bd*0.7);
-      s.bezierCurveTo(-bw-0.15, -bd*0.85, -bw-0.2, bd*0.85, -bw, bd*0.7);
-      s.lineTo(-bw*0.85, bd*0.85);
-      s.bezierCurveTo(-bw*0.7, bd*1.15, -0.85, bd*1.25, -1.1, bd*1.0);
-      s.lineTo(-1.3, bd*0.35);
-      s.bezierCurveTo(-1.4, bd*0.05, -1.3, -bd*0.05, -1.1, -bd*0.4);
-      s.lineTo(-0.85, -bd*1.25);
-      s.bezierCurveTo(-0.7, -bd*1.15, -bw*0.85, -bd*0.85, -bw, -bd*0.7);
-      s.lineTo(bw, -bd*0.7);
-      s.bezierCurveTo(bw+0.15, -bd*0.85, bw+0.2, bd*0.85, bw, bd*0.7);
-      s.lineTo(bw*0.85, bd*0.85);
-      s.bezierCurveTo(bw*0.7, bd*1.15, 0.85, bd*1.25, 1.1, bd*1.0);
-      s.lineTo(1.3, bd*0.35);
-      s.bezierCurveTo(1.4, bd*0.05, 1.3, -bd*0.05, 1.1, -bd*0.4);
-      s.lineTo(0.85, -bd*1.25);
-      s.bezierCurveTo(0.7, -bd*1.15, bw*0.85, -bd*0.85, bw, -bd*0.7);
-      s.closePath();
+    function createVertebraGeometry(type = 'thoracic') {
+      const group = new THREE.Group();
 
-      const hole = new THREE.Path();
-      hole.moveTo(-hw, -hh);
-      hole.bezierCurveTo(-hw-0.05, -hh*0.5, -hw-0.05, hh*0.5, -hw, hh);
-      hole.lineTo(hw, hh);
-      hole.bezierCurveTo(hw+0.05, hh*0.5, hw+0.05, -hh*0.5, hw, -hh);
-      hole.closePath();
-      s.holes.push(hole);
+      // Размеры по отделам
+      let bodyRadius, bodyHeight, archWidth, archDepth, spineLength, transverseLength;
+      if (type === 'cervical') {
+        bodyRadius = 0.38; bodyHeight = 0.24;
+        archWidth = 0.65; archDepth = 0.5; spineLength = 0.3; transverseLength = 0.45;
+      } else if (type === 'thoracic') {
+        bodyRadius = 0.48; bodyHeight = 0.28;
+        archWidth = 0.8; archDepth = 0.6; spineLength = 0.5; transverseLength = 0.55;
+      } else { // lumbar
+        bodyRadius = 0.6; bodyHeight = 0.32;
+        archWidth = 0.95; archDepth = 0.75; spineLength = 0.65; transverseLength = 0.7;
+      }
 
-      return new THREE.ExtrudeGeometry(s, {
-        depth: 0.3,
-        bevelEnabled: true,
-        bevelThickness: 0.04,
-        bevelSize: 0.03,
-        bevelSegments: 2
+      // 1. Тело позвонка (цилиндр с фаской)
+      const bodyGeom = new THREE.CylinderGeometry(bodyRadius, bodyRadius, bodyHeight, 20, 1, false);
+      const body = new THREE.Mesh(bodyGeom, boneMaterial);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      group.add(body);
+
+      // 2. Дуга позвонка (тонкий цилиндр позади тела)
+      const archGeom = new THREE.TorusGeometry(bodyRadius * 0.65, 0.08, 8, 16, Math.PI);
+      const arch = new THREE.Mesh(archGeom, boneMaterial);
+      arch.position.z = -bodyRadius * 0.15;
+      arch.rotation.x = Math.PI / 2;
+      arch.rotation.z = Math.PI;
+      arch.castShadow = true;
+      arch.receiveShadow = true;
+      group.add(arch);
+
+      // 3. Остистый отросток (назад)
+      const spineGeom = new THREE.ConeGeometry(0.08, spineLength, 8, 4);
+      const spine = new THREE.Mesh(spineGeom, boneMaterial);
+      spine.position.z = -bodyRadius - spineLength * 0.35;
+      spine.rotation.x = Math.PI / 2;
+      spine.castShadow = true;
+      spine.receiveShadow = true;
+      group.add(spine);
+
+      // 4. Поперечные отростки
+      [-1, 1].forEach(side => {
+        const transGeom = new THREE.CylinderGeometry(0.06, 0.06, transverseLength, 8);
+        const trans = new THREE.Mesh(transGeom, boneMaterial);
+        trans.position.x = side * (bodyRadius + transverseLength * 0.3);
+        trans.position.z = -bodyRadius * 0.1;
+        trans.rotation.z = Math.PI / 2;
+        trans.castShadow = true;
+        trans.receiveShadow = true;
+        group.add(trans);
       });
+
+      return group;
     }
 
     // ---------- ПОСТРОЕНИЕ ПОЗВОНОЧНИКА ----------
     const spineGroup = new THREE.Group();
     scene.add(spineGroup);
 
-    const total = 24;
-    const points = [];
-    for (let i = 0; i < total; i++) {
-      const t = i / (total - 1);
-      const y = i * 0.52;
+    const totalVertebrae = 24;
+    const vertSpacing = 0.56;
+
+    // Точки кривой позвоночника
+    const curvePoints = [];
+    for (let i = 0; i < totalVertebrae; i++) {
+      const t = i / (totalVertebrae - 1);
+      const y = i * vertSpacing;
       let z = 0;
-      if (t < 0.35) z = Math.sin((t/0.35)*Math.PI*0.8)*0.95;
-      else if (t < 0.7) z = 0.95*Math.cos(((t-0.35)/0.35)*Math.PI*0.7)-0.25;
-      else z = -0.25+Math.sin(((t-0.7)/0.3)*Math.PI*0.9)*0.75;
-      points.push(new THREE.Vector3(Math.sin(t*Math.PI*2.1)*0.04, y, z));
+      if (t < 0.35) z = Math.sin((t / 0.35) * Math.PI * 0.75) * 0.7;
+      else if (t < 0.7) z = 0.7 * Math.cos(((t - 0.35) / 0.35) * Math.PI * 0.65) - 0.15;
+      else z = -0.15 + Math.sin(((t - 0.7) / 0.3) * Math.PI * 0.8) * 0.55;
+      const x = Math.sin(t * Math.PI * 2) * 0.03;
+      curvePoints.push(new THREE.Vector3(x, y, z));
     }
 
-    const discMat = new THREE.MeshStandardMaterial({ roughness:0.4, color:0xe8d5b2, envMap, transparent:true, opacity:0.9 });
-    const nerveMat = new THREE.MeshStandardMaterial({ roughness:0.3, color:0xf5e6a3, emissive:0x332200, emissiveIntensity:0.25, envMap });
-
-    for (let i = 0; i < total; i++) {
-      const pos = points[i];
+    // Создаём позвонки и диски
+    for (let i = 0; i < totalVertebrae; i++) {
+      const pos = curvePoints[i];
       const type = i < 7 ? 'cervical' : i < 19 ? 'thoracic' : 'lumbar';
-      const vert = new THREE.Mesh(createVertebra(type), boneMaterial);
-      vert.castShadow = vert.receiveShadow = true;
-      vert.position.copy(pos);
-      vert.rotation.y = Math.PI;
-      spineGroup.add(vert);
+      const vertebraGroup = createVertebraGeometry(type);
+      vertebraGroup.position.copy(pos);
+      vertebraGroup.rotation.y = Math.PI;
+      spineGroup.add(vertebraGroup);
 
-      if (i < total - 1) {
-        const n = points[i+1];
-        const disc = new THREE.Mesh(
-          new THREE.CylinderGeometry(type==='lumbar'?0.58:0.48, type==='lumbar'?0.59:0.49, 0.22, 18),
-          discMat
-        );
-        disc.position.set((pos.x+n.x)/2, (pos.y+n.y)/2, (pos.z+n.z)/2);
-        disc.castShadow = disc.receiveShadow = true;
+      // Межпозвонковый диск
+      if (i < totalVertebrae - 1) {
+        const nextPos = curvePoints[i + 1];
+        const discY = (pos.y + nextPos.y) / 2;
+        const discZ = (pos.z + nextPos.z) / 2;
+        const discX = (pos.x + nextPos.x) / 2;
+        const discRadius = type === 'lumbar' ? 0.58 : type === 'cervical' ? 0.36 : 0.46;
+        const discGeom = new THREE.CylinderGeometry(discRadius, discRadius * 1.03, 0.18, 20);
+        const disc = new THREE.Mesh(discGeom, discMaterial);
+        disc.position.set(discX, discY, discZ);
+        disc.castShadow = true;
+        disc.receiveShadow = true;
         spineGroup.add(disc);
       }
     }
 
-    // Нервы
-    const cord = new THREE.Mesh(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 80, 0.22, 8, false),
-      nerveMat
-    );
-    cord.castShadow = cord.receiveShadow = true;
-    spineGroup.add(cord);
+    // ---------- НЕРВНАЯ СИСТЕМА ----------
+    const spinalCurve = new THREE.CatmullRomCurve3(curvePoints);
+    const cordGeom = new THREE.TubeGeometry(spinalCurve, 100, 0.2, 10, false);
+    const spinalCord = new THREE.Mesh(cordGeom, nerveMaterial);
+    spinalCord.castShadow = true;
+    spinalCord.receiveShadow = true;
+    spineGroup.add(spinalCord);
 
-    const rootGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.7, 6);
-    for (let i = 0; i < total-1; i++) {
-      const pos = points[i].clone().add(new THREE.Vector3(0, -0.1, 0.1));
-      [[-0.85, -0.1, 0.2], [0.85, -0.1, 0.2]].forEach(([dx, dy, dz]) => {
-        const dir = new THREE.Vector3(dx, dy, dz).normalize();
-        const root = new THREE.Mesh(rootGeom, nerveMat);
-        root.position.copy(pos.clone().add(dir.clone().multiplyScalar(0.3)));
-        root.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir);
-        root.castShadow = root.receiveShadow = true;
+    // Нервные корешки
+    const rootGeom = new THREE.CylinderGeometry(0.05, 0.05, 0.6, 6);
+    for (let i = 0; i < totalVertebrae - 1; i++) {
+      const pos = curvePoints[i].clone();
+      pos.z -= 0.1;
+      pos.y -= 0.05;
+
+      const directions = [
+        new THREE.Vector3(-0.8, -0.15, 0.15).normalize(),
+        new THREE.Vector3(0.8, -0.15, 0.15).normalize(),
+      ];
+
+      directions.forEach(dir => {
+        const root = new THREE.Mesh(rootGeom, nerveMaterial);
+        root.position.copy(pos.clone().add(dir.clone().multiplyScalar(0.35)));
+        root.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+        root.castShadow = true;
+        root.receiveShadow = true;
         spineGroup.add(root);
       });
     }
 
-    // Крестец + копчик
-    const sacrum = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.8, 0.55, 10), boneMaterial);
-    sacrum.position.set(0, -0.55, 0.42);
-    sacrum.castShadow = sacrum.receiveShadow = true;
+    // ---------- КРЕСТЕЦ И КОПЧИК ----------
+    const sacrumGeom = new THREE.CylinderGeometry(0.55, 0.7, 0.5, 10);
+    const sacrum = new THREE.Mesh(sacrumGeom, boneMaterial);
+    sacrum.position.set(0, -0.5, 0.35);
+    sacrum.castShadow = true;
+    sacrum.receiveShadow = true;
     spineGroup.add(sacrum);
 
-    const coccyx = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.65, 7), boneMaterial);
-    coccyx.position.set(0, -1.1, 0.52);
-    coccyx.rotation.x = 0.2;
-    coccyx.castShadow = coccyx.receiveShadow = true;
+    const coccyxGeom = new THREE.ConeGeometry(0.35, 0.6, 8);
+    const coccyx = new THREE.Mesh(coccyxGeom, boneMaterial);
+    coccyx.position.set(0, -1.0, 0.45);
+    coccyx.rotation.x = 0.25;
+    coccyx.castShadow = true;
+    coccyx.receiveShadow = true;
     spineGroup.add(coccyx);
 
-    // Пол
-    const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(4.5, 32),
-      new THREE.MeshStandardMaterial({ color:0x15152a, roughness:0.9, depthWrite:false, transparent:true, opacity:0.25, envMap })
-    );
+    // ---------- ПОДСТАВКА ----------
+    const floorGeom = new THREE.CircleGeometry(4, 32);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x181830,
+      roughness: 0.9,
+      metalness: 0.1,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.25,
+      envMap: envMap,
+      envMapIntensity: 0.4,
+    });
+    const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.receiveShadow = true;
-    floor.rotation.x = -Math.PI/2;
-    floor.position.y = -1.8;
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -1.6;
     scene.add(floor);
 
     // ---------- АНИМАЦИЯ ----------
@@ -321,25 +360,29 @@
     }
     animate();
 
-    // Двойной тап
+    // Двойной тап — сброс
     let lastTap = 0;
     window.addEventListener('touchstart', e => {
       if (Date.now() - lastTap < 300 && e.touches.length === 1) {
-        const sP = camera.position.clone(), sT = controls.target.clone();
-        const eP = new THREE.Vector3(5, 3.2, 7.5), eT = new THREE.Vector3(0, 2.15, 0);
-        requestAnimationFrame(function anim(ts) {
-          const t = Math.min((ts-performance.now()+800)/800, 1);
-          const ease = 1-Math.pow(1-t, 3);
+        const sP = camera.position.clone();
+        const sT = controls.target.clone();
+        const eP = new THREE.Vector3(4.5, 3, 7);
+        const eT = new THREE.Vector3(0, 2.3, 0);
+        const st = performance.now();
+        function anim(ts) {
+          const t = Math.min((ts - st) / 800, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
           camera.position.lerpVectors(sP, eP, ease);
           controls.target.lerpVectors(sT, eT, ease);
-          if (t<1) requestAnimationFrame(anim);
-        });
+          if (t < 1) requestAnimationFrame(anim);
+        }
+        requestAnimationFrame(anim);
       }
       lastTap = Date.now();
     });
 
     window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
