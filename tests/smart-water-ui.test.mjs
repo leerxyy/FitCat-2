@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setupDOM, tick } from './dom.mjs';
+import { setupDOM, tick, activeProFixture } from './dom.mjs';
 
 test('redesigned smart water keeps saved conditions, accurate contributions and the diary amount', async t => {
-  const env=setupDOM({fitnessProfile:JSON.stringify({name:'Тест',age:20,gender:'male',height:170,weight:52,goal:'maintain'}),lastDate:new Date().toDateString(),smartWaterEnabled:'true',currentTemp:'27',currentSteps:'12800',waterAmount:'750'});
+  const env=setupDOM({...activeProFixture(),fitnessProfile:JSON.stringify({name:'Тест',age:20,gender:'male',height:170,weight:52,goal:'maintain'}),lastDate:new Date().toDateString(),smartWaterEnabled:'true',currentTemp:'27',currentSteps:'12800',waterAmount:'750'});
   const $=id=>document.getElementById(id);
   const input=async(id,value,type='input')=>{if(type==='change')$(id).checked=value;else $(id).value=value;$(id).dispatchEvent(new Event(type,{bubbles:true}));await tick();};
   const click=async(selector)=>{const element=document.querySelector(selector);assert.ok(element,selector);element.click();await tick();};

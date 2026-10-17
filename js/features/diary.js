@@ -3,6 +3,7 @@ import { nutritionTotal, portion, clamp } from '../core/math.js';
 import { t, number } from '../core/i18n.js';
 import { $, icon, escapeHTML, safeImage, animateNumber, onAction, changed, openDialog, closeDialog, toast, confirmAction, promptValue } from '../ui/components.js';
 import { animateProgress, captureLayout, animateList, removeRow, toggleMeal } from '../ui/motion.js';
+import { requireTemplateSlot } from '../ui/premium.js';
 
 const meals = ['breakfast', 'lunch', 'dinner', 'snack', 'other'];
 const mealIcons = { breakfast: 'sun', lunch: 'meal', dinner: 'moon', snack: 'apple', other: 'meal' };
@@ -202,9 +203,11 @@ export function initDiary() {
   });
   onAction('openMealTools', () => { renderTemplates(); openDialog('mealToolsModal'); });
   onAction('saveTemplate', async () => {
+    if (!requireTemplateSlot()) return;
     if (!state.foods.length) { toast(t('no_dishes')); return; }
     const name = await promptValue(t('template_name'));
     if (!name) return;
+    if (!requireTemplateSlot()) return;
     state.templates.push({ name, foods: structuredClone(state.foods) }); changed(); renderTemplates(); toast(t('template_saved'));
   });
   onAction('loadTemplate', async button => {

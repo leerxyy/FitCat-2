@@ -1,9 +1,10 @@
-import { state, persist } from '../core/store.js';
+import { state, persist, proAccess } from '../core/store.js';
 import { localDate } from '../core/math.js';
 import { hasTodayWeather, locationKey, weatherTimeZone } from '../core/weather.js';
 import { fetchDailyWeather, locateForWeather, searchWeatherCities } from '../services/weather.js';
 import { t, locale } from '../core/i18n.js';
 import { $, onAction, toast } from '../ui/components.js';
+import { requirePro } from '../ui/premium.js';
 
 let generation = 0;
 let controller;
@@ -19,7 +20,7 @@ let cities = [];
 let lastAttempt = { key: '', at: 0 };
 
 const automatic = () => state.preferences.waterTemperatureMode === 'auto';
-const usable = () => Boolean(state.profile && state.preferences.smartWaterEnabled && automatic());
+const usable = () => Boolean(state.profile && state.preferences.smartWaterEnabled && automatic() && proAccess());
 const notify = () => document.dispatchEvent(new CustomEvent('fitcat:change'));
 
 function save(nextWeather, mode, temperature) {
@@ -42,6 +43,7 @@ export function stopWeatherRequest() {
 }
 
 export function useManualTemperature(value = state.preferences.currentTemp) {
+  if (!requirePro('smart-water')) return;
   stopWeatherRequest();
   const temperature = Math.round(Math.max(-10, Math.min(40, Number(value) || 0)));
   try { save(state.weather, 'manual', temperature); }
@@ -94,6 +96,7 @@ export function renderWeather() {
 }
 
 async function updateForecast({ place = state.weather.location, locate = false } = {}) {
+  if (!requirePro('smart-water')) return false;
   stopWeatherRequest();
   const token = generation;
   controller = new AbortController();
@@ -139,6 +142,7 @@ export function ensureDailyWeather() {
 
 export function initWeather() {
   onAction('waterTemperatureMode', button => {
+    if (!requirePro('smart-water')) return;
     if (button.dataset.mode === 'manual') { useManualTemperature(); return; }
     stopWeatherRequest();
     try { save(state.weather, 'auto', state.weather.daily?.temperature ?? state.preferences.currentTemp); }
@@ -147,7 +151,7 @@ export function initWeather() {
   });
   onAction('weatherLocate', () => updateForecast({ locate: true }));
   onAction('weatherRefresh', () => updateForecast());
-  onAction('weatherToggleCity', () => { cityOpen = !cityOpen; renderWeather(); if (cityOpen) $('weatherCityInput').focus({ preventScroll: true }); });
+  onAction('weatherToggleCity', () => { if (!requirePro('smart-water')) return; cityOpen = !cityOpen; renderWeather(); if (cityOpen) $('weatherCityInput').focus({ preventScroll: true }); });
   onAction('weatherChooseCity', button => {
     const index = Number(button.dataset.index);
     const place = Number.isInteger(index) && index >= 0 ? cities[index] : null;
@@ -155,6 +159,7 @@ export function initWeather() {
   });
   $('weatherCityForm').addEventListener('submit', async event => {
     event.preventDefault();
+    if (!requirePro('smart-water')) return;
     ++cityGeneration; cityController?.abort();
     const token = cityGeneration; cityController = new AbortController();
     cityBusy = true; cityMessage = 'weather_searching'; cities = []; renderWeather();

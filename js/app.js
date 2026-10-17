@@ -1,4 +1,4 @@
-import { state, loadState, rollDay, updateStreak, persist } from './core/store.js';
+import { state, loadState, rollDay, updateStreak, persist, proAccess } from './core/store.js';
 import { translate } from './core/i18n.js';
 import { $, initActions } from './ui/components.js';
 import { initNavigation, showScreen, updateHeading, activeTab } from './ui/navigation.js';
@@ -18,6 +18,19 @@ import { initSubscription, renderSubscription } from './features/subscription.js
 import { initWallet } from './features/wallet.js';
 import { ensureDailyWeather } from './features/weather.js';
 import { initSurfaces } from './ui/surfaces.js';
+import { stopWeatherRequest } from './features/weather.js';
+
+let previousAccess;
+function checkAccess() {
+  const active = proAccess();
+  if (active === previousAccess) return;
+  previousAccess = active;
+  if (!active) {
+    stopWeatherRequest();
+    if ($('smartWaterModal').open) document.dispatchEvent(new CustomEvent('fitcat:pro-request', { detail: 'smart-water' }));
+  }
+  render(); queuePublish(); void ensureDailyWeather();
+}
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
@@ -25,6 +38,7 @@ function render() {
 }
 
 function checkDay() {
+  checkAccess();
   if (rollDay()) { updateStreak(); render(); queuePublish(); }
   updateHeading();
   void ensureDailyWeather();
@@ -32,12 +46,15 @@ function checkDay() {
 
 function start() {
   loadState();
+  previousAccess = proAccess();
   rollDay(); updateStreak();
   initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAmbient(); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
   document.addEventListener('fitcat:change', () => { render(); queuePublish(); void ensureDailyWeather(); });
+  document.addEventListener('fitcat:subscription', checkAccess);
+  document.addEventListener('fitcat:wallet', checkAccess);
   document.addEventListener('fitcat:language', () => {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();

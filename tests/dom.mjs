@@ -132,4 +132,8 @@ export function setupDOM(data = {}) {
   return { document, window, localStorage, map, restoreTimers() { globalThis.setInterval = originalInterval; globalThis.setTimeout = originalTimeout; } };
 }
 export const tick = () => new Promise(resolve => setImmediate(resolve));
+export function activeProFixture(now = Date.now()) {
+  const activatedAt = now - 1000;
+  return { fitcat_subscription_v1: JSON.stringify({ version: 1, campaign: 'launch-8days-v1', activatedAt, expiresAt: activatedAt + 8 * 86400000 }) };
+}
 export function submit(form) { form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }

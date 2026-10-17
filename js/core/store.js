@@ -1,5 +1,6 @@
 import { localDate, nutritionTotal, calculateTargets } from './math.js';
 import { emptyWeather, normalizeWeather } from './weather.js';
+import { hasProAccess, mayCreateTemplate } from './access.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
@@ -87,8 +88,12 @@ function makePublicUid() {
 }
 
 export function targets() {
-  return calculateTargets(state.profile, state.preferences);
+  const result = calculateTargets(state.profile, state.preferences);
+  if (!proAccess() && state.profile) result.water = Math.round(state.profile.weight * 35);
+  return result;
 }
+export function proAccess() { return hasProAccess(storage); }
+export function templateSlotAvailable() { return mayCreateTemplate(state.templates.length, storage); }
 
 export function recordNutrition(date = localDate()) {
   const record = { date, ...nutritionTotal(state.foods) };

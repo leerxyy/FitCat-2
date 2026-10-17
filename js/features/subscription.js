@@ -1,9 +1,10 @@
 import { createSubscription, formatPromo, SUBSCRIPTION_KEY } from '../core/subscription.js';
 import { t, locale, number } from '../core/i18n.js';
-import { $, onAction, openDialog } from '../ui/components.js';
+import { $, onAction, openDialog, closeDialog } from '../ui/components.js';
 import { enter } from '../ui/motion.js';
 import { SUBSCRIPTION_PRICES } from '../core/wallet.js';
 import { getWallet, purchaseWithCoins, walletError, openWallet } from './wallet.js';
+import { renderPremium } from '../ui/premium.js';
 
 let subscription;
 let expiryTimer;
@@ -14,6 +15,8 @@ let revealPending = false;
 let checkoutPeriod = '1';
 let checkoutId;
 let successPeriod = '1';
+let requestedFeature = '';
+let openRequest = 0;
 
 function currentStatus() {
   try { return getWallet()?.status() || subscription.status(); }
@@ -46,6 +49,12 @@ function showError(key = '') {
 export function renderSubscription() {
   if (!subscription) return;
   const status = currentStatus();
+  renderPremium();
+  $('proFeatureNotice').hidden = !requestedFeature || status.active;
+  if (requestedFeature) {
+    $('proFeatureTitle').textContent = t('pro_feature_' + requestedFeature);
+    $('proFeatureDescription').textContent = t({ 'smart-water': 'pro_water_detail', 'macro-history': 'pro_macros_detail', templates: 'pro_templates_detail' }[requestedFeature]);
+  }
   const badge = $('subscriptionBadge');
   // Reveal the new header status after the congratulations window closes.
   badge.classList.toggle('is-pro', status.active && !revealPending);
@@ -89,10 +98,18 @@ function refresh() {
   renderSubscription();
   if (panel === 'success' && !currentStatus().active) setPanel('overview', false);
   scheduleExpiry();
+  document.dispatchEvent(new CustomEvent('fitcat:subscription', { detail: currentStatus() }));
 }
 
-function openSubscription() {
-  refresh(); showError(); setPanel('overview', false); openDialog('subscriptionDialog');
+function openSubscription(feature = '') {
+  const token = ++openRequest;
+  requestedFeature = ['smart-water', 'macro-history', 'templates'].includes(feature) ? feature : '';
+  refresh(); showError(); setPanel('overview', false);
+  const show = () => { if (token === openRequest) openDialog('subscriptionDialog'); };
+  const previous = [...document.querySelectorAll('dialog[open]')].reverse().find(dialog => dialog.id !== 'subscriptionDialog');
+  if (previous && !previous.hasAttribute('data-static-dialog')) {
+    previous.addEventListener('close', show, { once: true }); closeDialog(previous.id);
+  } else if (!previous) show();
 }
 
 export function initSubscription() {
@@ -100,7 +117,8 @@ export function initSubscription() {
   let storage;
   try { storage = globalThis.localStorage; } catch { storage = null; }
   subscription = createSubscription(storage);
-  onAction('openSubscription', openSubscription);
+  onAction('openSubscription', () => openSubscription());
+  document.addEventListener('fitcat:pro-request', event => openSubscription(event.detail));
   onAction('subscriptionOverview', () => { refresh(); setPanel('overview'); });
   onAction('subscriptionTerms', () => setPanel('terms'));
   onAction('chooseSubscriptionTerm', button => {

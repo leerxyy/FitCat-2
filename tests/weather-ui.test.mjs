@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setupDOM, tick, submit } from './dom.mjs';
+import { setupDOM, tick, submit, activeProFixture } from './dom.mjs';
 
 test('automatic weather remains fixed for the day, handles offline use and respects manual overrides', async t => {
-  const env = setupDOM({ fitnessProfile: JSON.stringify({ name: 'Тест', age: 20, gender: 'male', height: 170, weight: 52, goal: 'maintain' }),
+  const env = setupDOM({ ...activeProFixture(), fitnessProfile: JSON.stringify({ name: 'Тест', age: 20, gender: 'male', height: 170, weight: 52, goal: 'maintain' }),
     lastDate: new Date().toDateString(), smartWaterEnabled: 'true', currentTemp: '22', currentSteps: '12800', waterAmount: '750' });
   const originalFetch = globalThis.fetch;
   const $ = id => document.getElementById(id);

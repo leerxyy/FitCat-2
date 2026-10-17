@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="styles/startup.css">
   <link rel="stylesheet" href="styles/smart-water.css">
   <link rel="stylesheet" href="styles/interactions.css">
+  <link rel="stylesheet" href="styles/premium.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -97,7 +98,7 @@
       <div class="food-list" id="foodListContainer"></div>
     </section>
     <section class="card water-card" id="waterCard">
-      <div class="section-heading"><h2 data-i18n="water_title">Вода</h2><div class="water-reading"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg><span><strong id="waterCurrent">0</strong><span class="muted"> / </span><span class="muted" id="waterGoal">0 л</span></span></div><button type="button" class="icon-button subtle" data-action="openSmartWater" data-i18n-label="smart_water"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#settings"></use></svg></button></div>
+      <div class="section-heading"><h2 data-i18n="water_title">Вода</h2><div class="water-reading"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg><span><strong id="waterCurrent">0</strong><span class="muted"> / </span><span class="muted" id="waterGoal">0 л</span></span></div><button type="button" class="icon-button subtle" data-action="openSmartWater" data-i18n-label="smart_water" data-pro-feature="smart-water" data-pro-label="smart_water"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#settings"></use></svg></button></div>
       <div class="water-track" role="progressbar" id="waterProgress" aria-label="Вода" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="waterFill"></i></div>
       <div class="water-actions"><button type="button" class="glass-button" data-action="addWater" data-value="250">+250 <span data-i18n="ml">мл</span></button><button type="button" class="glass-button" data-action="addWater" data-value="500">+500 <span data-i18n="ml">мл</span></button><button type="button" class="icon-button glass" data-action="openWater" data-i18n-label="other_volume"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#more"></use></svg></button></div>
       <p class="water-hint" id="smartWaterHint" hidden></p>
@@ -199,13 +200,13 @@
       <button class="btn-small active" data-nutrition="kcal" type="button" data-action="switchNutritionChart" data-value="kcal">
         <span data-i18n="calories">Калории</span>
       </button>
-      <button class="btn-small" data-nutrition="protein" type="button" data-action="switchNutritionChart" data-value="protein">
+      <button class="btn-small" data-nutrition="protein" type="button" data-action="switchNutritionChart" data-value="protein" data-pro-feature="macro-history" data-pro-label="protein">
         <span data-i18n="protein">Белки</span>
       </button>
-      <button class="btn-small" data-nutrition="fat" type="button" data-action="switchNutritionChart" data-value="fat">
+      <button class="btn-small" data-nutrition="fat" type="button" data-action="switchNutritionChart" data-value="fat" data-pro-feature="macro-history" data-pro-label="fat">
         <span data-i18n="fat">Жиры</span>
       </button>
-      <button class="btn-small" data-nutrition="carbs" type="button" data-action="switchNutritionChart" data-value="carbs">
+      <button class="btn-small" data-nutrition="carbs" type="button" data-action="switchNutritionChart" data-value="carbs" data-pro-feature="macro-history" data-pro-label="carbs">
         <span data-i18n="carbs">Углеводы</span>
       </button>
     </div>
@@ -214,7 +215,7 @@
       <h3 data-i18n="nutrition_history">История питания</h3>
     </button>
     <div class="journal-content" id="nutritionHistoryContent">
-      <div id="nutritionHistoryList"></div>
+      <button type="button" id="macroHistoryAccess" class="macro-history-access" data-action="openMacroHistory" data-pro-feature="macro-history" data-pro-label="pro_open_macros"><span data-i18n="pro_open_macros">БЖУ за прошлые дни</span></button><div id="nutritionHistoryList"></div>
     </div>
   </div>
 </div><div id="friendsPage" class="page" data-main-view hidden>
@@ -329,7 +330,7 @@
   </form>
 </dialog>
 <dialog id="waterEntryModal" class="sheet compact-sheet" aria-labelledby="waterDialogTitle"><header class="sheet-heading"><h2 id="waterDialogTitle" data-i18n="other_volume">Другой объём</h2><button type="button" data-close="waterEntryModal" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><form id="waterForm"><div class="field"><label for="manualWaterInput" data-i18n="water_total">Всего выпито, мл</label><input type="number" id="manualWaterInput" min="0" max="30000" step="10" inputmode="numeric" required></div><button class="btn-primary" type="submit" data-i18n="set_water">Сохранить объём</button></form></dialog>
-<dialog id="mealToolsModal" class="sheet compact-sheet" aria-labelledby="mealToolsTitle"><header class="sheet-heading"><h2 id="mealToolsTitle" data-i18n="meals">Приёмы пищи</h2><button type="button" data-close="mealToolsModal" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><div id="templatesBar" class="templates-list"></div><button type="button" class="btn-secondary" data-action="saveTemplate"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><span data-i18n="save_template">Сохранить шаблон</span></button><button type="button" class="btn-secondary" data-action="showProductsManager"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="my_products">Мои продукты</span></button><button type="button" class="btn-secondary danger-text" data-action="clearTodayFoods"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg><span data-i18n="clear">Очистить</span></button></dialog>
+<dialog id="mealToolsModal" class="sheet compact-sheet" aria-labelledby="mealToolsTitle"><header class="sheet-heading"><h2 id="mealToolsTitle" data-i18n="meals">Приёмы пищи</h2><button type="button" data-close="mealToolsModal" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><div id="templatesBar" class="templates-list"></div><p id="templateAllowance" class="template-allowance"></p><button type="button" class="btn-secondary" id="saveTemplateButton" data-action="saveTemplate" data-pro-feature="templates" data-pro-label="save_template"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><span data-i18n="save_template">Сохранить шаблон</span></button><button type="button" class="btn-secondary" data-action="showProductsManager"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="my_products">Мои продукты</span></button><button type="button" class="btn-secondary danger-text" data-action="clearTodayFoods"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg><span data-i18n="clear">Очистить</span></button></dialog>
 <dialog id="confirmDialog" class="sheet compact-sheet" aria-labelledby="confirmTitle"><h2 id="confirmTitle" data-i18n="confirmation">Подтверждение</h2><p id="confirmMessage" class="dialog-description"></p><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="confirmDialog" data-i18n="cancel">Отмена</button><button type="button" class="btn-primary" id="confirmAccept" data-i18n="confirm">Подтвердить</button></div></dialog>
 <dialog id="promptDialog" class="sheet compact-sheet" aria-labelledby="promptTitle"><form id="promptForm"><h2 id="promptTitle"></h2><div class="field"><label class="sr-only" for="promptInput" data-i18n="name">Название</label><input id="promptInput" required></div><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="promptDialog" data-i18n="cancel">Отмена</button><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></div></form></dialog>
 <dialog id="productEditModal" class="sheet compact-sheet" aria-labelledby="productEditTitle"><header class="sheet-heading"><h2 id="productEditTitle" data-i18n="edit">Изменить</h2><button type="button" data-close="productEditModal" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><form id="productEditForm"><div class="field"><label for="productEditName" data-i18n="name">Название</label><input id="productEditName" maxlength="200" required></div><p class="field-legend" data-i18n="per_100g">На 100 грамм:</p><div class="nutrient-fields"><div class="field"><label for="productEditKcal" data-i18n="calories">calories</label><input id="productEditKcal" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditProtein" data-i18n="protein">protein</label><input id="productEditProtein" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditFat" data-i18n="fat">fat</label><input id="productEditFat" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditCarbs" data-i18n="carbs">carbs</label><input id="productEditCarbs" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div></div><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></form></dialog>
@@ -339,13 +340,16 @@
   <div class="subscription-grab" aria-hidden="true"></div>
   <section class="subscription-panel" data-subscription-panel="overview">
     <header class="sheet-heading"><h2 id="subscriptionTitle" data-i18n="subscription">Подписка</h2><button type="button" data-close="subscriptionDialog" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+    <aside id="proFeatureNotice" class="pro-feature-notice" hidden><strong id="proFeatureTitle"></strong><p id="proFeatureDescription"></p></aside>
     <div class="subscription-current"><strong data-i18n="subscription_your_plan">Ваш тариф</strong><span id="subscriptionCurrentPlan" class="subscription-badge"><span class="rgb-rim" aria-hidden="true"></span><span id="subscriptionCurrentPlanValue" class="badge-label">Basic</span></span><small id="subscriptionCurrentDetail">Бесплатно</small></div>
     <p class="subscription-expired" id="subscriptionExpired" data-i18n="subscription_expired" hidden>Срок PRO+ завершён. Сейчас у вас Basic.</p>
     <article class="subscription-offer"><span class="rgb-rim" aria-hidden="true"></span><h3>Fit<span class="brand-accent">Cat</span> PRO+</h3><p data-i18n="subscription_tagline">Больше возможностей каждый день</p>
       <ul class="subscription-features">
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg><div><strong data-i18n="pro_feature_smart-water">Умная вода</strong><small data-i18n="pro_water_detail">Температура, шаги и активность в расчёте воды; автоматическая погода.</small></div><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></li>
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><div><strong data-i18n="pro_feature_macro-history">История БЖУ</strong><small data-i18n="pro_macros_detail">Белки, жиры и углеводы за прошлые дни — в графиках и истории.</small></div><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></li>
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><div><strong data-i18n="pro_templates_unlimited">Шаблоны без ограничений</strong><small data-i18n="pro_templates_detail">Сохраняй больше 3 шаблонов рациона.</small></div><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></li>
         <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="subscription_ai">ИИ-помощник по питанию</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
         <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><span data-i18n="subscription_plans">Персональные планы</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
-        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><span data-i18n="subscription_analytics">Расширенная аналитика</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
       </ul>
     </article>
     <section class="subscription-active" id="subscriptionActiveDetails" hidden><strong data-i18n="subscription_active">PRO+ активна</strong><p id="subscriptionActiveDays"></p><p id="subscriptionActiveUntil"></p><p data-i18n="subscription_no_renewal">Автопродление выключено. Списаний не будет.</p></section>
@@ -370,7 +374,7 @@
   </section>
   <section class="subscription-panel subscription-fineprint" data-subscription-panel="terms" hidden>
     <header class="sheet-heading"><h2 id="subscriptionConditionsTitle" data-i18n="subscription_conditions">Условия подписки</h2><button type="button" data-close="subscriptionDialog" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
-    <p data-i18n="subscription_terms_promo">Прежние промокоды отключены. Уже активированный срок PRO+ и баланс коинов сохранены.</p><p data-i18n="subscription_terms_local">Активация сохраняется в этом браузере на этом устройстве. В другом браузере или после очистки данных статус не восстановится автоматически.</p><p data-i18n="subscription_terms_payment">Оплата коиновая: 29 за 1 месяц, 649 за 3 месяца, 1 999 за 12 месяцев. Автопродления нет.</p><p data-i18n="subscription_terms_features">Функции с пометкой «Скоро» готовятся к запуску. Основные возможности дневника доступны в Basic.</p><button type="button" class="text-button" data-action="subscriptionPromo" data-i18n="subscription_legacy_promo">Промокод на PRO+</button><button type="button" class="btn-secondary" data-action="subscriptionOverview" data-i18n="back">← Назад</button>
+    <p data-i18n="subscription_terms_promo">Прежние промокоды отключены. Уже активированный срок PRO+ и баланс коинов сохранены.</p><p data-i18n="subscription_terms_local">Активация сохраняется в этом браузере на этом устройстве. В другом браузере или после очистки данных статус не восстановится автоматически.</p><p data-i18n="subscription_terms_payment">Оплата коиновая: 29 за 1 месяц, 649 за 3 месяца, 1 999 за 12 месяцев. Автопродления нет.</p><p data-i18n="pro_subscription_features">Функции с пометкой «Скоро» готовятся к запуску. Основные возможности дневника доступны в Basic.</p><button type="button" class="text-button" data-action="subscriptionPromo" data-i18n="subscription_legacy_promo">Промокод на PRO+</button><button type="button" class="btn-secondary" data-action="subscriptionOverview" data-i18n="back">← Назад</button>
   </section>
 </dialog>
 

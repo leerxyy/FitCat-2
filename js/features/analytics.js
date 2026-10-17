@@ -1,10 +1,11 @@
-import { state } from '../core/store.js';
+import { state, proAccess } from '../core/store.js';
 import { bmi, bmiCategory, clamp, localDate } from '../core/math.js';
 import { t, locale, number } from '../core/i18n.js';
 import { loadScript } from '../core/loader.js';
 import { $, icon, escapeHTML, onAction, changed, confirmAction, promptValue, reducedMotion } from '../ui/components.js';
 import { activeTab } from '../ui/navigation.js';
 import { revealRegion } from '../ui/motion.js';
+import { requirePro } from '../ui/premium.js';
 
 let weightChart;
 let nutritionChart;
@@ -18,6 +19,11 @@ function formatDate(date) {
 
 export function renderAnalytics() {
   if (!state.profile) return;
+  if (!proAccess()) nutritionMetric = 'kcal';
+  document.querySelectorAll('[data-nutrition]').forEach(button => {
+    button.classList.toggle('active', button.dataset.nutrition === nutritionMetric);
+    button.setAttribute('aria-pressed', String(button.dataset.nutrition === nutritionMetric));
+  });
   const sorted = [...state.weight].sort((a, b) => a.date.localeCompare(b.date));
   const start = sorted[0]?.weight ?? state.profile.startWeight ?? state.profile.weight;
   const current = sorted.at(-1)?.weight ?? state.profile.weight;
@@ -33,7 +39,13 @@ export function renderAnalytics() {
   $('bmiMarker').style.left = `${clamp((bmiValue - 16) / 24) * 100}%`;
   $('bmiTooltip').textContent = t(bmiCategory(bmiValue));
   $('weightHistoryList').innerHTML = sorted.length ? sorted.reverse().map(entry => `<div class="history-item"><span>${escapeHTML(formatDate(entry.date))}</span><strong>${number(entry.weight, 1)} ${t('kg')}</strong><button type="button" class="icon-button close-button" data-action="deleteWeightEntry" data-value="${escapeHTML(entry.date)}" aria-label="${escapeHTML(t('delete') + ': ' + entry.date)}">${icon('x')}</button></div>`).join('') : emptyHistory();
-  $('nutritionHistoryList').innerHTML = state.nutrition.length ? [...state.nutrition].sort((a, b) => b.date.localeCompare(a.date)).map(entry => `<div class="history-item"><span>${escapeHTML(formatDate(entry.date))}</span><strong class="nutrition-history-value">${number(entry.kcal)} ${t('kcal')}<br><span class="muted">${t('protein_short')} ${number(entry.protein)} · ${t('fat_short')} ${number(entry.fat)} · ${t('carbs_short')} ${number(entry.carbs)}</span></strong><button type="button" class="icon-button close-button" data-action="deleteNutritionEntry" data-value="${escapeHTML(entry.date)}" aria-label="${escapeHTML(t('delete') + ': ' + entry.date)}">${icon('x')}</button></div>`).join('') : emptyHistory();
+  const showPastMacros = proAccess();
+  $('nutritionHistoryList').innerHTML = state.nutrition.length ? [...state.nutrition].sort((a, b) => b.date.localeCompare(a.date)).map(entry => {
+    const details = showPastMacros || entry.date === localDate()
+      ? `<span class="muted">${t('protein_short')} ${number(entry.protein)} · ${t('fat_short')} ${number(entry.fat)} · ${t('carbs_short')} ${number(entry.carbs)}</span>`
+      : `<button type="button" class="history-macro-lock" data-action="openMacroHistory" aria-label="${escapeHTML(t('pro_open_macros') + '. ' + t('pro_required'))}">${icon('lock')}<span>${escapeHTML(t('pro_macro_locked'))}</span></button>`;
+    return `<div class="history-item"><span>${escapeHTML(formatDate(entry.date))}</span><strong class="nutrition-history-value">${number(entry.kcal)} ${t('kcal')}<br>${details}</strong><button type="button" class="icon-button close-button" data-action="deleteNutritionEntry" data-value="${escapeHTML(entry.date)}" aria-label="${escapeHTML(t('delete') + ': ' + entry.date)}">${icon('x')}</button></div>`;
+  }).join('') : emptyHistory();
 }
 
 function emptyHistory() {
@@ -60,6 +72,7 @@ function setChartStatus(name, message, retry = false) {
 
 export async function renderCharts() {
   if (activeTab !== 2 || !state.profile) return;
+  if (!proAccess()) nutritionMetric = 'kcal';
   const version = ++drawVersion;
   if (!state.weight.length) { weightChart?.destroy(); weightChart = null; setChartStatus('weight', t('no_history_hint')); }
   if (!state.nutrition.length) { nutritionChart?.destroy(); nutritionChart = null; setChartStatus('nutrition', t('no_history_hint')); }
@@ -73,6 +86,7 @@ export async function renderCharts() {
     return;
   }
   if (version !== drawVersion || activeTab !== 2) return;
+  if (!proAccess()) nutritionMetric = 'kcal';
   if (state.weight.length) {
     weightChart?.destroy(); setChartStatus('weight', '');
     const entries = [...state.weight].sort((a, b) => a.date.localeCompare(b.date));
@@ -121,9 +135,19 @@ export function initAnalytics() {
     state.nutrition = state.nutrition.filter(entry => entry.date !== button.dataset.value); changed();
   });
   onAction('switchNutritionChart', button => {
+    if (!['kcal', 'protein', 'fat', 'carbs'].includes(button.dataset.value)) return;
+    if (button.dataset.value !== 'kcal' && !requirePro('macro-history')) return;
     nutritionMetric = button.dataset.value;
-    document.querySelectorAll('[data-nutrition]').forEach(item => item.classList.toggle('active', item.dataset.nutrition === nutritionMetric));
+    document.querySelectorAll('[data-nutrition]').forEach(item => {
+      item.classList.toggle('active', item.dataset.nutrition === nutritionMetric);
+      item.setAttribute('aria-pressed', String(item.dataset.nutrition === nutritionMetric));
+    });
     renderCharts();
+  });
+  onAction('openMacroHistory', () => {
+    if (!requirePro('macro-history')) return;
+    nutritionMetric = 'protein'; renderAnalytics(); renderCharts();
+    $('nutritionChart').scrollIntoView?.({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
   });
   onAction('toggleJournal', button => {
     const name = button.dataset.value; const content = $(name + 'Content');

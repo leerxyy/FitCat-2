@@ -3,6 +3,7 @@ import { translations } from './translations.js';
 import { subscriptionCopy } from './subscription-copy.js';
 import { walletCopy } from './wallet-copy.js';
 import { weatherCopy } from './weather-copy.js';
+import { premiumCopy } from './premium-copy.js';
 
 const additions = {
   ru: {
@@ -100,7 +101,7 @@ const additions = {
   },
 };
 
-for (const language of Object.keys(additions)) Object.assign(translations[language], additions[language], subscriptionCopy[language], walletCopy[language], weatherCopy[language]);
+for (const language of Object.keys(additions)) Object.assign(translations[language], additions[language], subscriptionCopy[language], walletCopy[language], weatherCopy[language], premiumCopy[language]);
 
 export function t(key) {
   return translations[state.preferences.lang]?.[key] ?? translations.ru[key] ?? key;
