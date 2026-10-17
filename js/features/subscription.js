@@ -1,7 +1,9 @@
 import { createSubscription, formatPromo, SUBSCRIPTION_KEY, PROMO_DAYS } from '../core/subscription.js';
-import { t, locale } from '../core/i18n.js';
+import { t, locale, number } from '../core/i18n.js';
 import { $, onAction, openDialog } from '../ui/components.js';
 import { enter } from '../ui/motion.js';
+import { SUBSCRIPTION_PRICES } from '../core/wallet.js';
+import { getWallet, purchaseWithCoins, walletError, openWallet } from './wallet.js';
 
 let subscription;
 let expiryTimer;
@@ -9,6 +11,15 @@ let chosenTerm = '1';
 let panel = 'overview';
 let errorKey = '';
 let revealPending = false;
+let checkoutPeriod = '1';
+let checkoutId;
+let successPeriod = null;
+
+function currentStatus() {
+  try { return getWallet()?.status() || subscription.status(); }
+  catch { return subscription.status(); }
+}
+function balance() { try { return getWallet().snapshot().balance; } catch { return null; } }
 
 function expiryLabel(value) {
   return value ? new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value)) : '';
@@ -34,7 +45,7 @@ function showError(key = '') {
 
 export function renderSubscription() {
   if (!subscription) return;
-  const status = subscription.status();
+  const status = currentStatus();
   const badge = $('subscriptionBadge');
   // Reveal the new header status after the congratulations window closes.
   badge.classList.toggle('is-pro', status.active && !revealPending);
@@ -45,11 +56,18 @@ export function renderSubscription() {
   $('subscriptionActiveDetails').hidden = !status.active;
   $('subscriptionActiveDays').textContent = `${t('subscription_remaining')} ${status.remainingDays} ${t('days')}`;
   $('subscriptionActiveUntil').textContent = `${t('subscription_until')} ${expiryLabel(status.expiresAt)}`;
-  $('subscriptionTerms').hidden = status.active;
+  $('subscriptionTerms').hidden = false;
   $('subscriptionPurchase').textContent = t(status.active ? 'subscription_extend' : 'subscription_get');
   $('subscriptionExpired').hidden = status.active || !status.redeemed;
   $('subscriptionSuccessUntil').textContent = `${t('subscription_until')} ${expiryLabel(status.expiresAt)}`;
-  $('subscriptionSuccessDays').textContent = `${PROMO_DAYS} ${t('days')}`;
+  $('subscriptionSuccessDays').textContent = successPeriod ? t('subscription_term_' + successPeriod) : `${PROMO_DAYS} ${t('days')}`;
+  const coins = balance();
+  $('subscriptionCoinBalance').textContent = coins == null ? '—' : number(coins);
+  $('subscriptionDebit').textContent = `${t('subscription_debit')} ${number(SUBSCRIPTION_PRICES[chosenTerm].price)} ${t('wallet_coins_unit')}`;
+  const term = SUBSCRIPTION_PRICES[checkoutPeriod];
+  $('checkoutPeriod').textContent = t('subscription_term_' + checkoutPeriod);
+  $('checkoutPrice').textContent = `${number(term.price)} ${t('wallet_coins_unit')}`;
+  $('checkoutAfter').textContent = coins == null ? '—' : `${number(Math.max(0, coins - term.price))} ${t('wallet_coins_unit')}`;
   for (const button of document.querySelectorAll('[data-subscription-term]')) {
     const selected = button.dataset.subscriptionTerm === chosenTerm;
     button.classList.toggle('is-selected', selected);
@@ -61,15 +79,15 @@ export function renderSubscription() {
 
 function scheduleExpiry() {
   clearTimeout(expiryTimer);
-  const status = subscription.status();
-  if (status.active) expiryTimer = setTimeout(refresh, Math.max(1, status.expiresAt - Date.now()));
+  const status = currentStatus();
+  if (status.active) expiryTimer = setTimeout(refresh, Math.min(2147483647, Math.max(1, status.expiresAt - Date.now())));
 }
 
 function refresh() {
   subscription.reload();
-  if (!subscription.status().active) revealPending = false;
+  if (!currentStatus().active) revealPending = false;
   renderSubscription();
-  if (panel === 'success' && !subscription.status().active) setPanel('overview', false);
+  if (panel === 'success' && !currentStatus().active) setPanel('overview', false);
   scheduleExpiry();
 }
 
@@ -85,9 +103,38 @@ export function initSubscription() {
   onAction('openSubscription', openSubscription);
   onAction('subscriptionOverview', () => { refresh(); setPanel('overview'); });
   onAction('subscriptionTerms', () => setPanel('terms'));
-  onAction('chooseSubscriptionTerm', button => { chosenTerm = button.dataset.subscriptionTerm; renderSubscription(); });
-  onAction('subscriptionPurchase', () => {
+  onAction('chooseSubscriptionTerm', button => {
+    if (!Object.hasOwn(SUBSCRIPTION_PRICES, button.dataset.subscriptionTerm)) return;
+    chosenTerm = button.dataset.subscriptionTerm; $('subscriptionPurchaseError').hidden = true; renderSubscription();
+  });
+  onAction('subscriptionPromo', () => {
     refresh(); showError(); $('promoCode').value = ''; setPanel('promo');
+  });
+  onAction('subscriptionWallet', () => openWallet('promo'));
+  onAction('subscriptionPurchase', () => {
+    refresh();
+    checkoutPeriod = chosenTerm; checkoutId = crypto.randomUUID();
+    $('checkoutError').hidden = true;
+    const coins = balance();
+    if (coins == null || coins < SUBSCRIPTION_PRICES[chosenTerm].price) {
+      $('subscriptionPurchaseError').textContent = t(coins == null ? 'wallet_corrupt' : 'wallet_insufficient');
+      $('subscriptionPurchaseError').hidden = false; $('subscriptionWalletAction').hidden = false; return;
+    }
+    $('subscriptionPurchaseError').hidden = true; $('subscriptionWalletAction').hidden = true;
+    renderSubscription(); setPanel('checkout');
+  });
+  onAction('confirmSubscriptionPurchase', async button => {
+    if (button.disabled) return;
+    button.disabled = true; revealPending = !currentStatus().active;
+    try {
+      await purchaseWithCoins(checkoutPeriod, { operationId: checkoutId });
+      successPeriod = checkoutPeriod;
+      renderSubscription(); scheduleExpiry(); setPanel('success');
+      document.dispatchEvent(new CustomEvent('fitcat:subscription', { detail: currentStatus() }));
+    } catch (error) {
+      revealPending = false; renderSubscription();
+      $('checkoutError').textContent = walletError(error); $('checkoutError').hidden = false;
+    } finally { button.disabled = false; }
   });
   $('promoCode').addEventListener('input', event => {
     const input = event.target;
@@ -102,10 +149,11 @@ export function initSubscription() {
     button.disabled = true;
     try {
       subscription.redeem($('promoCode').value);
+      successPeriod = null;
       revealPending = true;
       $('promoCode').blur?.();
       showError(); renderSubscription(); scheduleExpiry(); setPanel('success');
-      document.dispatchEvent(new CustomEvent('fitcat:subscription', { detail: subscription.status() }));
+      document.dispatchEvent(new CustomEvent('fitcat:subscription', { detail: currentStatus() }));
     } catch (error) {
       showError(['promo_format', 'promo_invalid', 'promo_used'].includes(error.message) ? error.message : 'save_error');
     } finally { button.disabled = false; }
@@ -115,6 +163,7 @@ export function initSubscription() {
     renderSubscription();
   });
   document.addEventListener('fitcat:language', renderSubscription);
+  document.addEventListener('fitcat:wallet', () => { renderSubscription(); scheduleExpiry(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.addEventListener('focus', refresh);
   window.addEventListener('storage', event => { if (event.key === SUBSCRIPTION_KEY || event.key === null) refresh(); });

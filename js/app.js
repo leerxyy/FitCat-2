@@ -14,6 +14,7 @@ import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
 import { initHaptics } from './ui/haptics.js';
 import { initSubscription, renderSubscription } from './features/subscription.js';
+import { initWallet } from './features/wallet.js';
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
@@ -29,7 +30,7 @@ function start() {
   loadState();
   rollDay(); updateStreak();
   initActions(); initDock(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
-  initProducts(); initAnalytics(); initFriends(); initGestures(); initSubscription();
+  initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
   document.addEventListener('fitcat:change', () => { render(); queuePublish(); });

@@ -14,7 +14,7 @@ test('Basic → subscription → promo → congratulations → RGB PRO+ → expi
     await click('#subscriptionBadge');
     assert.equal($('subscriptionDialog').open, true); assert.equal($('subscriptionCurrentPlanValue').textContent, 'Basic');
     await click('[data-subscription-term="12"]'); assert.equal(document.querySelector('[data-subscription-term="12"]').getAttribute('aria-pressed'), 'true');
-    await click('#subscriptionPurchase');
+    await click('[data-action="subscriptionTerms"]'); await click('[data-action="subscriptionPromo"]');
     assert.equal(document.querySelector('[data-subscription-panel="promo"]').hidden, false);
     $('promoCode').value = 'FCAT-0826-PROX-VI-9D'; submit($('promoForm')); await tick();
     assert.equal($('promoError').hidden, false); assert.match($('promoError').textContent, /не найден/);
@@ -30,8 +30,8 @@ test('Basic → subscription → promo → congratulations → RGB PRO+ → expi
     assert.equal(createSubscription(env.localStorage).status(now).active, true);
     await click('#subscriptionBadge');
     assert.equal($('subscriptionCurrentPlanValue').textContent, 'PRO+'); assert.equal($('subscriptionActiveDetails').hidden, false);
-    assert.equal($('subscriptionTerms').hidden, true);
-    await click('#subscriptionPurchase'); $('promoCode').value = PROMO_CODE; submit($('promoForm')); await tick();
+    assert.equal($('subscriptionTerms').hidden, false);
+    await click('[data-action="subscriptionTerms"]'); await click('[data-action="subscriptionPromo"]'); $('promoCode').value = PROMO_CODE; submit($('promoForm')); await tick();
     assert.match($('promoError').textContent, /уже использован/); assert.equal(JSON.parse(env.localStorage.getItem(SUBSCRIPTION_KEY)).expiresAt, record.expiresAt);
     now = record.expiresAt; document.dispatchEvent(new Event('visibilitychange')); await tick();
     assert.equal($('subscriptionBadge').classList.contains('is-pro'), false); assert.equal($('subscriptionCurrentPlanValue').textContent, 'Basic');
