@@ -13,9 +13,10 @@ import { initPWA } from './ui/pwa.js';
 import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
 import { initHaptics } from './ui/haptics.js';
+import { initSubscription, renderSubscription } from './features/subscription.js';
 
 function render() {
-  renderPreferences(); renderIdentity(); renderTemplates();
+  renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
   if (state.profile) { renderSummary(); renderFoods(); renderAnalytics(); if (activeTab === 2) renderCharts(); }
 }
 
@@ -28,7 +29,7 @@ function start() {
   loadState();
   rollDay(); updateStreak();
   initActions(); initDock(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
-  initProducts(); initAnalytics(); initFriends(); initGestures();
+  initProducts(); initAnalytics(); initFriends(); initGestures(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
   document.addEventListener('fitcat:change', () => { render(); queuePublish(); });

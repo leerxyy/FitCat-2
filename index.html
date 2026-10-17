@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="styles/layout.css">
   <link rel="stylesheet" href="styles/glass.css">
   <link rel="stylesheet" href="styles/motion.css">
+  <link rel="stylesheet" href="styles/subscription.css">
   <script type="module" src="js/app.js"></script>
 </head>
 <body data-screen="setupPage">
@@ -63,7 +64,7 @@
   </div>
 </div>
     <main id="mainPage" class="screen" data-screen-view hidden>
-      <header class="app-header"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><button type="button" class="profile-button glass" id="headerPhoto" data-action="showProfile" data-i18n-label="profile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#user"></use></svg></button></header>
+      <header class="app-header"><div class="brand-group"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><button type="button" class="subscription-badge" id="subscriptionBadge" data-action="openSubscription" aria-label="Подписка: Basic"><span class="rgb-rim" aria-hidden="true"></span><span class="badge-label badge-basic" aria-hidden="true">Basic</span><span class="badge-label badge-pro" aria-hidden="true">PRO+</span></button></div><button type="button" class="profile-button glass" id="headerPhoto" data-action="showProfile" data-i18n-label="profile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#user"></use></svg></button></header>
       <div class="page-heading"><h1 id="pageTitle" data-i18n="tab_today">Сегодня</h1><p id="pageSubtitle"></p></div>
       <div id="swipeContainer"><div id="swipeWrapper">
 <section id="todayPage" class="page active" data-main-view>
@@ -325,6 +326,43 @@
 <dialog id="confirmDialog" class="sheet compact-sheet" aria-labelledby="confirmTitle"><h2 id="confirmTitle" data-i18n="confirmation">Подтверждение</h2><p id="confirmMessage" class="dialog-description"></p><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="confirmDialog" data-i18n="cancel">Отмена</button><button type="button" class="btn-primary" id="confirmAccept" data-i18n="confirm">Подтвердить</button></div></dialog>
 <dialog id="promptDialog" class="sheet compact-sheet" aria-labelledby="promptTitle"><form id="promptForm"><h2 id="promptTitle"></h2><div class="field"><label class="sr-only" for="promptInput" data-i18n="name">Название</label><input id="promptInput" required></div><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="promptDialog" data-i18n="cancel">Отмена</button><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></div></form></dialog>
 <dialog id="productEditModal" class="sheet compact-sheet" aria-labelledby="productEditTitle"><header class="sheet-heading"><h2 id="productEditTitle" data-i18n="edit">Изменить</h2><button type="button" class="icon-button" data-close="productEditModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><form id="productEditForm"><div class="field"><label for="productEditName" data-i18n="name">Название</label><input id="productEditName" maxlength="200" required></div><p class="field-legend" data-i18n="per_100g">На 100 грамм:</p><div class="nutrient-fields"><div class="field"><label for="productEditKcal" data-i18n="calories">calories</label><input id="productEditKcal" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditProtein" data-i18n="protein">protein</label><input id="productEditProtein" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditFat" data-i18n="fat">fat</label><input id="productEditFat" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditCarbs" data-i18n="carbs">carbs</label><input id="productEditCarbs" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div></div><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></form></dialog>
+
+  
+<dialog id="subscriptionDialog" class="sheet subscription-sheet" aria-labelledby="subscriptionTitle">
+  <div class="subscription-grab" aria-hidden="true"></div>
+  <section class="subscription-panel" data-subscription-panel="overview">
+    <header class="sheet-heading"><h2 id="subscriptionTitle" data-i18n="subscription">Подписка</h2><button type="button" class="icon-button" data-close="subscriptionDialog" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+    <div class="subscription-current"><strong data-i18n="subscription_your_plan">Ваш тариф</strong><span id="subscriptionCurrentPlan" class="subscription-badge"><span class="rgb-rim" aria-hidden="true"></span><span id="subscriptionCurrentPlanValue" class="badge-label">Basic</span></span><small id="subscriptionCurrentDetail">Бесплатно</small></div>
+    <p class="subscription-expired" id="subscriptionExpired" data-i18n="subscription_expired" hidden>Срок PRO+ завершён. Сейчас у вас Basic.</p>
+    <article class="subscription-offer"><span class="rgb-rim" aria-hidden="true"></span><h3>Fit<span class="brand-accent">Cat</span> PRO+</h3><p data-i18n="subscription_tagline">Больше возможностей каждый день</p>
+      <ul class="subscription-features">
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="subscription_ai">ИИ-помощник по питанию</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><span data-i18n="subscription_plans">Персональные планы</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
+        <li><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><span data-i18n="subscription_analytics">Расширенная аналитика</span><small class="coming-soon" data-i18n="subscription_soon">Скоро</small></li>
+      </ul>
+    </article>
+    <section class="subscription-active" id="subscriptionActiveDetails" hidden><strong data-i18n="subscription_active">PRO+ активна</strong><p id="subscriptionActiveDays"></p><p id="subscriptionActiveUntil"></p><p data-i18n="subscription_no_renewal">Автопродление выключено. Списаний не будет.</p></section>
+    <section class="subscription-terms" id="subscriptionTerms"><h3 data-i18n="subscription_choose_term">Выберите срок</h3><div class="subscription-periods" role="group" data-i18n-label="subscription_choose_term">
+      <button type="button" class="subscription-period is-selected" data-action="chooseSubscriptionTerm" data-subscription-term="1" aria-pressed="true"><span data-i18n="subscription_month">1 месяц</span><span>— ₽</span></button>
+      <button type="button" class="subscription-period" data-action="chooseSubscriptionTerm" data-subscription-term="3" aria-pressed="false"><span data-i18n="subscription_quarter">3 месяца</span><span>— ₽</span></button>
+      <button type="button" class="subscription-period" data-action="chooseSubscriptionTerm" data-subscription-term="12" aria-pressed="false"><span data-i18n="subscription_year">1 год</span><span>— ₽</span></button>
+    </div><p class="subscription-term-hint" data-i18n="subscription_term_hint">Сейчас доступна активация по промокоду</p></section>
+    <button type="button" class="btn-primary" id="subscriptionPurchase" data-action="subscriptionPurchase">Оформить PRO+</button><div class="subscription-footer"><button type="button" class="text-button" data-action="subscriptionTerms" data-i18n="subscription_conditions">Условия подписки</button></div>
+  </section>
+  <section class="subscription-panel" data-subscription-panel="promo" hidden>
+    <header class="sheet-heading"><h2 id="promoTitle" data-i18n="promo_title">Введите промокод</h2><button type="button" class="icon-button" data-close="subscriptionDialog" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+    <p class="promo-intro" data-i18n="promo_intro">Активируй PRO+ с помощью промокода.</p><div class="promo-summary"><strong>FitCat PRO+</strong><span id="promoTermDetail" data-i18n="promo_offer_detail">Промокод на 8 дней • Без оплаты и автопродления</span></div>
+    <form id="promoForm" novalidate><div class="field"><label for="promoCode" data-i18n="promo_label">Промокод</label><input id="promoCode" type="text" inputmode="text" maxlength="64" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AAAA-0000-AAAA-AA-0A" aria-describedby="promoError promoDurationNote" required></div><p class="promo-error" id="promoError" role="alert" aria-live="polite" hidden></p><button class="btn-primary" id="activatePromo" type="submit" data-i18n="promo_activate">Активировать PRO+</button></form>
+    <p class="promo-duration-note" id="promoDurationNote" data-i18n="promo_duration_note">Восемь суток с момента активации. Срок определяется промокодом, независимо от выбранного периода.</p><div class="subscription-footer"><button type="button" class="text-button" data-action="subscriptionOverview" data-i18n="back">← Назад</button></div>
+  </section>
+  <section class="subscription-panel subscription-success" data-subscription-panel="success" hidden>
+    <div class="success-emblem"><span class="rgb-rim" aria-hidden="true"></span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></div><h2 id="subscriptionSuccessTitle" data-i18n="subscription_success">Поздравляем с приобретением PRO+!</h2><p data-i18n="subscription_success_copy">Ваш новый статус уже активен</p><strong class="success-days" id="subscriptionSuccessDays">8 дн.</strong><p id="subscriptionSuccessUntil"></p><p class="promo-duration-note" data-i18n="subscription_no_renewal">Автопродление выключено. Списаний не будет.</p><button type="button" class="btn-primary" data-close="subscriptionDialog" data-i18n="subscription_continue">Продолжить с PRO+</button>
+  </section>
+  <section class="subscription-panel subscription-fineprint" data-subscription-panel="terms" hidden>
+    <header class="sheet-heading"><h2 id="subscriptionConditionsTitle" data-i18n="subscription_conditions">Условия подписки</h2><button type="button" class="icon-button" data-close="subscriptionDialog" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+    <p data-i18n="subscription_terms_promo">Промокод активирует статус PRO+ на 8 суток с момента ввода. Повторное применение того же кода не продлевает срок.</p><p data-i18n="subscription_terms_local">Активация сохраняется в этом браузере на этом устройстве. В другом браузере или после очистки данных статус не восстановится автоматически.</p><p data-i18n="subscription_terms_payment">Активация по промокоду бесплатна. Платежей и автопродления нет. Цены на платную подписку пока не установлены.</p><p data-i18n="subscription_terms_features">Функции с пометкой «Скоро» готовятся к запуску. Основные возможности дневника доступны в Basic.</p><button type="button" class="btn-secondary" data-action="subscriptionOverview" data-i18n="back">← Назад</button>
+  </section>
+</dialog>
 
   <dialog id="smartWaterModal" class="sheet" aria-label="Умная вода">
   <div>
