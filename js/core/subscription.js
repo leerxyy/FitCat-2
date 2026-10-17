@@ -1,8 +1,6 @@
-// Local promotion for the static PWA. A paid service needs server-side entitlements.
+// Read previously activated local subscriptions without issuing new promotions.
 export const SUBSCRIPTION_KEY = 'fitcat_subscription_v1';
-export const PROMO_CODE = 'FCAT-0826-PROX-VI-8D';
-export const PROMO_DAYS = 8;
-export const PROMO_DURATION = PROMO_DAYS * 24 * 60 * 60 * 1000;
+export const LEGACY_DURATION = 8 * 24 * 60 * 60 * 1000;
 const CAMPAIGN = 'launch-8days-v1';
 const SHAPE = /^[A-Z]{4}-\d{4}-[A-Z]{4}-[A-Z]{2}-\d[A-Z]$/;
 
@@ -20,7 +18,7 @@ export function createSubscription(storage = globalThis.localStorage) {
       const value = JSON.parse(storage.getItem(SUBSCRIPTION_KEY));
       record = value?.version === 1 && value.campaign === CAMPAIGN
         && Number.isSafeInteger(value.activatedAt) && value.activatedAt > 0
-        && Number.isSafeInteger(value.expiresAt) && value.expiresAt - value.activatedAt === PROMO_DURATION
+        && Number.isSafeInteger(value.expiresAt) && value.expiresAt - value.activatedAt === LEGACY_DURATION
         ? { version: 1, campaign: CAMPAIGN, activatedAt: value.activatedAt, expiresAt: value.expiresAt } : null;
     } catch { record = null; }
     return status();
@@ -31,18 +29,10 @@ export function createSubscription(storage = globalThis.localStorage) {
       activatedAt: record?.activatedAt ?? null, expiresAt: record?.expiresAt ?? null,
       remainingDays: active ? Math.ceil((record.expiresAt - now) / 86400000) : 0 };
   }
-  function redeem(value, now = Date.now()) {
+  function redeem(value) {
     const code = formatPromo(value);
     if (!SHAPE.test(code)) throw new Error('promo_format');
-    if (code !== PROMO_CODE) throw new Error('promo_invalid');
-    reload(); // Observe redemption from another tab before checking this one.
-    if (record) throw new Error('promo_used');
-    if (!Number.isSafeInteger(now) || now <= 0) throw new Error('promo_invalid');
-    const next = { version: 1, campaign: CAMPAIGN, activatedAt: now, expiresAt: now + PROMO_DURATION };
-    // Do not show success until durable local storage has accepted the record.
-    storage.setItem(SUBSCRIPTION_KEY, JSON.stringify(next));
-    record = next;
-    return status(now);
+    throw new Error('promo_unavailable');
   }
   reload();
   return { status, reload, redeem };

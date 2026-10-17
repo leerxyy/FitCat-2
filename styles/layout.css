@@ -1,4 +1,4 @@
-.app-root { position: relative; z-index: 1; width: 100%; max-width: 1040px; height: 100%; height: 100dvh; margin: auto; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable; scroll-padding-bottom: var(--nav-reserve); padding: calc(env(safe-area-inset-top, 0px) + var(--header-space)) max(16px, env(safe-area-inset-right, 0px)) var(--nav-reserve) max(16px, env(safe-area-inset-left, 0px)); }
+.app-root { position: relative; z-index: 1; width: 100%; max-width: 1040px; height: 100%; margin: auto; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable; scroll-padding-bottom: var(--nav-reserve); padding: calc(env(safe-area-inset-top, 0px) + var(--header-space)) max(16px, env(safe-area-inset-right, 0px)) var(--nav-reserve) max(16px, env(safe-area-inset-left, 0px)); }
 .screen { min-width: 0; }
 #swipeWrapper { position: relative; }
 .view-leaving { position: absolute !important; inset: 0 0 auto; width: 100%; pointer-events: none; }
@@ -78,7 +78,7 @@
 .water-actions .glass-button { font-size: 13px; gap: 3px; }
 .water-actions .icon-button { border-radius: 99px; height: 43px; }
 .water-hint { margin-top: 10px; color: var(--muted); font-size: 11px; }
-.nav-dock { position: fixed; z-index: 40; inset: auto 0 0; display: flex; justify-content: center; padding: 0 max(14px, env(safe-area-inset-right, 0px)) calc(var(--nav-gap) + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.nav-dock { position: absolute; z-index: 40; inset: auto 0 0; display: flex; justify-content: center; padding: 0 max(14px, env(safe-area-inset-right, 0px)) calc(var(--nav-gap) + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); pointer-events: none; }
 .nav-dock.keyboard-open { visibility: hidden; }
 .nav-dock::before { content: ""; position: absolute; z-index: -1; inset: -16px 0 0; background: linear-gradient(transparent, rgb(7 18 29 / 70%)); pointer-events: none; }
 .bottom-nav { --active-index: 0; position: relative; flex-shrink: 0; width: 100%; max-width: 480px; height: var(--nav-height); padding: 6px; border-radius: 999px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); pointer-events: auto; box-shadow: inset 0 1px rgb(234 245 255 / 14%), 0 8px 35px rgb(0 0 0 / 25%); }

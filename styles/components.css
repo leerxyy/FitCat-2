@@ -42,7 +42,12 @@
 .apple-switch input:checked + .slider::before { transform: translateX(18px); }
 .apple-switch input:focus-visible + .slider { outline: 2px solid var(--accent); outline-offset: 4px; }
 .toggle-label { color: var(--muted); margin-left: 9px; font-size: 12px; }
-.sheet { color: var(--text); border: 1px solid var(--border-strong); background: #151e29; border-radius: 26px 26px 0 0; width: min(100%, 560px); max-width: 100%; max-height: min(94dvh, 960px); overflow-y: auto; padding: 24px 22px max(24px, env(safe-area-inset-bottom)); margin: auto auto 0; box-shadow: 0 -12px 60px rgb(0 0 0 / 30%); }
+.sheet { color: var(--text); border: 1px solid var(--border-strong); background: #151e29; border-radius: 26px 26px 0 0; width: min(100%, 560px); min-width: 0; max-width: 100%; max-height: min(calc(var(--visible-height, 100dvh) * .94), 960px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: none; touch-action: pan-y pinch-zoom; -webkit-overflow-scrolling: touch; padding: 24px 22px max(24px, env(safe-area-inset-bottom, 0px)); margin: auto auto 0; box-shadow: 0 -12px 60px rgb(0 0 0 / 30%); }
+.sheet h2[tabindex="-1"]:focus, .sheet h3[tabindex="-1"]:focus { outline: none; }
+.subscription-panel, .wallet-panel { width: 100%; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 619px) {
+  .subscription-sheet, .wallet-sheet { --sheet-gap: max(env(safe-area-inset-top, 0px), calc(var(--visible-height, 100dvh) * .06)); position: absolute; inset: calc(var(--visible-top, 0px) + var(--sheet-gap)) 0 auto; height: calc(var(--visible-height, 100dvh) - var(--sheet-gap)); max-height: none; margin: 0 auto; }
+}
 .sheet::backdrop { background: rgb(2 7 13 / 68%); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 .sheet > div:first-child:not(.card) { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 22px; }
 .sheet > div:first-child > h2 { flex: 1; }
@@ -92,4 +97,4 @@
 .update-banner button { color: var(--accent); font-weight: 650; }
 .haptic-bridge { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
 .haptic-bridge input { position: absolute; top: 0; left: 0; width: 42px; height: 28px; min-height: 0; margin: 0; padding: 0; appearance: auto; -webkit-appearance: auto; }
-@media (min-width: 620px) { .sheet { margin: auto; border-radius: 24px; max-height: 88dvh; } .compact-sheet { max-width: 440px; } }
+@media (min-width: 620px) { .sheet { margin: auto; border-radius: 24px; max-height: calc(var(--visible-height, 100dvh) * .88); } .compact-sheet { max-width: 440px; } }

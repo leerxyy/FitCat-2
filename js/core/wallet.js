@@ -1,8 +1,6 @@
 import { formatPromo, createSubscription } from './subscription.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
-export const COIN_PROMO_HASH = '691555c17b443da1494217e8688f15077a2c316807ffac0c84d5eeaec5d0d401';
-export const COIN_PROMO_AMOUNT = 99999;
 export const SUBSCRIPTION_PRICES = Object.freeze({
   '1': Object.freeze({ months: 1, old: 229, price: 29 }),
   '3': Object.freeze({ months: 3, old: 687, price: 649 }),
@@ -46,7 +44,7 @@ function defaultLock(work) {
   const task = localQueue.then(work); localQueue = task.catch(() => {}); return task;
 }
 
-export function createWallet(storage = globalThis.localStorage, { lock = defaultLock, promoHash = COIN_PROMO_HASH, promoAmount = COIN_PROMO_AMOUNT } = {}) {
+export function createWallet(storage = globalThis.localStorage, { lock = defaultLock } = {}) {
   const snapshot = () => structuredClone(read(storage));
   async function commit(work) {
     return lock(() => {
@@ -56,22 +54,11 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
       return structuredClone(value);
     });
   }
-  async function redeem(code, now = Date.now()) {
+  async function redeem(code) {
     const normalized = formatPromo(code);
     if (!FORMAT.test(normalized)) throw new Error('promo_format');
-    if (!globalThis.crypto?.subtle) throw new Error('wallet_crypto_unavailable');
-    const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(normalized));
-    const digest = [...new Uint8Array(bytes)].map(byte => byte.toString(16).padStart(2, '0')).join('');
-    if (digest !== promoHash) throw new Error('promo_invalid');
-    if (!validTime(now)) throw new Error('promo_invalid');
-    return commit(value => {
-      if (value.redeemed.includes(digest)) throw new Error('wallet_promo_used');
-      if (!Number.isSafeInteger(promoAmount) || promoAmount <= 0) throw new Error('wallet_invalid_purchase');
-      const balance = value.balance + promoAmount;
-      if (!Number.isSafeInteger(balance)) throw new Error('wallet_corrupt');
-      value.balance = balance; value.redeemed.push(digest);
-      value.entries.push({ id: crypto.randomUUID(), kind: 'promo', amount: promoAmount, at: now, balanceAfter: balance });
-    });
+    // No embedded code, hash or grant amount remains in this build.
+    throw new Error('promo_unavailable');
   }
   async function purchase(period, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
     const term = Object.hasOwn(SUBSCRIPTION_PRICES, String(period)) ? SUBSCRIPTION_PRICES[String(period)] : null;

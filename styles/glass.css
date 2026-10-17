@@ -1,5 +1,5 @@
 /* A lightweight web glass material: translucent tint, blur, edge refraction and light. */
-.ambient-light { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; background: linear-gradient(155deg, #07111c, #091b2a 54%, #07141e); }
+.ambient-light { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; background: linear-gradient(155deg, #07111c, #091b2a 54%, #07141e); }
 .ambient-plane { position: absolute; inset: -15vh -18vw; pointer-events: none; }
 .ambient-plane::before { content: ""; position: absolute; inset: 0; }
 .ambient-far { transform: translate3d(calc(var(--parallax-x, 0px) * .45), calc(var(--parallax-y, 0px) * .45), 0); }

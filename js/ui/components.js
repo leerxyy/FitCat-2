@@ -24,7 +24,10 @@ export function initActions() {
   document.querySelectorAll('dialog').forEach(dialog => {
     dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(dialog.id); });
     dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(dialog.id); });
-    dialog.addEventListener('close', () => { document.body.classList.toggle('dialog-open', Boolean(document.querySelector('dialog[open]'))); });
+    dialog.addEventListener('close', () => {
+      document.body.classList.toggle('dialog-open', Boolean(document.querySelector('dialog[open]')));
+      document.dispatchEvent(new Event('fitcat:dialogclose'));
+    });
   });
 }
 
@@ -42,12 +45,15 @@ export function openDialog(id) {
   if (typeof dialog.showModal === 'function') dialog.showModal();
   else dialog.setAttribute('open', '');
   document.body.classList.add('dialog-open');
+  const heading = $(dialog.getAttribute('aria-labelledby'));
+  if (heading?.getAttribute('tabindex') === '-1') heading.focus({ preventScroll: true });
   enter(dialog, { y: 24, duration: 340 });
 }
 
 export function closeDialog(id) {
   const dialog = $(id);
   if (!dialog?.open) return;
+  if (document.activeElement?.closest('dialog') === dialog) document.activeElement.blur?.();
   exitDialog(dialog, () => {
     if (typeof dialog.close === 'function') dialog.close();
     else { dialog.removeAttribute('open'); dialog.dispatchEvent(new Event('close')); }

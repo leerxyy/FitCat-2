@@ -1,4 +1,4 @@
-import { createSubscription, formatPromo, SUBSCRIPTION_KEY, PROMO_DAYS } from '../core/subscription.js';
+import { createSubscription, formatPromo, SUBSCRIPTION_KEY } from '../core/subscription.js';
 import { t, locale, number } from '../core/i18n.js';
 import { $, onAction, openDialog } from '../ui/components.js';
 import { enter } from '../ui/motion.js';
@@ -13,7 +13,7 @@ let errorKey = '';
 let revealPending = false;
 let checkoutPeriod = '1';
 let checkoutId;
-let successPeriod = null;
+let successPeriod = '1';
 
 function currentStatus() {
   try { return getWallet()?.status() || subscription.status(); }
@@ -32,7 +32,7 @@ function setPanel(name, animate = true) {
   if (animate) enter(destination, { y: 9, duration: 400 });
   $('subscriptionDialog').scrollTop = 0;
   const heading = destination?.querySelector('h2');
-  if (heading) { $('subscriptionDialog').setAttribute('aria-labelledby', heading.id); heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
+  if (heading) { $('subscriptionDialog').setAttribute('aria-labelledby', heading.id); heading.setAttribute('tabindex', '-1'); if ($('subscriptionDialog').open) heading.focus({ preventScroll: true }); }
 }
 
 function showError(key = '') {
@@ -60,7 +60,7 @@ export function renderSubscription() {
   $('subscriptionPurchase').textContent = t(status.active ? 'subscription_extend' : 'subscription_get');
   $('subscriptionExpired').hidden = status.active || !status.redeemed;
   $('subscriptionSuccessUntil').textContent = `${t('subscription_until')} ${expiryLabel(status.expiresAt)}`;
-  $('subscriptionSuccessDays').textContent = successPeriod ? t('subscription_term_' + successPeriod) : `${PROMO_DAYS} ${t('days')}`;
+  $('subscriptionSuccessDays').textContent = t('subscription_term_' + successPeriod);
   const coins = balance();
   $('subscriptionCoinBalance').textContent = coins == null ? '—' : number(coins);
   $('subscriptionDebit').textContent = `${t('subscription_debit')} ${number(SUBSCRIPTION_PRICES[chosenTerm].price)} ${t('wallet_coins_unit')}`;
@@ -149,13 +149,8 @@ export function initSubscription() {
     button.disabled = true;
     try {
       subscription.redeem($('promoCode').value);
-      successPeriod = null;
-      revealPending = true;
-      $('promoCode').blur?.();
-      showError(); renderSubscription(); scheduleExpiry(); setPanel('success');
-      document.dispatchEvent(new CustomEvent('fitcat:subscription', { detail: currentStatus() }));
     } catch (error) {
-      showError(['promo_format', 'promo_invalid', 'promo_used'].includes(error.message) ? error.message : 'save_error');
+      showError(['promo_format', 'promo_unavailable'].includes(error.message) ? error.message : 'save_error');
     } finally { button.disabled = false; }
   });
   $('subscriptionDialog').addEventListener('close', () => {

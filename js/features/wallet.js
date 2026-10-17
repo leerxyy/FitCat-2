@@ -9,7 +9,7 @@ let wallet;
 let filter = 'all';
 let currentPanel = 'overview';
 let errorKey = '';
-const knownErrors = new Set(['promo_format', 'promo_invalid', 'wallet_promo_used', 'wallet_insufficient', 'wallet_corrupt', 'wallet_crypto_unavailable', 'wallet_invalid_purchase']);
+const knownErrors = new Set(['promo_format', 'promo_unavailable', 'wallet_insufficient', 'wallet_corrupt', 'wallet_invalid_purchase']);
 export const walletError = error => t(knownErrors.has(error?.message) ? error.message : 'save_error');
 export const getWallet = () => wallet;
 
@@ -27,7 +27,7 @@ function panel(name, animate = true) {
   $('walletDialog').scrollTop = 0;
   const heading = section.querySelector('h2');
   $('walletDialog').setAttribute('aria-labelledby', heading.id);
-  heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true });
+  heading.setAttribute('tabindex', '-1'); if ($('walletDialog').open) heading.focus({ preventScroll: true });
 }
 export function openWallet(name = 'overview') {
   const show = () => { showError(); if (name === 'promo') $('walletPromoCode').value = ''; renderWallet(); panel(name, false); openDialog('walletDialog'); };
