@@ -67,7 +67,7 @@ function renderFriendsList() {
   $('friendsList').innerHTML = state.friends.map(id => {
     const data = friendData.get(id);
     const name = data?.name || id;
-    return `<div class="friend-item"><span class="friend-avatar">${escapeHTML(initials(name))}</span><button type="button" class="friend-details" data-action="showFriendProgress" data-value="${escapeHTML(id)}"><strong>${escapeHTML(name)}</strong><small class="${data?.online ? 'is-online' : ''}">${data ? t(data.online ? 'online' : 'offline') : t('not_available')}</small></button><button type="button" class="icon-button subtle" data-action="removeFriend" data-value="${escapeHTML(id)}" aria-label="${escapeHTML(t('delete') + ': ' + name)}">${icon('x')}</button></div>`;
+    return `<div class="friend-item"><span class="friend-avatar">${escapeHTML(initials(name))}</span><button type="button" class="friend-details" data-action="showFriendProgress" data-value="${escapeHTML(id)}"><strong>${escapeHTML(name)}</strong><small class="${data?.online ? 'is-online' : ''}">${data ? t(data.online ? 'online' : 'offline') : t('not_available')}</small></button><button type="button" class="icon-button close-button" data-action="removeFriend" data-value="${escapeHTML(id)}" aria-label="${escapeHTML(t('delete') + ': ' + name)}">${icon('x')}</button></div>`;
   }).join('');
 }
 

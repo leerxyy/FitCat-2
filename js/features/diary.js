@@ -77,7 +77,7 @@ function foodRow(food) {
     <button type="button" class="food-toggle ${food.checked ? 'checked' : ''}" data-action="toggleFood" data-value="${id}" aria-pressed="${Boolean(food.checked)}" aria-label="${escapeHTML(t('already_eaten') + ': ' + food.name)}">${icon('check')}</button>
     <div class="food-info"><div class="food-name">${escapeHTML(food.name)}</div><div class="food-details">${number(food.weight, 1)} ${t('g')} · ${number(food.kcal)} ${t('kcal')}${food.checked ? '' : ` · ${t('planned')}`}</div></div>
     <button type="button" class="icon-button" data-action="editFood" data-value="${id}" aria-label="${escapeHTML(t('edit') + ': ' + food.name)}">${icon('edit')}</button>
-    <button type="button" class="icon-button" data-action="deleteFood" data-value="${id}" aria-label="${escapeHTML(t('delete') + ': ' + food.name)}">${icon('x')}</button>
+    <button type="button" class="icon-button close-button" data-action="deleteFood" data-value="${id}" aria-label="${escapeHTML(t('delete') + ': ' + food.name)}">${icon('x')}</button>
   </div>`;
 }
 

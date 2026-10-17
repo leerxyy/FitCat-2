@@ -17,6 +17,7 @@ import { initHaptics } from './ui/haptics.js';
 import { initSubscription, renderSubscription } from './features/subscription.js';
 import { initWallet } from './features/wallet.js';
 import { ensureDailyWeather } from './features/weather.js';
+import { initSurfaces } from './ui/surfaces.js';
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
@@ -32,7 +33,7 @@ function checkDay() {
 function start() {
   loadState();
   rollDay(); updateStreak();
-  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAmbient(); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
