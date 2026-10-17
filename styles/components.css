@@ -46,7 +46,7 @@
 .sheet h2[tabindex="-1"]:focus, .sheet h3[tabindex="-1"]:focus { outline: none; }
 .subscription-panel, .wallet-panel { width: 100%; min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 619px) {
-  .subscription-sheet, .wallet-sheet { --sheet-gap: max(env(safe-area-inset-top, 0px), calc(var(--visible-height, 100dvh) * .06)); position: absolute; inset: calc(var(--visible-top, 0px) + var(--sheet-gap)) 0 auto; height: calc(var(--visible-height, 100dvh) - var(--sheet-gap)); max-height: none; margin: 0 auto; }
+  .subscription-sheet, .wallet-sheet, .smart-water-sheet { --sheet-gap: max(env(safe-area-inset-top, 0px), calc(var(--visible-height, 100dvh) * .06)); position: absolute; inset: calc(var(--visible-top, 0px) + var(--sheet-gap)) 0 auto; height: calc(var(--visible-height, 100dvh) - var(--sheet-gap)); max-height: none; margin: 0 auto; }
 }
 .sheet::backdrop { background: rgb(2 7 13 / 68%); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
 .sheet > div:first-child:not(.card) { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 22px; }
@@ -72,9 +72,6 @@
 .slider-labels, .slider-value { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
 .slider-value { justify-content: center; gap: 4px; }
 .slider-ticks, .slider-gradient { display: none; }
-#smartWaterSettings > div:last-child, #waterBaseOnly { padding: 16px 0 0; border-top: 1px solid var(--border); margin-top: 18px; }
-#smartWaterSettings .flex, #waterBaseOnly .flex { justify-content: space-between; gap: 12px; padding: 5px 0; color: var(--muted); font-size: 13px; }
-#smartWaterSettings .flex:last-child { color: var(--text); font-weight: 650; }
 .autocomplete-list { position: absolute; top: 82px; left: 0; right: 0; z-index: 10; max-height: 260px; overflow: auto; border: 1px solid var(--border-strong); background: #202c39; border-radius: 14px; box-shadow: 0 12px 25px #0005; }
 .with-autocomplete { position: relative; }
 .autocomplete-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; min-height: 52px; text-align: left; border-bottom: 1px solid var(--border); }

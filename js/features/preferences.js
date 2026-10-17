@@ -1,7 +1,7 @@
 import { state, targets } from '../core/store.js';
 import { temperatureBonus, stepsBonus } from '../core/math.js';
 import { t, number } from '../core/i18n.js';
-import { $, onAction, changed, openDialog, closeDialog, toast } from '../ui/components.js';
+import { $, onAction, changed, openDialog, closeDialog, toast, animateNumber } from '../ui/components.js';
 import { revealRegion } from '../ui/motion.js';
 import { haptic } from '../ui/haptics.js';
 
@@ -31,20 +31,46 @@ export function renderPreferences() {
   $('tempSlider').value = preferences.currentTemp;
   $('stepsSlider').value = preferences.currentSteps;
   $('resultsSlider').value = preferences.smartSearchResults;
-  $('tempDisplay').textContent = `${number(preferences.currentTemp)}°C`;
-  $('stepsDisplay').textContent = number(preferences.currentSteps);
   $('resultsDisplay').textContent = number(preferences.smartSearchResults);
-  $('baseWaterNorm').textContent = `${number((state.profile?.weight || 0) * 35)} ${t('ml')}`;
-  $('baseOnlyWater').textContent = `${number(targets().water)} ${t('ml')}`;
-  $('tempBonus').textContent = `+${number(temperatureBonus(preferences.currentTemp))} ${t('ml')}`;
-  $('stepsBonus').textContent = `+${number(stepsBonus(preferences.currentSteps))} ${t('ml')}`;
-  $('totalWaterNorm').textContent = `${number(targets().water)} ${t('ml')}`;
+  renderSmartWater();
   $('workoutIntensity').value = preferences.workoutIntensity;
   document.querySelectorAll('#workoutIntensityControl button').forEach(button => {
     button.classList.toggle('active', button.dataset.value === preferences.workoutIntensity);
     button.setAttribute('aria-pressed', String(button.dataset.value === preferences.workoutIntensity));
   });
   renderActivityOptions();
+}
+
+function renderSmartWater() {
+  const preferences = state.preferences;
+  const goal = targets().water;
+  const base = Math.round((state.profile?.weight || 0) * 35);
+  const enabled = Boolean(state.profile && preferences.smartWaterEnabled);
+  const temperature = enabled ? temperatureBonus(preferences.currentTemp) : 0;
+  const steps = enabled ? stepsBonus(preferences.currentSteps) : 0;
+  // The established target already includes training. Expose that contribution
+  // so every displayed row adds up without changing the original calculation.
+  const training = Math.max(0, goal - base - temperature - steps);
+  const extra = Math.max(0, goal - base);
+  const volume = value => `${number(value)} ${t('ml')}`;
+  $('tempDisplay').textContent = `${number(preferences.currentTemp)}°C`;
+  $('stepsDisplay').textContent = number(preferences.currentSteps);
+  $('tempSlider').style.setProperty('--range-fill', `${Math.max(0, Math.min(100, (preferences.currentTemp + 10) * 2))}%`);
+  $('stepsSlider').style.setProperty('--range-fill', `${Math.max(0, Math.min(100, preferences.currentSteps / 200))}%`);
+  $('tempSlider').setAttribute('aria-valuetext', $('tempDisplay').textContent);
+  $('stepsSlider').setAttribute('aria-valuetext', `${number(preferences.currentSteps)} ${t('steps')}`);
+  $('baseWaterNorm').textContent = volume(base);
+  $('tempBonus').textContent = $('tempBonusChip').textContent = `+${volume(temperature)}`;
+  $('stepsBonus').textContent = $('stepsBonusChip').textContent = `+${volume(steps)}`;
+  $('smartWaterWorkoutBonus').textContent = `+${volume(training)}`;
+  $('totalWaterNorm').textContent = volume(goal);
+  animateNumber($('smartWaterGoal'), goal / 1000, 2);
+  $('smartWaterExtraAmount').textContent = `+${volume(extra)}`;
+  $('smartWaterExtraLine').hidden = !extra;
+  $('smartWaterBaseLabel').hidden = Boolean(extra);
+  $('smartWaterTempRow').hidden = !enabled;
+  $('smartWaterStepsRow').hidden = !enabled;
+  $('smartWaterWorkoutRow').hidden = !training;
 }
 
 function renderActivityOptions() {
@@ -63,9 +89,9 @@ function renderAbout() {
     <h3>Данные</h3><p>Профиль, фото и дневник сохраняются в браузере на этом устройстве. Для функции друзей имя, дневные цели, сегодняшний список продуктов и вода синхронизируются с Firebase и доступны по твоему ID.</p>
     <p>При поиске продуктов и сканировании штрихкода приложение обращается к Open Food Facts. Сохранённые данные можно скачать и восстановить в настройках.</p>
     <h3>Расчёты</h3><p>Расчёты основаны на общих формулах из предыдущей версии FitCat и носят информационный характер. Приложение не является медицинским сервисом.</p>
-    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.4.2</p>` : chinese ? `
-    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.4.2</p>` : `
-    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.4.2</p>`;
+    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.4.3</p>` : chinese ? `
+    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.4.3</p>` : `
+    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.4.3</p>`;
 }
 
 export function initPreferences() {

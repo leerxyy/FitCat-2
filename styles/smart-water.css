@@ -1,0 +1,47 @@
+.smart-water-sheet { padding: 13px 18px max(20px, env(safe-area-inset-bottom, 0px)); }
+#smartWaterModal > .smart-water-content { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 10px; min-height: 100%; margin: 0; }
+.smart-water-grab { width: 40px; height: 4px; border-radius: 9px; margin: 0 auto 2px; background: #a8c5db60; flex-shrink: 0; }
+.smart-water-heading { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: 8px; margin-bottom: 2px; }
+.smart-water-heading h2 { text-align: center; margin: 0; font-size: 22px; }
+.smart-water-heading .icon-button { min-width: 40px; width: 40px; height: 40px; min-height: 40px; border-radius: 50%; color: #b7d4ec; background: #16456655; }
+.smart-water-switch-row, .smart-water-control, .smart-water-breakdown { border: 1px solid #9bd6ee30; border-radius: 20px; background: linear-gradient(145deg, #abdfff0b, transparent 55%), #09243958; box-shadow: inset 0 1px 1px #d7f8ff13, 0 5px 20px #00000010; }
+.smart-water-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; padding: 8px 16px; font-size: 14px; }
+.smart-water-switch-row .apple-switch { width: 48px; height: 29px; }
+.smart-water-switch-row .slider::before { width: 23px; height: 23px; }
+.smart-water-off-hint { margin: -3px 4px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.smart-water-hero { position: relative; isolation: isolate; flex-shrink: 0; overflow: hidden; padding: 14px; border: 1px solid #83dbff3b; border-radius: 25px; text-align: center; background: radial-gradient(ellipse at 50% 0, #0cc7f526, transparent 80%), linear-gradient(145deg, #15445b66, #061d30aa); box-shadow: inset 0 1px 2px #d5f7ff20, 0 0 24px #11c8e809; }
+.smart-water-hero::before, .smart-water-hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; width: 140%; height: 90%; border-radius: 44%; background: linear-gradient(180deg, #1eacd41c, #0399cf06); }
+.smart-water-hero::before { left: -60%; bottom: -65%; transform: rotate(10deg); }
+.smart-water-hero::after { right: -65%; bottom: -45%; transform: rotate(-13deg); }
+.smart-water-droplet, .smart-water-control-icon { display: grid; place-items: center; flex-shrink: 0; color: #cdf2ff; border: 1px solid #76d9ff4a; background: radial-gradient(ellipse at 35% 20%, #12bcef48, #06254380); box-shadow: inset 0 1px 2px #c8efff28, 0 0 15px #10c5e51c; border-radius: 50%; }
+.smart-water-droplet { width: 36px; height: 36px; margin: 0 auto 7px; }
+.smart-water-droplet .icon { width: 25px; height: 25px; stroke-width: 1.5; }
+.smart-water-caption { color: #aec7dd; font-size: 12px; }
+.smart-water-goal { display: flex; justify-content: center; align-items: baseline; gap: 6px; margin: 4px 0 5px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.smart-water-goal output { font-size: clamp(44px, 12vw, 56px); font-weight: 730; letter-spacing: -.045em; }
+.smart-water-goal > span { font-size: 32px; font-weight: 650; }
+.smart-water-extra { color: #77d6f6; font-size: 13px; line-height: 1.5; }
+.smart-water-controls { display: grid; gap: 10px; }
+.smart-water-control { padding: 10px 14px; min-width: 0; }
+.smart-water-control-heading { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; }
+.smart-water-control-icon { width: 32px; height: 32px; }
+.smart-water-control-icon .icon { width: 20px; height: 20px; stroke-width: 1.5; }
+.smart-water-control-heading label { font-size: 13px; color: #d2e4f3; }
+.smart-water-control-heading output { font-size: 20px; font-weight: 650; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.smart-water-range { --range-fill: 0%; display: block; -webkit-appearance: none; appearance: none; width: 100%; min-height: 28px; height: 28px; margin: 3px 0 -3px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+.smart-water-range::-webkit-slider-runnable-track { height: 6px; border-radius: 99px; background: linear-gradient(to right, #29dbf5 0%, #12c7ec var(--range-fill), #284c66 var(--range-fill), #284c66 100%); box-shadow: inset 0 0 0 1px #a4d9f41c; }
+.smart-water-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 21px; height: 21px; margin-top: -7.5px; border: 1px solid #b9f0ff; border-radius: 50%; background: #f3fcff; box-shadow: 0 0 10px #17c8ed4d, 0 1px 3px #00192470; }
+.smart-water-range::-moz-range-track { height: 6px; border-radius: 99px; background: #284c66; }
+.smart-water-range::-moz-range-progress { height: 6px; border-radius: 99px; background: linear-gradient(90deg, #29dbf5, #12c7ec); }
+.smart-water-range::-moz-range-thumb { width: 19px; height: 19px; border: 1px solid #b9f0ff; border-radius: 50%; background: #f3fcff; box-shadow: 0 0 10px #17c8ed4d; }
+.smart-water-range-labels { display: flex; justify-content: space-between; color: #91adc5; font-size: 11px; }
+.smart-water-bonus { display: inline-block; padding: 2px 9px; border: 1px solid #12d6f438; border-radius: 99px; margin-top: 4px; color: #70def6; background: #05bde714; font-size: 11px; line-height: 1.35; font-weight: 550; font-variant-numeric: tabular-nums; }
+.smart-water-breakdown { padding: 8px 14px; }
+.smart-water-breakdown dl { margin: 0; }
+.smart-water-breakdown dl > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 12px; padding: 3px 0; color: #a5bdd3; font-size: 12px; }
+.smart-water-breakdown dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.smart-water-breakdown .smart-water-total { margin-top: 6px; padding-top: 9px; border-top: 1px solid #a8d6f02b; color: var(--text); font-size: 16px; font-weight: 650; }
+.smart-water-done { flex-shrink: 0; margin-top: auto; padding-top: 2px; }
+.smart-water-done .btn-primary { border-radius: 999px; min-height: 48px; margin: 0; }
+@media (max-height: 760px) { #smartWaterModal > .smart-water-content { gap: 9px; } .smart-water-hero { padding-block: 14px; } .smart-water-droplet { width: 35px; height: 35px; margin-bottom: 6px; } .smart-water-goal output { font-size: 44px; } .smart-water-control { padding: 8px 12px; } .smart-water-controls { gap: 9px; } }
+@media (max-width: 359px) { .smart-water-sheet { padding-inline: 14px; } .smart-water-control-heading { grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; } .smart-water-control-icon { width: 28px; height: 28px; } .smart-water-control-heading label { font-size: 12px; } .smart-water-control-heading output { font-size: 18px; } }

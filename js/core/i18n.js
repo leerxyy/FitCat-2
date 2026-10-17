@@ -5,6 +5,7 @@ import { walletCopy } from './wallet-copy.js';
 
 const additions = {
   ru: {
+    smart_water_conditions: 'Учитывать условия', smart_water_goal: 'Цель на сегодня', smart_water_extra_base: 'к базовой цели', smart_water_base_goal: 'Базовая цель', smart_water_temperature: 'Температура воздуха', smart_water_steps: 'Шаги за день', smart_water_off_hint: 'Включите, чтобы учитывать температуру и шаги.',
     startup_loading: 'Загружаем дневник', startup_error: 'Не удалось открыть FitCat. Попробуй ещё раз.', startup_retry: 'Повторить запуск', orientation_title: 'Поверните телефон', orientation_hint: 'FitCat работает в вертикальном режиме',
     haptics: 'Виброотклик', test_haptics: 'Проверить отклик', haptics_unavailable: 'Этот браузер не предоставляет виброотклик.',
     meals: 'Приёмы пищи', analytics: 'Статистика', add_food: 'Добавить еду', add_friend: 'Добавить друга', add_weight: 'Добавить запись веса', weight_date: 'Дата измерения веса',
@@ -39,6 +40,7 @@ const additions = {
     update_available: 'Доступна новая версия FitCat', update: 'Обновить', photo_error: 'Не удалось открыть фото',
   },
   en: {
+    smart_water_conditions: 'Account for conditions', smart_water_goal: 'Today’s water goal', smart_water_extra_base: 'added to the base target', smart_water_base_goal: 'Base target', smart_water_temperature: 'Air temperature', smart_water_steps: 'Steps today', smart_water_off_hint: 'Enable to account for temperature and steps.',
     startup_loading: 'Opening your diary', startup_error: 'Could not open FitCat. Please try again.', startup_retry: 'Try again', orientation_title: 'Rotate your phone', orientation_hint: 'Use FitCat in portrait orientation',
     haptics: 'Haptic feedback', test_haptics: 'Test feedback', haptics_unavailable: 'This browser does not provide haptic feedback.',
     meals: 'Meals', analytics: 'Statistics', add_food: 'Add food', add_friend: 'Add friend', add_weight: 'Add weight entry', weight_date: 'Weight measurement date', remaining: 'kcal remaining', over_target: 'kcal over target',
@@ -70,6 +72,7 @@ const additions = {
     update_available: 'A new FitCat version is available', update: 'Update', photo_error: 'Could not open this photo',
   },
   cn: {
+    smart_water_conditions: '考虑环境和步数', smart_water_goal: '今日饮水目标', smart_water_extra_base: '添加到基础目标', smart_water_base_goal: '基础目标', smart_water_temperature: '气温', smart_water_steps: '今日步数', smart_water_off_hint: '开启后，将考虑气温和步数。',
     startup_loading: '正在打开日记', startup_error: '无法打开 FitCat，请重试。', startup_retry: '重试', orientation_title: '请竖直握持手机', orientation_hint: 'FitCat 使用竖屏模式',
     haptics: '触觉反馈', test_haptics: '测试触感', haptics_unavailable: '此浏览器不提供触觉反馈。',
     meals: '餐食', analytics: '统计', add_food: '添加食物', add_friend: '添加好友', add_weight: '添加体重记录', weight_date: '体重测量日期', remaining: '剩余千卡', over_target: '超出千卡',

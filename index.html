@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="styles/subscription.css">
   <link rel="stylesheet" href="styles/wallet.css">
   <link rel="stylesheet" href="styles/startup.css">
+  <link rel="stylesheet" href="styles/smart-water.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -388,94 +389,34 @@
   <section class="wallet-panel subscription-success" data-wallet-panel="success" hidden><div class="success-emblem"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></div><h2 id="walletSuccessTitle" data-i18n="wallet_promo_success">Промокод активирован!</h2><strong id="walletSuccessAmount" class="success-days"></strong><p>FitCat Coins</p><p class="promo-duration-note" data-i18n="wallet_promo_saved">Коины уже на балансе. Можно оформить PRO+.</p><button type="button" class="btn-primary" data-action="walletOverview" data-i18n="wallet_back">В кошелёк</button></section>
 </dialog>
 
-  <dialog id="smartWaterModal" class="sheet" aria-label="Умная вода">
-  <div>
-    <h2 data-i18n="smart_water">Умная вода</h2>
-    <button class="btn-small" data-i18n="close" type="button" data-action="closeSmartWater">Закрыть</button>
+  
+<dialog id="smartWaterModal" class="sheet smart-water-sheet" aria-labelledby="smartWaterTitle">
+  <div class="smart-water-content">
+    <div class="smart-water-grab" aria-hidden="true"></div>
+    <header class="smart-water-heading"><span aria-hidden="true"></span><h2 id="smartWaterTitle" tabindex="-1" data-i18n="smart_water">Умная вода</h2><button type="button" class="icon-button" data-action="closeSmartWater" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+    <div class="smart-water-switch-row"><label for="smartWaterToggle" data-i18n="smart_water_conditions">Учитывать условия</label><label class="apple-switch"><input type="checkbox" id="smartWaterToggle" data-i18n-label="smart_water_conditions"><span class="slider"></span><span id="smartWaterToggleLabel" class="sr-only" data-i18n="off">Выкл</span></label></div>
+    <p id="waterBaseOnly" class="smart-water-off-hint" data-i18n="smart_water_off_hint">Включите, чтобы учитывать температуру и шаги.</p>
+    <section class="smart-water-hero" aria-labelledby="smartWaterGoalLabel">
+      <div class="smart-water-droplet" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg></div><p id="smartWaterGoalLabel" class="smart-water-caption" data-i18n="smart_water_goal">Цель на сегодня</p>
+      <div class="smart-water-goal"><output id="smartWaterGoal" for="smartWaterToggle tempSlider stepsSlider">0</output><span data-i18n="l">л</span></div>
+      <p id="smartWaterExtraLine" class="smart-water-extra" hidden><span id="smartWaterExtraAmount">+0 мл</span> <span data-i18n="smart_water_extra_base">к базовой цели</span></p><p id="smartWaterBaseLabel" class="smart-water-extra" data-i18n="smart_water_base_goal">Базовая цель</p>
+    </section>
+    <div id="smartWaterSettings" class="smart-water-controls" hidden>
+      <section class="smart-water-control"><div class="smart-water-control-heading"><span class="smart-water-control-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#sun"></use></svg></span><label for="tempSlider" data-i18n="smart_water_temperature">Температура воздуха</label><output id="tempDisplay" for="tempSlider">22°C</output></div><input class="smart-water-range" type="range" id="tempSlider" min="-10" max="40" value="22" step="1"><div class="smart-water-range-labels" aria-hidden="true"><span>−10°</span><span>40°</span></div><span class="smart-water-bonus" id="tempBonusChip">+0 мл</span></section>
+      <section class="smart-water-control"><div class="smart-water-control-heading"><span class="smart-water-control-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#footsteps"></use></svg></span><label for="stepsSlider" data-i18n="smart_water_steps">Шаги за день</label><output id="stepsDisplay" for="stepsSlider">8 000</output></div><input class="smart-water-range" type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100"><div class="smart-water-range-labels" aria-hidden="true"><span>0</span><span>20 000</span></div><span class="smart-water-bonus" id="stepsBonusChip">+0 мл</span></section>
+    </div>
+    <section class="smart-water-breakdown"><dl>
+      <div><dt data-i18n="base_norm">Базовая норма</dt><dd id="baseWaterNorm">0 мл</dd></div>
+      <div id="smartWaterTempRow" hidden><dt data-i18n="temperature">Температура</dt><dd id="tempBonus">+0 мл</dd></div>
+      <div id="smartWaterStepsRow" hidden><dt data-i18n="steps">Шаги</dt><dd id="stepsBonus">+0 мл</dd></div>
+      <div id="smartWaterWorkoutRow" hidden><dt data-i18n="workout">Тренировка</dt><dd id="smartWaterWorkoutBonus">+0 мл</dd></div>
+      <div class="smart-water-total"><dt data-i18n="total">ИТОГО</dt><dd id="totalWaterNorm">0 мл</dd></div>
+    </dl></section>
+    <div class="smart-water-done"><button type="button" class="btn-primary" data-action="closeSmartWater" data-i18n="done">Готово</button></div>
   </div>
-  <div class="card">
-    <div>
-      <span data-i18n="enable">Включить</span>
-      <div>
-        <label class="apple-switch">
-          <input type="checkbox" id="smartWaterToggle" aria-label="smartWaterToggle" data-i18n-label="smart_water">
-          <span class="slider"></span>
-        </label>
-        <span class="toggle-label" id="smartWaterToggleLabel" data-i18n="off">Выкл</span>
-      </div>
-    </div>
-    <div id="smartWaterSettings" hidden>
-      <div class="slider-container">
-        <div class="slider-labels">
-          <span>🥶 -10°</span>
-          <span>0°</span>
-          <span>10°</span>
-          <span>20°</span>
-          <span>30°</span>
-          <span>🔥 40°+</span>
-        </div>
-        <div class="slider-wrapper">
-          <div class="slider-gradient temp-gradient"></div>
-          <div class="slider-ticks" id="tempTicks"></div>
-          <input type="range" id="tempSlider" min="-10" max="40" value="22" step="1" aria-label="tempSlider">
-        </div>
-        <div class="slider-value">
-          <span data-i18n="now_temp">Сейчас</span>
-          :
-          <span id="tempDisplay">22°C</span>
-        </div>
-      </div>
-      <div class="slider-container">
-        <div class="slider-labels">
-          <span>0</span>
-          <span>5k</span>
-          <span>10k</span>
-          <span>15k</span>
-          <span>20k+</span>
-        </div>
-        <div class="slider-wrapper">
-          <div class="slider-gradient steps-gradient"></div>
-          <div class="slider-ticks" id="stepsTicks"></div>
-          <input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100" aria-label="stepsSlider">
-        </div>
-        <div class="slider-value">
-          <span data-i18n="steps">Шаги</span>
-          :
-          <span id="stepsDisplay">8 000</span>
-        </div>
-      </div>
-      <div>
-        <div class="flex">
-          <span data-i18n="base_norm">Базовая норма</span>
-          :
-          <span id="baseWaterNorm">1820 мл</span>
-        </div>
-        <div class="flex">
-          <span data-i18n="temperature">Температура</span>
-          :
-          <span id="tempBonus">+150 мл</span>
-        </div>
-        <div class="flex">
-          <span data-i18n="steps">Шаги</span>
-          :
-          <span id="stepsBonus">+150 мл</span>
-        </div>
-        <div class="flex">
-          <span data-i18n="total">ИТОГО</span>
-          :
-          <span id="totalWaterNorm">2120 мл</span>
-        </div>
-      </div>
-    </div>
-    <div id="waterBaseOnly">
-      <div class="flex">
-        <span data-i18n="water_norm">Норма воды</span>
-        :
-        <span id="baseOnlyWater">1820 мл</span>
-      </div>
-    </div>
-  </div>
-</dialog><dialog id="smartSearchModal" class="sheet" aria-label="Умный поиск">
+</dialog>
+
+  <dialog id="smartSearchModal" class="sheet" aria-label="Умный поиск">
   <div>
     <h2 data-i18n="smart_search">Умный поиск</h2>
     <button class="btn-small" data-i18n="close" type="button" data-action="closeSmartSearch">Закрыть</button>
