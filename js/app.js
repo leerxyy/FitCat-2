@@ -16,6 +16,7 @@ import { initOrientation } from './ui/orientation.js';
 import { initHaptics } from './ui/haptics.js';
 import { initSubscription, renderSubscription } from './features/subscription.js';
 import { initWallet } from './features/wallet.js';
+import { ensureDailyWeather } from './features/weather.js';
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
@@ -25,6 +26,7 @@ function render() {
 function checkDay() {
   if (rollDay()) { updateStreak(); render(); queuePublish(); }
   updateHeading();
+  void ensureDailyWeather();
 }
 
 function start() {
@@ -34,7 +36,7 @@ function start() {
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
-  document.addEventListener('fitcat:change', () => { render(); queuePublish(); });
+  document.addEventListener('fitcat:change', () => { render(); queuePublish(); void ensureDailyWeather(); });
   document.addEventListener('fitcat:language', () => {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();
@@ -43,6 +45,7 @@ function start() {
   setInterval(checkDay, 60000);
   window.addEventListener('pagehide', () => { try { rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();
+  void ensureDailyWeather();
   Promise.resolve(viewportReady).then(() => document.dispatchEvent(new Event('fitcat:ready')));
 }
 

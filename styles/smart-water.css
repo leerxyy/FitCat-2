@@ -45,3 +45,37 @@
 .smart-water-done .btn-primary { border-radius: 999px; min-height: 48px; margin: 0; }
 @media (max-height: 760px) { #smartWaterModal > .smart-water-content { gap: 9px; } .smart-water-hero { padding-block: 14px; } .smart-water-droplet { width: 35px; height: 35px; margin-bottom: 6px; } .smart-water-goal output { font-size: 44px; } .smart-water-control { padding: 8px 12px; } .smart-water-controls { gap: 9px; } }
 @media (max-width: 359px) { .smart-water-sheet { padding-inline: 14px; } .smart-water-control-heading { grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; } .smart-water-control-icon { width: 28px; height: 28px; } .smart-water-control-heading label { font-size: 12px; } .smart-water-control-heading output { font-size: 18px; } }
+
+.weather-mode { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 3px; margin: 11px 0 8px; border: 1px solid #8fcbe01c; border-radius: 13px; background: #030f1a55; }
+.weather-mode button { min-width: 0; min-height: 36px; padding: 6px 10px; border: 1px solid transparent; border-radius: 10px; color: #9eb9cf; background: transparent; font-size: 13px; font-weight: 600; transition: background .25s ease, color .25s ease, border-color .25s ease; }
+.weather-mode button.is-selected { color: #c5f6ff; border-color: #45d8f844; background: linear-gradient(145deg, #18b4e22a, #1284ac1a); box-shadow: inset 0 1px 1px #b7f6ff13; }
+.weather-place-line { display: flex; align-items: center; gap: 7px; margin-top: 11px; min-width: 0; }
+.weather-place-line > .icon { flex: 0 0 16px; width: 16px; height: 16px; color: #4cd9f3; }
+.weather-place-line strong { min-width: 0; color: #d2e7f5; font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; font-weight: 600; }
+.weather-place-line strong.is-empty { font-weight: 400; color: #a5bdd3; }
+.weather-day-mean, .weather-date, .weather-fallback, .weather-manual-hint, .weather-permission, .weather-attribution, .smart-water-guidance { color: #98b0c7; font-size: 11px; line-height: 1.55; margin: 6px 0 0; overflow-wrap: anywhere; }
+.weather-day-mean { color: #9bd4e7; margin-bottom: 7px; }
+.weather-status { color: #7ed7e8; font-size: 12px; line-height: 1.5; margin: 7px 0 0; }
+.weather-status.is-error, .weather-fallback { color: #e1c392; }
+.weather-actions { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 7px; margin-top: 12px; }
+.weather-button { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; min-height: 42px; padding: 7px 8px; border: 1px solid #76c1df32; border-radius: 13px; color: #c9dfee; background: #779ac90a; font-size: 11px; line-height: 1.35; }
+.weather-button .icon { width: 15px; height: 15px; flex: 0 0 15px; }
+.weather-button:disabled, .weather-refresh:disabled, .weather-city-result:disabled { opacity: .5; cursor: progress; }
+.weather-city-picker { margin-top: 10px; }
+.weather-city-picker form { display: grid; grid-template-columns: minmax(0, 1fr) 42px; gap: 7px; align-items: stretch; }
+.weather-city-picker input { min-width: 0; width: 100%; min-height: 42px; height: 42px; margin: 0; padding: 9px 11px; border: 1px solid #7db8d33b; border-radius: 12px; background: #03142280; color: var(--text); font: inherit; font-size: 16px; }
+.weather-city-picker .icon-button { width: 42px; min-width: 42px; min-height: 42px; height: 42px; border-radius: 12px; margin: 0; background: #129dc51c; }
+.weather-city-results { display: grid; gap: 5px; margin-top: 6px; }
+.weather-city-result { width: 100%; min-width: 0; padding: 10px 11px; min-height: 44px; border: 1px solid #74b7d524; border-radius: 11px; text-align: left; background: #14506d24; color: #d2e6f3; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
+.weather-refresh { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-width: 0; min-height: 40px; padding: 7px 5px; margin-top: 7px; border: 0; background: transparent; color: #7fdaee; font-size: 12px; }
+.weather-refresh .icon { width: 15px; height: 15px; }
+.weather-permission { font-size: 10px; }
+.weather-attribution { font-size: 10px; color: #7e9eb8; }
+.weather-attribution a { color: inherit; text-underline-offset: 2px; }
+.weather-bonus-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+.weather-bonus-row .smart-water-bonus { margin: 0; }
+.weather-fixed { display: inline-flex; align-items: center; gap: 3px; color: #8fb8c7; font-size: 10px; }
+.weather-fixed .icon { width: 12px; height: 12px; }
+.weather-steps-manual { display: inline-block; margin-left: 8px; font-size: 10px; color: #93adc3; }
+.smart-water-guidance { margin: 0 3px; }
+@media (prefers-reduced-motion: reduce) { .weather-mode button { transition: none; } }

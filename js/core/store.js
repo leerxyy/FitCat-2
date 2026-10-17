@@ -1,16 +1,19 @@
 import { localDate, nutritionTotal, calculateTargets } from './math.js';
+import { emptyWeather, normalizeWeather } from './weather.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
   profile: 'fitnessProfile', foods: 'todayFoods', weight: 'weightHistory',
   nutrition: 'nutritionHistory', products: 'fitcat_products', templates: 'fitcat_templates',
   friends: 'fitcat_friends', uid: 'fitcat_myUid', photo: 'profilePhoto',
+  weather: 'fitcat_weather_v1',
 };
 const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
   currentSteps: 8000, currentTemp: 22, smartWaterEnabled: false,
   smartSearchEnabled: false, smartSearchResults: 10,
   hapticsEnabled: true,
+  waterTemperatureMode: 'manual',
 };
 const PREF_KEYS = { ...Object.fromEntries(Object.keys(DEFAULTS).map(key => [key, key])), lang: 'fitcat_lang' };
 function normalizePreferences(value) {
@@ -19,6 +22,7 @@ function normalizePreferences(value) {
     if (typeof value?.[key] === typeof fallback) result[key] = value[key];
   }
   if (!['ru', 'en', 'cn'].includes(result.lang)) result.lang = DEFAULTS.lang;
+  if (!['manual', 'auto'].includes(result.waterTemperatureMode)) result.waterTemperatureMode = 'manual';
   if (![1.2, 1.375, 1.55, 1.725].includes(result.dailyActivity)) result.dailyActivity = DEFAULTS.dailyActivity;
   if (!['light', 'moderate', 'intense'].includes(result.workoutIntensity)) result.workoutIntensity = DEFAULTS.workoutIntensity;
   for (const [key, min, max] of [['currentSteps', 0, 30000], ['currentTemp', -20, 45], ['smartSearchResults', 5, 50]]) {
@@ -31,6 +35,7 @@ export const state = {
   profile: null, foods: [], weight: [], nutrition: [], products: [], templates: [],
   friends: [], uid: '', photo: '', water: 0, lastDate: '', streak: 0,
   preferences: { ...DEFAULTS },
+  weather: emptyWeather(),
 };
 let storage;
 
@@ -62,6 +67,10 @@ export function loadState(adapter = globalThis.localStorage) {
       : typeof fallback === 'number' ? (Number.isFinite(Number(raw)) ? Number(raw) : fallback) : raw;
   }
   state.preferences = normalizePreferences(state.preferences);
+  state.weather = normalizeWeather(readJSON(KEYS.weather, null));
+  if (state.preferences.waterTemperatureMode === 'auto' && state.weather.daily) {
+    state.preferences.currentTemp = state.weather.daily.temperature;
+  }
   state.water = Math.max(0, Number(storage.getItem('waterAmount')) || 0);
   state.photo = storage.getItem(KEYS.photo) || '';
   state.lastDate = storage.getItem('lastDate') || new Date().toDateString();
@@ -121,6 +130,7 @@ export function persist({ nutrition = false } = {}) {
   for (const [key, value] of Object.entries(state.preferences)) {
     if (PREF_KEYS[key]) storage.setItem(PREF_KEYS[key], String(value));
   }
+  storage.setItem(KEYS.weather, JSON.stringify(state.weather));
   storage.setItem('waterAmount', String(state.water));
   storage.setItem('lastDate', state.lastDate || new Date().toDateString());
 }
@@ -137,6 +147,7 @@ export function exportSnapshot() {
     nutrition: state.nutrition, products: state.products, templates: state.templates,
     settings: state.preferences, friends: state.friends, uid: state.uid, photo: state.photo,
     water: state.water, lastDate: state.lastDate,
+    weather: state.weather,
   };
 }
 
@@ -171,9 +182,13 @@ export function importSnapshot(data) {
     uid: typeof data.uid === 'string' && /^\d{11}$/.test(data.uid) ? data.uid : state.uid,
     photo: typeof data.photo === 'string' && (!data.photo || /^data:image\/(jpeg|png|webp);base64,/.test(data.photo)) ? data.photo : state.photo,
     preferences: normalizePreferences({ ...state.preferences, ...data.settings }),
+    weather: normalizeWeather(data.weather),
     water: Math.max(0, Number(data.water) || 0),
     lastDate: typeof data.lastDate === 'string' && !Number.isNaN(new Date(data.lastDate).getTime()) ? data.lastDate : new Date().toDateString(),
   };
+  if (next.preferences.waterTemperatureMode === 'auto' && next.weather.daily) {
+    next.preferences.currentTemp = next.weather.daily.temperature;
+  }
   // Validate everything before replacing state, and restore prior keys if a write fails.
   const previous = structuredClone(state);
   const keys = [...Object.values(KEYS), ...Object.values(PREF_KEYS), 'waterAmount', 'lastDate'];

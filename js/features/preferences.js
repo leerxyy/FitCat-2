@@ -4,6 +4,7 @@ import { t, number } from '../core/i18n.js';
 import { $, onAction, changed, openDialog, closeDialog, toast, animateNumber } from '../ui/components.js';
 import { revealRegion } from '../ui/motion.js';
 import { haptic } from '../ui/haptics.js';
+import { initWeather, renderWeather, stopWeatherRequest, useManualTemperature, ensureDailyWeather } from './weather.js';
 
 let candidateActivity;
 
@@ -33,6 +34,7 @@ export function renderPreferences() {
   $('resultsSlider').value = preferences.smartSearchResults;
   $('resultsDisplay').textContent = number(preferences.smartSearchResults);
   renderSmartWater();
+  renderWeather();
   $('workoutIntensity').value = preferences.workoutIntensity;
   document.querySelectorAll('#workoutIntensityControl button').forEach(button => {
     button.classList.toggle('active', button.dataset.value === preferences.workoutIntensity);
@@ -53,7 +55,7 @@ function renderSmartWater() {
   const training = Math.max(0, goal - base - temperature - steps);
   const extra = Math.max(0, goal - base);
   const volume = value => `${number(value)} ${t('ml')}`;
-  $('tempDisplay').textContent = `${number(preferences.currentTemp)}°C`;
+  $('tempDisplay').textContent = `${number(preferences.currentTemp, preferences.waterTemperatureMode === 'auto' ? 1 : 0)}°C`;
   $('stepsDisplay').textContent = number(preferences.currentSteps);
   $('tempSlider').style.setProperty('--range-fill', `${Math.max(0, Math.min(100, (preferences.currentTemp + 10) * 2))}%`);
   $('stepsSlider').style.setProperty('--range-fill', `${Math.max(0, Math.min(100, preferences.currentSteps / 200))}%`);
@@ -88,13 +90,15 @@ function renderAbout() {
     <p>FitCat помогает вести дневник питания, воды, активности и изменений веса.</p>
     <h3>Данные</h3><p>Профиль, фото и дневник сохраняются в браузере на этом устройстве. Для функции друзей имя, дневные цели, сегодняшний список продуктов и вода синхронизируются с Firebase и доступны по твоему ID.</p>
     <p>При поиске продуктов и сканировании штрихкода приложение обращается к Open Food Facts. Сохранённые данные можно скачать и восстановить в настройках.</p>
+    <h3>Погода</h3><p>В «Умной воде» можно включить автоматический прогноз или задать температуру вручную. Геолокация запрашивается по кнопке; координаты округляются до сотых градуса и передаются Open-Meteo. Выбранное место и дневной прогноз сохраняются на устройстве и входят в резервную копию. Фонового отслеживания нет. Погодная поправка фиксируется до следующего дня; пересчитать её можно вручную.</p><p>Погода: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>, среднее за 09:00–21:00 по времени устройства; данные <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Шаги в этой PWA вводятся вручную.</p>
     <h3>Расчёты</h3><p>Расчёты основаны на общих формулах из предыдущей версии FitCat и носят информационный характер. Приложение не является медицинским сервисом.</p>
-    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.4.3</p>` : chinese ? `
-    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.4.3</p>` : `
-    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.4.3</p>`;
+    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.4.4</p>` : chinese ? `
+    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>天气</h3><p>仅点击定位按钮时请求位置。坐标四舍五入到小数点后两位后发送给 <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>，也可手动选择城市。计算设备时区 09:00–21:00 的平均气温，全天固定天气调整量；可手动重新计算。位置及预报保存在设备及备份中，不在后台追踪位置。本 PWA 的步数需手动输入。天气数据采用 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.4.4</p>` : `
+    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Weather</h3><p>Location access is requested only from the location button. Coordinates rounded to two decimals are sent to <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>; you can choose a city instead. The 09:00–21:00 forecast average uses the device timezone. The adjustment stays fixed for the day and can be recalculated manually. Your saved place and forecast are stored on-device and included in backups. No background location tracking. Steps are entered manually in this PWA. Weather data: <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.4.4</p>`;
 }
 
 export function initPreferences() {
+  initWeather();
   $('hapticsToggle').addEventListener('change', event => { state.preferences.hapticsEnabled = event.target.checked; changed(); if (event.target.checked) haptic(); });
   onAction('testHaptics', () => { if (!haptic()) toast(t('haptics_unavailable')); });
   const setLanguage = button => {
@@ -102,7 +106,7 @@ export function initPreferences() {
     document.dispatchEvent(new Event('fitcat:language'));
   };
   onAction('setSetupLanguage', setLanguage); onAction('setSettingsLanguage', setLanguage);
-  onAction('openSmartWater', () => { renderPreferences(); openDialog('smartWaterModal'); });
+  onAction('openSmartWater', () => { renderPreferences(); openDialog('smartWaterModal'); void ensureDailyWeather(); });
   onAction('closeSmartWater', () => closeDialog('smartWaterModal'));
   onAction('openSmartSearch', () => { renderPreferences(); openDialog('smartSearchModal'); });
   onAction('closeSmartSearch', () => closeDialog('smartSearchModal'));
@@ -117,9 +121,16 @@ export function initPreferences() {
     if (event.detail === 'activity') { candidateActivity = state.preferences.dailyActivity; renderActivityOptions(); }
   });
   for (const [identifier, key] of [['smartWaterToggle','smartWaterEnabled'], ['smartSearchToggle','smartSearchEnabled'], ['workoutToggle','workoutEnabled']]) {
-    $(identifier).addEventListener('change', event => { state.preferences[key] = event.target.checked; changed(); });
+    $(identifier).addEventListener('change', event => {
+      state.preferences[key] = event.target.checked;
+      if (key === 'smartWaterEnabled' && !event.target.checked) stopWeatherRequest();
+      changed();
+    });
   }
   for (const [identifier, key] of [['tempSlider','currentTemp'], ['stepsSlider','currentSteps'], ['resultsSlider','smartSearchResults']]) {
-    $(identifier).addEventListener('input', event => { state.preferences[key] = Number(event.target.value); changed(); });
+    $(identifier).addEventListener('input', event => {
+      if (key === 'currentTemp') { useManualTemperature(event.target.value); return; }
+      state.preferences[key] = Number(event.target.value); changed();
+    });
   }
 }
