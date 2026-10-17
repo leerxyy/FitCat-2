@@ -60,7 +60,9 @@ test('the real app modules load old data and wire diary, water, language, profil
       $('toast').querySelector('button').click(); await tick(); assert.equal(state.foods.length, 2); assert.equal(state.foods[1].id, id);
     });
     await t.test('activity selection and training change daily targets', async () => {
+      $('appScroller').scrollTop = 700;
       await click('[data-action="tab"][data-tab="activity"]'); assert.equal($('activityPage').hidden, false); assert.equal($('todayPage').hidden, true);
+      assert.equal($('appScroller').scrollTop, 0); assert.equal($('navDock').hidden, false);
       await click('[data-action="selectDailyActivity"][data-activity="1.55"]'); await click('[data-action="applyDailyActivity"]');
       assert.equal(state.preferences.dailyActivity, 1.55); assert.equal($('caloriesTarget').dataset.value, '2961');
       $('workoutToggle').checked = true; $('workoutToggle').dispatchEvent(new Event('change')); await tick();
@@ -77,11 +79,19 @@ test('the real app modules load old data and wire diary, water, language, profil
     });
     await t.test('profile, settings and all language versions remain reachable', async () => {
       await click('[data-action="showProfile"]'); assert.equal($('profilePage').hidden, false); assert.equal($('profileName').value, 'Тест');
+      assert.equal($('navDock').hidden, true);
       await click('[data-action="showPage"][data-value="settingsPage"]'); assert.equal($('settingsPage').hidden, false);
-      await click('[data-action="setSettingsLanguage"][data-value="en"]'); assert.equal(document.documentElement.lang, 'en');
-      await click('[data-action="tab"][data-tab="today"]'); assert.equal($('pageTitle').textContent, 'Today');
       await click('[data-action="setSettingsLanguage"][data-value="cn"]'); assert.equal(document.documentElement.lang, 'zh-Hans');
       await click('[data-action="setSettingsLanguage"][data-value="ru"]'); assert.equal(document.documentElement.lang, 'ru');
+      await click('[data-action="setSettingsLanguage"][data-value="en"]'); assert.equal(document.documentElement.lang, 'en');
+      await click('#settingsPage [data-action="showPage"][data-value="mainPage"]'); assert.equal($('navDock').hidden, false);
+      await click('[data-action="tab"][data-tab="today"]'); assert.equal($('pageTitle').textContent, 'Today');
+    });
+    await t.test('haptic preference is saved and disables its test button', async () => {
+      $('hapticsToggle').checked = false; $('hapticsToggle').dispatchEvent(new Event('change')); await tick();
+      assert.equal(state.preferences.hapticsEnabled, false); assert.equal(env.localStorage.getItem('hapticsEnabled'), 'false'); assert.equal($('hapticsTest').disabled, true);
+      $('hapticsToggle').checked = true; $('hapticsToggle').dispatchEvent(new Event('change')); await tick();
+      assert.equal($('hapticsTest').disabled, false);
     });
     await t.test('friends have a usable offline state without trying to connect', async () => {
       await click('[data-action="tab"][data-tab="friends"]'); assert.equal($('friendsPage').hidden, false);

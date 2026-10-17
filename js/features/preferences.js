@@ -3,11 +3,14 @@ import { temperatureBonus, stepsBonus } from '../core/math.js';
 import { t, number } from '../core/i18n.js';
 import { $, onAction, changed, openDialog, closeDialog, toast } from '../ui/components.js';
 import { revealRegion } from '../ui/motion.js';
+import { haptic } from '../ui/haptics.js';
 
 let candidateActivity;
 
 export function renderPreferences() {
   const preferences = state.preferences;
+  $('hapticsToggle').checked = preferences.hapticsEnabled;
+  $('hapticsTest').disabled = !preferences.hapticsEnabled;
   for (const group of ['setup', 'settings']) {
     for (const [suffix, value] of [['Ru','ru'], ['En','en'], ['Cn','cn']]) {
       const button = $(group + 'Lang' + suffix);
@@ -60,12 +63,14 @@ function renderAbout() {
     <h3>Данные</h3><p>Профиль, фото и дневник сохраняются в браузере на этом устройстве. Для функции друзей имя, дневные цели, сегодняшний список продуктов и вода синхронизируются с Firebase и доступны по твоему ID.</p>
     <p>При поиске продуктов и сканировании штрихкода приложение обращается к Open Food Facts. Сохранённые данные можно скачать и восстановить в настройках.</p>
     <h3>Расчёты</h3><p>Расчёты основаны на общих формулах из предыдущей версии FitCat и носят информационный характер. Приложение не является медицинским сервисом.</p>
-    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.1</p>` : chinese ? `
-    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.1</p>` : `
-    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.1</p>`;
+    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.2</p>` : chinese ? `
+    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.2</p>` : `
+    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.2</p>`;
 }
 
 export function initPreferences() {
+  $('hapticsToggle').addEventListener('change', event => { state.preferences.hapticsEnabled = event.target.checked; changed(); if (event.target.checked) haptic(); });
+  onAction('testHaptics', () => { if (!haptic()) toast(t('haptics_unavailable')); });
   const setLanguage = button => {
     state.preferences.lang = button.dataset.value; changed();
     document.dispatchEvent(new Event('fitcat:language'));

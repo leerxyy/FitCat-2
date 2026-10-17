@@ -83,10 +83,11 @@ test('reopening a closing dialog cancels the stale close operation', async () =>
 test('scroll parallax stays bounded and pauses while the page is hidden', () => {
   const layer = element(); const root = element(); const preference = new EventTarget(); Object.defineProperty(preference, 'matches', { get: () => reduce });
   globalThis.matchMedia = query => query.includes('prefers-reduced-motion') ? preference : { matches: true };
-  const document = new EventTarget(); Object.assign(document, { hidden: false, documentElement: root, getElementById: () => layer });
+  const scroller = new EventTarget(); scroller.scrollTop = 0;
+  const document = new EventTarget(); Object.assign(document, { hidden: false, documentElement: root, getElementById: id => id === 'ambientLight' ? layer : id === 'appScroller' ? scroller : null });
   const window = new EventTarget(); Object.assign(window, { scrollY: 0, innerWidth: 1000, innerHeight: 800 });
   Object.assign(globalThis, { document, window }); initAmbient(); step(16);
-  window.scrollY = 2000; window.dispatchEvent(new Event('scroll'));
+  scroller.scrollTop = 2000; scroller.dispatchEvent(new Event('scroll')); assert.equal(window.scrollY, 0);
   for (let time = 32; time <= 2000; time += 16) step(time);
   const y = parseFloat(layer.style['--parallax-y']); assert.ok(y < -30 && y > -43);
   assert.equal(frames.size, 0);

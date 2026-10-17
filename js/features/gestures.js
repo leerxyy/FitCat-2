@@ -76,7 +76,7 @@ function processGestures(results) {
     cursor.hidden = false; cursor.style.left = `${x}px`; cursor.style.top = `${y}px`;
   }
   const pinch = Math.hypot(hand[4].x - point.x, hand[4].y - point.y) < .05;
-  if (pinch && !lastPinch) { document.elementFromPoint(x, y)?.closest('button, a, summary, label, input')?.click(); navigator.vibrate?.(8); }
+  if (pinch && !lastPinch) { document.elementFromPoint(x, y)?.closest('button, a, summary, label, input')?.click(); }
   lastPinch = pinch;
   if (cooldown > 0) --cooldown;
   const palm = hand[0];
@@ -84,7 +84,7 @@ function processGestures(results) {
     const dx = palm.x - lastPalm.x; const dy = palm.y - lastPalm.y;
     if (Math.abs(dx) > .06 && Math.abs(dx) > Math.abs(dy)) {
       showTab(activeTab + (dx < 0 ? 1 : -1)); cooldown = 25; handledPose = 'palm';
-    } else if (Math.abs(dy) > .04 && Math.abs(dy) > Math.abs(dx)) window.scrollBy(0, dy * innerHeight * 2);
+    } else if (Math.abs(dy) > .04 && Math.abs(dy) > Math.abs(dx)) $('appScroller')?.scrollBy?.({ top: dy * innerHeight * 2, behavior: 'auto' });
   }
   lastPalm = { x: palm.x, y: palm.y };
   const tips = [8, 12, 16, 20];

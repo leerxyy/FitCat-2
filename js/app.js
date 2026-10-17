@@ -11,6 +11,8 @@ import { initFriends, queuePublish, loadFriends } from './services/friends.js';
 import { initGestures } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
 import { initAmbient } from './ui/ambient.js';
+import { initDock } from './ui/dock.js';
+import { initHaptics } from './ui/haptics.js';
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates();
@@ -25,7 +27,7 @@ function checkDay() {
 function start() {
   loadState();
   rollDay(); updateStreak();
-  initActions(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); initDock(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');

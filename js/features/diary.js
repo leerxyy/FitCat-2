@@ -145,7 +145,7 @@ function saveFood(event) {
   revealFoodId = food.id;
   if (!state.products.some(item => item.name.toLocaleLowerCase() === product.name.toLocaleLowerCase())) state.products.push(product);
   changed({ nutrition: true }); closeDialog('foodEntryModal'); toast(t('food_saved'));
-  navigator.vibrate?.(8);
+ 
 }
 
 function editFood(id) {
@@ -168,7 +168,7 @@ export function addWater(amount) {
   $('waterCard').classList.remove('just-added');
   requestAnimationFrame(() => $('waterCard').classList.add('just-added'));
   toast(t('water_added'), { label: t('undo'), run: () => { state.water = previous; changed(); } });
-  navigator.vibrate?.(8);
+ 
 }
 
 export function renderTemplates() {
@@ -182,7 +182,7 @@ export function initDiary() {
   onAction('editFood', button => editFood(button.dataset.value));
   onAction('toggleFood', button => {
     const food = state.foods.find(item => item.id === button.dataset.value);
-    if (food) { food.checked = !food.checked; revealFoodId = food.id; changed({ nutrition: true }); navigator.vibrate?.(8); }
+    if (food) { food.checked = !food.checked; revealFoodId = food.id; changed({ nutrition: true }); }
   });
   onAction('deleteFood', async button => {
     const id = button.dataset.value;

@@ -3,6 +3,7 @@ import { translations } from './translations.js';
 
 const additions = {
   ru: {
+    haptics: 'Виброотклик', test_haptics: 'Проверить отклик', haptics_unavailable: 'Этот браузер не предоставляет виброотклик.',
     meals: 'Приёмы пищи', analytics: 'Статистика', add_food: 'Добавить еду', add_friend: 'Добавить друга', add_weight: 'Добавить запись веса', weight_date: 'Дата измерения веса',
     remaining: 'ккал осталось', over_target: 'ккал сверх цели', eaten: 'Съедено', target: 'Цель',
     breakfast: 'Завтрак', lunch: 'Обед', dinner: 'Ужин', snack: 'Перекус', other: 'Продукты',
@@ -35,6 +36,7 @@ const additions = {
     update_available: 'Доступна новая версия FitCat', update: 'Обновить', photo_error: 'Не удалось открыть фото',
   },
   en: {
+    haptics: 'Haptic feedback', test_haptics: 'Test feedback', haptics_unavailable: 'This browser does not provide haptic feedback.',
     meals: 'Meals', analytics: 'Statistics', add_food: 'Add food', add_friend: 'Add friend', add_weight: 'Add weight entry', weight_date: 'Weight measurement date', remaining: 'kcal remaining', over_target: 'kcal over target',
     eaten: 'Eaten', target: 'Target', breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack', other: 'Foods',
     empty_title: 'Your diary for today', empty_description: 'Add food to see your meals and daily progress.',
@@ -64,6 +66,7 @@ const additions = {
     update_available: 'A new FitCat version is available', update: 'Update', photo_error: 'Could not open this photo',
   },
   cn: {
+    haptics: '触觉反馈', test_haptics: '测试触感', haptics_unavailable: '此浏览器不提供触觉反馈。',
     meals: '餐食', analytics: '统计', add_food: '添加食物', add_friend: '添加好友', add_weight: '添加体重记录', weight_date: '体重测量日期', remaining: '剩余千卡', over_target: '超出千卡',
     eaten: '已摄入', target: '目标', breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐', other: '食物',
     empty_title: '今天的饮食日记', empty_description: '添加食物，查看餐食和每日进度。', food_portion: '分量', meal_type: '餐次',

@@ -1,7 +1,8 @@
 *, *::before, *::after { box-sizing: border-box; }
-html { min-height: 100%; background: var(--bg); scrollbar-gutter: stable; }
-body { margin: 0; min-width: 300px; color: var(--text); background: var(--bg); font-family: var(--font); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; overflow: hidden; background: var(--bg); }
+body { margin: 0; height: 100%; overflow: hidden; min-width: 300px; color: var(--text); background: var(--bg); font-family: var(--font); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
 body.dialog-open { overflow: hidden; }
+body.dialog-open .app-root { overflow: hidden; }
 [hidden] { display: none !important; }
 button, input, select, textarea { font: inherit; }
 button, a, input, select, summary { touch-action: manipulation; }

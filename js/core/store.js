@@ -10,6 +10,7 @@ const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
   currentSteps: 8000, currentTemp: 22, smartWaterEnabled: false,
   smartSearchEnabled: false, smartSearchResults: 10,
+  hapticsEnabled: true,
 };
 const PREF_KEYS = { ...Object.fromEntries(Object.keys(DEFAULTS).map(key => [key, key])), lang: 'fitcat_lang' };
 function normalizePreferences(value) {

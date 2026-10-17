@@ -5,6 +5,7 @@ import { reducedMotion, finishValueMotion } from './motion.js';
 export function initAmbient() {
   const layer = document.getElementById('ambientLight');
   if (!layer) return;
+  const scroller = document.getElementById('appScroller');
   let frame = 0; let x = 0; let y = 0; let pointerX = 0; let pointerY = 0;
   let lastTime = 0; let paused = false;
   const preference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -13,7 +14,7 @@ export function initAmbient() {
     frame = 0;
     if (paused || reducedMotion()) return;
     const targetX = pointerX;
-    const targetY = pointerY - Math.tanh((window.scrollY || 0) / 1000) * 42;
+    const targetY = pointerY - Math.tanh((scroller?.scrollTop ?? window.scrollY ?? 0) / 1000) * 42;
     const elapsed = lastTime ? Math.min(64, now - lastTime) : 16;
     const blend = 1 - Math.exp(-elapsed / 160); lastTime = now;
     x += (targetX - x) * blend; y += (targetY - y) * blend;
@@ -31,6 +32,7 @@ export function initAmbient() {
     if (!hidden) schedule();
   };
   window.addEventListener('scroll', schedule, { passive: true });
+  scroller?.addEventListener?.('scroll', schedule, { passive: true });
   window.addEventListener('pointermove', event => {
     if (!finePointer?.matches || event.pointerType === 'touch') return;
     pointerX = (event.clientX / Math.max(1, window.innerWidth) - .5) * 22;

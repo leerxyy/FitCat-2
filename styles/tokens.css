@@ -18,6 +18,9 @@
   --glass-edge: rgb(166 220 255 / 28%);
   --glass-glow: rgb(17 193 238 / 9%);
   --header-space: 34px;
+  --nav-height: 70px;
+  --nav-gap: 14px;
+  --nav-reserve: calc(var(--nav-height) + var(--nav-gap) + env(safe-area-inset-bottom, 0px) + 24px);
   --radius: 22px;
   --radius-small: 14px;
   --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;

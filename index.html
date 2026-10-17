@@ -21,7 +21,7 @@
 </head>
 <body data-screen="setupPage">
   <div class="ambient-light" id="ambientLight" aria-hidden="true"><div class="ambient-plane ambient-far"></div><div class="ambient-plane ambient-near"></div></div>
-  <div class="app-root">
+  <div class="app-root" id="appScroller">
     <div id="setupPage" data-screen-view="" class="screen onboarding">
   <div class="onboarding-heading"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><p data-i18n="setup_subtitle">Настроим дневник под твои цели</p></div>
 <form class="card" id="setupForm">
@@ -172,10 +172,10 @@
         <span>40</span>
       </div>
     </div>
-    <div class="flex mb-2">
+    <div class="weight-entry">
       <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" inputmode="decimal" aria-label="Вес">
       <input type="date" id="weightDate" aria-label="weightDate" data-i18n-label="weight_date">
-      <button class="btn-small" type="button" data-action="addWeightEntry" data-i18n-label="add_weight">+</button>
+      <button class="btn-small" type="button" data-action="addWeightEntry" data-i18n-label="add_weight"><span data-i18n="add_weight">Добавить запись веса</span></button>
     </div>
     <div class="chart-frame"><canvas id="weightChart"></canvas></div><div id="weightChartStatus" class="chart-status" hidden></div>
     <button class="journal-header" data-action="toggleJournal" data-value="weightHistory" type="button">
@@ -285,8 +285,8 @@
     <button class="btn-secondary" data-i18n="import_data" type="button" data-action="importData">Загрузить данные</button>
     <button class="btn-secondary" data-i18n="my_products" type="button" data-action="showProductsManager">Мои продукты</button>
     <button class="btn-secondary" data-i18n="about" type="button" data-action="openAbout">О приложении</button>
-    <div class="settings-row"><span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg><span data-i18n="gesture_control">Управление жестами</span></span><button type="button" class="icon-button" id="gestureToggleBtn" data-action="toggleGestures" data-i18n-label="gesture_control" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg></button></div><p class="muted text-small" data-i18n="gesture_description">Переключай вкладки через камеру.</p><h2 data-i18n="language">Язык</h2>
-    <div class="flex">
+    <div class="settings-row"><span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg><span data-i18n="gesture_control">Управление жестами</span></span><button type="button" class="icon-button" id="gestureToggleBtn" data-action="toggleGestures" data-i18n-label="gesture_control" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg></button></div><p class="muted text-small" data-i18n="gesture_description">Переключай вкладки через камеру.</p><div class="settings-row"><span data-i18n="haptics">Виброотклик</span><label class="apple-switch"><input type="checkbox" id="hapticsToggle" data-i18n-label="haptics"><span class="slider"></span></label></div><button type="button" class="btn-small haptics-test" id="hapticsTest" data-action="testHaptics" data-i18n="test_haptics">Проверить отклик</button><h2 data-i18n="language">Язык</h2>
+    <div class="language-options">
       <button class="btn-small lang-btn" id="settingsLangRu" type="button" data-action="setSettingsLanguage" data-value="ru">RU</button>
       <button class="btn-small lang-btn" id="settingsLangEn" type="button" data-action="setSettingsLanguage" data-value="en">EN</button>
       <button class="btn-small lang-btn" id="settingsLangCn" type="button" data-action="setSettingsLanguage" data-value="cn">中文</button>
@@ -304,7 +304,7 @@
   </div>
 </div>
   </div>
-  <nav class="bottom-nav glass" id="bottomNav" aria-label="Основная навигация" hidden><span class="nav-selection" aria-hidden="true"></span><button type="button" class="nav-item is-active" data-action="tab" data-tab="today"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="tab_today">Сегодня</span></button><button type="button" class="nav-item" data-action="tab" data-tab="activity"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#activity"></use></svg><span data-i18n="tab_activity">Активность</span></button><button type="button" class="nav-item" data-action="tab" data-tab="analytics"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><span data-i18n="analytics">Статистика</span></button><button type="button" class="nav-item" data-action="tab" data-tab="friends"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#users"></use></svg><span data-i18n="friends_title">Друзья</span></button></nav>
+  <div class="nav-dock" id="navDock" hidden><nav class="bottom-nav glass" id="bottomNav" aria-label="Основная навигация" hidden><span class="nav-selection" aria-hidden="true"></span><button type="button" class="nav-item is-active" data-action="tab" data-tab="today"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="tab_today">Сегодня</span></button><button type="button" class="nav-item" data-action="tab" data-tab="activity"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#activity"></use></svg><span data-i18n="tab_activity">Активность</span></button><button type="button" class="nav-item" data-action="tab" data-tab="analytics"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><span data-i18n="analytics">Статистика</span></button><button type="button" class="nav-item" data-action="tab" data-tab="friends"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#users"></use></svg><span data-i18n="friends_title">Друзья</span></button></nav></div>
   
 <dialog id="foodEntryModal" class="sheet" aria-labelledby="foodDialogTitle">
   <header class="sheet-heading"><h2 id="foodDialogTitle" data-i18n="add_food">Добавить еду</h2><button type="button" class="icon-button" data-close="foodEntryModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>

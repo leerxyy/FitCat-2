@@ -12,6 +12,7 @@ export function showTab(tab) {
   if (index < 0) return;
   const direction = index >= activeTab ? 1 : -1;
   const didChange = index !== activeTab;
+  if (didChange) { const scroller = $('appScroller'); if (scroller) scroller.scrollTop = 0; }
   activeTab = index;
   window.currentPage = index;
   switchViews([...document.querySelectorAll('[data-main-view]')], index, direction);
@@ -36,8 +37,9 @@ export function showScreen(id) {
   for (const screen of document.querySelectorAll('[data-screen-view]')) screen.hidden = screen.id !== id;
   document.body.dataset.screen = id;
   $('bottomNav').hidden = id !== 'mainPage';
+  $('navDock').hidden = id !== 'mainPage';
   document.dispatchEvent(new CustomEvent('fitcat:screen', { detail: id }));
-  window.scrollTo({ top: 0, behavior: 'auto' });
+  const scroller = $('appScroller'); if (scroller) scroller.scrollTop = 0;
   if (previous !== id) enter($(id), { y: 12, duration: 360 });
 }
 
