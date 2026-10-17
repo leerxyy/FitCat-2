@@ -1,0 +1,198 @@
+.ambient-light { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse 70% 35% at 50% 0%, rgb(22 121 165 / 5%), transparent 75%); }
+.app-root { position: relative; max-width: 1040px; margin: auto; padding: max(18px, env(safe-area-inset-top)) 16px calc(112px + env(safe-area-inset-bottom)); }
+.screen { min-width: 0; }
+.app-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 48px; margin-bottom: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; width: max-content; color: var(--text); font-size: 28px; font-weight: 720; letter-spacing: -.035em; line-height: 1; }
+.brand-mark { width: 32px; height: 34px; object-fit: contain; }
+.brand-accent { color: var(--accent); }
+.profile-button { width: 43px; height: 43px; display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 50%; color: #b9c7d8; overflow: hidden; }
+.profile-button img { width: 100%; height: 100%; object-fit: cover; }
+.profile-button .icon { width: 24px; height: 24px; }
+.header-initials { font-size: 13px; font-weight: 650; }
+.page-heading { margin-bottom: 18px; }
+.page-heading p { margin-top: 7px; font-size: 14px; color: var(--muted); }
+.today-layout { display: grid; gap: 14px; align-items: start; }
+.nutrition-card { padding: 17px 17px 19px; }
+.calorie-summary { display: grid; grid-template-columns: minmax(52px, 1fr) minmax(0, 1.9fr) minmax(52px, 1fr); gap: 5px; align-items: center; margin-bottom: 14px; }
+.calorie-ring { position: relative; width: 100%; max-width: 190px; aspect-ratio: 1; margin: auto; }
+.calorie-ring > svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.ring-track, .ring-value { fill: none; stroke-width: 11; }
+.ring-track { stroke: #25303d; }
+.ring-value { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .7s var(--ease); }
+.ring-value.is-over { stroke: var(--warning); }
+.ring-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
+.ring-content strong { font-size: clamp(27px, 7.9vw, 38px); font-weight: 710; letter-spacing: -.04em; line-height: 1.15; }
+.ring-content span { color: var(--muted); font-size: 11px; max-width: 105px; }
+.calorie-side { display: flex; flex-direction: column; gap: 2px; align-items: center; text-align: center; }
+.calorie-side > span { font-size: 11px; color: var(--muted); }
+.calorie-side strong { font-size: clamp(18px, 5.6vw, 25px); line-height: 1.35; font-weight: 650; white-space: nowrap; letter-spacing: -.025em; }
+.macro-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); padding-top: 15px; }
+.macro { min-width: 0; padding: 0 12px; border-left: 1px solid var(--border-strong); }
+.macro:first-child { border: 0; padding-left: 0; }
+.macro:last-child { padding-right: 0; }
+.macro > span { color: var(--muted); font-size: 12px; }
+.macro > div:not(.macro-track) { margin: 5px 0 9px; white-space: nowrap; font-size: 13px; }
+.macro > div strong { font-weight: 650; }
+.macro-target { color: var(--muted); font-size: 11px; }
+.macro-track { height: 8px; border-radius: 99px; overflow: hidden; background: #25303d; }
+.macro-track i { display: block; width: 100%; height: 100%; background: var(--accent); border-radius: inherit; transform: scaleX(var(--fraction, 0)); transform-origin: left; transition: transform .65s var(--ease); }
+.primary-actions { display: flex; gap: 9px; margin-top: 10px; }
+.add-food-button { min-width: 0; flex: 1; min-height: 48px; }
+.scanner-button { width: 54px; height: 48px; padding: 12px; border-radius: 15px; }
+.scanner-button .icon { width: 24px; height: 24px; }
+.meals-card, .water-card { padding: 17px 16px; }
+.meal-total { font-size: 12px; white-space: nowrap; }
+.meals-card .section-heading { gap: 6px; margin-bottom: 5px; }
+.meals-card h2, .water-card h2 { font-size: 19px; }
+.meal-group + .meal-group { border-top: 1px solid var(--border); }
+.meal-summary { display: flex; gap: 12px; align-items: center; min-height: 76px; padding: 12px 0; cursor: pointer; list-style: none; }
+.meal-summary::-webkit-details-marker { display: none; }
+.meal-thumb { width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center; background: #21313e; color: #9dcbdb; flex-shrink: 0; overflow: hidden; }
+.meal-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.meal-thumb .icon { width: 25px; height: 25px; }
+.meal-description { flex: 1; min-width: 0; }
+.meal-description strong { font-size: 15px; font-weight: 640; }
+.meal-description small { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; color: var(--muted); font-size: 12px; margin-top: 2px; overflow-wrap: anywhere; }
+.meal-kcal { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.meal-chevron { width: 16px; height: 16px; color: var(--muted); transition: transform .2s; }
+.meal-group[open] .meal-chevron { transform: rotate(90deg); }
+.food-item { display: flex; align-items: center; gap: 10px; padding: 13px 0; border-top: 1px solid var(--border); }
+.food-toggle { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex-shrink: 0; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--surface-input); }
+.food-toggle .icon { width: 17px; height: 17px; opacity: 0; }
+.food-toggle.checked { background: var(--accent); color: #05131a; border-color: transparent; }
+.food-toggle.checked .icon { opacity: 1; }
+.food-info { flex: 1; min-width: 0; }
+.food-name { font-weight: 550; font-size: 13px; overflow-wrap: anywhere; }
+.food-details { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.food-item .icon-button { width: 36px; height: 38px; min-width: 36px; min-height: 38px; padding: 8px; border: 0; background: none; }
+.food-item .icon-button .icon { width: 17px; height: 17px; }
+.meal-group .text-button { width: 100%; border-top: 1px solid var(--border); }
+.water-card .section-heading { margin-bottom: 13px; gap: 8px; }
+.water-reading { display: flex; gap: 6px; align-items: center; font-size: 14px; white-space: nowrap; }
+.water-reading .icon { width: 18px; height: 21px; color: var(--muted); }
+.water-reading strong { font-weight: 650; }
+.water-track { height: 8px; border-radius: 99px; background: #25303d; overflow: hidden; -webkit-mask-image: repeating-linear-gradient(to right, #000 0, #000 calc(20% - 4px), transparent calc(20% - 4px), transparent 20%); mask-image: repeating-linear-gradient(to right, #000 0, #000 calc(20% - 4px), transparent calc(20% - 4px), transparent 20%); }
+.water-track > i { display: block; width: 100%; height: 100%; background: var(--accent); transform: scaleX(var(--fraction, 0)); transform-origin: left; transition: transform .65s var(--ease); }
+.water-actions { display: flex; gap: 9px; margin-top: 13px; }
+.water-actions .glass-button { font-size: 13px; gap: 3px; }
+.water-actions .icon-button { border-radius: 99px; height: 43px; }
+.water-hint { margin-top: 10px; color: var(--muted); font-size: 11px; }
+.bottom-nav { --active-index: 0; position: fixed; z-index: 30; bottom: max(12px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: calc(100% - 28px); max-width: 480px; height: 70px; padding: 6px; border-radius: 999px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); box-shadow: inset 0 1px rgb(234 245 255 / 14%), 0 8px 35px rgb(0 0 0 / 25%); }
+.nav-selection { position: absolute; top: 6px; bottom: 6px; left: 6px; width: calc((100% - 12px) / 4); transform: translateX(calc(var(--active-index) * 100%)); border-radius: 99px; background: linear-gradient(145deg, rgb(22 207 243 / 16%), rgb(22 207 243 / 7%)); border: 1px solid rgb(123 217 240 / 16%); box-shadow: inset 0 1px rgb(235 250 255 / 9%); transition: transform .4s var(--spring); pointer-events: none; }
+.nav-item { z-index: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 0; padding: 2px; border-radius: 99px; color: var(--muted); font-size: 11px; font-weight: 500; }
+.nav-item .icon { width: 23px; height: 23px; }
+.nav-item.is-active { color: var(--accent); }
+.narrow-screen { max-width: 580px; margin: auto; }
+.narrow-screen > .card > .btn-secondary { margin-top: 10px; }
+.profile-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+.profile-header .btn-small { font-size: 12px; }
+.profile-photo { display: flex; width: 84px; height: 84px; margin: 0 auto 13px; align-items: center; justify-content: center; border-radius: 50%; background: var(--accent-wash); border: 1px solid var(--border-strong); overflow: hidden; cursor: pointer; }
+.profile-photo img { width: 100%; height: 100%; object-fit: cover; }
+.profile-initials { font-size: 24px; color: var(--accent); }
+#profileForm > div:has(#profileUidDisplay), #profileForm > div:has([data-action=deletePhoto]) { text-align: center; color: var(--muted); font-size: 13px; margin: 8px 0 13px; }
+.profile-meta { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+.profile-meta strong { color: var(--text); }
+.profile-meta .text-button { margin-left: 6px; font-size: 12px; }
+#profileForm > .btn-secondary { margin-top: 10px; }
+#profileForm .btn-danger { color: var(--danger); }
+#settingsPage .card > h2:not(:first-child) { margin-top: 24px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 22px 0 4px; }
+.settings-row > span { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.settings-row > span .icon { width: 20px; color: var(--muted); }
+.settings-row [aria-pressed=true] { color: var(--accent); background: var(--accent-wash); }
+.onboarding { max-width: 470px; margin: 12px auto 0; }
+.onboarding-heading { margin-bottom: 26px; }
+.onboarding-heading .brand { font-size: 32px; }
+.onboarding-heading p { margin-top: 18px; color: var(--muted); font-size: 15px; }
+.onboarding > .btn-primary { margin-top: 16px; }
+.onboarding > .text-center { margin: 13px 12px 20px; }
+.onboarding > .card:last-child { margin-top: 18px; }
+.onboarding .input-group:last-child { margin-bottom: 0; }
+.activity-daily-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 25px; }
+.activity-daily-item { border: 1px solid var(--border-strong); border-radius: 14px; min-height: 65px; padding: 12px 10px; color: var(--muted); font-size: 13px; }
+.activity-daily-item.selected { color: var(--accent); background: var(--accent-wash); border-color: rgb(22 207 243 / 40%); }
+.workout-section { border-top: 1px solid var(--border); padding: 20px 0; }
+.workout-section > div:first-child { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+.workout-section > div:first-child > div { display: flex; align-items: center; }
+#workoutSettings { margin-top: 20px; }
+#workoutSettings > label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+#analyticsPage { display: grid; gap: 16px; }
+#analyticsPage > .card > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+#analyticsPage h2 { font-size: 18px; }
+#weightStats { border-radius: 14px; padding: 15px 0; margin-bottom: 17px; background: var(--surface-input); }
+#weightStats > div { display: grid; grid-template-columns: repeat(2, 1fr); text-align: center; row-gap: 14px; }
+#weightStats .text-small { font-size: 11px; margin-bottom: 3px; }
+#weightStats [id] { font-size: 17px; font-weight: 630; }
+.bmi-container { padding-bottom: 22px; }
+.bmi-header { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.bmi-value { font-weight: 650; font-size: 23px; }
+.bmi-category { color: var(--muted); font-size: 12px; }
+.bmi-scale { position: relative; cursor: pointer; height: 10px; }
+.bmi-gradient { position: absolute; inset: 0; border-radius: 99px; background: linear-gradient(to right, #6e9cb8 0% 10%, #73b6bd 10% 38%, #799c88 38% 58%, #bba573 58% 79%, #ad7980 79% 100%); }
+.bmi-marker { position: absolute; top: -3px; height: 16px; width: 4px; border-radius: 3px; background: #fff; box-shadow: 0 0 0 2px var(--surface); }
+.bmi-tooltip { display: none; }
+.bmi-labels { display: flex; justify-content: space-between; font-size: 10px; margin-top: 7px; color: var(--muted); }
+#analyticsPage .flex.mb-2 { display: grid; grid-template-columns: 1fr 1.3fr 44px; gap: 8px; }
+#analyticsPage input { padding: 11px 9px; font-size: 14px; }
+.chart-frame { position: relative; height: 220px; width: 100%; margin: 14px 0; }
+.chart-frame canvas { max-width: 100%; }
+.chart-status { color: var(--muted); font-size: 12px; text-align: center; padding: 20px 0; }
+.chart-status button { color: var(--accent); margin: 8px; }
+.nutrition-switch { display: flex; gap: 5px; margin: 15px 0; }
+.nutrition-switch > button { flex: 1; font-size: 11px; padding: 8px 5px; min-height: 40px; }
+.journal-header { display: flex; width: 100%; padding: 15px 0; text-align: left; margin-top: 10px; border-top: 1px solid var(--border); color: var(--text); }
+.journal-header h3 { font-size: 14px; }
+.history-item, .product-item, .friend-item { display: flex; gap: 12px; align-items: center; padding: 13px 0; border-top: 1px solid var(--border); }
+.history-item > span:first-child { flex: 1; color: var(--muted); font-size: 12px; }
+.history-item strong { font-size: 13px; }
+.history-item .icon-button, .product-item .icon-button { width: 36px; height: 36px; min-height: 36px; min-width: 36px; padding: 8px; }
+.history-item .icon { width: 17px; height: 17px; }
+.nutrition-history-value { font-size: 11px !important; }
+.product-item > div { flex: 1; min-width: 0; }
+.product-item strong { overflow-wrap: anywhere; font-size: 14px; }
+.product-item small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+#productsPage > .card > div:first-child { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+#friendsPage .card > div:first-of-type { display: flex; gap: 8px; margin-bottom: 14px; }
+.friend-privacy { line-height: 1.6; margin-bottom: 18px; }
+.friend-item .friend-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: var(--accent-wash); color: var(--accent); font-weight: 650; font-size: 12px; }
+.friend-details { flex: 1; min-width: 0; background: none; padding: 3px; text-align: left; }
+.friend-details strong { display: block; font-size: 14px; overflow-wrap: anywhere; }
+.friend-details small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+.friend-details small.is-online { color: var(--success); }
+#friendsOfflineMsg { color: var(--muted); text-align: center; font-size: 13px; }
+.friend-progress-item { margin: 15px 0; }
+.friend-progress-item > div:first-child { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+.friend-progress-item .macro-track i { transform: scaleX(var(--fraction, 0)); }
+.template-item { display: flex; gap: 6px; margin-bottom: 8px; }
+.template-item > button:first-child { flex: 1; justify-content: flex-start; text-align: left; overflow-wrap: anywhere; }
+.about-content h3 { margin: 22px 0 9px; }
+.about-content p, .about-content li { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.about-content p + p { margin-top: 12px; }
+.about-content ul { padding-left: 20px; }
+.about-content .version { margin-top: 22px; color: var(--text); }
+#gesture-cursor { position: fixed; z-index: 250; pointer-events: none; width: 18px; height: 18px; border: 2px solid var(--text); border-radius: 50%; background: rgb(22 207 243 / 55%); transform: translate(-50%, -50%); box-shadow: 0 0 0 5px rgb(22 207 243 / 8%); }
+@media (min-width: 760px) {
+  .app-root { padding-left: 28px; padding-right: 28px; }
+  .app-header { margin-bottom: 30px; }
+  .today-layout { grid-template-columns: 1.12fr 1fr; gap: 18px; }
+  .nutrition-section { grid-column: 1; grid-row: 1 / span 2; }
+  .meals-card { grid-column: 2; grid-row: 1; }
+  .water-card { grid-column: 2; grid-row: 2; }
+  .nutrition-card { padding: 25px 22px; }
+  .calorie-summary { margin: 8px 0 24px; }
+  .calorie-ring { max-width: 210px; }
+  .macro-grid { padding-top: 22px; }
+  .primary-actions { margin-top: 16px; }
+  #analyticsPage { grid-template-columns: 1fr 1fr; align-items: start; }
+  #activityPage, #friendsPage { max-width: 600px; }
+}
+@media (max-width: 359px) {
+  .app-root { padding-left: 12px; padding-right: 12px; }
+  .nutrition-card { padding: 13px; }
+  .macro { padding: 0 8px; }
+  .macro > span { font-size: 11px; }
+  .macro-target { font-size: 10px; }
+  .water-reading { font-size: 12px; }
+  .meal-kcal { font-size: 12px; }
+  .nav-item { font-size: 10px; }
+}

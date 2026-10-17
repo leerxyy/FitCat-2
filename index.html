@@ -1,1313 +1,485 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Голографическая модель позвоночника</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; overflow: hidden; font-family: 'Rajdhani', sans-serif; color: #00d4ff; cursor: crosshair; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .scan-line { position: fixed; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, rgba(0,212,255,0.12), transparent); animation: scanMove 6s linear infinite; z-index: 3; pointer-events: none; }
-        @keyframes scanMove { 0% { top: -2px; } 100% { top: 100%; } }
-        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%); z-index: 2; pointer-events: none; }
-        .corner-decor { position: fixed; width: 40px; height: 40px; z-index: 4; pointer-events: none; }
-        .corner-decor::before, .corner-decor::after { content: ''; position: absolute; background: rgba(0,212,255,0.25); }
-        .corner-tl { top: 12px; left: 12px; } .corner-tl::before { top: 0; left: 0; width: 16px; height: 1px; } .corner-tl::after { top: 0; left: 0; width: 1px; height: 16px; }
-        .corner-tr { top: 12px; right: 12px; } .corner-tr::before { top: 0; right: 0; width: 16px; height: 1px; } .corner-tr::after { top: 0; right: 0; width: 1px; height: 16px; }
-        .corner-bl { bottom: 12px; left: 12px; } .corner-bl::before { bottom: 0; left: 0; width: 16px; height: 1px; } .corner-bl::after { bottom: 0; left: 0; width: 1px; height: 16px; }
-        .corner-br { bottom: 12px; right: 12px; } .corner-br::before { bottom: 0; right: 0; width: 16px; height: 1px; } .corner-br::after { bottom: 0; right: 0; width: 1px; height: 16px; }
-        .menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(0,5,15,0.85); backdrop-filter: blur(20px); display: none; opacity: 0; transition: opacity 0.4s ease; }
-        .menu-overlay.visible { display: flex; opacity: 1; }
-        .menu-container { margin: auto; background: rgba(0,15,40,0.9); border: 1px solid rgba(0,212,255,0.25); border-radius: 8px; padding: 30px 40px; max-width: 600px; width: 90%; }
-        .menu-title { font-size: 16px; font-weight: 300; letter-spacing: 5px; text-transform: uppercase; color: rgba(0,212,255,0.8); text-align: center; margin-bottom: 25px; text-shadow: 0 0 15px rgba(0,212,255,0.4); }
-        .menu-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(0,212,255,0.1); }
-        .menu-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .menu-section h3 { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(0,212,255,0.5); margin-bottom: 12px; }
-        .menu-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .menu-label { font-size: 12px; letter-spacing: 1.5px; color: rgba(0,212,255,0.7); }
-        .menu-btn { background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.25); color: rgba(0,212,255,0.7); padding: 6px 14px; font-size: 10px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: all 0.3s; font-family: 'Rajdhani', sans-serif; font-weight: 500; }
-        .menu-btn:hover { background: rgba(0,212,255,0.15); border-color: rgba(0,212,255,0.5); color: #00d4ff; }
-        .menu-btn.active { background: rgba(0,212,255,0.2); border-color: rgba(0,212,255,0.6); color: #00d4ff; }
-        .menu-slider { -webkit-appearance: none; width: 150px; height: 2px; background: rgba(0,212,255,0.2); outline: none; }
-        .menu-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: rgba(0,212,255,0.8); border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px rgba(0,212,255,0.5); }
-        .color-btn { padding: 8px 16px; border: 1px solid; font-size: 11px; letter-spacing: 2px; cursor: pointer; font-family: 'Rajdhani', sans-serif; font-weight: 600; transition: all 0.3s; text-transform: uppercase; background: transparent; }
-        .color-btn.btn-normal { border-color: rgba(0,255,136,0.4); color: rgba(0,255,136,0.8); }
-        .color-btn.btn-normal.active { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.8); box-shadow: 0 0 15px rgba(0,255,136,0.2); }
-        .color-btn.btn-warning { border-color: rgba(255,204,0,0.4); color: rgba(255,204,0,0.8); }
-        .color-btn.btn-warning.active { background: rgba(255,204,0,0.15); border-color: rgba(255,204,0,0.8); box-shadow: 0 0 15px rgba(255,204,0,0.2); }
-        .color-btn.btn-critical { border-color: rgba(255,60,60,0.4); color: rgba(255,60,60,0.8); }
-        .color-btn.btn-critical.active { background: rgba(255,60,60,0.15); border-color: rgba(255,60,60,0.8); box-shadow: 0 0 15px rgba(255,60,60,0.2); }
-        .color-legend { display: flex; gap: 20px; margin-top: 8px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: rgba(0,212,255,0.5); }
-        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .legend-dot.normal { background: rgba(0,255,136,0.6); box-shadow: 0 0 6px rgba(0,255,136,0.4); }
-        .legend-dot.warning { background: rgba(255,204,0,0.8); box-shadow: 0 0 6px rgba(255,204,0,0.5); }
-        .legend-dot.critical { background: rgba(255,60,60,0.8); box-shadow: 0 0 6px rgba(255,60,60,0.5); }
-        .close-hint { text-align: center; font-size: 10px; letter-spacing: 2px; color: rgba(0,212,255,0.3); margin-top: 15px; }
-        .hud-hint { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 10px; letter-spacing: 2px; color: rgba(0,212,255,0.25); z-index: 4; pointer-events: none; transition: opacity 3s; }
-        .tooltip { position: fixed; background: rgba(0,10,30,0.9); border: 1px solid rgba(0,212,255,0.4); color: rgba(0,212,255,0.9); padding: 8px 12px; font-size: 11px; letter-spacing: 1px; pointer-events: none; z-index: 20; display: none; border-radius: 3px; backdrop-filter: blur(8px); white-space: nowrap; }
-        .instruction { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; text-align: center; font-size: 13px; letter-spacing: 2px; color: rgba(0,212,255,0.5); pointer-events: none; transition: opacity 2s; text-shadow: 0 0 20px rgba(0,212,255,0.3); line-height: 1.8; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0B1017">
+  <meta name="description" content="FitCat — дневник питания, воды и твоего прогресса.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>FitCat</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/app-icon.svg">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/components.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/motion.css">
+  <script type="module" src="js/app.js"></script>
 </head>
-<body>
-    <div id="canvas-container"></div>
-    <div class="scan-line"></div>
-    <div class="vignette"></div>
-    <div class="corner-decor corner-tl"></div>
-    <div class="corner-decor corner-tr"></div>
-    <div class="corner-decor corner-bl"></div>
-    <div class="corner-decor corner-br"></div>
-    <div class="instruction" id="instruction">Двойной клик — настройки<br>Клик на диск — отметить</div>
-    <div class="hud-hint" id="hudHint">двойной клик — меню</div>
-    <div class="tooltip" id="tooltip"></div>
-    <div class="menu-overlay" id="menuOverlay">
-        <div class="menu-container">
-            <div class="menu-title">Настройки модели</div>
-            <div class="menu-section">
-                <h3>Режим окраски дисков</h3>
-                <div class="menu-row">
-                    <span class="menu-label">Цвет метки</span>
-                    <div style="display:flex;gap:8px;">
-                        <button class="color-btn btn-normal active" data-color="normal">● Норма</button>
-                        <button class="color-btn btn-warning" data-color="warning">● Внимание</button>
-                        <button class="color-btn btn-critical" data-color="critical">● Критично</button>
-                    </div>
-                </div>
-                <div class="menu-row">
-                    <span class="menu-label">Сбросить все диски</span>
-                    <button class="menu-btn" id="btnResetDiscs">↺ Сброс</button>
-                </div>
-                <div class="color-legend">
-                    <div class="legend-item"><div class="legend-dot normal"></div>Норма</div>
-                    <div class="legend-item"><div class="legend-dot warning"></div>Внимание</div>
-                    <div class="legend-item"><div class="legend-dot critical"></div>Критично</div>
-                </div>
-            </div>
-            <div class="menu-section">
-                <h3>Отображение</h3>
-                <div class="menu-row">
-                    <span class="menu-label">Автовращение</span>
-                    <button class="menu-btn active" id="btnRotate">Вкл</button>
-                </div>
-                <div class="menu-row">
-                    <span class="menu-label">Нервы</span>
-                    <button class="menu-btn active" id="btnNerves">Вкл</button>
-                </div>
-                <div class="menu-row">
-                    <span class="menu-label">Спинной мозг</span>
-                    <button class="menu-btn active" id="btnCord">Вкл</button>
-                </div>
-                <div class="menu-row">
-                    <span class="menu-label">Метки позвонков</span>
-                    <button class="menu-btn" id="btnLabels">Выкл</button>
-                </div>
-            </div>
-            <div class="menu-section">
-                <h3>Скорость вращения</h3>
-                <div class="menu-row">
-                    <span class="menu-label">Медленно</span>
-                    <input type="range" class="menu-slider" id="speedSlider" min="0" max="100" value="20">
-                    <span class="menu-label">Быстро</span>
-                </div>
-            </div>
-            <div class="close-hint">двойной клик или ESC для закрытия</div>
-        </div>
+<body data-screen="setupPage">
+  <div class="ambient-light" aria-hidden="true"></div>
+  <div class="app-root">
+    <div id="setupPage" data-screen-view="" class="screen onboarding">
+  <div class="onboarding-heading"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><p data-i18n="setup_subtitle">Настроим дневник под твои цели</p></div>
+<form class="card" id="setupForm">
+    <h2 data-i18n="about_you">О себе</h2>
+    <div class="input-group">
+      <label data-i18n="name" for="setupName">Имя</label>
+      <input type="text" id="setupName" data-i18n-placeholder="name_placeholder" placeholder="Введите имя" required>
     </div>
-
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 4, 22);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000510, 1);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        let rotationSpeed = 0.003;
-        let showNerves = true;
-        let showCord = true;
-        let showLabels = false;
-        let selectedColorMode = 'normal';
-        let autoRotate = true;
-        let menuOpen = false;
-        let isDragging = false;
-        let prevMouse = { x: 0, y: 0 };
-        let cameraAngle = { theta: 0, phi: Math.PI / 8 };
-        let cameraDistance = 22;
-
-        const COLORS = {
-            bone: new THREE.Color(0x00b8e6),
-            boneBright: new THREE.Color(0x44d4ff),
-            disc: new THREE.Color(0x00ff88),
-            discWarning: new THREE.Color(0xffcc00),
-            discCritical: new THREE.Color(0xff3c3c),
-            nerve: new THREE.Color(0xff5533),
-            cord: new THREE.Color(0x3388ff)
-        };
-
-        function createBoneMaterial(opacity = 0.28) {
-            return new THREE.MeshPhysicalMaterial({
-                color: COLORS.bone, transparent: true, opacity: opacity,
-                metalness: 0.3, roughness: 0.4, emissive: COLORS.bone,
-                emissiveIntensity: 0.15, side: THREE.DoubleSide,
-                clearcoat: 0.5, clearcoatRoughness: 0.3
-            });
-        }
-
-        function createDiscMaterial(color, opacity = 0.5) {
-            return new THREE.MeshPhysicalMaterial({
-                color: color, transparent: true, opacity: opacity,
-                metalness: 0.1, roughness: 0.6, emissive: color,
-                emissiveIntensity: 0.4, side: THREE.DoubleSide
-            });
-        }
-
-        function createLineMaterial(color, opacity = 0.5) {
-            return new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: opacity });
-        }
-
-        // === RECURVATURE PROFILE ===
-        // Realistic spinal curvature based on anatomical data
-        // Cervical lordosis: +Z (forward) — gentle curve
-        // Thoracic kyphosis: -Z (backward) — gentle curve
-        // Lumbar lordosis: +Z (forward) — deeper curve, peaking at L4
-        // Sacral kyphosis: -Z (backward) — sacrum tilts backward
-        function getCurvature(vertebraIndex) {
-            let x = 0, z = 0, rotX = 0;
-
-            if (vertebraIndex < 0) {
-                // Above C1 (skull base)
-                z = 0;
-            } else if (vertebraIndex < 7) {
-                // Cervical C1-C7: lordosis
-                const t = vertebraIndex / 6;
-                z = Math.sin(t * Math.PI) * 1.2;
-                rotX = -Math.sin(t * Math.PI) * 0.15;
-            } else if (vertebraIndex < 19) {
-                // Thoracic T1-T12: kyphosis
-                const t = (vertebraIndex - 7) / 11;
-                z = -Math.sin(t * Math.PI) * 1.8;
-                rotX = Math.sin(t * Math.PI) * 0.12;
-            } else if (vertebraIndex < 24) {
-                // Lumbar L1-L5: lordosis (realistic)
-                const t = (vertebraIndex - 19) / 4;
-                // Parabolic lordosis - peaks around L4
-                z = Math.sin(t * Math.PI) * 2.2 + Math.sin(t * Math.PI * 0.5) * 0.5;
-                // Each lumbar vertebra tilts progressively
-                rotX = -0.08 - t * 0.12;
-            } else if (vertebraIndex < 29) {
-                // Sacrum S1-S5: kyphosis (sacral tilt)
-                const t = (vertebraIndex - 24) / 4;
-                // Sacrum curves backward and down
-                z = -1.8 - t * 2.5;
-                rotX = 0.35 + t * 0.15;
-            } else {
-                // Coccyx
-                const t = (vertebraIndex - 29) / 2;
-                z = -4.3 - t * 1.0;
-                rotX = 0.55 + t * 0.2;
-            }
-
-            return { x, z, rotX };
-        }
-
-        function getVertebraParams(index) {
-            if (index < 7) {
-                return { bodyW: 1.0 + index * 0.05, bodyH: 0.3, bodyD: 0.85 + index * 0.03, transLen: 0.8 + index * 0.05, spinLen: 0.4, spinAngle: index < 2 ? 0 : 0.3, canalR: 0.3, spacing: 0.45, type: 'cervical' };
-            } else if (index < 19) {
-                const ti = (index - 7) / 11;
-                return { bodyW: 1.3 + ti * 0.6, bodyH: 0.35 + ti * 0.05, bodyD: 1.0 + ti * 0.5, transLen: 1.0 + ti * 0.6, spinLen: 0.5 + ti * 0.3, spinAngle: 0.5 + ti * 0.3, canalR: 0.28 - ti * 0.03, spacing: 0.5, type: 'thoracic' };
-            } else if (index < 24) {
-    // Поясничные позвонки L1-L5: более реалистичные пропорции
-                 const li = (index - 19) / 4;   // 0..1
-                 return {
-                    bodyW: 1.65 + li * 0.3,    // ширина тела
-                    bodyH: 0.48 + li * 0.04,   // высота тела (передне-задний размер)
-                    bodyD: 1.3 + li * 0.25,    // глубина тела
-                    transLen: 1.3 + li * 0.3,  // поперечные отростки
-                    spinLen: 0.65 + li * 0.1,  // остистый отросток
-                    spinAngle: 0.08,           // угол наклона остистого отростка (почти горизонтален)
-                    canalR: 0.26 - li * 0.02,
-                    spacing: 0.6,              // расстояние между позвонками
-                    type: 'lumbar'
-            };
-         }
-
-        // Create vertebra
-        function createVertebraDetailed(index) {
-            const group = new THREE.Group();
-            const p = getVertebraParams(index);
-            const boneMat = createBoneMaterial();
-
-            // Body - kidney shape
-            const bodyShape = new THREE.Shape();
-            const bw = p.bodyW * 0.5, bd = p.bodyD * 0.5;
-            bodyShape.moveTo(-bw, -bd * 0.3);
-            bodyShape.bezierCurveTo(-bw * 0.8, -bd * 0.9, bw * 0.8, -bd * 0.9, bw, -bd * 0.3);
-            bodyShape.bezierCurveTo(bw * 1.05, 0, bw, bd * 0.7, bw * 0.9, bd * 0.8);
-            bodyShape.bezierCurveTo(bw * 0.3, bd * 1.0, -bw * 0.3, bd * 1.0, -bw * 0.9, bd * 0.8);
-            bodyShape.bezierCurveTo(-bw, bd * 0.7, -bw * 1.05, 0, -bw, -bd * 0.3);
-
-            const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, { depth: p.bodyH, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 3 });
-            const bodyMesh = new THREE.Mesh(bodyGeo, boneMat);
-            bodyMesh.position.set(0, -p.bodyH * 0.5, bd * 0.15);
-            group.add(bodyMesh);
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(bodyGeo, 15), createLineMaterial(COLORS.boneBright, 0.4)));
-
-            // Superior articular processes
-            const sapGeo = new THREE.BoxGeometry(0.25, 0.2, 0.15);
-            for (let side = -1; side <= 1; side += 2) {
-                const sap = new THREE.Mesh(sapGeo, boneMat);
-                sap.position.set(side * p.bodyW * 0.35, p.bodyH * 0.3, -p.bodyD * 0.2);
-                group.add(sap);
-                group.add(new THREE.LineSegments(new THREE.EdgesGeometry(sapGeo), createLineMaterial(COLORS.boneBright, 0.3)));
-            }
-
-            // Inferior articular processes
-            const iapGeo = new THREE.BoxGeometry(0.22, 0.18, 0.12);
-            for (let side = -1; side <= 1; side += 2) {
-                const iap = new THREE.Mesh(iapGeo, boneMat);
-                iap.position.set(side * p.bodyW * 0.38, -p.bodyH * 0.3, -p.bodyD * 0.35);
-                group.add(iap);
-                group.add(new THREE.LineSegments(new THREE.EdgesGeometry(iapGeo), createLineMaterial(COLORS.boneBright, 0.3)));
-            }
-
-            // Pedicles
-            const pedGeo = new THREE.CylinderGeometry(0.1, 0.12, p.bodyD * 0.45, 8);
-            for (let side = -1; side <= 1; side += 2) {
-                const ped = new THREE.Mesh(pedGeo, boneMat);
-                ped.position.set(side * p.bodyW * 0.3, 0, -p.bodyD * 0.35);
-                ped.rotation.x = Math.PI / 2;
-                group.add(ped);
-            }
-
-            // Laminae
-            const lamGeo = new THREE.BoxGeometry(0.3, p.bodyH * 0.6, p.bodyD * 0.2);
-            for (let side = -1; side <= 1; side += 2) {
-                const lam = new THREE.Mesh(lamGeo, boneMat);
-                lam.position.set(side * p.bodyW * 0.2, 0, -p.bodyD * 0.55);
-                lam.rotation.z = -side * 0.15;
-                group.add(lam);
-            }
-
-            // Transverse processes
-            const tpGeo = new THREE.CylinderGeometry(0.06, 0.09, p.transLen * 0.6, 8);
-            for (let side = -1; side <= 1; side += 2) {
-                const tp = new THREE.Mesh(tpGeo, boneMat);
-                tp.position.set(side * p.bodyW * 0.7, 0.05, -p.bodyD * 0.2);
-                tp.rotation.z = Math.PI / 2;
-                group.add(tp);
-            }
-
-            // Spinous process
-            const spGeo = new THREE.CylinderGeometry(0.06, 0.1, p.spinLen, 8);
-            const spMesh = new THREE.Mesh(spGeo, boneMat);
-            spMesh.position.set(0, 0, -p.bodyD * 0.65 - p.spinLen * 0.4);
-            spMesh.rotation.x = Math.PI / 2 + p.spinAngle;
-            group.add(spMesh);
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(spGeo), createLineMaterial(COLORS.boneBright, 0.35)));
-
-            // Tip
-            const tipGeo = new THREE.SphereGeometry(0.08, 8, 8);
-            const tipMesh = new THREE.Mesh(tipGeo, boneMat);
-            const tipOffZ = p.bodyD * 0.65 + p.spinLen * 0.8;
-            const tipOffY = p.spinLen * 0.4 * Math.cos(p.spinAngle);
-            tipMesh.position.set(0, -tipOffY, -tipOffZ);
-            group.add(tipMesh);
-
-            // Canal ring
-            const canalGeo = new THREE.RingGeometry(p.canalR * 0.6, p.canalR, 20);
-            const canalMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0x001133), transparent: true, opacity: 0.6, side: THREE.DoubleSide });
-            const canalMesh = new THREE.Mesh(canalGeo, canalMat);
-            canalMesh.position.set(0, 0, -p.bodyD * 0.3);
-            group.add(canalMesh);
-
-            // Endplates
-            const endplateGeo = new THREE.RingGeometry(p.bodyW * 0.35, p.bodyW * 0.48, 20);
-            const endplateMat = new THREE.MeshBasicMaterial({ color: COLORS.bone, transparent: true, opacity: 0.3, side: THREE.DoubleSide });
-            for (let y = 1; y >= -1; y -= 2) {
-                const ep = new THREE.Mesh(endplateGeo, endplateMat.clone());
-                ep.rotation.x = -Math.PI / 2;
-                ep.position.y = y * p.bodyH * 0.5;
-                group.add(ep);
-            }
-
-            // Facet joints
-            const facetGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            const facetMat = new THREE.MeshPhysicalMaterial({ color: COLORS.bone, transparent: true, opacity: 0.2, emissive: COLORS.bone, emissiveIntensity: 0.1 });
-            for (let side = -1; side <= 1; side += 2) {
-                const facet = new THREE.Mesh(facetGeo, facetMat);
-                facet.position.set(side * p.bodyW * 0.35, 0, -p.bodyD * 0.25);
-                group.add(facet);
-            }
-
-            group.userData = { vertebraIndex: index, type: p.type };
-            return group;
-        }
-
-        // Atlas C1
-        function createAtlas() {
-            const group = new THREE.Group();
-            const boneMat = createBoneMaterial();
-
-            const archShape = new THREE.Shape();
-            archShape.absarc(0, 0, 1.0, 0.3, Math.PI - 0.3, false);
-            const archGeo = new THREE.ExtrudeGeometry(archShape, { depth: 0.25, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 });
-            const archMesh = new THREE.Mesh(archGeo, boneMat);
-            archMesh.rotation.x = -Math.PI / 2;
-            archMesh.position.set(0, 0, 0.5);
-            group.add(archMesh);
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(archGeo, 20), createLineMaterial(COLORS.boneBright, 0.4)));
-
-            const massGeo = new THREE.BoxGeometry(0.45, 0.35, 0.5);
-            for (let side = -1; side <= 1; side += 2) {
-                const mass = new THREE.Mesh(massGeo, boneMat);
-                mass.position.set(side * 0.85, 0, 0.3);
-                group.add(mass);
-                group.add(new THREE.LineSegments(new THREE.EdgesGeometry(massGeo), createLineMaterial(COLORS.boneBright, 0.3)));
-            }
-
-            const safGeo = new THREE.SphereGeometry(0.18, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-            for (let side = -1; side <= 1; side += 2) {
-                const saf = new THREE.Mesh(safGeo, boneMat);
-                saf.position.set(side * 0.85, 0.15, 0.3);
-                group.add(saf);
-            }
-
-            const tubGeo = new THREE.SphereGeometry(0.12, 8, 8);
-            group.add(new THREE.Mesh(tubGeo, boneMat).translateZ(-0.9));
-
-            group.userData = { vertebraIndex: 0, type: 'cervical' };
-            return group;
-        }
-
-        // Axis C2
-        function createAxis() {
-            const group = createVertebraDetailed(1);
-            const densGeo = new THREE.CylinderGeometry(0.1, 0.14, 0.7, 12);
-            const densMesh = new THREE.Mesh(densGeo, createBoneMaterial());
-            densMesh.position.set(0, 0.5, -0.1);
-            group.add(densMesh);
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(densGeo), createLineMaterial(COLORS.boneBright, 0.4)));
-
-            const apexGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            group.add(new THREE.Mesh(apexGeo, createBoneMaterial()).translateY(0.85).translateZ(-0.1));
-
-            return group;
-        }
-
-        // Intervertebral disc
-        function createDetailedDisc(index) {
-            const group = new THREE.Group();
-            const p = getVertebraParams(Math.max(0, index - 1));
-            const discW = (p ? p.bodyW : 1.5) * 0.48;
-
-            const nucleusGeo = new THREE.CylinderGeometry(discW * 0.3, discW * 0.35, 0.12, 24);
-            group.add(new THREE.Mesh(nucleusGeo, createDiscMaterial(COLORS.disc, 0.4)));
-
-            const annulusGeo = new THREE.TorusGeometry(discW * 0.6, 0.06, 10, 32);
-            const annulusMesh = new THREE.Mesh(annulusGeo, createDiscMaterial(COLORS.disc, 0.35));
-            annulusMesh.rotation.x = Math.PI / 2;
-            group.add(annulusMesh);
-
-            const discBodyGeo = new THREE.CylinderGeometry(discW * 0.55, discW * 0.58, 0.14, 24);
-            group.add(new THREE.Mesh(discBodyGeo, createDiscMaterial(COLORS.disc, 0.25)));
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(discBodyGeo), createLineMaterial(COLORS.disc, 0.35)));
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(annulusGeo), createLineMaterial(COLORS.disc, 0.3)));
-
-            group.userData = { discIndex: index, isDisc: true, colorState: 'normal' };
-            return group;
-        }
-
-        function updateDiscColor(discGroup, state) {
-            let color, emissiveColor;
-            switch (state) {
-                case 'normal': color = COLORS.disc; emissiveColor = COLORS.disc; break;
-                case 'warning': color = COLORS.discWarning; emissiveColor = COLORS.discWarning; break;
-                case 'critical': color = COLORS.discCritical; emissiveColor = COLORS.discCritical; break;
-            }
-            discGroup.children.forEach(child => {
-                if (child.isMesh && child.material && child.material.emissive) {
-                    child.material.color.copy(color);
-                    child.material.emissive.copy(emissiveColor);
-                    child.material.emissiveIntensity = state === 'critical' ? 0.7 : state === 'warning' ? 0.5 : 0.4;
-                    child.material.opacity = state === 'critical' ? 0.6 : state === 'warning' ? 0.45 : 0.25;
-                }
-                if (child.isLineSegments && child.material) child.material.color.copy(color);
-            });
-        }
-
-        // Nerve root
-        function createNerveRoot(startPos, side, length) {
-            const group = new THREE.Group();
-            const nerveMat = new THREE.MeshPhysicalMaterial({
-                color: COLORS.nerve, transparent: true, opacity: 0.5,
-                emissive: COLORS.nerve, emissiveIntensity: 0.2, roughness: 0.5
-            });
-
-            const points = [];
-            for (let i = 0; i <= 25; i++) {
-                const t = i / 25;
-                points.push(new THREE.Vector3(
-                    startPos.x + side * (t * length * 0.6 + Math.sin(t * 2.5) * 0.4),
-                    startPos.y - t * length * 0.4 + Math.sin(t * 3) * 0.1,
-                    startPos.z - t * length * 0.35 + Math.cos(t * 2) * 0.25
-                ));
-            }
-
-            const curve = new THREE.CatmullRomCurve3(points);
-            group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 30, 0.045, 8, false), nerveMat));
-
-            for (let b = 0; b < 3; b++) {
-                const bs = points[8 + b * 6];
-                const bp = [];
-                for (let i = 0; i <= 12; i++) {
-                    const t = i / 12;
-                    bp.push(new THREE.Vector3(
-                        bs.x + side * t * 1.5 + Math.sin(t * 3 + b * 2) * 0.3,
-                        bs.y - t * 1.0 + Math.cos(t * 2.5 + b) * 0.15,
-                        bs.z - t * 0.6
-                    ));
-                }
-                group.add(new THREE.Mesh(
-                    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(bp), 15, 0.025, 6, false),
-                    new THREE.MeshPhysicalMaterial({ color: COLORS.nerve, transparent: true, opacity: 0.35, emissive: COLORS.nerve, emissiveIntensity: 0.15 })
-                ));
-            }
-
-            const ganglion = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10),
-                new THREE.MeshPhysicalMaterial({ color: new THREE.Color(0xff8855), transparent: true, opacity: 0.6, emissive: new THREE.Color(0xff6644), emissiveIntensity: 0.3 }));
-            ganglion.position.set(startPos.x + side * 0.3, startPos.y, startPos.z - 0.2);
-            group.add(ganglion);
-
-            return group;
-        }
-
-        // === DETAILED SACRUM ===
-        function createDetailedSacrum() {
-            const sacrumGroup = new THREE.Group();
-            const boneMat = createBoneMaterial(0.32);
-
-            // The sacrum is a triangular bone formed by 5 fused vertebrae (S1-S5)
-            // It has: body (anterior), ala (wings), median crest (posterior), sacral canal, foramina
-
-            // Main body - tapered wedge shape
-            const sacrumBodyShape = new THREE.Shape();
-            // S1 is widest at top, narrows to S5 at bottom
-            const topW = 1.15, topD = 0.75;
-            const botW = 0.35, botD = 0.25;
-            const height = 3.2;
-
-            sacrumBodyShape.moveTo(-topW, -topD);
-            sacrumBodyShape.bezierCurveTo(-topW * 1.05, 0, -topW, topD, -topW * 0.95, topD * 0.8);
-            sacrumBodyShape.lineTo(-botW, topD * 0.8 + (height * 0.15));
-            sacrumBodyShape.bezierCurveTo(-botW * 0.5, height * 0.5, -botW, height - 0.2, 0, height);
-            sacrumBodyShape.bezierCurveTo(botW, height - 0.2, botW * 0.5, height * 0.5, botW, topD * 0.8 + (height * 0.15));
-            sacrumBodyShape.lineTo(topW * 0.95, topD * 0.8);
-            sacrumBodyShape.bezierCurveTo(topW, topD, topW * 1.05, 0, topW, -topD);
-
-            const bodyDepth = 1.8;
-            const sacrumBodyGeo = new THREE.ExtrudeGeometry(sacrumBodyShape, {
-                depth: bodyDepth, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.08, bevelSegments: 4
-            });
-            const sacrumBody = new THREE.Mesh(sacrumBodyGeo, boneMat);
-            sacrumBody.position.set(0, 0, -bodyDepth / 2);
-            sacrumGroup.add(sacrumBody);
-            sacrumGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(sacrumBodyGeo, 15), createLineMaterial(COLORS.boneBright, 0.35)));
-
-            // Ala sacralis (wings) - auricular surfaces for SI joint
-            const alaGeo = new THREE.CylinderGeometry(0.5, 0.3, 1.8, 12);
-            for (let side = -1; side <= 1; side += 2) {
-                const ala = new THREE.Mesh(alaGeo, new THREE.MeshPhysicalMaterial({
-                    color: COLORS.bone, transparent: true, opacity: 0.25,
-                    emissive: COLORS.bone, emissiveIntensity: 0.1, metalness: 0.2, roughness: 0.5
-                }));
-                ala.position.set(side * 1.4, height * 0.55, 0.2);
-                ala.rotation.x = Math.PI / 2;
-                ala.rotation.z = side * 0.3;
-                sacrumGroup.add(ala);
-                sacrumGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(alaGeo), createLineMaterial(COLORS.boneBright, 0.25)));
-            }
-
-            // Sacral promontory (prominent upper edge of S1)
-            const promGeo = new THREE.BoxGeometry(1.6, 0.12, 0.3);
-            const promMesh = new THREE.Mesh(promGeo, boneMat);
-            promMesh.position.set(0, topD * 0.8, 0.1);
-            sacrumGroup.add(promMesh);
-            sacrumGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(promGeo), createLineMaterial(COLORS.boneBright, 0.3)));
-
-            // Median sacral crest (fused spinous processes) - posterior midline
-            const medianCrestPoints = [];
-            for (let i = 0; i <= 20; i++) {
-                const t = i / 20;
-                const y = t * height;
-                const w = topW * (1 - t) * 0.08;
-                medianCrestPoints.push(new THREE.Vector3(0, y, -bodyDepth - 0.05 + w));
-            }
-            const medianCrestCurve = new THREE.CatmullRomCurve3(medianCrestPoints);
-            const medianCrestGeo = new THREE.TubeGeometry(medianCrestCurve, 20, 0.06, 8, false);
-            sacrumGroup.add(new THREE.Mesh(medianCrestGeo, boneMat));
-            sacrumGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(medianCrestGeo), createLineMaterial(COLORS.boneBright, 0.3)));
-
-            // Intermediate sacral crests (fused articular processes)
-            for (let side = -1; side <= 1; side += 2) {
-                const interPoints = [];
-                for (let i = 0; i <= 15; i++) {
-                    const t = i / 15;
-                    const y = t * height;
-                    const w = topW * (1 - t) * 0.35 + 0.15;
-                    interPoints.push(new THREE.Vector3(side * w, y, -bodyDepth + 0.05));
-                }
-                const interCurve = new THREE.CatmullRomCurve3(interPoints);
-                const interGeo = new THREE.TubeGeometry(interCurve, 15, 0.04, 6, false);
-                sacrumGroup.add(new THREE.Mesh(interGeo, new THREE.MeshPhysicalMaterial({
-                    color: COLORS.bone, transparent: true, opacity: 0.2,
-                    emissive: COLORS.bone, emissiveIntensity: 0.1
-                })));
-            }
-
-            // Lateral sacral crests (fused transverse processes)
-            for (let side = -1; side <= 1; side += 2) {
-                const latPoints = [];
-                for (let i = 0; i <= 15; i++) {
-                    const t = i / 15;
-                    const y = t * height;
-                    const w = topW * (1 - t) * 0.7 + 0.3;
-                    latPoints.push(new THREE.Vector3(side * w, y, 0.1));
-                }
-                const latCurve = new THREE.CatmullRomCurve3(latPoints);
-                const latGeo = new THREE.TubeGeometry(latCurve, 15, 0.05, 6, false);
-                sacrumGroup.add(new THREE.Mesh(latGeo, new THREE.MeshPhysicalMaterial({
-                    color: COLORS.bone, transparent: true, opacity: 0.2,
-                    emissive: COLORS.bone, emissiveIntensity: 0.1
-                })));
-            }
-
-            // Sacral foramina (anterior) - 4 pairs of holes for nerve exit
-            for (let i = 0; i < 4; i++) {
-                for (let side = -1; side <= 1; side += 2) {
-                    const y = 2.6 - i * 0.65;
-                    const w = (1.15 * (1 - i * 0.15)) * 0.6;
-                    const foramGeo = new THREE.CircleGeometry(0.12, 12);
-                    const foramMesh = new THREE.Mesh(foramGeo, new THREE.MeshBasicMaterial({
-                        color: new THREE.Color(0x001133),
-                        transparent: true, opacity: 0.7, side: THREE.DoubleSide
-                    }));
-                    foramMesh.position.set(side * w, y, bodyDepth * 0.48);
-                    sacrumGroup.add(foramMesh);
-
-                    // Foraminal rim
-                    const rimGeo = new THREE.RingGeometry(0.12, 0.15, 12);
-                    const rimMesh = new THREE.Mesh(rimGeo, new THREE.MeshBasicMaterial({
-                        color: COLORS.boneBright, transparent: true, opacity: 0.3, side: THREE.DoubleSide
-                    }));
-                    rimMesh.position.copy(foramMesh.position);
-                    rimMesh.position.z -= 0.01;
-                    sacrumGroup.add(rimMesh);
-                }
-            }
-
-            // Posterior sacral foramina
-            for (let i = 0; i < 4; i++) {
-                for (let side = -1; side <= 1; side += 2) {
-                    const y = 2.6 - i * 0.65;
-                    const w = (1.15 * (1 - i * 0.15)) * 0.5 + 0.1;
-                    const foramGeo = new THREE.CircleGeometry(0.08, 10);
-                    const foramMesh = new THREE.Mesh(foramGeo, new THREE.MeshBasicMaterial({
-                        color: new THREE.Color(0x001133),
-                        transparent: true, opacity: 0.5, side: THREE.DoubleSide
-                    }));
-                    foramMesh.position.set(side * w, y, -bodyDepth - 0.05);
-                    sacrumGroup.add(foramMesh);
-                }
-            }
-
-            // Sacral canal - visible from top
-            const canalGeo = new THREE.RingGeometry(0.15, 0.25, 16);
-            const canalMat = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(0x001133), transparent: true, opacity: 0.6, side: THREE.DoubleSide
-            });
-            const canalMesh = new THREE.Mesh(canalGeo, canalMat);
-            canalMesh.rotation.x = -Math.PI / 2;
-            canalMesh.position.set(0, height - 0.05, 0);
-            sacrumGroup.add(canalMesh);
-
-            // Sacral hiatus (opening at bottom of sacral canal)
-            const hiatusGeo = new THREE.PlaneGeometry(0.3, 0.4);
-            const hiatusMesh = new THREE.Mesh(hiatusGeo, new THREE.MeshBasicMaterial({
-                color: new THREE.Color(0x001133), transparent: true, opacity: 0.5, side: THREE.DoubleSide
-            }));
-            hiatusMesh.position.set(0, 0.2, -bodyDepth);
-            sacrumGroup.add(hiatusMesh);
-
-            // Sacral cornua (horns) at sacral hiatus
-            for (let side = -1; side <= 1; side += 2) {
-                const cornuGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.4, 8);
-                const cornuMesh = new THREE.Mesh(cornuGeo, boneMat);
-                cornuMesh.position.set(side * 0.18, 0.3, -bodyDepth - 0.05);
-                cornuMesh.rotation.z = side * 0.2;
-                sacrumGroup.add(cornuMesh);
-                sacrumGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(cornuGeo), createLineMaterial(COLORS.boneBright, 0.25)));
-            }
-
-            // Auricular surface markers (SI joint surface)
-            for (let side = -1; side <= 1; side += 2) {
-                const aurShape = new THREE.Shape();
-                aurShape.moveTo(0, 0);
-                aurShape.bezierCurveTo(0.3, 0.5, 0.35, 1.2, 0.2, 1.8);
-                aurShape.lineTo(-0.1, 1.8);
-                aurShape.bezierCurveTo(0.05, 1.2, 0, 0.5, 0, 0);
-
-                const aurGeo = new THREE.ExtrudeGeometry(aurShape, {
-                    depth: 0.1, bevelEnabled: false
-                });
-                const aurMesh = new THREE.Mesh(aurGeo, new THREE.MeshPhysicalMaterial({
-                    color: new THREE.Color(0x005588), transparent: true, opacity: 0.2,
-                    emissive: new THREE.Color(0x005588), emissiveIntensity: 0.1, side: THREE.DoubleSide
-                }));
-                aurMesh.position.set(side * 1.55, height * 0.4, 0.3);
-                aurMesh.rotation.y = side * 0.5;
-                sacrumGroup.add(aurMesh);
-            }
-
-            // Pelvic surface line markings (transverse lines - fusion lines)
-            for (let i = 0; i < 4; i++) {
-                const y = 2.5 - i * 0.6;
-                const w = 1.15 * (1 - i * 0.15) * 0.7;
-                const lineGeo = new THREE.BoxGeometry(w * 2, 0.02, 0.02);
-                const lineMesh = new THREE.Mesh(lineGeo, new THREE.MeshBasicMaterial({
-                    color: COLORS.boneBright, transparent: true, opacity: 0.15
-                }));
-                lineMesh.position.set(0, y, bodyDepth * 0.48);
-                sacrumGroup.add(lineMesh);
-            }
-
-            // Apex (tip) of sacrum
-            const apexGeo = new THREE.SphereGeometry(0.2, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-            const apexMesh = new THREE.Mesh(apexGeo, boneMat);
-            apexMesh.position.set(0, height + 0.05, 0);
-            apexMesh.rotation.x = Math.PI;
-            sacrumGroup.add(apexMesh);
-
-            // Sacral nerve roots inside canal (visible glow)
-            for (let i = 0; i < 5; i++) {
-                const y = 2.8 - i * 0.55;
-                for (let side = -1; side <= 1; side += 2) {
-                    const nerveDot = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 6),
-                        new THREE.MeshBasicMaterial({
-                            color: COLORS.nerve, transparent: true, opacity: 0.4
-                        }));
-                    nerveDot.position.set(side * 0.12, y, 0.3);
-                    sacrumGroup.add(nerveDot);
-                }
-            }
-
-            sacrumGroup.userData = { vertebraIndex: 24, type: 'sacral' };
-            return sacrumGroup;
-        }
-
-        // Coccyx
-        function createCoccyx() {
-            const group = new THREE.Group();
-            const boneMat = createBoneMaterial(0.25);
-
-            // 3-4 fused coccygeal vertebrae - small triangular remnant
-            const segments = 4;
-            for (let i = 0; i < segments; i++) {
-                const t = i / segments;
-                const size = 0.25 - t * 0.15;
-                const segGeo = new THREE.CylinderGeometry(size, size * 0.7, 0.25, 8);
-                const segMesh = new THREE.Mesh(segGeo, boneMat);
-                segMesh.position.set(0, -i * 0.28, t * 0.3);
-                segMesh.rotation.x = -0.3 - t * 0.2;
-                group.add(segMesh);
-                group.add(new THREE.LineSegments(new THREE.EdgesGeometry(segGeo), createLineMaterial(COLORS.boneBright, 0.2)));
-            }
-
-            // Coccygeal tip
-            const tipGeo = new THREE.SphereGeometry(0.06, 8, 8);
-            const tipMesh = new THREE.Mesh(tipGeo, boneMat);
-            tipMesh.position.set(0, -1.1, 0.8);
-            group.add(tipMesh);
-
-            group.userData = { vertebraIndex: 29, type: 'coccyx' };
-            return group;
-        }
-
-        // === SPINAL CORD that follows the canal ===
-        function createSpinalCord(vertebrae) {
-            const group = new THREE.Group();
-            const cordPoints = [];
-
-            for (let i = 0; i < vertebrae.length; i++) {
-                const v = vertebrae[i];
-                const p = getVertebraParams(i);
-                const curve = getCurvature(i);
-                const canalZ = -p.bodyD * 0.3;
-                cordPoints.push(new THREE.Vector3(
-                    v.position.x,
-                    v.position.y,
-                    v.position.z + canalZ
-                ));
-            }
-
-            // Add conus endpoint
-            const lastV = vertebrae[vertebrae.length - 1];
-            const lastP = getVertebraParams(vertebrae.length - 1);
-            const lastCurve = getCurvature(vertebrae.length - 1);
-            cordPoints.push(new THREE.Vector3(
-                lastV.position.x,
-                lastV.position.y - lastP.spacing * 2,
-                lastV.position.z + lastP.bodyD * 0.1
-            ));
-
-            const cordCurve = new THREE.CatmullRomCurve3(cordPoints, false, 'centripetal', 0.5);
-
-            // Main cord
-            const cordGeo = new THREE.TubeGeometry(cordCurve, 80, 0.09, 12, false);
-            const cordMat = new THREE.MeshPhysicalMaterial({
-                color: COLORS.cord, transparent: true, opacity: 0.22,
-                emissive: COLORS.cord, emissiveIntensity: 0.25,
-                roughness: 0.5, metalness: 0.1
-            });
-            group.add(new THREE.Mesh(cordGeo, cordMat));
-            group.add(new THREE.LineSegments(new THREE.EdgesGeometry(cordGeo, 20), createLineMaterial(COLORS.cord, 0.25)));
-
-            // Denticulate ligaments
-            for (let side = -1; side <= 1; side += 2) {
-                const dPts = [];
-                for (let i = 0; i <= cordPoints.length * 2; i++) {
-                    const t = i / (cordPoints.length * 2);
-                    const pt = cordCurve.getPointAt(t);
-                    dPts.push(new THREE.Vector3(pt.x + side * 0.2, pt.y, pt.z));
-                }
-                const dCurve = new THREE.CatmullRomCurve3(dPts);
-                group.add(new THREE.Mesh(new THREE.TubeGeometry(dCurve, 40, 0.015, 6, false),
-                    new THREE.MeshPhysicalMaterial({ color: COLORS.cord, transparent: true, opacity: 0.15, emissive: COLORS.cord, emissiveIntensity: 0.1 })));
-            }
-
-            // Conus medullaris
-            const conusStart = cordCurve.getPointAt(0.85);
-            const conusEnd = cordCurve.getPointAt(1.0);
-            const conusPts = [];
-            for (let i = 0; i <= 10; i++) {
-                const t = i / 10;
-                conusPts.push(new THREE.Vector3(
-                    conusStart.x + (conusEnd.x - conusStart.x) * t,
-                    conusStart.y + (conusEnd.y - conusStart.y) * t,
-                    conusStart.z + (conusEnd.z - conusStart.z) * t
-                ));
-            }
-            group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(conusPts), 10, 0.03, 8, false),
-                new THREE.MeshPhysicalMaterial({ color: COLORS.cord, transparent: true, opacity: 0.3, emissive: COLORS.cord, emissiveIntensity: 0.3 })));
-
-            // Filum terminale
-            const filumPts = [];
-            for (let i = 0; i <= 15; i++) {
-                const t = i / 15;
-                filumPts.push(new THREE.Vector3(
-                    conusEnd.x, conusEnd.y - t * 3.0, conusEnd.z + t * 0.5
-                ));
-            }
-            group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(filumPts), 15, 0.015, 6, false),
-                new THREE.MeshPhysicalMaterial({ color: new THREE.Color(0x5599cc), transparent: true, opacity: 0.25, emissive: new THREE.Color(0x3388ff), emissiveIntensity: 0.15 })));
-
-            // Cauda equina
-            for (let i = 0; i < 6; i++) {
-                const t = 0.8 + i * 0.03;
-                const origin = cordCurve.getPointAt(Math.min(t, 0.95));
-                for (let side = -1; side <= 1; side += 2) {
-                    const cPts = [];
-                    for (let j = 0; j <= 15; j++) {
-                        const st = j / 15;
-                        cPts.push(new THREE.Vector3(
-                            origin.x + side * (st * 1.0 + st * st * 0.3),
-                            origin.y - st * (2.5 + i * 0.2),
-                            origin.z - st * 1.2 + Math.sin(st * 3 + i) * 0.1
-                        ));
-                    }
-                    group.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cPts), 15, 0.018, 6, false),
-                        new THREE.MeshPhysicalMaterial({ color: COLORS.nerve, transparent: true, opacity: 0.25, emissive: COLORS.nerve, emissiveIntensity: 0.12 })));
-                }
-            }
-
-            // Glow nodes
-            for (let i = 0; i < 40; i++) {
-                const t = i / 40;
-                const pt = cordCurve.getPointAt(t);
-                const node = new THREE.Mesh(new THREE.SphereGeometry(0.03, 6, 6),
-                    new THREE.MeshBasicMaterial({ color: COLORS.cord, transparent: true, opacity: 0.4 }));
-                node.position.copy(pt);
-                group.add(node);
-            }
-
-            return group;
-        }
-
-        // === BUILD SPINE ===
-        const spineGroup = new THREE.Group();
-        const nervesGroup = new THREE.Group();
-        const discsGroup = new THREE.Group();
-        const discMeshes = [];
-        const vertebrae = [];
-
-        let currentY = 8.5;
-
-        // Cervical C1-C7
-        for (let i = 0; i < 7; i++) {
-            let vertebra;
-            const curve = getCurvature(i);
-
-            if (i === 0) vertebra = createAtlas();
-            else if (i === 1) vertebra = createAxis();
-            else vertebra = createVertebraDetailed(i);
-
-            vertebra.position.set(curve.x * 0.6, currentY, curve.z * 0.6);
-            vertebra.rotation.x = curve.rotX;
-            spineGroup.add(vertebra);
-            vertebrae.push(vertebra);
-
-            if (i > 0) {
-                const midCurve = getCurvature(i - 0.5);
-                const disc = createDetailedDisc(i);
-                disc.position.set(midCurve.x * 0.6, currentY - getVertebraParams(i).spacing * 0.5, midCurve.z * 0.6);
-                discsGroup.add(disc);
-                discMeshes.push(disc);
-            }
-
-            for (let side = -1; side <= 1; side += 2) {
-                nervesGroup.add(createNerveRoot(
-                    new THREE.Vector3(curve.x * 0.6 + side * 0.4, currentY - 0.1, curve.z * 0.6 - 0.4),
-                    side, 3.0 + i * 0.2
-                ));
-            }
-
-            currentY -= getVertebraParams(i).spacing;
-        }
-
-        // Thoracic T1-T12
-        for (let i = 7; i < 19; i++) {
-            const vertebra = createVertebraDetailed(i);
-            const p = getVertebraParams(i);
-            const curve = getCurvature(i);
-
-            vertebra.position.set(curve.x * 0.6, currentY, curve.z * 0.6);
-            vertebra.rotation.x = curve.rotX;
-            spineGroup.add(vertebra);
-            vertebrae.push(vertebra);
-
-            const disc = createDetailedDisc(i);
-            disc.position.set(curve.x * 0.6, currentY - p.spacing * 0.5, curve.z * 0.6);
-            discsGroup.add(disc);
-            discMeshes.push(disc);
-
-            for (let side = -1; side <= 1; side += 2) {
-                nervesGroup.add(createNerveRoot(
-                    new THREE.Vector3(curve.x * 0.6 + side * 0.5, currentY - 0.15, curve.z * 0.6 - 0.5),
-                    side, 4.0 + (i - 7) * 0.15
-                ));
-            }
-
-            currentY -= p.spacing;
-        }
-
-        // === LUMBAR L1-L5 with correct lordosis ===
-        for (let i = 19; i < 24; i++) {
-            const vertebra = createVertebraDetailed(i);
-            const p = getVertebraParams(i);
-            const curve = getCurvature(i);
-
-            vertebra.position.set(curve.x * 0.6, currentY, curve.z * 0.6);
-            // Each lumbar vertebra has increasing anterior tilt (lordosis)
-            vertebra.rotation.x = curve.rotX;
-            spineGroup.add(vertebra);
-            vertebrae.push(vertebra);
-
-            const disc = createDetailedDisc(i);
-            disc.position.set(curve.x * 0.6, currentY - p.spacing * 0.5, curve.z * 0.6);
-            // Disc also follows the lordotic angle
-            disc.rotation.x = curve.rotX;
-            discsGroup.add(disc);
-            discMeshes.push(disc);
-
-            for (let side = -1; side <= 1; side += 2) {
-                nervesGroup.add(createNerveRoot(
-                    new THREE.Vector3(curve.x * 0.6 + side * 0.6, currentY - 0.2, curve.z * 0.6 - 0.5),
-                    side, 5.0
-                ));
-            }
-
-            currentY -= p.spacing;
-        }
-
-        // === SACRUM ===
-        const sacrum = createDetailedSacrum();
-        const sacrumCurve = getCurvature(24);
-        sacrum.position.set(sacrumCurve.x * 0.6, currentY, sacrumCurve.z * 0.6);
-        sacrum.rotation.x = sacrumCurve.rotX;
-        spineGroup.add(sacrum);
-        vertebrae.push(sacrum);
-
-        // Sacral nerves through foramina
-        for (let i = 0; i < 5; i++) {
-            for (let side = -1; side <= 1; side += 2) {
-                const startY = currentY + 2.6 - i * 0.65;
-                const startZ = sacrumCurve.z * 0.6 + 0.9;
-                nervesGroup.add(createNerveRoot(
-                    new THREE.Vector3(sacrumCurve.x * 0.6 + side * 0.5, startY, startZ),
-                    side, 2.5
-                ));
-            }
-        }
-
-        // === COCCYX ===
-        const coccyx = createCoccyx();
-        const coccyxCurve = getCurvature(29);
-        coccyx.position.set(coccyxCurve.x * 0.6, currentY - 3.2, coccyxCurve.z * 0.6);
-        coccyx.rotation.x = coccyxCurve.rotX;
-        spineGroup.add(coccyx);
-
-        // Spinal cord
-        const spinalCord = createSpinalCord(vertebrae);
-        spineGroup.add(spinalCord);
-
-        spineGroup.add(nervesGroup);
-        spineGroup.add(discsGroup);
-        scene.add(spineGroup);
-
-        // Floor grid
-        const gridHelper = new THREE.GridHelper(30, 60, 0x001133, 0x000822);
-        gridHelper.position.y = -10;
-        gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.3;
-        scene.add(gridHelper);
-
-        // Particles
-        const particleCount = 500;
-        const particleGeo = new THREE.BufferGeometry();
-        const pPositions = new Float32Array(particleCount * 3);
-        const pVelocities = [];
-
-        for (let i = 0; i < particleCount; i++) {
-            pPositions[i * 3] = (Math.random() - 0.5) * 25;
-            pPositions[i * 3 + 1] = (Math.random() - 0.5) * 28;
-            pPositions[i * 3 + 2] = (Math.random() - 0.5) * 25;
-            pVelocities.push({
-                x: (Math.random() - 0.5) * 0.003,
-                y: Math.random() * 0.008 + 0.002,
-                z: (Math.random() - 0.5) * 0.003
-            });
-        }
-
-        particleGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-
-        const particleMat = new THREE.PointsMaterial({
-            color: COLORS.bone, size: 0.04, transparent: true, opacity: 0.25,
-            blending: THREE.AdditiveBlending, sizeAttenuation: true
-        });
-
-        scene.add(new THREE.Points(particleGeo, particleMat));
-
-        // Lights
-        scene.add(new THREE.AmbientLight(0x112244, 0.4));
-        const mainLight = new THREE.PointLight(0x00d4ff, 2, 60);
-        mainLight.position.set(8, 8, 8);
-        scene.add(mainLight);
-        const fillLight = new THREE.PointLight(0x0066ff, 1.2, 50);
-        fillLight.position.set(-8, 4, -6);
-        scene.add(fillLight);
-        const backLight = new THREE.PointLight(0x4400ff, 0.8, 40);
-        backLight.position.set(0, -3, 10);
-        scene.add(backLight);
-
-        // Glow sprite
-        const glowCanvas = document.createElement('canvas');
-        glowCanvas.width = 256; glowCanvas.height = 256;
-        const gCtx = glowCanvas.getContext('2d');
-        const gradient = gCtx.createRadialGradient(128, 128, 0, 128, 128, 128);
-        gradient.addColorStop(0, 'rgba(0, 150, 255, 0.15)');
-        gradient.addColorStop(0.3, 'rgba(0, 80, 200, 0.05)');
-        gradient.addColorStop(1, 'rgba(0, 0, 30, 0)');
-        gCtx.fillStyle = gradient;
-        gCtx.fillRect(0, 0, 256, 256);
-
-        const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
-            map: new THREE.CanvasTexture(glowCanvas), transparent: true, blending: THREE.AdditiveBlending
-        }));
-        glowSprite.scale.set(30, 30, 1);
-        scene.add(glowSprite);
-
-        // Labels
-        const labels = [];
-        function createLabel(text, position) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(0, 212, 255, 0.8)';
-            ctx.font = 'bold 28px Rajdhani';
-            ctx.textAlign = 'center';
-            ctx.fillText(text, 128, 40);
-
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-                map: new THREE.CanvasTexture(canvas), transparent: true, opacity: 0.7
-            }));
-            sprite.position.copy(position);
-            sprite.scale.set(2, 0.5, 1);
-            sprite.visible = showLabels;
-            return sprite;
-        }
-
-        const vertLabels = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7',
-                           'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12',
-                           'L1', 'L2', 'L3', 'L4', 'L5'];
-
-        for (let i = 0; i < vertebrae.length - 2 && i < vertLabels.length; i++) {
-            const label = createLabel(vertLabels[i], new THREE.Vector3(
-                vertebrae[i].position.x + 2.5,
-                vertebrae[i].position.y,
-                vertebrae[i].position.z + 1
-            ));
-            spineGroup.add(label);
-            labels.push(label);
-        }
-
-        // Raycaster
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const tooltip = document.getElementById('tooltip');
-
-        document.addEventListener('mousemove', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-            if (isDragging && !menuOpen) {
-                const dx = e.clientX - prevMouse.x;
-                const dy = e.clientY - prevMouse.y;
-                cameraAngle.theta -= dx * 0.005;
-                cameraAngle.phi = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, cameraAngle.phi + dy * 0.005));
-                prevMouse.x = e.clientX;
-                prevMouse.y = e.clientY;
-            }
-        });
-
-        document.addEventListener('mousedown', (e) => {
-            if (e.button === 0 && !menuOpen) {
-                isDragging = true;
-                prevMouse.x = e.clientX;
-                prevMouse.y = e.clientY;
-            }
-        });
-
-        document.addEventListener('mouseup', () => { isDragging = false; });
-
-        document.addEventListener('wheel', (e) => {
-            if (!menuOpen) cameraDistance = Math.max(8, Math.min(40, cameraDistance + e.deltaY * 0.02));
-        });
-
-        // Click for disc coloring
-        document.addEventListener('click', (e) => {
-            if (menuOpen) return;
-
-            raycaster.setFromCamera(mouse, camera);
-
-            const allDiscChildren = [];
-            discsGroup.children.forEach(disc => {
-                disc.children.forEach(child => {
-                    if (child.isMesh) {
-                        child.userData.parentDisc = disc;
-                        allDiscChildren.push(child);
-                    }
-                });
-            });
-
-            const intersects = raycaster.intersectObjects(allDiscChildren, false);
-
-            if (intersects.length > 0) {
-                const parentDisc = intersects[0].object.userData.parentDisc;
-                if (parentDisc && parentDisc.userData.isDisc) {
-                    const state = parentDisc.userData.colorState;
-                    const cycle = ['normal', 'warning', 'critical'];
-                    const currentIdx = cycle.indexOf(state);
-                    const newState = cycle[(currentIdx + 1) % 3];
-
-                    parentDisc.userData.colorState = newState;
-                    updateDiscColor(parentDisc, newState);
-
-                    document.getElementById('instruction').style.opacity = '0';
-                }
-            }
-        });
-
-        // Double click for menu
-        document.addEventListener('dblclick', (e) => {
-            e.preventDefault();
-            menuOpen = !menuOpen;
-            const overlay = document.getElementById('menuOverlay');
-            if (menuOpen) {
-                overlay.style.display = 'flex';
-                requestAnimationFrame(() => overlay.style.opacity = '1');
-            } else {
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.display = 'none', 400);
-            }
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && menuOpen) {
-                menuOpen = false;
-                const overlay = document.getElementById('menuOverlay');
-                overlay.style.opacity = '0';
-                setTimeout(() => overlay.style.display = 'none', 400);
-            }
-        });
-
-        function updateTooltip() {
-            if (menuOpen) { tooltip.style.display = 'none'; return; }
-
-            raycaster.setFromCamera(mouse, camera);
-
-            const allDiscChildren = [];
-            discsGroup.children.forEach(disc => {
-                disc.children.forEach(child => {
-                    if (child.isMesh) {
-                        child.userData.parentDisc = disc;
-                        allDiscChildren.push(child);
-                    }
-                });
-            });
-
-            const intersects = raycaster.intersectObjects(allDiscChildren, false);
-
-            if (intersects.length > 0) {
-                const parentDisc = intersects[0].object.userData.parentDisc;
-                if (parentDisc && parentDisc.userData.isDisc) {
-                    const idx = parentDisc.userData.discIndex;
-                    const name = idx < 8 ? `C${idx - 1}/C${idx}` :
-                                 idx < 20 ? `T${idx - 8}/T${idx - 7}` :
-                                 idx < 25 ? `L${idx - 20}/L${idx - 19}` : 'S1/S2';
-
-                    const state = parentDisc.userData.colorState;
-                    const stateName = state === 'normal' ? 'Норма' :
-                                      state === 'warning' ? '⚠ Внимание' : '✖ Критично';
-
-                    tooltip.style.display = 'block';
-                    tooltip.style.left = (mouse.x * 0.5 + 0.5) * window.innerWidth + 20 + 'px';
-                    tooltip.style.top = (-mouse.y * 0.5 + 0.5) * window.innerHeight - 10 + 'px';
-                    tooltip.innerHTML = `Диск: ${name} | ${stateName}`;
-                    return;
-                }
-            }
-
-            tooltip.style.display = 'none';
-        }
-
-        // Menu controls
-        document.getElementById('speedSlider').addEventListener('input', (e) => {
-            rotationSpeed = (e.target.value / 100) * 0.02;
-        });
-
-        function toggleBtn(btnId, stateVar, setter) {
-            const btn = document.getElementById(btnId);
-            btn.addEventListener('click', function() {
-                this.classList.toggle('active');
-                setter(this.classList.contains('active'));
-            });
-        }
-
-        toggleBtn('btnRotate', null, (v) => autoRotate = v);
-        toggleBtn('btnNerves', null, (v) => { showNerves = v; nervesGroup.visible = v; });
-        toggleBtn('btnCord', null, (v) => { showCord = v; spinalCord.visible = v; });
-        toggleBtn('btnLabels', null, (v) => { showLabels = v; labels.forEach(l => l.visible = v); });
-
-        document.querySelectorAll('.color-btn[data-color]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                selectedColorMode = this.dataset.color;
-                document.querySelectorAll('.color-btn[data-color]').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        document.getElementById('btnResetDiscs').addEventListener('click', () => {
-            discMeshes.forEach(disc => {
-                disc.userData.colorState = 'normal';
-                updateDiscColor(disc, 'normal');
-            });
-        });
-
-        // Animation
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
-
-            if (autoRotate && !isDragging && !menuOpen) {
-                cameraAngle.theta += rotationSpeed;
-            }
-
-            camera.position.x = Math.sin(cameraAngle.theta) * Math.cos(cameraAngle.phi) * cameraDistance;
-            camera.position.y = Math.sin(cameraAngle.phi) * cameraDistance + 2;
-            camera.position.z = Math.cos(cameraAngle.theta) * Math.cos(cameraAngle.phi) * cameraDistance;
-            camera.lookAt(0, 1, 0);
-
-            spineGroup.position.y = Math.sin(time * 0.4) * 0.15;
-
-            const pos = particleGeo.attributes.position.array;
-            for (let i = 0; i < particleCount; i++) {
-                pos[i * 3] += pVelocities[i].x;
-                pos[i * 3 + 1] += pVelocities[i].y;
-                pos[i * 3 + 2] += pVelocities[i].z;
-                if (pos[i * 3 + 1] > 15) {
-                    pos[i * 3 + 1] = -12;
-                    pos[i * 3] = (Math.random() - 0.5) * 25;
-                    pos[i * 3 + 2] = (Math.random() - 0.5) * 25;
-                }
-            }
-            particleGeo.attributes.position.needsUpdate = true;
-
-            glowSprite.material.opacity = 0.4 + Math.sin(time * 1.5) * 0.15;
-            glowSprite.scale.setScalar(15 + Math.sin(time * 1.2) * 1.5);
-
-            if (showNerves) {
-                nervesGroup.children.forEach((nerve, idx) => {
-                    if (nerve.children[0] && nerve.children[0].material) {
-                        nerve.children[0].material.opacity = 0.35 + Math.sin(time * 2.5 + idx * 0.2) * 0.15;
-                        if (nerve.children[0].material.emissive) {
-                            nerve.children[0].material.emissiveIntensity = 0.15 + Math.sin(time * 2.5 + idx * 0.2) * 0.1;
-                        }
-                    }
-                });
-            }
-
-            discMeshes.forEach(disc => {
-                if (disc.userData.colorState === 'critical') {
-                    disc.children.forEach(child => {
-                        if (child.isMesh && child.material.emissive) {
-                            child.material.emissiveIntensity = 0.5 + Math.sin(time * 4) * 0.3;
-                        }
-                    });
-                }
-            });
-
-            updateTooltip();
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        setTimeout(() => { document.getElementById('instruction').style.opacity = '0'; }, 6000);
-    </script>
+    <div class="input-group">
+      <label data-i18n="age" for="setupAge">Возраст</label>
+      <input type="number" id="setupAge" data-i18n-placeholder="age_placeholder" placeholder="Введите возраст" min="10" max="100" inputmode="decimal" required>
+    </div>
+    <div class="input-group">
+      <label data-i18n="gender">Пол</label>
+      <div class="segmented-control" id="setupGenderControl">
+        <button class="segmented-option active" data-gender="female" data-i18n="female" data-action="selectSetupGender" data-value="female" type="button">Женский</button>
+        <button class="segmented-option" data-gender="male" data-i18n="male" data-action="selectSetupGender" data-value="male" type="button">Мужской</button>
+      </div>
+      <input type="hidden" id="setupGender" value="female">
+    </div>
+    <div class="input-group">
+      <label data-i18n="height" for="setupHeight">Рост (см)</label>
+      <input type="number" id="setupHeight" data-i18n-placeholder="height_placeholder" placeholder="Введите рост" min="100" max="250" inputmode="decimal" required>
+    </div>
+    <div class="input-group">
+      <label data-i18n="weight" for="setupWeight">Вес (кг)</label>
+      <input type="number" id="setupWeight" data-i18n-placeholder="weight_placeholder" placeholder="Введите вес" min="30" max="500" step="0.1" inputmode="decimal" required>
+    </div>
+  </form>
+  <button class="btn-primary" data-i18n="start" type="submit" form="setupForm">Начать</button>
+  <div class="text-center text-small" data-i18n="data_local">Данные только в твоём телефоне</div>
+  <div class="card">
+    <h2 data-i18n="language">Язык</h2>
+    <div class="flex">
+      <button class="btn-small lang-btn active" id="setupLangRu" type="button" data-action="setSetupLanguage" data-value="ru">RU</button>
+      <button class="btn-small lang-btn" id="setupLangEn" type="button" data-action="setSetupLanguage" data-value="en">EN</button>
+      <button class="btn-small lang-btn" id="setupLangCn" type="button" data-action="setSetupLanguage" data-value="cn">中文</button>
+    </div>
+  </div>
+</div>
+    <main id="mainPage" class="screen" data-screen-view hidden>
+      <header class="app-header"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><button type="button" class="profile-button glass" id="headerPhoto" data-action="showProfile" data-i18n-label="profile"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#user"></use></svg></button></header>
+      <div class="page-heading"><h1 id="pageTitle" data-i18n="tab_today">Сегодня</h1><p id="pageSubtitle"></p></div>
+      <div id="swipeContainer"><div id="swipeWrapper">
+<section id="todayPage" class="page active" data-main-view>
+  <div class="today-layout">
+    <div class="nutrition-section">
+      <section class="card nutrition-card" aria-label="Калории и БЖУ">
+        <div class="calorie-summary" id="progressBars">
+          <div class="calorie-side"><span data-i18n="eaten">Съедено</span><strong id="caloriesEaten">0</strong><span data-i18n="kcal">ккал</span></div>
+          <div class="calorie-ring">
+            <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-value" id="calorieRing" cx="90" cy="90" r="78" pathLength="100"/></svg>
+            <div class="ring-content"><strong id="caloriesRemaining">0</strong><span id="remainingLabel" data-i18n="remaining">ккал осталось</span></div>
+          </div>
+          <div class="calorie-side"><span data-i18n="target">Цель</span><strong id="caloriesTarget">0</strong><span data-i18n="kcal">ккал</span></div>
+        </div>
+        <div class="macro-grid">
+          <div class="macro"><span data-i18n="protein">Белки</span><div><strong id="proteinCurrent">0</strong><span class="macro-target"> / <span id="proteinTarget">0</span> <span data-i18n="g">г</span></span></div><div class="macro-track"><i id="proteinBar"></i></div></div><div class="macro"><span data-i18n="fat">Жиры</span><div><strong id="fatCurrent">0</strong><span class="macro-target"> / <span id="fatTarget">0</span> <span data-i18n="g">г</span></span></div><div class="macro-track"><i id="fatBar"></i></div></div><div class="macro"><span data-i18n="carbs">Углеводы</span><div><strong id="carbsCurrent">0</strong><span class="macro-target"> / <span id="carbsTarget">0</span> <span data-i18n="g">г</span></span></div><div class="macro-track"><i id="carbsBar"></i></div></div>
+        </div>
+      </section>
+      <div class="primary-actions"><button type="button" class="btn-primary add-food-button" data-action="openFood"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#plus"></use></svg><span data-i18n="add_food">Добавить еду</span></button><button type="button" class="icon-button scanner-button glass" data-action="openScanner" data-i18n-label="scanner"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#scan"></use></svg></button></div>
+    </div>
+    <section class="card meals-card" id="mealsCard">
+      <div class="section-heading"><h2 data-i18n="meals">Приёмы пищи</h2><span class="muted meal-total" id="mealTotal">0 ккал</span><button type="button" class="icon-button subtle" data-action="openMealTools" data-i18n-label="more"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#more"></use></svg></button></div>
+      <div class="food-list" id="foodListContainer"></div>
+    </section>
+    <section class="card water-card" id="waterCard">
+      <div class="section-heading"><h2 data-i18n="water_title">Вода</h2><div class="water-reading"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg><span><strong id="waterCurrent">0</strong><span class="muted"> / </span><span class="muted" id="waterGoal">0 л</span></span></div><button type="button" class="icon-button subtle" data-action="openSmartWater" data-i18n-label="smart_water"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#settings"></use></svg></button></div>
+      <div class="water-track" role="progressbar" id="waterProgress" aria-label="Вода" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="waterFill"></i></div>
+      <div class="water-actions"><button type="button" class="glass-button" data-action="addWater" data-value="250">+250 <span data-i18n="ml">мл</span></button><button type="button" class="glass-button" data-action="addWater" data-value="500">+500 <span data-i18n="ml">мл</span></button><button type="button" class="icon-button glass" data-action="openWater" data-i18n-label="other_volume"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#more"></use></svg></button></div>
+      <p class="water-hint" id="smartWaterHint" hidden></p>
+    </section>
+  </div>
+</section><div id="activityPage" class="page" data-main-view hidden>
+  <div class="card">
+    <h2 data-i18n="activity">Активность</h2>
+    <div class="activity-daily-options">
+      <button class="activity-daily-item" data-activity="1.2" data-i18n="sedentary" data-action="selectDailyActivity" type="button">Сидячий</button>
+      <button class="activity-daily-item" data-activity="1.375" data-i18n="light" data-action="selectDailyActivity" type="button">Умеренный</button>
+      <button class="activity-daily-item" data-activity="1.55" data-i18n="moderate" data-action="selectDailyActivity" type="button">Активный</button>
+      <button class="activity-daily-item" data-activity="1.725" data-i18n="very_active" data-action="selectDailyActivity" type="button">Очень активный</button>
+    </div>
+    <div class="workout-section">
+      <div>
+        <span data-i18n="workout">Тренировка</span>
+        <div>
+          <label class="apple-switch">
+            <input type="checkbox" id="workoutToggle" aria-label="workoutToggle" data-i18n-label="workout">
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
+        </div>
+      </div>
+      <div id="workoutSettings" hidden>
+        <label data-i18n="workout_intensity">Интенсивность тренировки</label>
+        <div class="segmented-control" id="workoutIntensityControl">
+          <button class="segmented-option active" data-intensity="light" data-i18n="workout_light" data-action="selectWorkoutIntensity" data-value="light" type="button">Лёгкая</button>
+          <button class="segmented-option" data-intensity="moderate" data-i18n="workout_moderate" data-action="selectWorkoutIntensity" data-value="moderate" type="button">Умеренная</button>
+          <button class="segmented-option" data-intensity="intense" data-i18n="workout_intense" data-action="selectWorkoutIntensity" data-value="intense" type="button">Интенсивная</button>
+        </div>
+        <input type="hidden" id="workoutIntensity" value="light">
+      </div>
+    </div>
+    <button class="btn-primary" data-i18n="apply_today" type="button" data-action="applyDailyActivity">Применить на сегодня</button>
+  </div>
+</div><div id="analyticsPage" class="page" data-main-view hidden>
+  <div class="card">
+    <div>
+      <h2 data-i18n="weight_log">Журнал веса</h2>
+      <button class="btn-small" data-i18n="set_goal" type="button" data-action="setWeightGoal">Задать цель</button>
+    </div>
+    <div id="weightStats">
+      <div class="flex">
+        <div>
+          <div class="text-small" data-i18n="start_weight">Старт</div>
+          <div id="startWeightStat">---</div>
+        </div>
+        <div>
+          <div class="text-small" data-i18n="current_weight">Сейчас</div>
+          <div id="currentWeightStat">---</div>
+        </div>
+        <div>
+          <div class="text-small" data-i18n="change">Изменение</div>
+          <div id="weightChangeStat">---</div>
+        </div>
+        <div>
+          <div class="text-small" data-i18n="to_goal">До цели</div>
+          <div id="toGoalStat">---</div>
+        </div>
+      </div>
+    </div>
+    <div class="bmi-container">
+      <div class="bmi-header">
+        <span class="bmi-value" id="bmiValue">---</span>
+        <span class="bmi-category" id="bmiCategory">---</span>
+      </div>
+      <div class="bmi-scale" id="bmiScale" data-action="showBMITooltip">
+        <div class="bmi-gradient"></div>
+        <div class="bmi-marker" id="bmiMarker"></div>
+        <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
+      </div>
+      <div class="bmi-labels">
+        <span>16</span>
+        <span>18.5</span>
+        <span>25</span>
+        <span>30</span>
+        <span>35</span>
+        <span>40</span>
+      </div>
+    </div>
+    <div class="flex mb-2">
+      <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" inputmode="decimal" aria-label="Вес">
+      <input type="date" id="weightDate" aria-label="weightDate" data-i18n-label="weight_date">
+      <button class="btn-small" type="button" data-action="addWeightEntry" data-i18n-label="add_weight">+</button>
+    </div>
+    <div class="chart-frame"><canvas id="weightChart"></canvas></div><div id="weightChartStatus" class="chart-status" hidden></div>
+    <button class="journal-header" data-action="toggleJournal" data-value="weightHistory" type="button">
+      <h3 data-i18n="weight_history">История веса</h3>
+    </button>
+    <div class="journal-content" id="weightHistoryContent">
+      <div id="weightHistoryList"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2 data-i18n="nutrition_journal">Журнал питания</h2>
+    <div class="nutrition-switch">
+      <button class="btn-small active" data-nutrition="kcal" type="button" data-action="switchNutritionChart" data-value="kcal">
+        <span data-i18n="calories">Калории</span>
+      </button>
+      <button class="btn-small" data-nutrition="protein" type="button" data-action="switchNutritionChart" data-value="protein">
+        <span data-i18n="protein">Белки</span>
+      </button>
+      <button class="btn-small" data-nutrition="fat" type="button" data-action="switchNutritionChart" data-value="fat">
+        <span data-i18n="fat">Жиры</span>
+      </button>
+      <button class="btn-small" data-nutrition="carbs" type="button" data-action="switchNutritionChart" data-value="carbs">
+        <span data-i18n="carbs">Углеводы</span>
+      </button>
+    </div>
+    <div class="chart-frame"><canvas id="nutritionChart"></canvas></div><div id="nutritionChartStatus" class="chart-status" hidden></div>
+    <button class="journal-header" data-action="toggleJournal" data-value="nutritionHistory" type="button">
+      <h3 data-i18n="nutrition_history">История питания</h3>
+    </button>
+    <div class="journal-content" id="nutritionHistoryContent">
+      <div id="nutritionHistoryList"></div>
+    </div>
+  </div>
+</div><div id="friendsPage" class="page" data-main-view hidden>
+  <div class="card">
+    <h2 data-i18n="friends_title">Друзья</h2>
+    <div>
+      <input type="text" id="friendUidInput" placeholder="Введите UID" aria-label="Введите UID" data-i18n-label="friend_id" data-i18n-placeholder="friend_id">
+      <button class="btn-small" type="button" data-action="addFriend" data-i18n-label="add_friend">+</button>
+    </div>
+    <p class="muted text-small friend-privacy" data-i18n="friend_privacy">Друзья видят твой прогресс по ID.</p><div id="friendsList"></div>
+    <div id="friendsOfflineMsg" hidden>Нет интернета</div>
+  </div>
+</div></div></div>
+    </main>
+    <div id="profilePage" hidden data-screen-view="" class="screen narrow-screen">
+  <form class="card" id="profileForm">
+    <div class="profile-header">
+      <button class="btn-small" data-i18n="back" type="button" data-action="showPage" data-value="mainPage">← Назад</button>
+      <h2 data-i18n="profile">Профиль</h2>
+      <div></div>
+    </div>
+    <div class="profile-photo" id="profilePhoto" data-action="uploadPhoto">
+      <span id="profileInitials" class="profile-initials">FC</span>
+    </div>
+    <div>
+      UID:
+      <span id="profileUidDisplay"></span>
+    </div>
+    <div>
+      <button class="btn-small" data-i18n="delete_photo" type="button" data-action="deletePhoto">Удалить фото</button>
+    </div>
+    <div class="profile-meta"><span data-i18n="streak">Серия</span><strong id="streakCount">1</strong><span data-i18n="days">дн.</span><button type="button" class="text-button" data-action="copyUid" data-i18n="copy_id">Скопировать ID</button></div>
+<input type="file" id="photoInput" accept="image/*" hidden aria-label="photoInput" data-i18n-label="photo_hint">
+    <div class="input-group">
+      <label data-i18n="name" for="profileName">Имя</label>
+      <input type="text" id="profileName" required>
+    </div>
+    <div class="input-group">
+      <label data-i18n="age" for="profileAge">Возраст</label>
+      <input type="number" id="profileAge" min="10" max="100" inputmode="decimal" required>
+    </div>
+    <div class="input-group">
+      <label data-i18n="gender">Пол</label>
+      <div class="segmented-control" id="profileGenderControl">
+        <button class="segmented-option" data-gender="female" data-i18n="female" data-action="selectProfileGender" data-value="female" type="button">Женский</button>
+        <button class="segmented-option" data-gender="male" data-i18n="male" data-action="selectProfileGender" data-value="male" type="button">Мужской</button>
+      </div>
+      <input type="hidden" id="profileGender" value="female">
+    </div>
+    <div class="input-group">
+      <label data-i18n="goal">Цель</label>
+      <div class="segmented-control" id="profileGoalControl">
+        <button class="segmented-option active" data-goal="lose" data-i18n="lose" data-action="selectProfileGoal" data-value="lose" type="button">Похудение</button>
+        <button class="segmented-option" data-goal="maintain" data-i18n="maintain" data-action="selectProfileGoal" data-value="maintain" type="button">Поддержание</button>
+        <button class="segmented-option" data-goal="gain" data-i18n="gain" data-action="selectProfileGoal" data-value="gain" type="button">Набор</button>
+      </div>
+      <input type="hidden" id="profileGoal" value="lose">
+    </div>
+    <div class="input-group">
+      <label data-i18n="height" for="profileHeight">Рост (см)</label>
+      <input type="number" id="profileHeight" min="100" max="250" inputmode="decimal" required>
+    </div>
+    <div class="input-group">
+      <label data-i18n="weight" for="profileWeight">Вес (кг)</label>
+      <input type="number" id="profileWeight" min="30" max="500" step="0.1" inputmode="decimal" required>
+    </div>
+    <button class="btn-primary" data-i18n="save" type="submit">Сохранить</button>
+    <button class="btn-secondary" data-i18n="settings" type="button" data-action="showPage" data-value="settingsPage">Настройки</button>
+    <button class="btn-secondary btn-danger" data-i18n="delete_account" type="button" data-action="deleteAccount">Удалить аккаунт</button>
+  </form>
+</div>
+    <div id="settingsPage" hidden data-screen-view="" class="screen narrow-screen">
+  <div class="card">
+    <h2 data-i18n="settings">Настройки</h2>
+    <button class="btn-secondary" data-i18n="export_data" type="button" data-action="exportData">Скачать данные</button>
+    <button class="btn-secondary" data-i18n="import_data" type="button" data-action="importData">Загрузить данные</button>
+    <button class="btn-secondary" data-i18n="my_products" type="button" data-action="showProductsManager">Мои продукты</button>
+    <button class="btn-secondary" data-i18n="about" type="button" data-action="openAbout">О приложении</button>
+    <div class="settings-row"><span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg><span data-i18n="gesture_control">Управление жестами</span></span><button type="button" class="icon-button" id="gestureToggleBtn" data-action="toggleGestures" data-i18n-label="gesture_control" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#hand"></use></svg></button></div><p class="muted text-small" data-i18n="gesture_description">Переключай вкладки через камеру.</p><h2 data-i18n="language">Язык</h2>
+    <div class="flex">
+      <button class="btn-small lang-btn" id="settingsLangRu" type="button" data-action="setSettingsLanguage" data-value="ru">RU</button>
+      <button class="btn-small lang-btn" id="settingsLangEn" type="button" data-action="setSettingsLanguage" data-value="en">EN</button>
+      <button class="btn-small lang-btn" id="settingsLangCn" type="button" data-action="setSettingsLanguage" data-value="cn">中文</button>
+    </div>
+    <button class="btn-primary" data-i18n="back" type="button" data-action="showPage" data-value="mainPage">← Назад</button>
+  </div>
+</div>
+    <div id="productsPage" hidden data-screen-view="" class="screen narrow-screen">
+  <div class="card">
+    <div>
+      <button class="btn-small" data-i18n="back" type="button" data-action="showPage" data-value="settingsPage">← Назад</button>
+      <h2 data-i18n="my_products">Мои продукты</h2>
+    </div>
+    <div id="productsList"></div>
+  </div>
+</div>
+  </div>
+  <nav class="bottom-nav glass" id="bottomNav" aria-label="Основная навигация" hidden><span class="nav-selection" aria-hidden="true"></span><button type="button" class="nav-item is-active" data-action="tab" data-tab="today"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="tab_today">Сегодня</span></button><button type="button" class="nav-item" data-action="tab" data-tab="activity"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#activity"></use></svg><span data-i18n="tab_activity">Активность</span></button><button type="button" class="nav-item" data-action="tab" data-tab="analytics"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chart"></use></svg><span data-i18n="analytics">Статистика</span></button><button type="button" class="nav-item" data-action="tab" data-tab="friends"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#users"></use></svg><span data-i18n="friends_title">Друзья</span></button></nav>
+  
+<dialog id="foodEntryModal" class="sheet" aria-labelledby="foodDialogTitle">
+  <header class="sheet-heading"><h2 id="foodDialogTitle" data-i18n="add_food">Добавить еду</h2><button type="button" class="icon-button" data-close="foodEntryModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header>
+  <form id="foodForm">
+    <div class="field with-autocomplete"><label for="foodName" data-i18n="name">Название</label><div class="search-field"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#search"></use></svg><input id="foodName" type="text" maxlength="200" required autocomplete="off" data-i18n-placeholder="food_name_placeholder" placeholder="Название продукта" aria-autocomplete="list" aria-controls="autocompleteList" aria-expanded="false"></div><div class="autocomplete-list" id="autocompleteList" hidden></div><p class="field-hint" id="searchStatus" aria-live="polite"></p></div>
+    <div class="field"><label for="foodMeal" data-i18n="meal_type">Приём пищи</label><select id="foodMeal"><option value="breakfast" data-i18n="breakfast">Завтрак</option><option value="lunch" data-i18n="lunch">Обед</option><option value="dinner" data-i18n="dinner">Ужин</option><option value="snack" data-i18n="snack">Перекус</option></select></div>
+    <p class="field-legend" data-i18n="per_100g">На 100 грамм:</p>
+    <div class="nutrient-fields"><div class="field"><label for="foodKcal100" data-i18n="calories">Калории</label><input type="number" id="foodKcal100" min="0" max="1000" step="0.1" inputmode="decimal" placeholder="0"></div><div class="field"><label for="foodProt100" data-i18n="protein">Белки</label><input type="number" id="foodProt100" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div><div class="field"><label for="foodFat100" data-i18n="fat">Жиры</label><input type="number" id="foodFat100" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div><div class="field"><label for="foodCarb100" data-i18n="carbs">Углеводы</label><input type="number" id="foodCarb100" min="0" max="100" step="0.1" inputmode="decimal" placeholder="0"></div></div>
+    <div class="field"><label for="foodWeight" data-i18n="weight_grams">Вес (грамм)</label><input type="number" id="foodWeight" min="1" max="10000" step="1" inputmode="decimal" placeholder="100" required></div>
+    <div class="portion-preview" id="portionPreview"></div>
+    <label class="checkbox-row"><input type="checkbox" id="foodEaten" checked><span data-i18n="already_eaten">Уже съедено</span></label>
+    <button type="submit" class="btn-primary"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#plus"></use></svg><span data-i18n="add_food">Добавить еду</span></button>
+    <button type="button" class="text-button" data-action="openSmartSearch" data-i18n="search_online">Поиск по базе продуктов</button>
+  </form>
+</dialog>
+<dialog id="waterEntryModal" class="sheet compact-sheet" aria-labelledby="waterDialogTitle"><header class="sheet-heading"><h2 id="waterDialogTitle" data-i18n="other_volume">Другой объём</h2><button type="button" class="icon-button" data-close="waterEntryModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><form id="waterForm"><div class="field"><label for="manualWaterInput" data-i18n="water_total">Всего выпито, мл</label><input type="number" id="manualWaterInput" min="0" max="30000" step="10" inputmode="numeric" required></div><button class="btn-primary" type="submit" data-i18n="set_water">Сохранить объём</button></form></dialog>
+<dialog id="mealToolsModal" class="sheet compact-sheet" aria-labelledby="mealToolsTitle"><header class="sheet-heading"><h2 id="mealToolsTitle" data-i18n="meals">Приёмы пищи</h2><button type="button" class="icon-button" data-close="mealToolsModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><div id="templatesBar" class="templates-list"></div><button type="button" class="btn-secondary" data-action="saveTemplate"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#template"></use></svg><span data-i18n="save_template">Сохранить шаблон</span></button><button type="button" class="btn-secondary" data-action="showProductsManager"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#meal"></use></svg><span data-i18n="my_products">Мои продукты</span></button><button type="button" class="btn-secondary danger-text" data-action="clearTodayFoods"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg><span data-i18n="clear">Очистить</span></button></dialog>
+<dialog id="confirmDialog" class="sheet compact-sheet" aria-labelledby="confirmTitle"><h2 id="confirmTitle" data-i18n="confirmation">Подтверждение</h2><p id="confirmMessage" class="dialog-description"></p><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="confirmDialog" data-i18n="cancel">Отмена</button><button type="button" class="btn-primary" id="confirmAccept" data-i18n="confirm">Подтвердить</button></div></dialog>
+<dialog id="promptDialog" class="sheet compact-sheet" aria-labelledby="promptTitle"><form id="promptForm"><h2 id="promptTitle"></h2><div class="field"><label class="sr-only" for="promptInput" data-i18n="name">Название</label><input id="promptInput" required></div><div class="dialog-actions"><button type="button" class="btn-secondary" data-close="promptDialog" data-i18n="cancel">Отмена</button><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></div></form></dialog>
+<dialog id="productEditModal" class="sheet compact-sheet" aria-labelledby="productEditTitle"><header class="sheet-heading"><h2 id="productEditTitle" data-i18n="edit">Изменить</h2><button type="button" class="icon-button" data-close="productEditModal" data-i18n-label="close"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button></header><form id="productEditForm"><div class="field"><label for="productEditName" data-i18n="name">Название</label><input id="productEditName" maxlength="200" required></div><p class="field-legend" data-i18n="per_100g">На 100 грамм:</p><div class="nutrient-fields"><div class="field"><label for="productEditKcal" data-i18n="calories">calories</label><input id="productEditKcal" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditProtein" data-i18n="protein">protein</label><input id="productEditProtein" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditFat" data-i18n="fat">fat</label><input id="productEditFat" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div><div class="field"><label for="productEditCarbs" data-i18n="carbs">carbs</label><input id="productEditCarbs" type="number" min="0" max="1000" step="0.1" inputmode="decimal" required></div></div><button type="submit" class="btn-primary" data-i18n="save">Сохранить</button></form></dialog>
+
+  <dialog id="smartWaterModal" class="sheet" aria-label="Умная вода">
+  <div>
+    <h2 data-i18n="smart_water">Умная вода</h2>
+    <button class="btn-small" data-i18n="close" type="button" data-action="closeSmartWater">Закрыть</button>
+  </div>
+  <div class="card">
+    <div>
+      <span data-i18n="enable">Включить</span>
+      <div>
+        <label class="apple-switch">
+          <input type="checkbox" id="smartWaterToggle" aria-label="smartWaterToggle" data-i18n-label="smart_water">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="smartWaterToggleLabel" data-i18n="off">Выкл</span>
+      </div>
+    </div>
+    <div id="smartWaterSettings" hidden>
+      <div class="slider-container">
+        <div class="slider-labels">
+          <span>🥶 -10°</span>
+          <span>0°</span>
+          <span>10°</span>
+          <span>20°</span>
+          <span>30°</span>
+          <span>🔥 40°+</span>
+        </div>
+        <div class="slider-wrapper">
+          <div class="slider-gradient temp-gradient"></div>
+          <div class="slider-ticks" id="tempTicks"></div>
+          <input type="range" id="tempSlider" min="-10" max="40" value="22" step="1" aria-label="tempSlider">
+        </div>
+        <div class="slider-value">
+          <span data-i18n="now_temp">Сейчас</span>
+          :
+          <span id="tempDisplay">22°C</span>
+        </div>
+      </div>
+      <div class="slider-container">
+        <div class="slider-labels">
+          <span>0</span>
+          <span>5k</span>
+          <span>10k</span>
+          <span>15k</span>
+          <span>20k+</span>
+        </div>
+        <div class="slider-wrapper">
+          <div class="slider-gradient steps-gradient"></div>
+          <div class="slider-ticks" id="stepsTicks"></div>
+          <input type="range" id="stepsSlider" min="0" max="20000" value="8000" step="100" aria-label="stepsSlider">
+        </div>
+        <div class="slider-value">
+          <span data-i18n="steps">Шаги</span>
+          :
+          <span id="stepsDisplay">8 000</span>
+        </div>
+      </div>
+      <div>
+        <div class="flex">
+          <span data-i18n="base_norm">Базовая норма</span>
+          :
+          <span id="baseWaterNorm">1820 мл</span>
+        </div>
+        <div class="flex">
+          <span data-i18n="temperature">Температура</span>
+          :
+          <span id="tempBonus">+150 мл</span>
+        </div>
+        <div class="flex">
+          <span data-i18n="steps">Шаги</span>
+          :
+          <span id="stepsBonus">+150 мл</span>
+        </div>
+        <div class="flex">
+          <span data-i18n="total">ИТОГО</span>
+          :
+          <span id="totalWaterNorm">2120 мл</span>
+        </div>
+      </div>
+    </div>
+    <div id="waterBaseOnly">
+      <div class="flex">
+        <span data-i18n="water_norm">Норма воды</span>
+        :
+        <span id="baseOnlyWater">1820 мл</span>
+      </div>
+    </div>
+  </div>
+</dialog><dialog id="smartSearchModal" class="sheet" aria-label="Умный поиск">
+  <div>
+    <h2 data-i18n="smart_search">Умный поиск</h2>
+    <button class="btn-small" data-i18n="close" type="button" data-action="closeSmartSearch">Закрыть</button>
+  </div>
+  <div class="card">
+    <div>
+      <span data-i18n="enable">Включить</span>
+      <div>
+        <label class="apple-switch">
+          <input type="checkbox" id="smartSearchToggle" aria-label="smartSearchToggle" data-i18n-label="smart_search">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label" id="smartSearchToggleLabel" data-i18n="off">Выкл</span>
+      </div>
+    </div>
+    <div id="smartSearchSettings" hidden>
+      <div class="slider-container">
+        <div class="slider-labels">
+          <span>5</span>
+          <span>10</span>
+          <span>20</span>
+          <span>30</span>
+          <span>40</span>
+          <span>50</span>
+        </div>
+        <div class="slider-wrapper">
+          <div class="slider-gradient search-gradient"></div>
+          <div class="slider-ticks" id="resultsTicks"></div>
+          <input type="range" id="resultsSlider" min="5" max="50" value="10" step="1" aria-label="resultsSlider">
+        </div>
+        <div class="slider-value">
+          <span data-i18n="results">Результатов</span>
+          :
+          <span id="resultsDisplay">10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog><dialog id="aboutModal" class="sheet" aria-label="О приложении">
+  <div>
+    <h2 data-i18n="about">О приложении</h2>
+    <button class="btn-small" data-i18n="close" type="button" data-action="closeAbout">Закрыть</button>
+  </div>
+  <div class="about-content" id="aboutContent"></div>
+</dialog><dialog id="friendProgressModal" class="sheet" aria-label="Прогресс друга">
+  <div>
+    <h2 id="friendModalName">Прогресс друга</h2>
+    <button class="btn-small" type="button" data-action="closeFriendProgress">Закрыть</button>
+  </div>
+  <div class="card" id="friendProgressBars"></div>
+</dialog><dialog id="scannerModal" class="sheet scanner-sheet" aria-label="Сканер">
+  <div>
+    <h2 data-i18n="scanner">Сканер</h2>
+    <button class="btn-small" data-i18n="close" type="button" data-action="closeScanner">Закрыть</button>
+  </div>
+  <video id="scannerVideo" playsinline muted></video>
+  <div>
+    <div>
+      <input type="text" id="manualBarcode" data-i18n-placeholder="barcode_placeholder" placeholder="Штрихкод" aria-label="Штрихкод" data-i18n-label="barcode_placeholder" inputmode="numeric">
+      <button class="btn-small" data-i18n="search" type="button" data-action="lookupBarcode">Найти</button>
+    </div>
+    <div id="scannerHint" data-i18n="scanner_hint">Наведите камеру</div>
+    <button class="btn-secondary" data-i18n="cancel" type="button" data-action="closeScanner">Отмена</button>
+  </div>
+</dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="update-banner" id="updateBanner" hidden><span data-i18n="update_available">Доступна новая версия FitCat</span><button type="button" id="applyUpdate" data-i18n="update">Обновить</button></div>
+  <noscript><p class="noscript-message">Для FitCat необходимо включить JavaScript.</p></noscript>
 </body>
 </html>
-

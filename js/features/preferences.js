@@ -1,0 +1,93 @@
+import { state, targets } from '../core/store.js';
+import { temperatureBonus, stepsBonus } from '../core/math.js';
+import { t, number } from '../core/i18n.js';
+import { $, onAction, changed, openDialog, closeDialog, toast } from '../ui/components.js';
+
+let candidateActivity;
+
+export function renderPreferences() {
+  const preferences = state.preferences;
+  for (const group of ['setup', 'settings']) {
+    for (const [suffix, value] of [['Ru','ru'], ['En','en'], ['Cn','cn']]) {
+      const button = $(group + 'Lang' + suffix);
+      button.classList.toggle('active', preferences.lang === value);
+      button.setAttribute('aria-pressed', String(preferences.lang === value));
+    }
+  }
+  for (const [toggle, flag, settings, label] of [
+    ['smartWaterToggle', 'smartWaterEnabled', 'smartWaterSettings', 'smartWaterToggleLabel'],
+    ['smartSearchToggle', 'smartSearchEnabled', 'smartSearchSettings', 'smartSearchToggleLabel'],
+    ['workoutToggle', 'workoutEnabled', 'workoutSettings', 'workoutToggleLabel'],
+  ]) {
+    $(toggle).checked = preferences[flag];
+    $(settings).hidden = !preferences[flag];
+    $(label).textContent = t(preferences[flag] ? 'on' : 'off');
+  }
+  $('waterBaseOnly').hidden = preferences.smartWaterEnabled;
+  $('tempSlider').value = preferences.currentTemp;
+  $('stepsSlider').value = preferences.currentSteps;
+  $('resultsSlider').value = preferences.smartSearchResults;
+  $('tempDisplay').textContent = `${number(preferences.currentTemp)}°C`;
+  $('stepsDisplay').textContent = number(preferences.currentSteps);
+  $('resultsDisplay').textContent = number(preferences.smartSearchResults);
+  $('baseWaterNorm').textContent = `${number((state.profile?.weight || 0) * 35)} ${t('ml')}`;
+  $('baseOnlyWater').textContent = `${number(targets().water)} ${t('ml')}`;
+  $('tempBonus').textContent = `+${number(temperatureBonus(preferences.currentTemp))} ${t('ml')}`;
+  $('stepsBonus').textContent = `+${number(stepsBonus(preferences.currentSteps))} ${t('ml')}`;
+  $('totalWaterNorm').textContent = `${number(targets().water)} ${t('ml')}`;
+  $('workoutIntensity').value = preferences.workoutIntensity;
+  document.querySelectorAll('#workoutIntensityControl button').forEach(button => {
+    button.classList.toggle('active', button.dataset.value === preferences.workoutIntensity);
+    button.setAttribute('aria-pressed', String(button.dataset.value === preferences.workoutIntensity));
+  });
+  renderActivityOptions();
+}
+
+function renderActivityOptions() {
+  const selected = candidateActivity ?? state.preferences.dailyActivity;
+  document.querySelectorAll('.activity-daily-item').forEach(button => {
+    button.classList.toggle('selected', Number(button.dataset.activity) === selected);
+    button.setAttribute('aria-pressed', String(Number(button.dataset.activity) === selected));
+  });
+}
+
+function renderAbout() {
+  const russian = state.preferences.lang === 'ru';
+  const chinese = state.preferences.lang === 'cn';
+  $('aboutContent').innerHTML = russian ? `
+    <p>FitCat помогает вести дневник питания, воды, активности и изменений веса.</p>
+    <h3>Данные</h3><p>Профиль, фото и дневник сохраняются в браузере на этом устройстве. Для функции друзей имя, дневные цели, сегодняшний список продуктов и вода синхронизируются с Firebase и доступны по твоему ID.</p>
+    <p>При поиске продуктов и сканировании штрихкода приложение обращается к Open Food Facts. Сохранённые данные можно скачать и восстановить в настройках.</p>
+    <h3>Расчёты</h3><p>Расчёты основаны на общих формулах из предыдущей версии FitCat и носят информационный характер. Приложение не является медицинским сервисом.</p>
+    <h3>Открытые библиотеки</h3><ul><li>Chart.js — графики (MIT).</li><li>ZXing — сканер штрихкодов (Apache 2.0).</li><li>QuaggaJS — резервный сканер (MIT).</li><li>MediaPipe Hands — управление жестами (Apache 2.0).</li><li>Firebase — прогресс друзей.</li></ul><p>Данные продуктов: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>. Проверяй состав и значения по упаковке продукта.</p><p class="version">FitCat 3.0</p>` : chinese ? `
+    <p>FitCat 用于记录饮食、饮水、活动和体重变化。</p><h3>数据</h3><p>个人资料、照片和日记保存在此设备的浏览器中。好友功能将姓名、每日目标、今日食物和饮水量同步到 Firebase，可通过你的 ID 查看。搜索和条码查询使用 Open Food Facts。</p><h3>计算</h3><p>计算沿用原版 FitCat 的通用公式，仅供参考，不构成医疗建议。</p><h3>开源工具</h3><p>Chart.js、ZXing、QuaggaJS、MediaPipe Hands 和 Firebase。食物数据来自 Open Food Facts。</p><p class="version">FitCat 3.0</p>` : `
+    <p>FitCat tracks food, water, activity and weight changes.</p><h3>Your data</h3><p>Your profile, photo and diary are stored in this device’s browser. For the friends feature, your name, daily targets, today’s foods and water are synced to Firebase and can be viewed using your ID. Food search and barcode lookup use Open Food Facts.</p><p>Export and restore your data in Settings.</p><h3>Calculations</h3><p>Calculations retain the general formulas from the original FitCat source. They are informational and do not constitute medical advice.</p><h3>Open-source libraries</h3><p>Chart.js (MIT), ZXing (Apache 2.0), QuaggaJS (MIT), MediaPipe Hands (Apache 2.0) and Firebase. Product data: <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>.</p><p class="version">FitCat 3.0</p>`;
+}
+
+export function initPreferences() {
+  const setLanguage = button => {
+    state.preferences.lang = button.dataset.value; changed();
+    document.dispatchEvent(new Event('fitcat:language'));
+  };
+  onAction('setSetupLanguage', setLanguage); onAction('setSettingsLanguage', setLanguage);
+  onAction('openSmartWater', () => { renderPreferences(); openDialog('smartWaterModal'); });
+  onAction('closeSmartWater', () => closeDialog('smartWaterModal'));
+  onAction('openSmartSearch', () => { renderPreferences(); openDialog('smartSearchModal'); });
+  onAction('closeSmartSearch', () => closeDialog('smartSearchModal'));
+  onAction('openAbout', () => { renderAbout(); openDialog('aboutModal'); });
+  onAction('closeAbout', () => closeDialog('aboutModal'));
+  onAction('selectDailyActivity', button => { candidateActivity = Number(button.dataset.activity); renderActivityOptions(); });
+  onAction('applyDailyActivity', () => {
+    state.preferences.dailyActivity = candidateActivity ?? state.preferences.dailyActivity; changed(); toast(t('saved'));
+  });
+  onAction('selectWorkoutIntensity', button => { state.preferences.workoutIntensity = button.dataset.value; changed(); });
+  document.addEventListener('fitcat:tab', event => {
+    if (event.detail === 'activity') { candidateActivity = state.preferences.dailyActivity; renderActivityOptions(); }
+  });
+  for (const [identifier, key] of [['smartWaterToggle','smartWaterEnabled'], ['smartSearchToggle','smartSearchEnabled'], ['workoutToggle','workoutEnabled']]) {
+    $(identifier).addEventListener('change', event => { state.preferences[key] = event.target.checked; changed(); });
+  }
+  for (const [identifier, key] of [['tempSlider','currentTemp'], ['stepsSlider','currentSteps'], ['resultsSlider','smartSearchResults']]) {
+    $(identifier).addEventListener('input', event => { state.preferences[key] = Number(event.target.value); changed(); });
+  }
+}

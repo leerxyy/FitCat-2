@@ -1,0 +1,14 @@
+@keyframes view-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sheet-enter { from { opacity: 0; transform: translateY(22px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes water-pulse { 50% { background-color: rgb(22 207 243 / 5%); } }
+[data-main-view]:not([hidden]), .screen:not([hidden]) { animation: view-enter .28s var(--ease) both; }
+dialog[open] { animation: sheet-enter .28s var(--ease) both; }
+dialog[open]::backdrop { animation: backdrop-enter .2s ease both; }
+.water-card.just-added { animation: water-pulse .5s ease; }
+button:active:not(:disabled) { transform: scale(.975); }
+.icon-button:active, .profile-button:active { transform: scale(.93); }
+.nav-item:active { transform: scale(.95); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
