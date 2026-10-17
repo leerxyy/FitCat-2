@@ -12,6 +12,7 @@ import { initGestures } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
 import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
+import { initOrientation } from './ui/orientation.js';
 import { initHaptics } from './ui/haptics.js';
 import { initSubscription, renderSubscription } from './features/subscription.js';
 import { initWallet } from './features/wallet.js';
@@ -29,7 +30,7 @@ function checkDay() {
 function start() {
   loadState();
   rollDay(); updateStreak();
-  initActions(); initDock(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
@@ -42,7 +43,12 @@ function start() {
   setInterval(checkDay, 60000);
   window.addEventListener('pagehide', () => { try { rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();
+  Promise.resolve(viewportReady).then(() => document.dispatchEvent(new Event('fitcat:ready')));
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-else start();
+function boot() {
+  try { start(); }
+  catch (error) { document.dispatchEvent(new Event('fitcat:startup-error')); throw error; }
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+else boot();

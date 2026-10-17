@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { setupDOM } from './dom.mjs';
 import { initDock } from '../js/ui/dock.js';
 
-function harness({ visualViewport = true } = {}) {
+function harness({ visualViewport = true, configure } = {}) {
   const env = setupDOM();
   const originals = { requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout };
   let frame; let id = 0; const timers = new Map(); const scrolls = [];
@@ -22,8 +22,9 @@ function harness({ visualViewport = true } = {}) {
   };
   const focus = element => { document.activeElement = element; event(document, 'focusin'); };
   const close = () => { event(window,'pagehide'); Object.assign(globalThis, originals); env.restoreTimers(); };
-  initDock();
-  return { env, viewport, root, dock: document.getElementById('navDock'), flush, event, settle, focus, scrolls, close };
+  configure?.({root,viewport});
+  const ready=initDock();
+  return { ready, env, viewport, root, dock: document.getElementById('navDock'), flush, event, settle, focus, scrolls, close };
 }
 
 test('dock stays outside the scrolling views and hides through keyboard dismissal', () => {
@@ -100,4 +101,32 @@ test('pinch zoom keeps its own viewport and is never forced back to the origin',
     h.event(h.viewport,'resize'); h.event(h.viewport,'scroll');
     assert.deepEqual(h.scrolls,[]); assert.equal(h.root.style.getPropertyValue('--app-height'),'800px');
   } finally { h.close(); }
+});
+
+
+test('a cold iPhone launch immediately covers the physical screen without requiring rotation', async () => {
+  const h=harness({configure({root,viewport}) {
+    navigator.userAgent='iPhone'; navigator.standalone=true;
+    window.screen={width:390,height:844}; window.innerHeight=742;
+    viewport.height=742; root.clientHeight=742;
+    document.getElementById('viewportProbe').getBoundingClientRect=()=>({height:742});
+  }});
+  try {
+    assert.equal(h.root.style.getPropertyValue('--app-height'),'844px');
+    assert.equal(h.root.style.getPropertyValue('--visible-height'),'844px');
+    h.settle(); h.settle(); await h.ready;
+    assert.equal(h.dock.classList.contains('keyboard-open'),false);
+    assert.equal(h.root.style.getPropertyValue('--app-height'),'844px');
+  } finally {h.close();}
+});
+
+test('late CSS viewport changes are observed even when WebKit sends no window resize', () => {
+  const original=globalThis.ResizeObserver; let notify; let measured=742;
+  globalThis.ResizeObserver=class {constructor(callback){notify=callback;} observe(){} disconnect(){}};
+  const h=harness({configure() {document.getElementById('viewportProbe').getBoundingClientRect=()=>({height:measured});}});
+  try {
+    assert.equal(h.root.style.getPropertyValue('--app-height'),'742px');
+    measured=844; notify(); h.flush();
+    assert.equal(h.root.style.getPropertyValue('--app-height'),'844px');
+  } finally {h.close(); if(original)globalThis.ResizeObserver=original;else delete globalThis.ResizeObserver;}
 });

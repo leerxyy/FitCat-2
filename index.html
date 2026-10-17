@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0B1017">
+  <meta name="theme-color" content="#08121d">
   <meta name="description" content="FitCat — дневник питания, воды и твоего прогресса.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,9 +19,13 @@
   <link rel="stylesheet" href="styles/motion.css">
   <link rel="stylesheet" href="styles/subscription.css">
   <link rel="stylesheet" href="styles/wallet.css">
+  <link rel="stylesheet" href="styles/startup.css">
+  <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
 <body data-screen="setupPage">
+  <div class="viewport-probe" id="viewportProbe" aria-hidden="true"></div>
+  <div class="startup-screen" id="startupScreen" role="status" aria-live="polite"><div class="startup-brand"><img class="startup-logo" src="assets/icons/logo.svg" width="76" height="80" alt=""><div class="startup-name">Fit<span class="brand-accent">Cat</span></div><p class="startup-caption" data-i18n="startup_loading">Загружаем дневник</p><div class="startup-track" aria-hidden="true"></div><div class="startup-error"><p data-i18n="startup_error">Не удалось открыть FitCat. Попробуй ещё раз.</p><button type="button" class="btn-secondary" id="startupRetry" data-i18n="startup_retry">Повторить запуск</button></div></div></div>
   <div class="ambient-light" id="ambientLight" aria-hidden="true"><div class="ambient-plane ambient-far"></div><div class="ambient-plane ambient-near"></div></div>
   <div class="app-root" id="appScroller">
     <div id="setupPage" data-screen-view="" class="screen onboarding">
@@ -537,6 +541,7 @@
     <button class="btn-secondary" data-i18n="cancel" type="button" data-action="closeScanner">Отмена</button>
   </div>
 </dialog>
+  <dialog class="orientation-guard" id="orientationGuard" data-static-dialog aria-labelledby="orientationGuardTitle" aria-describedby="orientationGuardHint"><div class="orientation-content"><svg class="orientation-symbol" viewBox="0 0 56 64" aria-hidden="true"><rect x="18" y="10" width="25" height="44" rx="6"></rect><path d="M27 47h7M10 35a21 21 0 0 1 9-25M9 13l10-3 1 10"></path></svg><h2 id="orientationGuardTitle" data-i18n="orientation_title">Поверните телефон</h2><p id="orientationGuardHint" data-i18n="orientation_hint">FitCat работает в вертикальном режиме</p></div></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="update-banner" id="updateBanner" hidden><span data-i18n="update_available">Доступна новая версия FitCat</span><button type="button" id="applyUpdate" data-i18n="update">Обновить</button></div>
   <noscript><p class="noscript-message">Для FitCat необходимо включить JavaScript.</p></noscript>

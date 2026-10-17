@@ -18,7 +18,7 @@
   .sheet { --glass-tint: rgb(11 27 44 / 84%); -webkit-backdrop-filter: blur(30px) saturate(145%); backdrop-filter: blur(30px) saturate(145%); }
 }
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
-  .card::before, .glass::before, .glass-button::before, .sheet::before {
+  .card::before, .glass::before, .glass-button::before {
     content: ""; position: absolute; inset: -1px; z-index: 2; padding: 1px; border-radius: inherit; pointer-events: none;
     background: linear-gradient(135deg, rgb(233 250 255 / 76%), rgb(101 217 255 / 24%) 17%, transparent 37%, rgb(113 191 255 / 15%) 60%, rgb(126 224 255 / 56%) 83%, rgb(228 246 255 / 32%));
     background-size: 220% 220%;

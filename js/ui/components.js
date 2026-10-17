@@ -22,6 +22,7 @@ export function initActions() {
     catch (error) { console.error(error); toast(t(error.message === 'invalid_backup' ? 'invalid_backup' : 'network_error')); }
   });
   document.querySelectorAll('dialog').forEach(dialog => {
+    if (dialog.hasAttribute('data-static-dialog')) return;
     dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(dialog.id); });
     dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(dialog.id); });
     dialog.addEventListener('close', () => {
