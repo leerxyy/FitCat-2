@@ -1,0 +1,63 @@
+/* A lightweight web glass material: translucent tint, blur, edge refraction and light. */
+.ambient-light { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; background: linear-gradient(155deg, #07111c, #091b2a 54%, #07141e); }
+.ambient-plane { position: absolute; inset: -15vh -18vw; pointer-events: none; }
+.ambient-plane::before { content: ""; position: absolute; inset: 0; }
+.ambient-far { transform: translate3d(calc(var(--parallax-x, 0px) * .45), calc(var(--parallax-y, 0px) * .45), 0); }
+.ambient-near { transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0); }
+.ambient-far::before { background: radial-gradient(ellipse 35% 48% at 75% 8%, rgb(0 119 190 / 27%), transparent 74%), radial-gradient(ellipse 30% 32% at 6% 62%, rgb(0 160 192 / 17%), transparent 75%), radial-gradient(ellipse 40% 32% at 95% 100%, rgb(18 73 137 / 21%), transparent 75%); animation: ambient-drift-far 29s ease-in-out infinite alternate; }
+.ambient-near::before { background: radial-gradient(ellipse 17% 48% at 43% 2%, rgb(0 146 209 / 19%), transparent 77%), radial-gradient(ellipse 24% 33% at 91% 61%, rgb(8 111 174 / 17%), transparent 77%), radial-gradient(ellipse 18% 25% at 8% 100%, rgb(0 188 217 / 13%), transparent 75%); animation: ambient-drift-near 37s ease-in-out infinite alternate; }
+
+.card, .glass, .glass-button, .sheet {
+  background: linear-gradient(135deg, rgb(206 232 255 / 8%), transparent 44%), linear-gradient(325deg, rgb(12 174 220 / 4%), transparent 65%), var(--glass-tint);
+  border-color: var(--glass-edge);
+  box-shadow: inset 0 1px 1px rgb(222 246 255 / 19%), inset 1px 0 1px rgb(209 238 255 / 7%), inset 0 -1px 1px rgb(135 207 249 / 13%), 0 10px 30px rgb(0 4 12 / 19%), 0 0 24px var(--glass-glow);
+}
+.glass-button, .scanner-button { position: relative; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card, .glass, .glass-button { --glass-tint: rgb(10 26 42 / 53%); -webkit-backdrop-filter: blur(22px) saturate(155%); backdrop-filter: blur(22px) saturate(155%); }
+  .sheet { --glass-tint: rgb(11 27 44 / 84%); -webkit-backdrop-filter: blur(30px) saturate(145%); backdrop-filter: blur(30px) saturate(145%); }
+}
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+  .card::before, .glass::before, .glass-button::before, .sheet::before {
+    content: ""; position: absolute; inset: -1px; z-index: 2; padding: 1px; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(135deg, rgb(233 250 255 / 76%), rgb(101 217 255 / 24%) 17%, transparent 37%, rgb(113 191 255 / 15%) 60%, rgb(126 224 255 / 56%) 83%, rgb(228 246 255 / 32%));
+    background-size: 220% 220%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;
+    opacity: .72; animation: glass-edge-drift 23s ease-in-out infinite alternate;
+  }
+}
+.sheet .card { --glass-tint: rgb(5 19 32 / 60%); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.sheet .card::before { opacity: .35; }
+.card > h2, .section-heading { position: relative; z-index: 3; }
+.nutrition-card { --glass-glow: rgb(8 184 235 / 10%); }
+.nutrition-card::before { animation-delay: -5s; }
+.meals-card::before { animation-delay: -12s; }
+.water-card::before { animation-delay: -18s; }
+.profile-button { border-color: rgb(137 215 255 / 52%); box-shadow: inset 0 1px 3px rgb(213 242 255 / 30%), inset 0 -3px 9px rgb(27 144 212 / 15%), 0 0 17px rgb(29 176 235 / 17%); }
+.profile-button, .text-button, .activity-daily-item, .segmented-option { transition: transform .3s var(--ease), background-color .3s ease, color .3s ease, box-shadow .35s ease; }
+.brand-mark { filter: drop-shadow(0 0 7px rgb(185 235 255 / 12%)); }
+.brand-accent { text-shadow: 0 0 18px rgb(22 207 243 / 23%); }
+.btn-primary { position: relative; overflow: hidden; background: linear-gradient(145deg, #32e0f6, #0cc6ec 66%, #15bde9); border: 1px solid rgb(178 244 255 / 47%); box-shadow: inset 0 2px 4px rgb(225 254 255 / 43%), inset 0 -3px 9px rgb(0 111 156 / 17%), 0 0 19px rgb(22 207 243 / 15%), 0 5px 20px rgb(0 148 196 / 12%); }
+.btn-primary::after { content: ""; position: absolute; inset: -70% auto -70% -50%; width: 35%; background: linear-gradient(90deg, transparent, rgb(236 255 255 / 18%), transparent); transform: rotate(18deg); pointer-events: none; animation: button-sheen 25s ease-in-out infinite; }
+.btn-primary:hover { background: linear-gradient(145deg, #54e8fb, #21d3f1 66%, #26c6ee); }
+.btn-primary > * { position: relative; z-index: 1; }
+.btn-secondary, .btn-small, .activity-daily-item, .segmented-control { background-color: rgb(20 41 58 / 64%); border-color: rgb(160 207 239 / 18%); box-shadow: inset 0 1px rgb(220 243 255 / 6%); }
+.btn-secondary:hover, .btn-small:hover { background-color: rgb(31 65 87 / 70%); }
+.icon-button.subtle { box-shadow: none; }
+.glass-button:hover { background-color: rgb(31 69 94 / 62%); }
+.macro-track i, .water-track > i { background: linear-gradient(100deg, #10c4e6, #41e3f4 38%, #16cff3 68%, #22d7f1); background-size: 200% 100%; animation: progress-sheen 14s ease-in-out infinite alternate; box-shadow: 0 0 10px rgb(22 207 243 / 25%); }
+.macro-track, .water-track { box-shadow: inset 0 1px 2px rgb(1 6 13 / 22%); }
+.bottom-nav { --glass-tint: rgb(10 31 48 / 66%); border-color: rgb(133 215 252 / 42%); box-shadow: inset 0 1px 2px rgb(231 250 255 / 33%), inset 0 -2px 7px rgb(72 178 232 / 10%), 0 9px 32px rgb(0 3 10 / 30%), 0 0 25px rgb(11 178 225 / 12%); }
+.nav-item { transition: color .3s ease, transform .28s var(--ease); }
+.nav-item .icon { transition: filter .4s ease; }
+.nav-item.is-active .icon { filter: drop-shadow(0 0 6px rgb(22 207 243 / 36%)); }
+.nav-item.is-active::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 7px rgb(22 207 243 / 42%); }
+.sheet::backdrop { background: rgb(2 9 17 / 53%); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
+.sheet.is-closing { pointer-events: none; }
+.meal-thumb { background: linear-gradient(145deg, rgb(64 126 156 / 27%), rgb(19 57 77 / 43%)); box-shadow: inset 0 1px rgb(225 247 255 / 12%); }
+.food-toggle, input, select, textarea { transition: border-color .3s ease, background-color .3s ease, box-shadow .3s ease; }
+.food-toggle.checked { box-shadow: 0 0 10px rgb(22 207 243 / 16%); }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgb(22 207 243 / 9%); }
+.is-removing { pointer-events: none; }
+@media (prefers-reduced-transparency: reduce) { .card, .glass, .glass-button, .sheet { --glass-tint: #122638; -webkit-backdrop-filter: none; backdrop-filter: none; } }

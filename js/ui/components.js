@@ -1,11 +1,12 @@
 import { persist } from '../core/store.js';
 import { t, number } from '../core/i18n.js';
+import { tweenValue, enter, exitDialog, cancelDialogExit } from './motion.js';
+export { reducedMotion } from './motion.js';
 
 export const $ = id => document.getElementById(id);
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
 export const icon = (name, className = '') => `<svg class="icon ${className}" aria-hidden="true"><use href="assets/icons/sprite.svg#${name}"></use></svg>`;
 const actions = new Map();
-const animations = new WeakMap();
 let toastTimer;
 
 export function onAction(name, handler) { actions.set(name, handler); }
@@ -22,6 +23,7 @@ export function initActions() {
   });
   document.querySelectorAll('dialog').forEach(dialog => {
     dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(dialog.id); });
+    dialog.addEventListener('cancel', event => { event.preventDefault(); closeDialog(dialog.id); });
     dialog.addEventListener('close', () => { document.body.classList.toggle('dialog-open', Boolean(document.querySelector('dialog[open]'))); });
   });
 }
@@ -34,17 +36,22 @@ export function changed({ nutrition = false } = {}) {
 
 export function openDialog(id) {
   const dialog = $(id);
-  if (!dialog || dialog.open) return;
+  if (!dialog) return;
+  cancelDialogExit(dialog);
+  if (dialog.open) return;
   if (typeof dialog.showModal === 'function') dialog.showModal();
   else dialog.setAttribute('open', '');
   document.body.classList.add('dialog-open');
+  enter(dialog, { y: 24, duration: 340 });
 }
 
 export function closeDialog(id) {
   const dialog = $(id);
   if (!dialog?.open) return;
-  if (typeof dialog.close === 'function') dialog.close();
-  else { dialog.removeAttribute('open'); dialog.dispatchEvent(new Event('close')); }
+  exitDialog(dialog, () => {
+    if (typeof dialog.close === 'function') dialog.close();
+    else { dialog.removeAttribute('open'); dialog.dispatchEvent(new Event('close')); }
+  });
 }
 
 export function toast(message, action) {
@@ -62,27 +69,10 @@ export function toast(message, action) {
   toastTimer = setTimeout(() => region.classList.remove('visible'), action ? 6500 : 3300);
 }
 
-export function reducedMotion() {
-  return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
-}
-
 export function animateNumber(element, value, digits = 0) {
   if (!element) return;
-  const previous = Number(element.dataset.value);
-  if (animations.has(element)) cancelAnimationFrame(animations.get(element));
   element.dataset.value = String(value);
-  if (!Number.isFinite(previous) || reducedMotion() || previous === value) {
-    element.textContent = number(value, digits); return;
-  }
-  const started = performance.now();
-  const tick = now => {
-    const progress = Math.min(1, (now - started) / 420);
-    const eased = 1 - (1 - progress) ** 3;
-    element.textContent = number(previous + (value - previous) * eased, digits);
-    if (progress < 1) animations.set(element, requestAnimationFrame(tick));
-    else animations.delete(element);
-  };
-  animations.set(element, requestAnimationFrame(tick));
+  tweenValue(element, value, current => { element.textContent = number(current, digits); });
 }
 
 export function confirmAction(message) {

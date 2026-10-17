@@ -1,13 +1,13 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.0.0-r1';
+const VERSION = '3.1.0-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
   './', 'index.html', 'manifest.webmanifest',
-  'styles/tokens.css', 'styles/base.css', 'styles/components.css', 'styles/layout.css', 'styles/motion.css',
+  'styles/tokens.css', 'styles/base.css', 'styles/components.css', 'styles/layout.css', 'styles/glass.css', 'styles/motion.css',
   'js/app.js', 'js/core/store.js', 'js/core/math.js', 'js/core/i18n.js', 'js/core/translations.js', 'js/core/loader.js',
-  'js/ui/components.js', 'js/ui/navigation.js', 'js/ui/pwa.js',
+  'js/ui/components.js', 'js/ui/navigation.js', 'js/ui/pwa.js', 'js/ui/motion.js', 'js/ui/ambient.js',
   'js/features/diary.js', 'js/features/profile.js', 'js/features/preferences.js',
   'js/features/products.js', 'js/features/analytics.js', 'js/features/gestures.js', 'js/services/friends.js',
   'assets/icons/logo.svg', 'assets/icons/sprite.svg', 'assets/icons/app-icon.svg',

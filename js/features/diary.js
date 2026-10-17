@@ -2,11 +2,14 @@ import { state, targets, uid } from '../core/store.js';
 import { nutritionTotal, portion, clamp } from '../core/math.js';
 import { t, number } from '../core/i18n.js';
 import { $, icon, escapeHTML, safeImage, animateNumber, onAction, changed, openDialog, closeDialog, toast, confirmAction, promptValue } from '../ui/components.js';
+import { animateProgress, captureLayout, animateList, removeRow, toggleMeal } from '../ui/motion.js';
 
 const meals = ['breakfast', 'lunch', 'dinner', 'snack', 'other'];
 const mealIcons = { breakfast: 'sun', lunch: 'meal', dinner: 'moon', snack: 'apple', other: 'meal' };
 let editingFood = null;
 let selectedImage = '';
+let foodSignature = '';
+let revealFoodId = '';
 
 export function renderSummary() {
   const total = nutritionTotal(state.foods); const goal = targets();
@@ -15,12 +18,12 @@ export function renderSummary() {
   animateNumber($('caloriesEaten'), total.kcal);
   animateNumber($('caloriesTarget'), goal.kcal);
   $('remainingLabel').textContent = t(remaining < 0 ? 'over_target' : 'remaining');
-  $('calorieRing').style.strokeDashoffset = String(100 - clamp(total.kcal / goal.kcal) * 100);
+  animateProgress($('calorieRing'), clamp(total.kcal / goal.kcal), 'ring');
   $('calorieRing').classList.toggle('is-over', remaining < 0);
   for (const key of ['protein', 'fat', 'carbs']) {
     animateNumber($(`${key}Current`), total[key]);
     $(`${key}Target`).textContent = number(goal[key]);
-    $(`${key}Bar`).style.setProperty('--fraction', clamp(total[key] / goal[key]));
+    animateProgress($(`${key}Bar`), clamp(total[key] / goal[key]));
   }
   $('mealTotal').textContent = `${number(total.kcal)} ${t('kcal')}`;
   renderWater();
@@ -30,7 +33,7 @@ export function renderWater() {
   const goal = targets(); const fraction = clamp(state.water / goal.water);
   animateNumber($('waterCurrent'), state.water / 1000, 2);
   $('waterGoal').textContent = `${number(goal.water / 1000, 2)} ${t('l')}`;
-  $('waterFill').style.setProperty('--fraction', fraction);
+  animateProgress($('waterFill'), fraction);
   $('waterProgress').setAttribute('aria-valuenow', String(Math.round(fraction * 100)));
   $('waterProgress').setAttribute('aria-label', t('water_title'));
   const extra = state.profile ? goal.water - Math.round(state.profile.weight * 35) : 0;
@@ -40,9 +43,15 @@ export function renderWater() {
 
 export function renderFoods() {
   const container = $('foodListContainer');
+  const signature = state.preferences.lang + JSON.stringify(state.foods);
+  if (signature === foodSignature) return;
+  foodSignature = signature;
+  const previous = captureLayout(container);
+  const highlightId = revealFoodId; revealFoodId = '';
   const expanded = new Set([...container.querySelectorAll('details[open]')].map(item => item.dataset.meal));
   if (!state.foods.length) {
     container.innerHTML = `<div class="empty-state">${icon('meal')}<strong>${t('empty_title')}</strong><p>${t('empty_description')}</p></div>`;
+    animateList(container, previous);
     return;
   }
   container.innerHTML = meals.map(meal => {
@@ -51,17 +60,20 @@ export function renderFoods() {
     const total = nutritionTotal(foods, false);
     const image = safeImage(foods.find(food => safeImage(food.image))?.image);
     const thumb = image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" decoding="async" data-food-image>` : icon(mealIcons[meal]);
-    return `<details class="meal-group" data-meal="${meal}" ${expanded.has(meal) ? 'open' : ''}>
-      <summary class="meal-summary"><span class="meal-thumb">${thumb}</span><span class="meal-description"><strong>${t(meal)}</strong><small>${escapeHTML(foods.map(food => food.name).join(', '))}</small></span><span class="meal-kcal">${number(total.kcal)} ${t('kcal')}</span>${icon('chevron', 'meal-chevron')}</summary>
+    const open = expanded.has(meal) || foods.some(food => food.id === highlightId);
+    return `<details class="meal-group" data-meal="${meal}" data-motion-key="meal-${meal}" ${open ? 'open' : ''}>
+      <summary class="meal-summary" aria-expanded="${open}"><span class="meal-thumb">${thumb}</span><span class="meal-description"><strong>${t(meal)}</strong><small>${escapeHTML(foods.map(food => food.name).join(', '))}</small></span><span class="meal-kcal">${number(total.kcal)} ${t('kcal')}</span>${icon('chevron', 'meal-chevron')}</summary>
       <div class="meal-contents">${foods.map(food => foodRow(food)).join('')}<button type="button" class="text-button" data-action="openFood" data-value="${meal}">${icon('plus')}<span>${t('add_food')}</span></button></div>
     </details>`;
   }).join('');
+  container.querySelectorAll('.meal-summary').forEach(summary => summary.addEventListener('click', event => { event.preventDefault(); toggleMeal(summary.parentElement); }));
   container.querySelectorAll('[data-food-image]').forEach(image => image.addEventListener('error', () => { image.parentElement.innerHTML = icon('meal'); }, { once: true }));
+  animateList(container, previous, highlightId);
 }
 
 function foodRow(food) {
   const id = escapeHTML(food.id);
-  return `<div class="food-item">
+  return `<div class="food-item" data-food-id="${id}" data-motion-key="food-${id}">
     <button type="button" class="food-toggle ${food.checked ? 'checked' : ''}" data-action="toggleFood" data-value="${id}" aria-pressed="${Boolean(food.checked)}" aria-label="${escapeHTML(t('already_eaten') + ': ' + food.name)}">${icon('check')}</button>
     <div class="food-info"><div class="food-name">${escapeHTML(food.name)}</div><div class="food-details">${number(food.weight, 1)} ${t('g')} · ${number(food.kcal)} ${t('kcal')}${food.checked ? '' : ` · ${t('planned')}`}</div></div>
     <button type="button" class="icon-button" data-action="editFood" data-value="${id}" aria-label="${escapeHTML(t('edit') + ': ' + food.name)}">${icon('edit')}</button>
@@ -130,6 +142,7 @@ function saveFood(event) {
     checked: $('foodEaten').checked, image: selectedImage,
   };
   if (existingIndex >= 0) state.foods[existingIndex] = food; else state.foods.push(food);
+  revealFoodId = food.id;
   if (!state.products.some(item => item.name.toLocaleLowerCase() === product.name.toLocaleLowerCase())) state.products.push(product);
   changed({ nutrition: true }); closeDialog('foodEntryModal'); toast(t('food_saved'));
   navigator.vibrate?.(8);
@@ -169,14 +182,17 @@ export function initDiary() {
   onAction('editFood', button => editFood(button.dataset.value));
   onAction('toggleFood', button => {
     const food = state.foods.find(item => item.id === button.dataset.value);
-    if (food) { food.checked = !food.checked; changed({ nutrition: true }); navigator.vibrate?.(8); }
+    if (food) { food.checked = !food.checked; revealFoodId = food.id; changed({ nutrition: true }); navigator.vibrate?.(8); }
   });
-  onAction('deleteFood', button => {
-    const index = state.foods.findIndex(item => item.id === button.dataset.value);
+  onAction('deleteFood', async button => {
+    const id = button.dataset.value;
+    button.disabled = true;
+    await removeRow(button.closest('.food-item'));
+    const index = state.foods.findIndex(item => item.id === id);
     if (index < 0) return;
     const [food] = state.foods.splice(index, 1);
     changed({ nutrition: true });
-    toast(t('food_deleted'), { label: t('undo'), run: () => { state.foods.splice(index, 0, food); changed({ nutrition: true }); } });
+    toast(t('food_deleted'), { label: t('undo'), run: () => { state.foods.splice(index, 0, food); revealFoodId = food.id; changed({ nutrition: true }); } });
   });
   onAction('addWater', button => addWater(Number(button.dataset.value)));
   onAction('openWater', () => { $('manualWaterInput').value = state.water; openDialog('waterEntryModal'); });

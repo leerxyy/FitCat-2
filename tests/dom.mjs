@@ -51,6 +51,7 @@ export class Element extends EventTarget {
   get className() { return this.getAttribute('class') || ''; } set className(value) { this.setAttribute('class', value); }
   get hidden() { return this.hasAttribute('hidden'); } set hidden(value) { if (value) this.setAttribute('hidden', ''); else this.removeAttribute('hidden'); }
   get open() { return this.hasAttribute('open'); }
+  set open(value) { if (value) this.setAttribute('open', ''); else this.removeAttribute('open'); }
   get value() { return this._value ?? this.getAttribute('value') ?? (this.tagName === 'SELECT' ? this.querySelector('option[selected]')?.value ?? this.querySelector('option')?.value : '') ?? ''; }
   set value(value) { this._value = String(value); }
   get checked() { return this._checked ?? this.hasAttribute('checked'); } set checked(value) { this._checked = Boolean(value); }

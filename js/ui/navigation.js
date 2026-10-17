@@ -1,5 +1,6 @@
 import { t, locale } from '../core/i18n.js';
 import { $, onAction } from './components.js';
+import { switchViews, enter } from './motion.js';
 
 const tabs = ['today', 'activity', 'analytics', 'friends'];
 const titles = ['tab_today', 'tab_activity', 'analytics', 'friends_title'];
@@ -9,15 +10,18 @@ export let activeTab = 0;
 export function showTab(tab) {
   const index = typeof tab === 'number' ? Math.max(0, Math.min(3, tab)) : tabs.indexOf(tab);
   if (index < 0) return;
+  const direction = index >= activeTab ? 1 : -1;
+  const didChange = index !== activeTab;
   activeTab = index;
   window.currentPage = index;
-  document.querySelectorAll('[data-main-view]').forEach((view, i) => { view.hidden = i !== index; view.classList.toggle('active', i === index); });
+  switchViews([...document.querySelectorAll('[data-main-view]')], index, direction);
   const nav = $('bottomNav'); nav.style.setProperty('--active-index', index);
   nav.querySelectorAll('[data-tab]').forEach((button, i) => {
     button.classList.toggle('is-active', i === index);
     if (i === index) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
   updateHeading();
+  if (didChange) enter($('pageTitle').parentElement, { y: 5, duration: 280 });
   document.dispatchEvent(new CustomEvent('fitcat:tab', { detail: tabs[index] }));
 }
 
@@ -28,11 +32,13 @@ export function updateHeading() {
 }
 
 export function showScreen(id) {
+  const previous = document.body.dataset.screen;
   for (const screen of document.querySelectorAll('[data-screen-view]')) screen.hidden = screen.id !== id;
   document.body.dataset.screen = id;
   $('bottomNav').hidden = id !== 'mainPage';
   document.dispatchEvent(new CustomEvent('fitcat:screen', { detail: id }));
   window.scrollTo({ top: 0, behavior: 'auto' });
+  if (previous !== id) enter($(id), { y: 12, duration: 360 });
 }
 
 export function initNavigation() {

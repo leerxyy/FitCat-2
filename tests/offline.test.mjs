@@ -5,10 +5,10 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 
 test('offline install caches every runtime file under the GitHub Pages subpath', async () => {
   const events = {}; const cacheEntries = new Map(); let claimed = false; let skipped = false; let network = 0;
-  const scope = 'https://example.github.io/FitCatApp/'; const cacheNames = [];
+  const scope = 'https://example.github.io/FitCat-2/'; const cacheNames = [];
   const caches = {
     async open(name) { cacheNames.push(name); return { async addAll(requests) { for (const request of requests) cacheEntries.set(request.url, { url: request.url, cached: true }); }, async match(url) { return cacheEntries.get(url); } }; },
-    async keys() { return [cacheNames[0], cacheNames[0].replace('3.0.0-r1', 'old-version'), 'another-application-cache']; },
+    async keys() { return [cacheNames[0], cacheNames[0] + '-old', 'another-application-cache']; },
     async delete(name) { deleted.push(name); },
   };
   const deleted = [];

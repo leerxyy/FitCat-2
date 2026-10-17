@@ -10,6 +10,7 @@ import { initAnalytics, renderAnalytics, renderCharts } from './features/analyti
 import { initFriends, queuePublish, loadFriends } from './services/friends.js';
 import { initGestures } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
+import { initAmbient } from './ui/ambient.js';
 
 function render() {
   renderPreferences(); renderIdentity(); renderTemplates();
@@ -24,7 +25,7 @@ function checkDay() {
 function start() {
   loadState();
   rollDay(); updateStreak();
-  initActions(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); initAmbient(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');

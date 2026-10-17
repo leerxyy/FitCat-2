@@ -20,7 +20,9 @@ test('the real app modules load old data and wire diary, water, language, profil
       assert.equal($('waterCurrent').dataset.value, '0.5'); assert.match($('foodListContainer').textContent, /Старый продукт/);
     });
     await t.test('water buttons and Undo update state and original storage', async () => {
+      const meal = $('foodListContainer').querySelector('details');
       await click('[data-action="addWater"][data-value="250"]'); assert.equal(state.water, 750); assert.equal(env.localStorage.getItem('waterAmount'), '750');
+      assert.equal($('foodListContainer').querySelector('details'), meal);
       $('toast').querySelector('button').click(); await tick(); assert.equal(state.water, 500);
     });
     await t.test('the custom water form sets the total volume', async () => {
@@ -41,6 +43,12 @@ test('the real app modules load old data and wire diary, water, language, profil
       const id = state.foods[1].id; await click(`[data-action="toggleFood"][data-value="${id}"]`);
       assert.equal(state.foods[1].checked, false); assert.equal($('caloriesEaten').dataset.value, '250');
       assert.match($('foodListContainer').textContent, /Запланировано/);
+    });
+    await t.test('the affected meal opens after adding food and can be collapsed again', async () => {
+      const meal = $('foodListContainer').querySelector('[data-meal="breakfast"]');
+      assert.equal(meal.open, true); meal.querySelector('summary').click(); await tick();
+      assert.equal(meal.open, false); assert.equal(meal.querySelector('summary').getAttribute('aria-expanded'), 'false');
+      meal.querySelector('summary').click(); await tick(); assert.equal(meal.open, true);
     });
     await t.test('editing a portion updates the selected item without duplicating it', async () => {
       const id = state.foods[1].id; await click(`[data-action="editFood"][data-value="${id}"]`);

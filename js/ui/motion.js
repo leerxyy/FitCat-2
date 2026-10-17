@@ -1,0 +1,170 @@
+// Shared timings keep numbers, progress, navigation and list changes in step.
+export const EASE = 'cubic-bezier(.22, 1, .36, 1)';
+const tweens = new WeakMap();
+const liveTweens = new Set();
+const exits = new WeakMap();
+const entrances = new WeakMap();
+const heights = new WeakMap();
+const disclosures = new WeakMap();
+let tabTransition;
+
+export function reducedMotion() {
+  return Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
+}
+
+export function tweenValue(element, target, render, { duration = 760, initial = target } = {}) {
+  if (!element) return;
+  target = Number.isFinite(Number(target)) ? Number(target) : 0;
+  const previous = tweens.get(element);
+  if (previous?.target === target) { previous.render = render; render(previous.current); return; }
+  if (previous) { cancelAnimationFrame(previous.frame); liveTweens.delete(previous); }
+  const from = previous?.current ?? initial;
+  const job = { current: from, target, render, frame: 0 };
+  tweens.set(element, job);
+  if (reducedMotion() || from === target) { job.current = target; render(target); return; }
+  const start = performance.now();
+  render(from); liveTweens.add(job);
+  const tick = now => {
+    const progress = Math.max(0, Math.min(1, (now - start) / duration));
+    job.current = from + (target - from) * (1 - (1 - progress) ** 3);
+    job.render(job.current);
+    if (progress < 1) job.frame = requestAnimationFrame(tick);
+    else { job.current = target; liveTweens.delete(job); }
+  };
+  job.frame = requestAnimationFrame(tick);
+}
+
+export function finishValueMotion() {
+  for (const job of liveTweens) { cancelAnimationFrame(job.frame); job.current = job.target; job.render(job.target); }
+  liveTweens.clear();
+}
+
+export function animateProgress(element, fraction, kind = 'bar') {
+  if (!element) return;
+  const target = Math.max(0, Math.min(1, Number(fraction) || 0));
+  tweenValue(element, target, value => {
+    if (kind === 'ring') element.style.strokeDashoffset = String(100 - value * 100);
+    else element.style.setProperty('--fraction', value);
+  }, { initial: 0 });
+}
+
+export function play(element, keyframes, options = {}) {
+  if (!element || reducedMotion() || typeof element.animate !== 'function') return null;
+  try {
+    const animation = element.animate(keyframes, { duration: 340, easing: EASE, fill: 'none', ...options });
+    animation.finished.catch(() => {});
+    return animation;
+  } catch { return null; }
+}
+
+export function enter(element, { x = 0, y = 12, delay = 0, duration = 360 } = {}) {
+  if (!element) return;
+  entrances.get(element)?.cancel();
+  const animation = play(element, [
+    { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` },
+    { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+  ], { duration, delay, fill: delay ? 'backwards' : 'none' });
+  if (animation) entrances.set(element, animation);
+}
+
+export function switchViews(views, index, direction = 1) {
+  tabTransition?.(); tabTransition = null;
+  const outgoing = views.find(view => view.classList.contains('active') && !view.hidden);
+  const incoming = views[index];
+  views.forEach((view, i) => {
+    view.hidden = i !== index; view.classList.toggle('active', i === index);
+    view.inert = i !== index;
+    if (i === index) view.removeAttribute('aria-hidden'); else view.setAttribute('aria-hidden', 'true');
+  });
+  if (!outgoing || outgoing === incoming || reducedMotion() || typeof incoming?.animate !== 'function') return;
+  outgoing.hidden = false; outgoing.classList.add('view-leaving');
+  const leave = play(outgoing, [{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: `translateX(${-direction * 14}px)` }], { duration: 190 });
+  enter(incoming, { x: direction * 18, y: 0, duration: 340 });
+  const clean = () => { leave?.cancel(); outgoing.hidden = true; outgoing.classList.remove('view-leaving'); };
+  tabTransition = clean;
+  if (leave) leave.finished.then(() => { if (tabTransition === clean) { clean(); tabTransition = null; } }, () => {});
+  else { clean(); tabTransition = null; }
+}
+
+export function cancelDialogExit(dialog) {
+  const job = exits.get(dialog);
+  if (job) { exits.delete(dialog); job.cancel(); dialog.classList.remove('is-closing'); }
+}
+
+export function exitDialog(dialog, finish) {
+  if (exits.has(dialog)) return;
+  entrances.get(dialog)?.cancel();
+  const animation = play(dialog, [{ opacity: 1, transform: 'translateY(0) scale(1)' }, { opacity: 0, transform: 'translateY(18px) scale(.99)' }], { duration: 180, easing: 'cubic-bezier(.4, 0, 1, 1)' });
+  if (!animation) { finish(); return; }
+  dialog.classList.add('is-closing'); exits.set(dialog, animation);
+  animation.finished.then(() => {
+    if (exits.get(dialog) !== animation) return;
+    exits.delete(dialog); dialog.classList.remove('is-closing'); finish();
+  }, () => {});
+}
+
+export function captureLayout(container) {
+  if (reducedMotion() || typeof container?.getBoundingClientRect !== 'function' || !container.getClientRects().length) return null;
+  const snapshot = { height: container.getBoundingClientRect().height, nodes: new Map() };
+  container.querySelectorAll('[data-motion-key]').forEach(node => {
+    if (node.getClientRects().length) snapshot.nodes.set(node.dataset.motionKey, node.getBoundingClientRect());
+  });
+  heights.get(container)?.cancel();
+  return snapshot;
+}
+
+export function animateList(container, snapshot, highlightId = '') {
+  if (!snapshot || reducedMotion()) return;
+  const items = [...container.querySelectorAll('[data-motion-key]')].filter(node => node.getClientRects().length);
+  const current = new Map(items.map(node => [node.dataset.motionKey, node.getBoundingClientRect()]));
+  for (const node of items) {
+    const key = node.dataset.motionKey; const before = snapshot.nodes.get(key); const after = current.get(key);
+    if (!before) { enter(node, { y: 10, duration: 400 }); continue; }
+    let x = before.left - after.left; let y = before.top - after.top;
+    const parent = node.parentElement.closest('[data-motion-key]');
+    if (parent && snapshot.nodes.has(parent.dataset.motionKey) && current.has(parent.dataset.motionKey)) {
+      x -= snapshot.nodes.get(parent.dataset.motionKey).left - current.get(parent.dataset.motionKey).left;
+      y -= snapshot.nodes.get(parent.dataset.motionKey).top - current.get(parent.dataset.motionKey).top;
+    }
+    if (Math.abs(x) + Math.abs(y) > .5) play(node, [{ transform: `translate(${x}px, ${y}px)` }, { transform: 'translate(0, 0)' }], { duration: 400 });
+    if (node.dataset.foodId === highlightId) play(node, [{ backgroundColor: 'rgba(22,207,243,.13)' }, { backgroundColor: 'rgba(22,207,243,0)' }], { duration: 850 });
+  }
+  const height = container.getBoundingClientRect().height;
+  if (Math.abs(snapshot.height - height) > 1) {
+    const animation = play(container, [{ height: `${snapshot.height}px`, overflow: 'clip' }, { height: `${height}px`, overflow: 'clip' }], { duration: 400 });
+    if (animation) heights.set(container, animation);
+  }
+}
+
+export async function removeRow(row) {
+  if (!row || typeof row.getBoundingClientRect !== 'function' || reducedMotion()) return;
+  const height = row.getBoundingClientRect().height;
+  const animation = play(row, [{ opacity: 1, height: `${height}px`, paddingTop: '13px', paddingBottom: '13px', overflow: 'hidden' }, { opacity: 0, height: '0px', paddingTop: '0px', paddingBottom: '0px', borderTopWidth: '0px', overflow: 'hidden' }], { duration: 210, fill: 'forwards' });
+  if (!animation) return;
+  row.classList.add('is-removing');
+  try { await animation.finished; } catch { /* A later render may replace this row. */ }
+}
+
+export function toggleMeal(details) {
+  const content = details.querySelector('.meal-contents'); const summary = details.querySelector('summary');
+  if (!content) return;
+  const previous = disclosures.get(details); const open = previous ? !previous.open : !details.open;
+  const from = content.getBoundingClientRect?.().height || 0;
+  previous?.animation?.cancel(); details.open = true; summary.setAttribute('aria-expanded', String(open));
+  const to = open ? content.scrollHeight : 0;
+  const animation = play(content, [{ height: `${from}px`, opacity: open ? .5 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: open ? 1 : 0, overflow: 'hidden' }], { duration: 320 });
+  const job = { open, animation }; disclosures.set(details, job);
+  const done = () => { if (disclosures.get(details) === job) { details.open = open; disclosures.delete(details); } };
+  if (animation) animation.finished.then(done, () => {}); else done();
+}
+
+export function revealRegion(region, visible) {
+  const previous = disclosures.get(region); const from = region.hidden ? 0 : region.getBoundingClientRect?.().height || 0;
+  if (previous?.open === visible || (!previous && region.hidden === !visible)) return;
+  previous?.animation?.cancel(); region.hidden = false;
+  const to = visible ? region.scrollHeight : 0;
+  const animation = play(region, [{ height: `${from}px`, opacity: visible ? 0 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: visible ? 1 : 0, overflow: 'hidden' }], { duration: 300 });
+  const job = { open: visible, animation }; disclosures.set(region, job);
+  const done = () => { if (disclosures.get(region) === job) { region.hidden = !visible; disclosures.delete(region); } };
+  if (animation) animation.finished.then(done, () => {}); else done();
+}

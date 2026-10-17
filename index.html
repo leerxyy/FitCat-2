@@ -15,11 +15,12 @@
   <link rel="stylesheet" href="styles/base.css">
   <link rel="stylesheet" href="styles/components.css">
   <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/glass.css">
   <link rel="stylesheet" href="styles/motion.css">
   <script type="module" src="js/app.js"></script>
 </head>
 <body data-screen="setupPage">
-  <div class="ambient-light" aria-hidden="true"></div>
+  <div class="ambient-light" id="ambientLight" aria-hidden="true"><div class="ambient-plane ambient-far"></div><div class="ambient-plane ambient-near"></div></div>
   <div class="app-root">
     <div id="setupPage" data-screen-view="" class="screen onboarding">
   <div class="onboarding-heading"><a class="brand" href="./" aria-label="FitCat"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="34" height="34"><span>Fit<span class="brand-accent">Cat</span></span></a><p data-i18n="setup_subtitle">Настроим дневник под твои цели</p></div>
@@ -72,7 +73,7 @@
         <div class="calorie-summary" id="progressBars">
           <div class="calorie-side"><span data-i18n="eaten">Съедено</span><strong id="caloriesEaten">0</strong><span data-i18n="kcal">ккал</span></div>
           <div class="calorie-ring">
-            <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-value" id="calorieRing" cx="90" cy="90" r="78" pathLength="100"/></svg>
+            <svg viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#49e6f4"/><stop offset="55%" stop-color="#16cff3"/><stop offset="100%" stop-color="#08bce6"/></linearGradient></defs><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-value" id="calorieRing" cx="90" cy="90" r="78" pathLength="100"/></svg>
             <div class="ring-content"><strong id="caloriesRemaining">0</strong><span id="remainingLabel" data-i18n="remaining">ккал осталось</span></div>
           </div>
           <div class="calorie-side"><span data-i18n="target">Цель</span><strong id="caloriesTarget">0</strong><span data-i18n="kcal">ккал</span></div>
