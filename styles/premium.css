@@ -8,8 +8,10 @@
 .nutrition-switch { margin-top: 24px; }
 .nutrition-switch > .pro-entry { min-height: 48px; padding-top: 14px; }
 .nutrition-switch .pro-feature-badge { top: -9px; right: 2px; min-width: 43px; padding-inline: 5px; font-size: 8px; }
-.smart-water-conditions { display: inline-flex; align-items: center; min-height: 40px; padding: 5px 0; text-align: left; color: inherit; font-size: 14px; }
-.smart-water-conditions .pro-feature-badge { top: -8px; right: 0; }
+.smart-water-switch-row { position: relative; }
+.smart-water-conditions { position: static; display: inline-flex; align-items: center; min-height: 40px; padding: 5px 0; text-align: left; color: inherit; font-size: 14px; }
+.smart-water-conditions:active:not(:disabled) { transform: none; }
+.smart-water-conditions .pro-feature-badge { top: -9px; right: 16px; }
 .template-allowance { margin: 8px 0 18px; color: var(--muted); font-size: 12px; }
 #saveTemplateButton { margin-bottom: 10px; }
 .macro-history-access { display: flex; align-items: center; min-height: 44px; width: 100%; padding: 11px 14px; margin: 13px 0 14px; border: 1px solid #8dbfe333; border-radius: 14px; background: #14304b40; color: #c4deef; text-align: left; font-size: 12px; }
