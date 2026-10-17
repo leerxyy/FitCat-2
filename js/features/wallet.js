@@ -1,9 +1,10 @@
 import { createWallet, WALLET_KEY } from '../core/wallet.js';
 import { formatPromo } from '../core/subscription.js';
-import { state } from '../core/store.js';
+import { state, proAccess } from '../core/store.js';
 import { t, number, locale } from '../core/i18n.js';
 import { $, onAction, openDialog, closeDialog, escapeHTML, icon, animateNumber, toast } from '../ui/components.js';
 import { enter } from '../ui/motion.js';
+import { requirePro } from '../ui/premium.js';
 
 let wallet;
 let filter = 'all';
@@ -20,6 +21,7 @@ function showError(key = '') {
   if (key) $('walletPromoCode').setAttribute('aria-invalid', 'true'); else $('walletPromoCode').removeAttribute('aria-invalid');
 }
 function panel(name, animate = true) {
+  if (name === 'transfer' && !requirePro('transfers')) return false;
   currentPanel = name;
   for (const section of document.querySelectorAll('[data-wallet-panel]')) section.hidden = section.dataset.walletPanel !== name;
   const section = $('walletDialog').querySelector(`[data-wallet-panel="${name}"]`);
@@ -28,9 +30,11 @@ function panel(name, animate = true) {
   const heading = section.querySelector('h2');
   $('walletDialog').setAttribute('aria-labelledby', heading.id);
   heading.setAttribute('tabindex', '-1'); if ($('walletDialog').open) heading.focus({ preventScroll: true });
+  return true;
 }
 export function openWallet(name = 'overview') {
-  const show = () => { showError(); if (name === 'promo') $('walletPromoCode').value = ''; renderWallet(); panel(name, false); openDialog('walletDialog'); };
+  if (name === 'transfer' && !requirePro('transfers')) return;
+  const show = () => { showError(); if (name === 'promo') $('walletPromoCode').value = ''; renderWallet(); if (panel(name, false)) openDialog('walletDialog'); };
   const previous = $('subscriptionDialog');
   if (previous.open) { previous.addEventListener('close', show, { once: true }); closeDialog(previous.id); }
   else show();
@@ -43,6 +47,7 @@ export async function purchaseWithCoins(period, options) {
 }
 export function renderWallet() {
   if (!wallet) return;
+  if (currentPanel === 'transfer' && !proAccess()) panel('overview', false);
   let value;
   try { value = wallet.snapshot(); }
   catch {
@@ -93,6 +98,7 @@ export function initWallet(options = {}) {
   });
   $('walletTransferForm').addEventListener('submit', event => {
     event.preventDefault();
+    if (!requirePro('transfers')) return;
     if (!$('walletTransferForm').reportValidity()) return;
     const recipient = $('walletRecipient').value.trim(); const amount = Number($('walletTransferAmount').value);
     const message = recipient === state.uid ? 'own_id' : !/^\d{11}$/.test(recipient) ? 'invalid_id'
@@ -105,6 +111,7 @@ export function initWallet(options = {}) {
     try { await navigator.clipboard.writeText(state.uid); toast(t('copied')); } catch { toast(t('wallet_copy_id_hint')); }
   });
   document.addEventListener('fitcat:wallet', renderWallet);
+  document.addEventListener('fitcat:subscription', renderWallet);
   document.addEventListener('fitcat:language', renderWallet);
   document.addEventListener('fitcat:change', renderWallet);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) announce(); });

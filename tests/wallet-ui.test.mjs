@@ -30,10 +30,10 @@ test('retired promo forms preserve existing coins; receipt filters, checkout and
     await click('[data-action="walletOverview"]'); assert.match($('walletHistoryList').textContent,/Поступление/);
     await click('[data-wallet-filter="out"]'); assert.match($('walletHistoryList').textContent,/пока нет/);
     await click('[data-wallet-filter="all"]');
-    await click('[data-action="walletTransfer"]'); const rawBefore = env.localStorage.getItem(WALLET_KEY);
-    $('walletRecipient').value='81234567890'; $('walletTransferAmount').value='250'; submit($('walletTransferForm')); await tick();
-    assert.match($('walletTransferResult').textContent,/пока недоступны/); assert.equal(env.localStorage.getItem(WALLET_KEY),rawBefore);
-    await click('[data-wallet-panel="transfer"] [data-close="walletDialog"]');
+    await click('[data-action="walletTransfer"]');
+    assert.equal($('subscriptionDialog').open,true); assert.equal($('walletDialog').open,false);
+    assert.equal($('proFeatureTitle').textContent,'Отправить другу'); assert.equal(getWallet().snapshot().balance,99999);
+    await click('[data-subscription-panel="overview"] [data-close="subscriptionDialog"]');
     await click('#subscriptionBadge'); await click('#subscriptionPurchase');
     assert.equal(document.querySelector('[data-subscription-panel="checkout"]').hidden,false);
     assert.match($('checkoutPrice').textContent,/29/); assert.match($('checkoutAfter').textContent,/99.?970/);
@@ -43,6 +43,10 @@ test('retired promo forms preserve existing coins; receipt filters, checkout and
     assert.equal($('subscriptionBadge').classList.contains('is-pro'),false);
     await click('[data-subscription-panel="success"] [data-close="subscriptionDialog"]');
     assert.equal($('subscriptionBadge').classList.contains('is-pro'),true);
+    await click('#walletBadge'); await click('[data-action="walletTransfer"]'); const rawBefore = env.localStorage.getItem(WALLET_KEY);
+    $('walletRecipient').value='81234567890'; $('walletTransferAmount').value='250'; submit($('walletTransferForm')); await tick();
+    assert.match($('walletTransferResult').textContent,/пока недоступны/); assert.equal(env.localStorage.getItem(WALLET_KEY),rawBefore);
+    await click('[data-wallet-panel="transfer"] [data-close="walletDialog"]');
     await click('#walletBadge'); await click('[data-wallet-filter="out"]');
     assert.match($('walletHistoryList').textContent,/PRO\+/); assert.match($('walletHistoryList').textContent,/Списание/);
     assert.equal($('walletHistoryList').textContent.includes('99 999'),false);

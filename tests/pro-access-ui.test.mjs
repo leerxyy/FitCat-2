@@ -48,7 +48,10 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
     });
 
     await t.test('the floating badge and each macro tab open the existing subscription overview', async () => {
-      document.querySelector('[data-action="openSmartWater"] .pro-feature-text').click(); await tick();
+      assert.equal(document.querySelector('[data-action="openSmartWater"] .pro-feature-badge'), null);
+      await click('[data-action="openSmartWater"]');
+      assert.equal($('smartWaterModal').open, true); assert.equal($('subscriptionDialog').open, false);
+      await click('#smartWaterConditions .pro-feature-text');
       assert.equal($('subscriptionDialog').open, true); assert.equal($('smartWaterModal').open, false);
       assert.equal($('proFeatureTitle').textContent, 'Умная вода'); assert.match($('subscriptionPurchase').textContent, /Оформить/); await closeSubscription();
       await click('[data-tab="analytics"]');
@@ -96,16 +99,17 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
       assert.equal(state.water, 750);
     });
 
-    await t.test('expiry closes smart water, cancels a pending forecast and removes historical macro access', async () => {
+    await t.test('expiry keeps the base water screen, cancels a pending forecast and removes historical macro access', async () => {
       await click('[data-action="openSmartWater"]'); await click('[data-action="waterTemperatureMode"][data-mode="auto"]');
       navigator.onLine = true; navigator.geolocation = { getCurrentPosition(success) { success({ coords: { latitude: 55.16, longitude: 61.4 } }); } };
       await click('#weatherLocate'); navigator.onLine = false; assert.equal(weatherCalls, 1);
       now = getWallet().status().expiresAt; window.dispatchEvent(new Event('focus')); await tick(); await tick();
-      assert.equal(proAccess(), false); assert.equal($('smartWaterModal').open, false); assert.equal($('subscriptionDialog').open, true);
+      assert.equal(proAccess(), false); assert.equal($('smartWaterModal').open, true); assert.equal($('subscriptionDialog').open, false);
+      assert.equal($('smartWaterToggle').checked, false);
       assert.equal($('waterGoal').textContent, '1,82 л'); assert.ok(pastRow().querySelector('.history-macro-lock'));
       assert.equal(document.querySelector('[data-nutrition="kcal"]').classList.contains('active'), true);
       releaseWeather(); await tick(); await tick(); assert.equal(state.weather.daily, null); assert.equal(state.preferences.currentTemp, 27);
-      assert.equal(state.templates.length, 5); assert.equal(state.preferences.smartWaterEnabled, true); await closeSubscription();
+      assert.equal(state.templates.length, 5); assert.equal(state.preferences.smartWaterEnabled, true); await click('.smart-water-heading [data-action="closeSmartWater"]');
     });
 
     await t.test('saved templates remain usable after expiry, and new templates still require PRO', async () => {
@@ -117,7 +121,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
       assert.equal(proAccess(), true); assert.equal(getWallet().snapshot().balance, 42); assert.equal(state.templates.length, 5);
       await click('[data-subscription-panel="success"] [data-close="subscriptionDialog"]');
       state.preferences.lang = 'en'; document.dispatchEvent(new Event('fitcat:language')); await tick();
-      assert.match(document.querySelector('[data-action="openSmartWater"]').getAttribute('aria-label'), /Included in PRO/);
+      assert.match($('smartWaterConditions').getAttribute('aria-label'), /Included in PRO/);
       state.preferences.lang = 'cn'; document.dispatchEvent(new Event('fitcat:language')); await tick();
       assert.match($('templateAllowance').textContent, /不限/);
     });

@@ -8,7 +8,7 @@ import { initPreferences, renderPreferences } from './features/preferences.js';
 import { initProducts, renderProducts } from './features/products.js';
 import { initAnalytics, renderAnalytics, renderCharts } from './features/analytics.js';
 import { initFriends, queuePublish, loadFriends } from './services/friends.js';
-import { initGestures } from './features/gestures.js';
+import { initGestures, stopGestures } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
 import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
@@ -27,7 +27,7 @@ function checkAccess() {
   previousAccess = active;
   if (!active) {
     stopWeatherRequest();
-    if ($('smartWaterModal').open) document.dispatchEvent(new CustomEvent('fitcat:pro-request', { detail: 'smart-water' }));
+    stopGestures();
   }
   render(); queuePublish(); void ensureDailyWeather();
 }

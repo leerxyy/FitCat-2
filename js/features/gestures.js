@@ -4,6 +4,8 @@ import { $, onAction, toast, closeDialog } from '../ui/components.js';
 import { showTab, activeTab } from '../ui/navigation.js';
 import { addWater } from './diary.js';
 import { openScanner, stopScanner } from './products.js';
+import { proAccess } from '../core/store.js';
+import { requirePro } from '../ui/premium.js';
 
 let active = false;
 let starting = false;
@@ -36,22 +38,29 @@ export function stopGestures() {
 
 export async function toggleGestures() {
   if (active || starting) { stopGestures(); return; }
+  if (!requirePro('gestures')) return;
   if (!navigator.mediaDevices?.getUserMedia) { toast(t('camera_unavailable')); return; }
   stopScanner(); closeDialog('scannerModal');
   starting = true; const ticket = ++generation;
   try {
     const Hands = await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js', 'Hands');
     if (ticket !== generation) return;
+    if (!proAccess()) { stopGestures(); return; }
     const newModel = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}` });
     model = newModel;
     newModel.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: .7, minTrackingConfidence: .6 });
     newModel.onResults(processGestures);
     const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } });
-    if (ticket !== generation) { newStream.getTracks().forEach(track => track.stop()); return; }
+    if (ticket !== generation || !proAccess()) {
+      newStream.getTracks().forEach(track => track.stop());
+      if (ticket === generation) stopGestures();
+      return;
+    }
     stream = newStream;
     video = document.createElement('video'); video.muted = true; video.playsInline = true; video.hidden = true; video.srcObject = stream;
     document.body.append(video); await video.play();
     if (ticket !== generation) return;
+    if (!proAccess()) { stopGestures(); return; }
     cursor = document.createElement('div'); cursor.id = 'gesture-cursor'; cursor.hidden = true; document.body.append(cursor);
     active = true; starting = false; $('gestureToggleBtn').setAttribute('aria-pressed', 'true'); toast(t('gesture_on'));
     const loop = async () => {

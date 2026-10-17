@@ -53,7 +53,7 @@ export function renderSubscription() {
   $('proFeatureNotice').hidden = !requestedFeature || status.active;
   if (requestedFeature) {
     $('proFeatureTitle').textContent = t('pro_feature_' + requestedFeature);
-    $('proFeatureDescription').textContent = t({ 'smart-water': 'pro_water_detail', 'macro-history': 'pro_macros_detail', templates: 'pro_templates_detail' }[requestedFeature]);
+    $('proFeatureDescription').textContent = t({ 'smart-water': 'pro_water_detail', 'macro-history': 'pro_macros_detail', templates: 'pro_templates_detail', gestures: 'pro_gestures_detail', transfers: 'pro_transfers_detail' }[requestedFeature]);
   }
   const badge = $('subscriptionBadge');
   // Reveal the new header status after the congratulations window closes.
@@ -103,7 +103,7 @@ function refresh() {
 
 function openSubscription(feature = '') {
   const token = ++openRequest;
-  requestedFeature = ['smart-water', 'macro-history', 'templates'].includes(feature) ? feature : '';
+  requestedFeature = ['smart-water', 'macro-history', 'templates', 'gestures', 'transfers'].includes(feature) ? feature : '';
   refresh(); showError(); setPanel('overview', false);
   const show = () => { if (token === openRequest) openDialog('subscriptionDialog'); };
   const previous = [...document.querySelectorAll('dialog[open]')].reverse().find(dialog => dialog.id !== 'subscriptionDialog');
