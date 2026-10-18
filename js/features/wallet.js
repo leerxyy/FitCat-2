@@ -25,7 +25,7 @@ function panel(name, animate = true) {
   currentPanel = name;
   for (const section of document.querySelectorAll('[data-wallet-panel]')) section.hidden = section.dataset.walletPanel !== name;
   const section = $('walletDialog').querySelector(`[data-wallet-panel="${name}"]`);
-  if (animate) enter(section, { y: 9, duration: 360 });
+  if (animate) enter(section, { y: 9 });
   $('walletDialog').scrollTop = 0;
   const heading = section.querySelector('h2');
   $('walletDialog').setAttribute('aria-labelledby', heading.id);

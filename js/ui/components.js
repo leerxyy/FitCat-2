@@ -1,6 +1,7 @@
 import { persist } from '../core/store.js';
 import { t, number } from '../core/i18n.js';
 import { tweenValue, enter, exitDialog, cancelDialogExit } from './motion.js';
+import { initSheetGestures } from './sheets.js';
 export { reducedMotion } from './motion.js';
 
 export const $ = id => document.getElementById(id);
@@ -12,6 +13,7 @@ let toastTimer;
 export function onAction(name, handler) { actions.set(name, handler); }
 
 export function initActions() {
+  initSheetGestures(closeDialog);
   document.addEventListener('click', async event => {
     const close = event.target.closest('[data-close]');
     if (close) { closeDialog(close.dataset.close); return; }
@@ -32,10 +34,10 @@ export function initActions() {
   });
 }
 
-export function changed({ nutrition = false } = {}) {
+export function changed({ nutrition = false, afterDialog = '' } = {}) {
   try { persist({ nutrition }); }
   catch (error) { console.error(error); toast(t('save_error')); }
-  document.dispatchEvent(new CustomEvent('fitcat:change'));
+  document.dispatchEvent(new CustomEvent('fitcat:change', { detail: { afterDialog } }));
 }
 
 export function openDialog(id) {
@@ -45,20 +47,27 @@ export function openDialog(id) {
   if (dialog.open) return;
   if (typeof dialog.showModal === 'function') dialog.showModal();
   else dialog.setAttribute('open', '');
+  document.dispatchEvent(new CustomEvent('fitcat:dialogopen', { detail: { id } }));
   document.body.classList.add('dialog-open');
   const heading = $(dialog.getAttribute('aria-labelledby'));
   if (heading?.getAttribute('tabindex') === '-1') heading.focus({ preventScroll: true });
-  enter(dialog, { y: 24, duration: 340 });
+  enter(dialog, { y: 20 });
 }
 
-export function closeDialog(id) {
+export function afterDialogClose(id, run) {
+  const dialog = $(id);
+  if (dialog?.open) dialog.addEventListener('close', run, { once: true });
+  else run();
+}
+
+export function closeDialog(id, options) {
   const dialog = $(id);
   if (!dialog?.open) return;
   if (document.activeElement?.closest('dialog') === dialog) document.activeElement.blur?.();
   exitDialog(dialog, () => {
     if (typeof dialog.close === 'function') dialog.close();
     else { dialog.removeAttribute('open'); dialog.dispatchEvent(new Event('close')); }
-  });
+  }, options);
 }
 
 export function toast(message, action) {

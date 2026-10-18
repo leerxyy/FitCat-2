@@ -1,6 +1,6 @@
 import test, { beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { tweenValue, animateProgress, finishValueMotion, switchViews, exitDialog, cancelDialogExit, revealRegion } from '../js/ui/motion.js';
+import { tweenValue, animateProgress, finishValueMotion, switchViews, exitDialog, cancelDialogExit, revealRegion, batchMotion, waterFeedback } from '../js/ui/motion.js';
 import { initAmbient } from '../js/ui/ambient.js';
 
 let clock, frames, sequence, reduce, originals;
@@ -48,6 +48,23 @@ test('unrelated renders do not restart a number or progress animation', () => {
   step(200); const current = value; const frame = [...frames.keys()][0];
   tweenValue(node, 80, current => { value = current; }); assert.equal(value, current); assert.equal([...frames.keys()][0], frame);
   step(760); assert.equal(value, 80);
+});
+test('batched counters stay in step even when rendering advances the clock', () => {
+  const first = element(); const second = element(); let a, b;
+  batchMotion(() => {
+    tweenValue(first, 100, value => { a = value; }, { initial: 0 });
+    clock = 70;
+    tweenValue(second, 100, value => { b = value; }, { initial: 0 });
+  });
+  step(300); assert.equal(a, b); assert.ok(a > 0 && a < 100);
+  step(600); assert.equal(a, 100); assert.equal(b, 100);
+});
+test('rapid water taps share one light pass; later additions can start a fresh pass', async () => {
+  const wave = element(); waterFeedback(wave); waterFeedback(wave); waterFeedback(wave);
+  assert.equal(wave.animations.length, 1); wave.animations[0].finish(); await tick();
+  waterFeedback(wave); assert.equal(wave.animations.length, 2);
+  reduce = true; waterFeedback(element()); assert.equal(frames.size, 0);
+  reduce = false; const hidden = element(); hidden.getClientRects = () => []; waterFeedback(hidden); assert.equal(hidden.animations.length, 0);
 });
 test('ring and bar progress share a smooth update and stop at valid limits', () => {
   const ring = element(); const bar = element(); animateProgress(ring, .5, 'ring'); animateProgress(bar, .5);

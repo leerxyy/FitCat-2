@@ -1,6 +1,6 @@
 import { t, locale } from '../core/i18n.js';
 import { $, onAction } from './components.js';
-import { switchViews, enter } from './motion.js';
+import { switchViews, enter, MOTION } from './motion.js';
 
 const tabs = ['today', 'activity', 'analytics', 'friends'];
 const titles = ['tab_today', 'tab_activity', 'analytics', 'friends_title'];
@@ -22,7 +22,7 @@ export function showTab(tab) {
     if (i === index) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
   updateHeading();
-  if (didChange) enter($('pageTitle').parentElement, { y: 5, duration: 280 });
+  if (didChange) enter($('pageTitle').parentElement, { y: 4, duration: MOTION.screen });
   document.dispatchEvent(new CustomEvent('fitcat:tab', { detail: tabs[index] }));
 }
 
@@ -40,7 +40,7 @@ export function showScreen(id) {
   $('navDock').hidden = id !== 'mainPage';
   document.dispatchEvent(new CustomEvent('fitcat:screen', { detail: id }));
   const scroller = $('appScroller'); if (scroller) scroller.scrollTop = 0;
-  if (previous !== id) enter($(id), { y: 12, duration: 360 });
+  if (previous !== id) enter($(id), { y: 10, duration: MOTION.panel });
 }
 
 export function initNavigation() {

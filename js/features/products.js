@@ -4,11 +4,15 @@ import { loadScript, fetchJSON } from '../core/loader.js';
 import { $, icon, escapeHTML, safeImage, onAction, changed, openDialog, closeDialog, toast, confirmAction } from '../ui/components.js';
 import { showScreen } from '../ui/navigation.js';
 import { openFood, fillFoodForm } from './diary.js';
+import { play, MOTION } from '../ui/motion.js';
 
 let suggestions = [];
 let searchTimer;
 let searchController;
 let requestNumber = 0;
+let searchPending = false;
+let searchMessage = '';
+let suggestionMotion;
 let scannerToken = 0;
 let reader = null;
 let quagga = null;
@@ -28,9 +32,28 @@ export function productFromOFF(product) {
 
 function renderSuggestions() {
   const list = $('autocompleteList');
-  list.hidden = !suggestions.length;
+  const before = !list.hidden && list.getBoundingClientRect?.().height;
+  const focused = document.activeElement?.closest?.('.autocomplete-item')?.dataset.value;
+  suggestionMotion?.cancel();
+  list.hidden = !suggestions.length && !searchPending;
+  list.classList.toggle('search-loading', searchPending);
+  list.setAttribute('aria-busy', String(searchPending));
+  $('foodName').setAttribute('aria-busy', String(searchPending));
   $('foodName').setAttribute('aria-expanded', String(!list.hidden));
-  list.innerHTML = suggestions.map((product, index) => `<button type="button" class="autocomplete-item" data-action="chooseProduct" data-value="${index}">${icon(product.local ? 'template' : 'search')}<span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.brand || t(product.local ? 'local_product' : 'per_100g'))} · ${number(product.kcal)} ${t('kcal')}</small></span></button>`).join('');
+  $('searchStatus').textContent = searchMessage ? t(searchMessage) : '';
+  list.innerHTML = suggestions.map((product, index) => `<button type="button" class="autocomplete-item" data-action="chooseProduct" data-value="${index}">${icon(product.local ? 'template' : 'search')}<span><strong>${escapeHTML(product.name)}</strong><small>${escapeHTML(product.brand || t(product.local ? 'local_product' : 'per_100g'))} · ${number(product.kcal)} ${t('kcal')}</small></span></button>`).join('')
+    + (searchPending ? `<div class="search-skeleton" aria-hidden="true">${Array.from({ length: 3 }, () => '<div class="search-skeleton-row"><i></i><span><b></b><small></small></span></div>').join('')}</div>` : '');
+  if (focused != null) list.querySelector(`[data-value="${focused}"]`)?.focus({ preventScroll: true });
+  if (!list.hidden) {
+    const after = list.getBoundingClientRect?.().height;
+    const frames = before && after ? [{ height: `${before}px`, opacity: .75 }, { height: `${after}px`, opacity: 1 }] : [{ opacity: .6, transform: 'translateY(-3px)' }, { opacity: 1, transform: 'translateY(0)' }];
+    suggestionMotion = play(list, frames, { duration: MOTION.close });
+  }
+}
+
+function stopSearch() {
+  ++requestNumber; clearTimeout(searchTimer); searchController?.abort(); searchController = null;
+  searchPending = false; searchMessage = ''; suggestions = []; renderSuggestions();
 }
 
 async function searchProducts() {
@@ -38,26 +61,30 @@ async function searchProducts() {
   const request = ++requestNumber;
   searchController?.abort();
   clearTimeout(searchTimer);
-  $('searchStatus').textContent = '';
+  searchPending = false; searchMessage = '';
   if (query.length < 2) { suggestions = []; renderSuggestions(); return; }
   const local = state.products.filter(product => product.name.toLocaleLowerCase().includes(query.toLocaleLowerCase())).slice(0, 5).map(product => ({ ...product, local: true }));
   suggestions = local; renderSuggestions();
   if (!state.preferences.smartSearchEnabled) return;
-  $('searchStatus').textContent = t('searching');
+  if (navigator.onLine === false) { searchMessage = 'network_error'; renderSuggestions(); return; }
+  searchPending = true; searchMessage = 'searching'; renderSuggestions();
   searchTimer = setTimeout(async () => {
-    searchController = new AbortController();
+    if (request !== requestNumber || !$('foodEntryModal').open) return;
+    const controller = new AbortController(); searchController = controller;
     const url = new URL('https://world.openfoodfacts.org/cgi/search.pl');
     url.search = new URLSearchParams({ search_terms: query, search_simple: '1', action: 'process', json: '1', page_size: String(state.preferences.smartSearchResults), fields: 'product_name,brands,nutriments,image_front_small_url,image_small_url' });
     try {
-      const data = await fetchJSON(url, 12000, { signal: searchController.signal });
+      const data = await fetchJSON(url, 12000, { signal: controller.signal });
       if (request !== requestNumber) return;
       const products = (data.products || []).map(productFromOFF).filter(product => product.name);
       const names = new Set(local.map(product => product.name.toLocaleLowerCase()));
       suggestions = [...local, ...products.filter(product => !names.has(product.name.toLocaleLowerCase()))];
-      $('searchStatus').textContent = suggestions.length ? '' : t('product_not_found'); renderSuggestions();
+      searchPending = false; searchMessage = suggestions.length ? '' : 'product_not_found'; renderSuggestions();
     } catch (error) {
-      if (request !== requestNumber || error.name === 'AbortError') return;
-      suggestions = local; renderSuggestions(); $('searchStatus').textContent = t('network_error');
+      if (request !== requestNumber) return;
+      suggestions = local; searchPending = false; searchMessage = 'network_error'; renderSuggestions();
+    } finally {
+      if (request === requestNumber) searchController = null;
     }
   }, 400);
 }
@@ -129,13 +156,17 @@ export async function openScanner() {
 export function initProducts() {
   $('foodName').addEventListener('input', searchProducts);
   $('foodName').addEventListener('keydown', event => {
-    if (event.key === 'Escape') { $('autocompleteList').hidden = true; $('foodName').setAttribute('aria-expanded', 'false'); }
+    if (event.key === 'Escape') stopSearch();
     if (event.key === 'ArrowDown' && !$('autocompleteList').hidden) { event.preventDefault(); $('autocompleteList').querySelector('button')?.focus(); }
   });
   document.addEventListener('click', event => {
-    if (!event.target.closest('.with-autocomplete')) { $('autocompleteList').hidden = true; $('foodName').setAttribute('aria-expanded', 'false'); }
+    if (!event.target.closest('.with-autocomplete') && (!$('autocompleteList').hidden || searchPending)) stopSearch();
   });
-  $('foodEntryModal').addEventListener('close', () => { ++requestNumber; clearTimeout(searchTimer); searchController?.abort(); });
+  $('foodEntryModal').addEventListener('close', stopSearch);
+  document.addEventListener('fitcat:food-open', stopSearch);
+  document.addEventListener('fitcat:product-picked', stopSearch);
+  document.addEventListener('fitcat:language', renderSuggestions);
+  document.addEventListener('fitcat:change', () => { if (!state.preferences.smartSearchEnabled && searchPending) stopSearch(); });
   onAction('chooseProduct', button => {
     const product = suggestions[Number(button.dataset.value)]; if (product) { fillFoodForm(product); $('searchStatus').textContent = ''; }
   });

@@ -49,8 +49,8 @@
   .subscription-sheet, .wallet-sheet, .smart-water-sheet { --sheet-gap: max(env(safe-area-inset-top, 0px), calc(var(--visible-height, 100dvh) * .06)); position: absolute; inset: calc(var(--visible-top, 0px) + var(--sheet-gap)) 0 auto; height: calc(var(--visible-height, 100dvh) - var(--sheet-gap)); max-height: none; margin: 0 auto; }
 }
 .sheet::backdrop { background: rgb(2 7 13 / 68%); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
-.sheet > div:first-child:not(.card) { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 22px; }
-.sheet > div:first-child > h2 { flex: 1; }
+.sheet > div:first-of-type:not(.card) { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 22px; }
+.sheet > div:first-of-type > h2 { flex: 1; }
 .sheet .card > div:first-child { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
 .sheet .card > div:first-child > div { display: flex; align-items: center; }
 .sheet .card { padding: 17px; border-radius: 17px; background: var(--surface-input); }

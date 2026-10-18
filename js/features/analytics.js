@@ -4,7 +4,7 @@ import { t, locale, number } from '../core/i18n.js';
 import { loadScript } from '../core/loader.js';
 import { $, icon, escapeHTML, onAction, changed, confirmAction, promptValue, reducedMotion } from '../ui/components.js';
 import { activeTab } from '../ui/navigation.js';
-import { revealRegion } from '../ui/motion.js';
+import { revealRegion, MOTION } from '../ui/motion.js';
 import { requirePro } from '../ui/premium.js';
 
 let weightChart;
@@ -54,7 +54,7 @@ function emptyHistory() {
 
 function chartOptions() {
   return {
-    responsive: true, maintainAspectRatio: false, animation: { duration: reducedMotion() ? 0 : 760, easing: 'easeOutCubic' },
+    responsive: true, maintainAspectRatio: false, animation: { duration: reducedMotion() ? 0 : MOTION.value, easing: 'easeOutCubic' },
     plugins: { legend: { display: false }, tooltip: { backgroundColor: '#243342', padding: 10, cornerRadius: 9, displayColors: false } },
     scales: {
       x: { grid: { display: false }, ticks: { color: '#98A6B7', maxTicksLimit: 5, maxRotation: 0, font: { size: 10 } }, border: { display: false } },

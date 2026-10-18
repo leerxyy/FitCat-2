@@ -1,8 +1,8 @@
 import { state, targets, uid } from '../core/store.js';
 import { nutritionTotal, portion, clamp } from '../core/math.js';
 import { t, number } from '../core/i18n.js';
-import { $, icon, escapeHTML, safeImage, animateNumber, onAction, changed, openDialog, closeDialog, toast, confirmAction, promptValue } from '../ui/components.js';
-import { animateProgress, captureLayout, animateList, removeRow, toggleMeal } from '../ui/motion.js';
+import { $, icon, escapeHTML, safeImage, animateNumber, onAction, changed, openDialog, closeDialog, afterDialogClose, toast, confirmAction, promptValue } from '../ui/components.js';
+import { animateProgress, captureLayout, animateList, removeRow, toggleMeal, waterFeedback } from '../ui/motion.js';
 import { requireTemplateSlot } from '../ui/premium.js';
 
 const meals = ['breakfast', 'lunch', 'dinner', 'snack', 'other'];
@@ -88,6 +88,7 @@ export function defaultMeal() {
 }
 
 export function openFood(meal) {
+  document.dispatchEvent(new Event('fitcat:food-open'));
   editingFood = null; selectedImage = '';
   $('foodForm').reset();
   $('foodMeal').value = meals.includes(meal) && meal !== 'other' ? meal : defaultMeal();
@@ -100,6 +101,7 @@ export function openFood(meal) {
 }
 
 export function fillFoodForm(product) {
+  document.dispatchEvent(new Event('fitcat:product-picked'));
   $('foodName').value = product.name || '';
   for (const [field, key] of [['foodKcal100','kcal'], ['foodProt100','protein'], ['foodFat100','fat'], ['foodCarb100','carbs']]) {
     $(field).value = Math.round((Number(product[key]) || 0) * 10) / 10;
@@ -131,6 +133,7 @@ function updatePortionPreview() {
 
 function saveFood(event) {
   event.preventDefault();
+  if (!$('foodEntryModal').open || $('foodEntryModal').classList.contains('is-closing')) return;
   if (!$('foodForm').reportValidity()) return;
   const product = productFromForm();
   if (!product.name) { $('foodName').focus(); return; }
@@ -145,7 +148,9 @@ function saveFood(event) {
   if (existingIndex >= 0) state.foods[existingIndex] = food; else state.foods.push(food);
   revealFoodId = food.id;
   if (!state.products.some(item => item.name.toLocaleLowerCase() === product.name.toLocaleLowerCase())) state.products.push(product);
-  changed({ nutrition: true }); closeDialog('foodEntryModal'); toast(t('food_saved'));
+  changed({ nutrition: true, afterDialog: 'foodEntryModal' });
+  afterDialogClose('foodEntryModal', () => toast(t('food_saved')));
+  closeDialog('foodEntryModal');
  
 }
 
@@ -166,8 +171,7 @@ export function addWater(amount) {
   const previous = state.water;
   state.water = Math.max(0, state.water + amount);
   changed();
-  $('waterCard').classList.remove('just-added');
-  requestAnimationFrame(() => $('waterCard').classList.add('just-added'));
+  if (state.water > previous) waterFeedback($('waterRipple'));
   toast(t('water_added'), { label: t('undo'), run: () => { state.water = previous; changed(); } });
  
 }
@@ -198,8 +202,13 @@ export function initDiary() {
   onAction('addWater', button => addWater(Number(button.dataset.value)));
   onAction('openWater', () => { $('manualWaterInput').value = state.water; openDialog('waterEntryModal'); });
   $('waterForm').addEventListener('submit', event => {
-    event.preventDefault(); if (!$('waterForm').reportValidity()) return;
-    state.water = Math.max(0, Number($('manualWaterInput').value) || 0); changed(); closeDialog('waterEntryModal'); toast(t('saved'));
+    event.preventDefault();
+    if (!$('waterEntryModal').open || $('waterEntryModal').classList.contains('is-closing') || !$('waterForm').reportValidity()) return;
+    const previous = state.water;
+    state.water = Math.max(0, Number($('manualWaterInput').value) || 0);
+    changed({ afterDialog: 'waterEntryModal' });
+    afterDialogClose('waterEntryModal', () => { if (state.water > previous) waterFeedback($('waterRipple')); toast(t('saved')); });
+    closeDialog('waterEntryModal');
   });
   onAction('openMealTools', () => { renderTemplates(); openDialog('mealToolsModal'); });
   onAction('saveTemplate', async () => {

@@ -19,8 +19,10 @@ import { initWallet } from './features/wallet.js';
 import { ensureDailyWeather } from './features/weather.js';
 import { initSurfaces } from './ui/surfaces.js';
 import { stopWeatherRequest } from './features/weather.js';
+import { batchMotion } from './ui/motion.js';
 
 let previousAccess;
+let pendingRender;
 function checkAccess() {
   const active = proAccess();
   if (active === previousAccess) return;
@@ -33,8 +35,24 @@ function checkAccess() {
 }
 
 function render() {
-  renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
-  if (state.profile) { renderSummary(); renderFoods(); renderAnalytics(); if (activeTab === 2) renderCharts(); }
+  pendingRender?.(); pendingRender = null;
+  const scroller = $('appScroller'); const top = scroller?.scrollTop;
+  batchMotion(() => {
+    renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
+    if (state.profile) { renderSummary(); renderFoods(); renderAnalytics(); if (activeTab === 2) renderCharts(); }
+  });
+  if (scroller && Number.isFinite(top)) scroller.scrollTop = top;
+}
+
+function renderChange(event) {
+  pendingRender?.(); pendingRender = null;
+  const dialog = event.detail?.afterDialog && $(event.detail.afterDialog);
+  if (dialog?.open) {
+    const done = () => render();
+    dialog.addEventListener('close', done, { once: true });
+    pendingRender = () => dialog.removeEventListener('close', done);
+  } else render();
+  queuePublish(); void ensureDailyWeather();
 }
 
 function checkDay() {
@@ -52,7 +70,7 @@ function start() {
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
-  document.addEventListener('fitcat:change', () => { render(); queuePublish(); void ensureDailyWeather(); });
+  document.addEventListener('fitcat:change', renderChange);
   document.addEventListener('fitcat:subscription', checkAccess);
   document.addEventListener('fitcat:wallet', checkAccess);
   document.addEventListener('fitcat:language', () => {

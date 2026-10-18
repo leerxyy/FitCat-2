@@ -1,5 +1,8 @@
 // Shared timings keep numbers, progress, navigation and list changes in step.
 export const EASE = 'cubic-bezier(.22, 1, .36, 1)';
+export const MOTION = Object.freeze({ press: 140, screen: 280, panel: 300, close: 200, value: 600, list: 320 });
+let batchTime;
+const waterWaves = new WeakMap();
 const tweens = new WeakMap();
 const liveTweens = new Set();
 const exits = new WeakMap();
@@ -12,7 +15,12 @@ export function reducedMotion() {
   return Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 }
 
-export function tweenValue(element, target, render, { duration = 760, initial = target } = {}) {
+export function batchMotion(run) {
+  const previous = batchTime; batchTime = performance.now();
+  try { return run(); } finally { batchTime = previous; }
+}
+
+export function tweenValue(element, target, render, { duration = MOTION.value, initial = target } = {}) {
   if (!element) return;
   target = Number.isFinite(Number(target)) ? Number(target) : 0;
   const previous = tweens.get(element);
@@ -22,7 +30,7 @@ export function tweenValue(element, target, render, { duration = 760, initial = 
   const job = { current: from, target, render, frame: 0 };
   tweens.set(element, job);
   if (reducedMotion() || from === target) { job.current = target; render(target); return; }
-  const start = performance.now();
+  const start = batchTime ?? performance.now();
   render(from); liveTweens.add(job);
   const tick = now => {
     const progress = Math.max(0, Math.min(1, (now - start) / duration));
@@ -51,20 +59,35 @@ export function animateProgress(element, fraction, kind = 'bar') {
 export function play(element, keyframes, options = {}) {
   if (!element || reducedMotion() || typeof element.animate !== 'function') return null;
   try {
-    const animation = element.animate(keyframes, { duration: 340, easing: EASE, fill: 'none', ...options });
+    const animation = element.animate(keyframes, { duration: MOTION.panel, easing: EASE, fill: 'none', ...options });
     animation.finished.catch(() => {});
     return animation;
   } catch { return null; }
 }
 
-export function enter(element, { x = 0, y = 12, delay = 0, duration = 360 } = {}) {
+export function cancelEntrance(element) {
+  entrances.get(element)?.cancel(); entrances.delete(element);
+}
+
+function visualState(element, fallback) {
+  if (typeof globalThis.getComputedStyle !== 'function') return fallback;
+  const style = getComputedStyle(element);
+  return { opacity: style.opacity || fallback.opacity, transform: style.transform === 'none' ? 'translate3d(0, 0, 0)' : style.transform || fallback.transform };
+}
+
+export function enter(element, { x = 0, y = 10, delay = 0, duration = MOTION.panel } = {}) {
   if (!element) return;
-  entrances.get(element)?.cancel();
+  const previous = entrances.get(element);
+  const first = previous ? visualState(element, { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` }) : { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` };
+  cancelEntrance(element);
   const animation = play(element, [
-    { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` },
+    first,
     { opacity: 1, transform: 'translate3d(0, 0, 0)' },
   ], { duration, delay, fill: delay ? 'backwards' : 'none' });
-  if (animation) entrances.set(element, animation);
+  if (animation) {
+    entrances.set(element, animation);
+    animation.finished.then(() => { if (entrances.get(element) === animation) entrances.delete(element); }, () => {});
+  }
 }
 
 export function switchViews(views, index, direction = 1) {
@@ -77,9 +100,11 @@ export function switchViews(views, index, direction = 1) {
     if (i === index) view.removeAttribute('aria-hidden'); else view.setAttribute('aria-hidden', 'true');
   });
   if (!outgoing || outgoing === incoming || reducedMotion() || typeof incoming?.animate !== 'function') return;
+  const start = visualState(outgoing, { opacity: 1, transform: 'translateX(0)' });
+  cancelEntrance(outgoing);
   outgoing.hidden = false; outgoing.classList.add('view-leaving');
-  const leave = play(outgoing, [{ opacity: 1, transform: 'translateX(0)' }, { opacity: 0, transform: `translateX(${-direction * 14}px)` }], { duration: 190 });
-  enter(incoming, { x: direction * 18, y: 0, duration: 340 });
+  const leave = play(outgoing, [start, { opacity: 0, transform: `translateX(${-direction * 10}px)` }], { duration: MOTION.close });
+  enter(incoming, { x: direction * 14, y: 0, duration: MOTION.screen });
   const clean = () => { leave?.cancel(); outgoing.hidden = true; outgoing.classList.remove('view-leaving'); };
   tabTransition = clean;
   if (leave) leave.finished.then(() => { if (tabTransition === clean) { clean(); tabTransition = null; } }, () => {});
@@ -91,16 +116,33 @@ export function cancelDialogExit(dialog) {
   if (job) { exits.delete(dialog); job.cancel(); dialog.classList.remove('is-closing'); }
 }
 
-export function exitDialog(dialog, finish) {
+export function exitDialog(dialog, finish, { fromY = 0 } = {}) {
   if (exits.has(dialog)) return;
-  entrances.get(dialog)?.cancel();
-  const animation = play(dialog, [{ opacity: 1, transform: 'translateY(0) scale(1)' }, { opacity: 0, transform: 'translateY(18px) scale(.99)' }], { duration: 180, easing: 'cubic-bezier(.4, 0, 1, 1)' });
+  const start = fromY ? { opacity: 1, transform: `translateY(${fromY}px)` } : visualState(dialog, { opacity: 1, transform: 'translateY(0)' });
+  cancelEntrance(dialog);
+  const animation = play(dialog, [start, { opacity: 0, transform: `translateY(${Math.max(26, fromY + 50)}px)` }], { duration: MOTION.close, easing: 'cubic-bezier(.4, 0, 1, 1)' });
   if (!animation) { finish(); return; }
   dialog.classList.add('is-closing'); exits.set(dialog, animation);
   animation.finished.then(() => {
     if (exits.get(dialog) !== animation) return;
     exits.delete(dialog); dialog.classList.remove('is-closing'); finish();
   }, () => {});
+}
+
+export function waterFeedback(wave) {
+  if (!wave || reducedMotion() || globalThis.document?.hidden) return;
+  if (wave.getClientRects && !wave.getClientRects().length) return;
+  if (waterWaves.has(wave)) return;
+  const animation = play(wave, [
+    { transform: 'translateX(-110%)', opacity: 0 },
+    { transform: 'translateX(-25%)', opacity: .7, offset: .35 },
+    { transform: 'translateX(110%)', opacity: 0 },
+  ], { duration: MOTION.value + 80 });
+  if (animation) {
+    waterWaves.set(wave, animation);
+    const clear = () => { if (waterWaves.get(wave) === animation) waterWaves.delete(wave); };
+    animation.finished.then(clear, clear);
+  }
 }
 
 export function captureLayout(container) {
@@ -119,19 +161,19 @@ export function animateList(container, snapshot, highlightId = '') {
   const current = new Map(items.map(node => [node.dataset.motionKey, node.getBoundingClientRect()]));
   for (const node of items) {
     const key = node.dataset.motionKey; const before = snapshot.nodes.get(key); const after = current.get(key);
-    if (!before) { enter(node, { y: 10, duration: 400 }); continue; }
+    if (!before) { enter(node, { y: 10, duration: MOTION.list }); continue; }
     let x = before.left - after.left; let y = before.top - after.top;
     const parent = node.parentElement.closest('[data-motion-key]');
     if (parent && snapshot.nodes.has(parent.dataset.motionKey) && current.has(parent.dataset.motionKey)) {
       x -= snapshot.nodes.get(parent.dataset.motionKey).left - current.get(parent.dataset.motionKey).left;
       y -= snapshot.nodes.get(parent.dataset.motionKey).top - current.get(parent.dataset.motionKey).top;
     }
-    if (Math.abs(x) + Math.abs(y) > .5) play(node, [{ transform: `translate(${x}px, ${y}px)` }, { transform: 'translate(0, 0)' }], { duration: 400 });
-    if (node.dataset.foodId === highlightId) play(node, [{ backgroundColor: 'rgba(22,207,243,.13)' }, { backgroundColor: 'rgba(22,207,243,0)' }], { duration: 850 });
+    if (Math.abs(x) + Math.abs(y) > .5) play(node, [{ transform: `translate(${x}px, ${y}px)` }, { transform: 'translate(0, 0)' }], { duration: MOTION.list });
+    if (node.dataset.foodId === highlightId) play(node, [{ backgroundColor: 'rgba(22,207,243,.13)' }, { backgroundColor: 'rgba(22,207,243,0)' }], { duration: MOTION.value });
   }
   const height = container.getBoundingClientRect().height;
   if (Math.abs(snapshot.height - height) > 1) {
-    const animation = play(container, [{ height: `${snapshot.height}px`, overflow: 'clip' }, { height: `${height}px`, overflow: 'clip' }], { duration: 400 });
+    const animation = play(container, [{ height: `${snapshot.height}px`, overflow: 'clip' }, { height: `${height}px`, overflow: 'clip' }], { duration: MOTION.list });
     if (animation) heights.set(container, animation);
   }
 }
@@ -139,7 +181,7 @@ export function animateList(container, snapshot, highlightId = '') {
 export async function removeRow(row) {
   if (!row || typeof row.getBoundingClientRect !== 'function' || reducedMotion()) return;
   const height = row.getBoundingClientRect().height;
-  const animation = play(row, [{ opacity: 1, height: `${height}px`, paddingTop: '13px', paddingBottom: '13px', overflow: 'hidden' }, { opacity: 0, height: '0px', paddingTop: '0px', paddingBottom: '0px', borderTopWidth: '0px', overflow: 'hidden' }], { duration: 210, fill: 'forwards' });
+  const animation = play(row, [{ opacity: 1, height: `${height}px`, paddingTop: '13px', paddingBottom: '13px', overflow: 'hidden' }, { opacity: 0, height: '0px', paddingTop: '0px', paddingBottom: '0px', borderTopWidth: '0px', overflow: 'hidden' }], { duration: MOTION.close, fill: 'forwards' });
   if (!animation) return;
   row.classList.add('is-removing');
   try { await animation.finished; } catch { /* A later render may replace this row. */ }
@@ -152,7 +194,7 @@ export function toggleMeal(details) {
   const from = content.getBoundingClientRect?.().height || 0;
   previous?.animation?.cancel(); details.open = true; summary.setAttribute('aria-expanded', String(open));
   const to = open ? content.scrollHeight : 0;
-  const animation = play(content, [{ height: `${from}px`, opacity: open ? .5 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: open ? 1 : 0, overflow: 'hidden' }], { duration: 320 });
+  const animation = play(content, [{ height: `${from}px`, opacity: open ? .5 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: open ? 1 : 0, overflow: 'hidden' }], { duration: MOTION.panel });
   const job = { open, animation }; disclosures.set(details, job);
   const done = () => { if (disclosures.get(details) === job) { details.open = open; disclosures.delete(details); } };
   if (animation) animation.finished.then(done, () => {}); else done();
@@ -163,7 +205,7 @@ export function revealRegion(region, visible) {
   if (previous?.open === visible || (!previous && region.hidden === !visible)) return;
   previous?.animation?.cancel(); region.hidden = false;
   const to = visible ? region.scrollHeight : 0;
-  const animation = play(region, [{ height: `${from}px`, opacity: visible ? 0 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: visible ? 1 : 0, overflow: 'hidden' }], { duration: 300 });
+  const animation = play(region, [{ height: `${from}px`, opacity: visible ? 0 : 1, overflow: 'hidden' }, { height: `${to}px`, opacity: visible ? 1 : 0, overflow: 'hidden' }], { duration: MOTION.panel });
   const job = { open: visible, animation }; disclosures.set(region, job);
   const done = () => { if (disclosures.get(region) === job) { region.hidden = !visible; disclosures.delete(region); } };
   if (animation) animation.finished.then(done, () => {}); else done();

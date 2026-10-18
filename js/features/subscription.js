@@ -32,7 +32,7 @@ function setPanel(name, animate = true) {
   panel = name;
   for (const node of document.querySelectorAll('[data-subscription-panel]')) node.hidden = node.dataset.subscriptionPanel !== name;
   const destination = $('subscriptionDialog').querySelector(`[data-subscription-panel="${name}"]`);
-  if (animate) enter(destination, { y: 9, duration: 400 });
+  if (animate) enter(destination, { y: 9 });
   $('subscriptionDialog').scrollTop = 0;
   const heading = destination?.querySelector('h2');
   if (heading) { $('subscriptionDialog').setAttribute('aria-labelledby', heading.id); heading.setAttribute('tabindex', '-1'); if ($('subscriptionDialog').open) heading.focus({ preventScroll: true }); }
