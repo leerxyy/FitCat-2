@@ -1,11 +1,17 @@
 import { t, locale } from '../core/i18n.js';
 import { $, onAction } from './components.js';
 import { switchViews, enter, MOTION } from './motion.js';
+import { initNavLens } from './nav-lens.js';
+import { haptic } from './haptics.js';
 
 const tabs = ['today', 'activity', 'analytics', 'friends'];
 const titles = ['tab_today', 'tab_activity', 'analytics', 'friends_title'];
 const subtitles = ['', 'activity_subtitle', 'analytics_subtitle', 'friends_subtitle'];
 export let activeTab = 0;
+let lens;
+let start = null;
+
+export function resetNavigationGestures() { start = null; lens?.reset(); }
 
 export function showTab(tab) {
   const index = typeof tab === 'number' ? Math.max(0, Math.min(3, tab)) : tabs.indexOf(tab);
@@ -46,16 +52,22 @@ export function showScreen(id, { x = 0, y = 10, duration = MOTION.panel } = {}) 
 export function initNavigation() {
   onAction('tab', button => showTab(button.dataset.tab));
   onAction('screen', button => showScreen(button.dataset.screen));
-  let start = null;
+  lens = initNavLens($('bottomNav'), { getIndex: () => activeTab, onSelect: index => { haptic(); showTab(index); } });
   $('swipeContainer').addEventListener('touchstart', event => {
+    start = null;
+    if (event.touches?.length !== 1 || document.querySelector('dialog[open]')) return;
     if (event.target.closest('button, input, select, textarea, canvas, summary, [role="slider"]')) return;
-    const touch = event.changedTouches[0]; start = { x: touch.clientX, y: touch.clientY };
+    const touch = event.changedTouches[0]; start = { id: touch.identifier, x: touch.clientX, y: touch.clientY };
   }, { passive: true });
   $('swipeContainer').addEventListener('touchend', event => {
     if (!start || document.querySelector('dialog[open]')) { start = null; return; }
-    const touch = event.changedTouches[0]; const dx = touch.clientX - start.x; const dy = touch.clientY - start.y;
+    if (event.touches?.length) { start = null; return; }
+    const touch = Array.from(event.changedTouches).find(item => item.identifier === start.id);
+    if (!touch) { start = null; return; }
+    const dx = touch.clientX - start.x; const dy = touch.clientY - start.y;
     if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 1.6) showTab(activeTab + (dx < 0 ? 1 : -1));
     start = null;
   }, { passive: true });
+  $('swipeContainer').addEventListener('touchcancel', resetNavigationGestures, { passive: true });
   showTab(0);
 }
