@@ -1,4 +1,4 @@
-import { state, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../core/store.js';
+import { state, setProfile, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../core/store.js';
 import { t, locale, number } from '../core/i18n.js';
 import { localDate } from '../core/math.js';
 import { $, icon, initials, escapeHTML, onAction, changed, toast, confirmAction } from '../ui/components.js';
@@ -10,11 +10,45 @@ import { initPhotoEditor } from '../ui/photo-editor.js';
 const avatars = new WeakMap();
 let photoVersion = 0;
 let photoEditor;
+let feedbackTimer, profileChanged = false;
+const profileFields = { profileName: 'name', profileAge: 'age', profileHeight: 'height', profileWeight: 'weight', profileGender: 'gender', profileGoal: 'goal' };
+
+function profileStatus(key = 'profile_auto_hint') {
+  $('profileAutosave').dataset.state = key === 'save_error' ? 'error' : key === 'profile_auto_invalid' ? 'invalid' : 'saved';
+  $('profileAutosaveText').dataset.i18n = key; $('profileAutosaveText').textContent = t(key);
+}
+export function flushProfileFeedback() {
+  clearTimeout(feedbackTimer);
+  if (!profileChanged) return;
+  profileChanged = false;
+  document.dispatchEvent(new CustomEvent('fitcat:change'));
+}
+function saveProfileField(input, showInvalid = false) {
+  const key = profileFields[input?.id];
+  if (!key || !state.profile) return;
+  const raw = input.value.trim(); let value = raw, valid = Boolean(raw);
+  if (key === 'gender') valid = ['female', 'male'].includes(raw);
+  else if (key === 'goal') valid = ['lose', 'maintain', 'gain'].includes(raw);
+  else if (key !== 'name') {
+    value = Number(raw);
+    const [min, max, step] = { age: [10, 100, 1], height: [100, 250, 1], weight: [30, 500, .1] }[key];
+    valid = valid && Number.isFinite(value) && value >= min && value <= max && Math.abs(value / step - Math.round(value / step)) < 1e-7;
+  }
+  input.setAttribute('aria-invalid', String(!valid && showInvalid));
+  if (!valid) { if (showInvalid) profileStatus('profile_auto_invalid'); return; }
+  if (state.profile[key] === value) { if (showInvalid) profileStatus(); return; }
+  try {
+    setProfile({ ...state.profile, [key]: value });
+    profileStatus('profile_auto_saved'); renderIdentity();
+    profileChanged = true; clearTimeout(feedbackTimer); feedbackTimer = setTimeout(flushProfileFeedback, 180);
+  } catch (error) { console.error(error); profileStatus('save_error'); }
+}
 
 function renderAvatar(element, initialLabel = '', animate = false) {
+  const labelKey = state.photo ? '' : initialLabel;
   const previous = avatars.get(element);
-  if (previous?.photo === state.photo && previous?.initialLabel === initialLabel && element.children.length) return;
-  avatars.set(element, { photo: state.photo, initialLabel }); element.replaceChildren();
+  if (previous?.photo === state.photo && previous?.initialLabel === labelKey && element.children.length) return;
+  avatars.set(element, { photo: state.photo, initialLabel: labelKey }); element.replaceChildren();
   if (state.photo) {
     const image = document.createElement('img'); image.src = state.photo; image.alt = ''; element.append(image);
   } else if (initialLabel) {
@@ -50,11 +84,14 @@ function renderProfile() {
   setSegment('profileGender', state.profile.gender === 'male' ? 'male' : 'female');
   setSegment('profileGoal', ['lose', 'maintain', 'gain'].includes(state.profile.goal) ? state.profile.goal : 'lose');
   renderIdentity();
+  profileStatus();
+  for (const id of Object.keys(profileFields)) $(id).removeAttribute('aria-invalid');
   $('profileTitle').focus({ preventScroll: true });
   $('profileForm').querySelectorAll('.card').forEach((card, index) => enter(card, { y: 10, delay: index * 45, duration: MOTION.screen }));
 }
 
 function backToToday() {
+  flushProfileFeedback();
   document.activeElement?.blur?.();
   showTab('today'); showScreen('mainPage', { x: -28, y: 0, duration: MOTION.screen });
 }
@@ -103,7 +140,7 @@ export function initProfile() {
   } });
   $('photoCropModal').addEventListener('close', () => { photoVersion++; });
   for (const [name, target] of [['selectSetupGender', 'setupGender'], ['selectProfileGender', 'profileGender'], ['selectProfileGoal', 'profileGoal']]) {
-    onAction(name, button => setSegment(target, button.dataset.value));
+    onAction(name, button => { setSegment(target, button.dataset.value); if (target !== 'setupGender') { saveProfileField($(target)); flushProfileFeedback(); } });
   }
   $('setupForm').addEventListener('submit', event => {
     event.preventDefault();
@@ -115,11 +152,13 @@ export function initProfile() {
   });
   $('profileForm').addEventListener('submit', event => {
     event.preventDefault();
-    if (!$('profileForm').reportValidity()) return;
-    const profile = collectProfile('profile');
-    if (!profile.name) { $('profileName').focus(); return; }
-    state.profile = { ...state.profile, ...profile, goal: $('profileGoal').value };
-    changed(); renderIdentity(); backToToday(); toast(t('saved'));
+    for (const id of Object.keys(profileFields)) saveProfileField($(id), true);
+    flushProfileFeedback();
+  });
+  for (const eventName of ['input', 'change', 'focusout', 'compositionend']) $('profileForm').addEventListener(eventName, event => {
+    if (event.isComposing) return;
+    saveProfileField(event.target, eventName === 'focusout' || eventName === 'change');
+    if (eventName !== 'input') flushProfileFeedback();
   });
   onAction('showProfile', () => { if (state.profile) showScreen('profilePage', { x: 28, y: 0, duration: MOTION.screen }); });
   onAction('profileBackToToday', backToToday);
@@ -127,7 +166,7 @@ export function initProfile() {
   onAction('showPage', button => showScreen(button.dataset.value));
   document.addEventListener('fitcat:screen', event => {
     if (event.detail === 'profilePage') renderProfile();
-    else { photoVersion++; photoEditor.discard(); }
+    else { flushProfileFeedback(); photoVersion++; photoEditor.discard(); }
   });
   onAction('uploadPhoto', editPhoto);
   $('photoInput').addEventListener('change', event => { const file = event.target.files?.[0]; if (file) uploadPhoto(file); event.target.value = ''; });

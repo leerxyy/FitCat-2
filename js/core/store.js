@@ -141,6 +141,13 @@ export function persist({ nutrition = false } = {}) {
   storage.setItem('lastDate', state.lastDate || new Date().toDateString());
 }
 
+// Autosaving a profile field should write only the profile, not the entire diary.
+// Commit memory after the single storage write succeeds.
+export function setProfile(profile) {
+  storage.setItem(KEYS.profile, JSON.stringify(profile));
+  state.profile = profile;
+}
+
 function normalizePhotoEdit(value) {
   if (!value || typeof value.source !== 'string' || !/^data:image\/(jpeg|png|webp);base64,/.test(value.source)) return null;
   const frame = value.frame;
