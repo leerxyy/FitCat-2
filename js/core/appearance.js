@@ -1,4 +1,4 @@
-import { SOUND_DEFAULTS, SOUND_STYLES } from './sounds.js';
+import { SOUND_DEFAULTS, SOUND_STYLES, PREMIUM_SOUND_STYLES } from './sounds.js';
 
 export const APPEARANCE_KEY = 'fitcat_appearance_v1';
 export const APPEARANCE_DEFAULTS = Object.freeze({
@@ -52,6 +52,7 @@ export function effectiveAppearance(value, pro) {
   const result = normalizeAppearance(value);
   if (!pro && PREMIUM_THEMES.includes(result.theme)) Object.assign(result, { theme: 'ocean', accent: 'cyan', background: 'ocean' });
   if (!pro && PREMIUM_BACKGROUNDS.includes(result.background)) result.background = 'ocean';
+  if (!pro && PREMIUM_SOUND_STYLES.includes(result.soundStyle)) result.soundStyle = SOUND_DEFAULTS.soundStyle;
   return result;
 }
 export function appearanceTimings(value) {

@@ -1,5 +1,6 @@
-import { state } from '../core/store.js';
-import { createSoundPlayer, SOUND_STYLES } from '../core/sounds.js';
+import { state, proAccess } from '../core/store.js';
+import { effectiveAppearance } from '../core/appearance.js';
+import { createSoundPlayer, SOUND_STYLES, PREMIUM_SOUND_STYLES } from '../core/sounds.js';
 
 let current;
 export const soundSupported = () => Boolean(current?.player.supported());
@@ -13,7 +14,8 @@ export function initInterfaceAudio() {
   const doc = document, view = window, removers = [];
   const player = createSoundPlayer({
     AudioContext: view.AudioContext || view.webkitAudioContext,
-    fetch: (...args) => globalThis.fetch(...args), initial: state.appearance,
+    fetch: (...args) => globalThis.fetch(...args), initial: effectiveAppearance(state.appearance, proAccess()),
+    canUse: style => !PREMIUM_SOUND_STYLES.includes(style) || proAccess(),
     hidden: () => Boolean(doc.hidden),
     notify: detail => doc.dispatchEvent(new CustomEvent('fitcat:audio-status', { detail })),
   });

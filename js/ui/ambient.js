@@ -172,11 +172,15 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   const configure=event=>{
     const previous=settings;settings=normalizeAppearance(event.detail);
     const wasOn=previous.deviceTilt&&previous.parallax&&previous.depth>0;
+    const adopting=!previous.deviceTilt&&settings.deviceTilt&&manualIntent&&listening&&['waiting','active'].includes(phase);
     enabled=settings.deviceTilt;
     if(!settings.deviceTilt)manualIntent=false;
     if(!canRun()||!wantsTilt()){
       suspend();if(phase!=='unsupported')status('idle');if(canRun())schedule();return;
     }
+    // Saving a successful opt-in adopts its existing connection. Restarting
+    // here would probe permission again while still waiting for the first data.
+    if(adopting){manualIntent=false;schedule();return;}
     if(!wasOn){suspend();status('waiting');restore();}
     else if(!listening)restore();
     schedule();

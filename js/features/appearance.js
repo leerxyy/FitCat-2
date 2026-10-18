@@ -8,7 +8,7 @@ import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { haptic } from '../ui/haptics.js';
 import { requestDeviceTilt, disableDeviceTilt, deviceTiltStatus } from '../ui/ambient.js';
-import { SOUND_STYLES } from '../core/sounds.js';
+import { SOUND_STYLES, PREMIUM_SOUND_STYLES } from '../core/sounds.js';
 import { soundSupported, playInterfaceSound, stopSoundPreview, preloadSoundChoices } from '../ui/sounds.js';
 
 let currentTab = 'style', saveError = false, tiltPending = false;
@@ -89,6 +89,7 @@ function renderSounds(settings=effective()) {
     button.setAttribute('aria-label',`${t('appearance_sound_listen')}: ${t('appearance_sound_'+button.dataset.value)}`);
   }
   $('appearanceSoundVolume').disabled=!supported;
+  $('appearanceSoundProNotice').hidden=proAccess()||!PREMIUM_SOUND_STYLES.includes(state.appearance.soundStyle)||state.appearance.soundStyle===settings.soundStyle;
   const key=!supported?'appearance_sound_unsupported':audioStatus.state==='unavailable'?'appearance_sound_error':settings.soundVolume===0?'appearance_sound_muted':audioStatus.state==='playing'?'appearance_sound_playing':'appearance_sound_preview_hint';
   setText($('appearanceSoundStatus'),t(key)+(key==='appearance_sound_playing'?`: ${t('appearance_sound_'+audioStatus.style)}`:''));
 }
@@ -149,6 +150,7 @@ function choose(kind,value){
   const choices={accent:Object.keys(ACCENTS),background:BACKGROUNDS,effect:EFFECTS,motion:motions,soundStyle:SOUND_STYLES};
   if(!choices[kind]?.includes(value))return;
   if(kind==='background'&&PREMIUM_BACKGROUNDS.includes(value)&&!requirePro('appearance'))return;
+  if(kind==='soundStyle'&&PREMIUM_SOUND_STYLES.includes(value)&&!requirePro('sounds'))return;
   const saved=update({[kind]:value,...(['accent','background'].includes(kind)?{theme:'custom'}:{})});
   if(kind==='soundStyle'&&saved!==false)void playInterfaceSound({style:value,preview:true});
 }
