@@ -48,7 +48,7 @@ test('automatic weather remains fixed for the day, handles offline use and respe
     await t.test('reopening, background return and reload keep the day goal without new requests', async () => {
       dailyTemperature = 10;
       await ensureDailyWeather(); document.dispatchEvent(new Event('visibilitychange')); await tick();
-      await click('.smart-water-done button'); await click('[data-action="openSmartWater"]');
+      await click('#smartWaterModal [data-sheet-handle]'); await click('[data-action="openSmartWater"]');
       loadState(env.localStorage); renderPreferences(); await ensureDailyWeather();
       assert.equal(forecastCalls, 1); assert.equal(geoCalls, 1); assert.equal(state.preferences.currentTemp, 27);
       assert.equal(targets().water, 2370); assert.match($('weatherStatus').textContent, /зафиксирована/);

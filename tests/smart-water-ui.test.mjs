@@ -39,7 +39,7 @@ test('redesigned smart water keeps saved conditions, accurate contributions and 
       assert.equal($('smartWaterTempRow').hidden,true);assert.equal($('smartWaterStepsRow').hidden,true);
       assert.equal($('smartWaterWorkoutRow').hidden,false);assert.equal($('smartWaterGoal').textContent,'2,07');
       assert.equal(state.preferences.currentTemp,40);assert.equal(state.preferences.currentSteps,20000);
-      await click('.smart-water-done [data-action="closeSmartWater"]');assert.equal($('smartWaterModal').open,false);
+      await click('#smartWaterModal [data-sheet-handle]');assert.equal($('smartWaterModal').open,false);
       loadState(env.localStorage);renderPreferences();await click('[data-action="openSmartWater"]');await input('smartWaterToggle',true,'change');
       assert.equal($('smartWaterGoal').textContent,'2,87');assert.equal($('tempSlider').value,'40');assert.equal($('stepsSlider').value,'20000');
     });

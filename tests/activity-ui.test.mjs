@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupDOM, tick } from './dom.mjs';
 
-test('redesigned rhythm and workout controls keep staged activity, saved training and goal adjustments consistent', async t => {
+test('redesigned rhythm and workout controls keep autosaved activity, saved training and goal adjustments consistent', async t => {
   const env = setupDOM({ fitnessProfile: JSON.stringify({ name: 'Тест', age: 20, gender: 'male', height: 180, weight: 80, goal: 'maintain' }), lastDate: new Date().toDateString(), workoutIntensity: 'moderate' });
   const $ = id => document.getElementById(id);
   const click = async selector => { const node = document.querySelector(selector); assert.ok(node, selector); node.click(); await tick(); };
@@ -11,19 +11,20 @@ test('redesigned rhythm and workout controls keep staged activity, saved trainin
     await import('../js/app.js');
     const { state, rollDay } = await import('../js/core/store.js');
     const { changed } = await import('../js/ui/components.js');
-    await t.test('a rhythm choice has one selected state and is stored only after Apply', async () => {
+    await t.test('a rhythm choice immediately persists and updates goals without Apply', async () => {
       await click('[data-tab="activity"]');
       assert.equal($('activityRhythmTitle').textContent, 'Твой ритм дня');
       assert.equal($('activityLevelMeter').dataset.level, '2');
       await click('[data-activity="1.55"] .activity-choice-copy');
-      assert.equal(state.preferences.dailyActivity, 1.375);
+      assert.equal(state.preferences.dailyActivity, 1.55);
       assert.equal(document.querySelectorAll('.activity-daily-item.selected').length, 1);
       assert.equal(document.querySelector('[data-activity="1.55"]').getAttribute('aria-pressed'), 'true');
       assert.equal($('activityLevelMeter').dataset.level, '3');
-      await click('[data-action="applyDailyActivity"]');
+      assert.equal(document.querySelector('[data-action="applyDailyActivity"]'), null);
       assert.equal(env.localStorage.getItem('dailyActivity'), '1.55'); assert.equal($('caloriesTarget').dataset.value, '2961');
       await click('[data-activity="1.725"]'); await click('[data-tab="today"]'); await click('[data-tab="activity"]');
-      assert.equal($('activityLevelMeter').dataset.level, '3'); assert.equal(document.querySelector('[data-activity="1.55"]').getAttribute('aria-pressed'), 'true');
+      assert.equal($('activityLevelMeter').dataset.level, '4'); assert.equal(document.querySelector('[data-activity="1.725"]').getAttribute('aria-pressed'), 'true');
+      assert.equal(env.localStorage.getItem('dailyActivity'), '1.725'); await click('[data-activity="1.55"]');
     });
     await t.test('the page switch opens the free workout sheet and all intensity settings update both goals exactly once', async () => {
       const base = Number($('caloriesTarget').dataset.value);
@@ -39,7 +40,7 @@ test('redesigned rhythm and workout controls keep staged activity, saved trainin
         assert.equal(Number($('caloriesTarget').dataset.value), base + extra);
         assert.equal($('activityWorkoutToggle').checked, true);
       }
-      await click('[data-value="moderate"].workout-option'); await click('[data-close="workoutModal"]');
+      await click('[data-value="moderate"].workout-option'); await click('#workoutModal [data-sheet-handle]');
       assert.equal($('workoutModal').open, false); assert.equal(state.preferences.workoutIntensity, 'moderate');
     });
     await t.test('turning training off restores the base goal and retains intensity across closing and reopening', async () => {

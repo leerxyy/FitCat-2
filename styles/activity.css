@@ -29,9 +29,7 @@
 .activity-workout-entry small { display: block; font-size: 11px; line-height: 1.5; color: var(--muted); margin-top: 4px; }
 .workout-entry-chevron { width: 16px; height: 16px; color: #86a7bc; }
 .activity-workout-card.is-enabled { border-color: #48c5df50; }
-.activity-apply { padding: 2px 3px 0; }.activity-apply .btn-primary { gap: 10px; min-height: 50px; border-radius: 17px; }
-.activity-apply .btn-primary .icon { width: 23px; height: 23px; }
-.activity-apply > p { color: #8da8be; font-size: 10px; text-align: center; line-height: 1.6; margin: 9px 7px 0; }
+.activity-auto-hint { display: flex; justify-content: center; align-items: center; gap: 6px; color: #8da8be; font-size: 10px; text-align: center; line-height: 1.6; margin: 2px 7px 0; }.activity-auto-hint > .icon { width: 15px; height: 15px; flex-shrink: 0; color: #58cbe0; }
 
 .workout-sheet { height: min(calc(var(--visible-height, 100dvh) * .9), 790px); padding: 13px 18px max(20px, env(safe-area-inset-bottom, 0px)); }
 #workoutModal > .workout-content { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 16px; margin: 0; min-height: calc(100% - 28px); }
@@ -58,7 +56,6 @@
 .workout-adjustment-grid > div { display: flex; align-items: center; gap: 10px; min-width: 0; }.workout-adjustment-grid > div + div { padding-left: 13px; border-left: 1px solid #48bad14f; }
 .workout-adjustment-grid .choice-icon { width: 40px; height: 46px; color: #7bdff4; }
 .workout-adjustment-grid small { display: block; font-size: 11px; color: #9bb8cc; }.workout-adjustment-grid strong { display: block; font-size: 25px; color: #3edcf2; font-weight: 680; letter-spacing: -.025em; line-height: 1.3; font-variant-numeric: tabular-nums; }
-.workout-done { margin-top: auto; padding-top: 1px; }.workout-done .btn-primary { min-height: 49px; border-radius: 18px; }
 
 /* A transform-only sweep with a long calm interval, only on selected choices. */
 .selection-glint { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; border-radius: inherit; }

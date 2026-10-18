@@ -63,7 +63,7 @@ test('the real app modules load old data and wire diary, water, language, profil
       $('appScroller').scrollTop = 700;
       await click('[data-action="tab"][data-tab="activity"]'); assert.equal($('activityPage').hidden, false); assert.equal($('todayPage').hidden, true);
       assert.equal($('appScroller').scrollTop, 0); assert.equal($('navDock').hidden, false);
-      await click('[data-action="selectDailyActivity"][data-activity="1.55"]'); await click('[data-action="applyDailyActivity"]');
+      await click('[data-action="selectDailyActivity"][data-activity="1.55"]');
       assert.equal(state.preferences.dailyActivity, 1.55); assert.equal($('caloriesTarget').dataset.value, '2961');
       $('workoutToggle').checked = true; $('workoutToggle').dispatchEvent(new Event('change')); await tick();
       assert.equal($('workoutSettings').hidden, false); assert.equal($('caloriesTarget').dataset.value, '3111');
