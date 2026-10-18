@@ -14,6 +14,7 @@ import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
 import { initOrientation } from './ui/orientation.js';
 import { initHaptics } from './ui/haptics.js';
+import { initInterfaceAudio, pauseInterfaceAudio } from './ui/sounds.js';
 import { initSubscription, renderSubscription } from './features/subscription.js';
 import { initWallet } from './features/wallet.js';
 import { ensureDailyWeather } from './features/weather.js';
@@ -69,7 +70,7 @@ function start() {
   loadState();
   previousAccess = proAccess();
   rollDay(); updateStreak();
-  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAppearance(); initAmbient(effectiveAppearance(state.appearance, proAccess())); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initInterfaceAudio(); initAppearance(); initAmbient(effectiveAppearance(state.appearance, proAccess())); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
@@ -80,9 +81,9 @@ function start() {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { flushAppearance(); resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { void pauseInterfaceAudio(); flushAppearance(); resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
   setInterval(checkDay, 60000);
-  window.addEventListener('pagehide', () => { flushAppearance(); resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
+  window.addEventListener('pagehide', () => { void pauseInterfaceAudio(); flushAppearance(); resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();
   void ensureDailyWeather();
   Promise.resolve(viewportReady).then(() => document.dispatchEvent(new Event('fitcat:ready')));

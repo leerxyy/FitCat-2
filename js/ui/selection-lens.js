@@ -167,7 +167,10 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     reset(dragged);
     if (!commit) return;
     if (event.cancelable) event.preventDefault();
-    if (!buttons[destination].disabled && destination !== selectedIndex()) onSelect(destination);
+    if (!buttons[destination].disabled && destination !== selectedIndex()) {
+      onSelect(destination);
+      doc.dispatchEvent(new CustomEvent('fitcat:selection', { detail: { trusted: event.isTrusted === true } }));
+    }
     paint();
   }
   listen('pointerdown', event => {

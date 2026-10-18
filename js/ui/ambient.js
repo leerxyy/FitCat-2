@@ -208,6 +208,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   on(document,'pointerleave',()=>{if(phase!=='active'){pointerX=0;pointerY=0;schedule();}});
   on(document,'pointerup',firstGesture,{capture:true,passive:true});on(document,'click',firstGesture,{capture:true,passive:true});on(document,'keydown',firstGesture,{capture:true});
   on(document,'fitcat:appearance',configure);on(document,'fitcat:screen',syncPreview);
+  on(document,'fitcat:appearance-tab',syncPreview);
   on(document,'close',()=>{lastTime=null;schedule();},true);
   on(document,'visibilitychange',()=>visibility(Boolean(document.hidden)));
   on(view,'pagehide',()=>visibility(true));on(view,'pageshow',()=>visibility(Boolean(document.hidden)));

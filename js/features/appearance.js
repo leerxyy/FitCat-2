@@ -8,10 +8,13 @@ import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { haptic } from '../ui/haptics.js';
 import { requestDeviceTilt, disableDeviceTilt, deviceTiltStatus } from '../ui/ambient.js';
+import { SOUND_STYLES } from '../core/sounds.js';
+import { soundSupported, playInterfaceSound, stopSoundPreview, preloadSoundChoices } from '../ui/sounds.js';
 
 let currentTab = 'style', saveError = false, tiltPending = false;
 let tiltRequest = 0;
-const tabs = ['style', 'background', 'effects'], motions = ['calm', 'standard', 'expressive'];
+const tabs = ['style', 'background', 'effects', 'audio'], motions = ['calm', 'standard', 'expressive'];
+let audioStatus = { state: 'idle', style: 'glass' };
 const applied = new WeakMap();
 let draft = null, saveTimer = 0, liveFrame = null;
 const current = () => draft ?? state.appearance;
@@ -74,6 +77,21 @@ function renderTilt(settings=effective()){
   $('appearanceTiltStatus').dataset.state=status;
   setText($('appearanceTiltStatus'),t(key));
 }
+function renderSounds(settings=effective()) {
+  const supported=soundSupported();
+  $('appearanceSoundEnabled').disabled=!supported;
+  for(const card of $('appearanceAudioPanel').querySelectorAll('[data-sound-card]')) {
+    card.dataset.selected=String(card.dataset.soundCard===settings.soundStyle);
+    card.dataset.previewing=String(audioStatus.state==='playing'&&audioStatus.style===card.dataset.soundCard);
+  }
+  for(const button of $('appearanceAudioPanel').querySelectorAll('[data-audio-preview]')) {
+    button.disabled=!supported||settings.soundVolume===0;
+    button.setAttribute('aria-label',`${t('appearance_sound_listen')}: ${t('appearance_sound_'+button.dataset.value)}`);
+  }
+  $('appearanceSoundVolume').disabled=!supported;
+  const key=!supported?'appearance_sound_unsupported':audioStatus.state==='unavailable'?'appearance_sound_error':settings.soundVolume===0?'appearance_sound_muted':audioStatus.state==='playing'?'appearance_sound_playing':'appearance_sound_preview_hint';
+  setText($('appearanceSoundStatus'),t(key)+(key==='appearance_sound_playing'?`: ${t('appearance_sound_'+audioStatus.style)}`:''));
+}
 export function renderAppearance() {
   const settings=applyAppearance();
   // Hidden forms do not need their ranges, thumbnails or preview rerendered.
@@ -86,6 +104,7 @@ export function renderAppearance() {
   $('appearanceMotionNotice').hidden=!reducedMotion();
   $('appearanceProNotice').hidden=state.appearance.background===settings.background&&state.appearance.theme===settings.theme;
   renderTilt(settings);
+  renderSounds(settings);
   $('appearanceReset').disabled=isDefaultAppearance(current())&&!tiltPending;
   setSaveStatus();
   const control=$('appearanceMotionControl'), index=motions.indexOf(settings.motion);
@@ -127,10 +146,11 @@ function choose(kind,value){
     // Choosing a palette never silently resets the user's glass/blur sliders.
     update(Object.fromEntries(['theme','accent','background','effect'].map(key=>[key,preset[key]])));return;
   }
-  const choices={accent:Object.keys(ACCENTS),background:BACKGROUNDS,effect:EFFECTS,motion:motions};
+  const choices={accent:Object.keys(ACCENTS),background:BACKGROUNDS,effect:EFFECTS,motion:motions,soundStyle:SOUND_STYLES};
   if(!choices[kind]?.includes(value))return;
   if(kind==='background'&&PREMIUM_BACKGROUNDS.includes(value)&&!requirePro('appearance'))return;
-  update({[kind]:value,...(['accent','background'].includes(kind)?{theme:'custom'}:{})});
+  const saved=update({[kind]:value,...(['accent','background'].includes(kind)?{theme:'custom'}:{})});
+  if(kind==='soundStyle'&&saved!==false)void playInterfaceSound({style:value,preview:true});
 }
 function selectTab(value){
   if(!tabs.includes(value))return;
@@ -143,6 +163,9 @@ function selectTab(value){
     else panel.setAttribute('aria-hidden','true');
   }
   syncSelectionLens($('appearanceTabs'));
+  $('appearancePreview').hidden=value==='audio';
+  document.dispatchEvent(new CustomEvent('fitcat:appearance-tab',{detail:value}));
+  if(value==='audio')preloadSoundChoices();else stopSoundPreview();
 }
 export function initAppearance(){
   onAction('openAppearance',()=>showScreen('appearancePage',{x:24,y:0,duration:MOTION.screen}));
@@ -150,6 +173,7 @@ export function initAppearance(){
   onAction('appearanceTab',button=>selectTab(button.dataset.value));
   onAction('appearanceChoice',button=>choose(button.dataset.appearanceKind,button.dataset.value));
   onAction('resetAppearance',()=>{
+    stopSoundPreview();
     try{clearTimeout(saveTimer);cancelLiveFrame();setAppearance(APPEARANCE_DEFAULTS);draft=null;document.documentElement.dataset.appearanceAdjusting='off';tiltRequest++;tiltPending=false;disableDeviceTilt();saveError=false;renderAppearance();toast(t('appearance_reset_done'));}
     catch(error){console.error(error);saveError=true;setSaveStatus();}
   });
@@ -158,12 +182,18 @@ export function initAppearance(){
     if(input.dataset.appearanceRange){
       const key=input.dataset.appearanceRange,value=Number(input.value);
       if(typeof APPEARANCE_DEFAULTS[key]!=='number'||!Number.isFinite(value))return;
-      update({[key]:value,...(['transparency','glow','dimming','blur'].includes(key)?{theme:'custom'}:{})},name==='input'?input:null);
-      if(name==='change')flushAppearance();
+      const updated=update({[key]:value,...(['transparency','glow','dimming','blur'].includes(key)?{theme:'custom'}:{})},name==='input'?input:null);
+      if(name==='change'){
+        const saved=updated!==false&&flushAppearance();
+        if(key==='soundVolume'&&saved!==false&&current().soundVolume>0)void playInterfaceSound({preview:true});
+      }
     }else if(name==='change'&&input.dataset.appearanceToggle){
       const key=input.dataset.appearanceToggle;
       if(key==='deviceTilt'&&input.checked){void enableTilt();return;}
-      if(typeof APPEARANCE_DEFAULTS[key]==='boolean')update({[key]:input.checked});
+      if(typeof APPEARANCE_DEFAULTS[key]==='boolean'){
+        const saved=update({[key]:input.checked});
+        if(key==='soundEnabled'&&input.checked&&saved!==false)void playInterfaceSound();
+      }
     }
   });
   $('appearancePage').addEventListener('focusout',event=>{if(event.target.dataset.appearanceRange)flushAppearance();});
@@ -171,7 +201,7 @@ export function initAppearance(){
   initSelectionLens($('appearanceMotionControl'),{padding:4,getIndex:()=>motions.indexOf(effectiveAppearance(state.appearance,proAccess()).motion),onSelect:index=>{haptic();choose('motion',motions[index]);},isEnabled:()=>document.body.dataset.screen==='appearancePage'&&currentTab==='style'});
   $('appearanceTabs').addEventListener('keydown',event=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();
-    const index=event.key==='Home'?0:event.key==='End'?2:(tabs.indexOf(currentTab)+(event.key==='ArrowRight'?1:-1)+3)%3;
+    const index=event.key==='Home'?0:event.key==='End'?tabs.length-1:(tabs.indexOf(currentTab)+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;
     selectTab(tabs[index]);$('appearance'+tabs[index][0].toUpperCase()+tabs[index].slice(1)+'Tab').focus({preventScroll:true});
   });
   async function enableTilt(){
@@ -184,10 +214,15 @@ export function initAppearance(){
     finally{if(request===tiltRequest){tiltPending=false;renderTilt();}}
   }
   onAction('appearanceTilt',enableTilt);
+  onAction('appearanceSoundPreview',button=>{ if(SOUND_STYLES.includes(button.dataset.value))void playInterfaceSound({style:button.dataset.value,preview:true}); });
+  document.addEventListener('fitcat:audio-status',event=>{
+    audioStatus=event.detail;
+    if(!$('appearancePage').hidden&&currentTab==='audio')renderSounds();
+  });
   const motionPreference=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const motionChanged=()=>{ $('appearanceMotionNotice').hidden=!reducedMotion(); };
   if(motionPreference?.addEventListener)motionPreference.addEventListener('change',motionChanged);
   document.addEventListener('fitcat:tilt-status',()=>{if(!$('appearancePage').hidden)renderTilt();});
-  document.addEventListener('fitcat:screen',event=>{if(event.detail==='appearancePage'){renderAppearance();renderPremium();$('appearanceTitle').focus({preventScroll:true});}else flushAppearance();});
+  document.addEventListener('fitcat:screen',event=>{if(event.detail==='appearancePage'){renderAppearance();renderPremium();$('appearanceTitle').focus({preventScroll:true});}else{flushAppearance();stopSoundPreview();}});
   renderAppearance();selectTab('style');
 }
