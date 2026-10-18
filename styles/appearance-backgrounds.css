@@ -1,0 +1,24 @@
+/* The preview uses small thumbnails; only the selected wallpaper uses full size. */
+:root[data-background="cosmos"]{--wallpaper:url('../assets/backgrounds/cosmos.webp')}
+.appearance-thumb[data-background="cosmos"]{--wallpaper:url('../assets/backgrounds/cosmos-thumb.webp')}
+:root[data-background="aurora"]{--wallpaper:url('../assets/backgrounds/aurora.webp')}
+.appearance-thumb[data-background="aurora"]{--wallpaper:url('../assets/backgrounds/aurora-thumb.webp')}
+:root[data-background="forest"]{--wallpaper:url('../assets/backgrounds/forest.webp')}
+.appearance-thumb[data-background="forest"]{--wallpaper:url('../assets/backgrounds/forest-thumb.webp')}
+:root[data-background="dunes"]{--wallpaper:url('../assets/backgrounds/dunes.webp')}
+.appearance-thumb[data-background="dunes"]{--wallpaper:url('../assets/backgrounds/dunes-thumb.webp')}
+:root[data-background="coast"]{--wallpaper:url('../assets/backgrounds/coast.webp')}
+.appearance-thumb[data-background="coast"]{--wallpaper:url('../assets/backgrounds/coast-thumb.webp')}
+:root[data-background="glacier"]{--wallpaper:url('../assets/backgrounds/glacier.webp')}
+.appearance-thumb[data-background="glacier"]{--wallpaper:url('../assets/backgrounds/glacier-thumb.webp')}
+:root[data-background="mountains"]{--wallpaper:url('../assets/backgrounds/mountains.webp')}
+.appearance-thumb[data-background="mountains"]{--wallpaper:url('../assets/backgrounds/mountains-thumb.webp')}
+.appearance-thumb[data-theme="ocean"]{--wallpaper:radial-gradient(ellipse at 75% 0%,#08546e,transparent 70%),linear-gradient(145deg,#071623,#072331);--mini-accent:#16cff3}
+.appearance-thumb[data-theme="amethyst"]{--wallpaper:linear-gradient(145deg,#10192f,#403064 58%,#18172e);--mini-accent:#bda0ff}
+.appearance-thumb[data-theme="aurora"]{--wallpaper:url('../assets/backgrounds/aurora-thumb.webp');--mini-accent:#68e0d3}
+.appearance-thumb[data-theme="alpine"]{--wallpaper:url('../assets/backgrounds/glacier-thumb.webp');--mini-accent:#b6dfff}
+.appearance-thumb[data-theme="forest"]{--wallpaper:url('../assets/backgrounds/forest-thumb.webp');--mini-accent:#91e5bc}
+.appearance-thumb[data-theme="sunset"]{--wallpaper:url('../assets/backgrounds/dunes-thumb.webp');--mini-accent:#ffa49a}
+.appearance-thumb[data-theme="midnight"]{--wallpaper:url('../assets/backgrounds/cosmos-thumb.webp');--mini-accent:#e0e7ff}
+.appearance-thumb[data-theme="coast"]{--wallpaper:url('../assets/backgrounds/coast-thumb.webp');--mini-accent:#70b7ff}
+.appearance-thumb[data-theme="summit"]{--wallpaper:url('../assets/backgrounds/mountains-thumb.webp');--mini-accent:#a5a7ff}

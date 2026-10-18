@@ -1,10 +1,12 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.15.0-r1';
+const VERSION = '3.16.0-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
-  'styles/appearance.css', 'js/core/appearance.js', 'js/core/appearance-copy.js', 'js/core/appearance-tones.js', 'js/features/appearance.js', 'assets/backgrounds/mountains.png',
+  'styles/appearance.css', 'js/core/appearance.js', 'js/core/appearance-copy.js', 'js/core/appearance-tones.js', 'js/features/appearance.js', 'styles/appearance-palette.css', 'styles/appearance-backgrounds.css',
+  'assets/backgrounds/aurora-thumb.webp', 'assets/backgrounds/aurora.webp', 'assets/backgrounds/coast-thumb.webp', 'assets/backgrounds/coast.webp', 'assets/backgrounds/cosmos-thumb.webp', 'assets/backgrounds/cosmos.webp', 'assets/backgrounds/dunes-thumb.webp', 'assets/backgrounds/dunes.webp', 'assets/backgrounds/forest-thumb.webp', 'assets/backgrounds/forest.webp', 'assets/backgrounds/glacier-thumb.webp', 'assets/backgrounds/glacier.webp', 'assets/backgrounds/mountains-thumb.webp', 'assets/backgrounds/mountains.webp',
+  'assets/effects/waves.svg', 'assets/effects/aurora-light.svg', 'assets/effects/iridescence.svg',
   'styles/selection-lens.css', 'js/ui/selection-lens.js',
   'styles/today.css', 'js/ui/nav-lens.js',
   'styles/settings.css', 'js/core/settings-copy.js',

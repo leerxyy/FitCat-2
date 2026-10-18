@@ -33,6 +33,13 @@ test('saving an appearance writes only its key and survives a complete reload',(
  for(const [key,value] of before)assert.equal(adapter.getItem(key),value,key);
  loadState(adapter);assert.equal(state.appearance.background,'mountains');assert.equal(state.appearance.glintSpeed,75);assert.equal(adapter.getItem('fitcat_wallet_v1'),'keep-wallet');
 });
+test('70% transparency and the tilt opt-in survive reload with all legacy appearance fields',()=>{
+ const adapter=storage({[APPEARANCE_KEY]:JSON.stringify({...APPEARANCE_DEFAULTS,transparency:70,background:'forest',deviceTilt:true})});
+ loadState(adapter);assert.equal(state.appearance.transparency,70);assert.equal(state.appearance.deviceTilt,true);assert.equal(state.appearance.background,'forest');
+ persist();loadState(adapter);assert.equal(state.appearance.transparency,70);
+ adapter.setItem(APPEARANCE_KEY,JSON.stringify({theme:'ocean',transparency:70,parallax:true}));loadState(adapter);
+ assert.equal(state.appearance.transparency,70);assert.equal(state.appearance.deviceTilt,false,'an old record must not silently opt in to sensors');
+});
 test('a failed write retains the last saved appearance in both memory and storage',()=>{
  const adapter=storage();loadState(adapter);setAppearance({...APPEARANCE_DEFAULTS,glow:50});const before=structuredClone(state.appearance),saved=adapter.getItem(APPEARANCE_KEY),write=adapter.setItem;
  adapter.setItem=(key,value)=>{if(key===APPEARANCE_KEY)throw new Error('quota');write(key,value);};
