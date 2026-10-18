@@ -1,9 +1,10 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.19.0-r1';
+const VERSION = '3.19.1-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
+  'js/ui/cosmetic-timeline.js', 'assets/profile-effects/stars-2.svg', 'assets/profile-effects/stars-3.svg', 'assets/profile-effects/stars-4.svg', 'assets/profile-effects/aurora-far.svg', 'assets/profile-effects/mist-far.svg',
   'js/core/profile-style.js', 'js/core/profile-style-copy.js', 'js/features/profile-style.js', 'styles/profile-style.css', 'assets/profile-covers/aurora-thumb.webp', 'assets/profile-covers/aurora.webp', 'assets/profile-covers/cosmos-thumb.webp', 'assets/profile-covers/cosmos.webp', 'assets/profile-covers/dunes-thumb.webp', 'assets/profile-covers/dunes.webp', 'assets/profile-covers/forest-thumb.webp', 'assets/profile-covers/forest.webp', 'assets/profile-covers/lake-thumb.webp', 'assets/profile-covers/lake.webp', 'assets/profile-covers/mist-thumb.webp', 'assets/profile-covers/mist.webp', 'assets/profile-covers/ocean-thumb.webp', 'assets/profile-covers/ocean.webp', 'assets/profile-covers/summits-thumb.webp', 'assets/profile-covers/summits.webp', 'assets/profile-effects/aurora.svg', 'assets/profile-effects/cosmos.svg', 'assets/profile-effects/mist.svg', 'assets/profile-effects/stars.svg',
   'js/core/sounds.js', 'js/ui/sounds.js',
   'assets/audio/suede.wav', 'assets/audio/felt.wav', 'assets/audio/silk.wav', 'assets/audio/warm.wav', 'assets/audio/tick.wav', 'assets/audio/graphite.wav', 'assets/audio/wood.wav', 'assets/audio/paper.wav', 'assets/audio/porcelain.wav', 'assets/audio/matte.wav', 'assets/audio/stone.wav', 'assets/audio/crystal.wav', 'assets/audio/frost.wav', 'assets/audio/thin.wav',

@@ -78,12 +78,30 @@ test('profile cosmetics integrate selection, autosave, PRO+, photo identity and 
       await click('#frameChoice_orbit'); assert.equal(state.profileStyle.frame, 'orbit'); assert.equal($('profileFrameStatus').dataset.error, 'false');
       await close('profileFrameModal');
     });
+    await t.test('reopening the frame picker aligns its native animations with the current shared phase', async () => {
+      const originalMedia = globalThis.matchMedia, animation = { animationName: 'profile-rim-turn', currentTime: 0 };
+      let reads = 0;
+      $('framePickerFrame').getAnimations = () => { reads++; return [animation]; };
+      globalThis.matchMedia = () => ({ matches: false });
+      try {
+        document.dispatchEvent(new Event('visibilitychange'));
+        await click('#profileFrameEdit'); const first = animation.currentTime; assert.ok(first > 0); assert.equal(reads, 1);
+        renderProfileStyle(); assert.equal(reads, 1, 'an ordinary render must not seek a running frame');
+        await close('profileFrameModal'); animation.currentTime = 0;
+        await click('#profileFrameEdit'); assert.equal(reads, 2); assert.ok(animation.currentTime >= first);
+        await close('profileFrameModal');
+      } finally { globalThis.matchMedia = originalMedia; delete $('framePickerFrame').getAnimations; }
+    });
     await t.test('only the visible hero runs, and all cosmetics sleep when hidden or reduced motion is enabled', async () => {
       const originalMedia = globalThis.matchMedia;
       globalThis.matchMedia = () => ({ matches: false });
       try {
         syncProfileStyleMotion(); assert.equal($('profileAvatarFrame').dataset.live, 'true'); assert.equal($('headerAvatarFrame').dataset.live, 'false');
         assert.equal($('profileCoverScene').dataset.live, 'true');
+        const animation = state.appearance.animation;
+        state.appearance.animation = false; document.dispatchEvent(new Event('fitcat:change'));
+        assert.equal(document.documentElement.dataset.backgroundAnimation, 'off'); assert.equal($('profileCoverScene').dataset.live, 'true');
+        state.appearance.animation = animation; document.dispatchEvent(new Event('fitcat:change'));
         await click('#profileCoverEdit'); assert.equal($('profileAvatarFrame').dataset.live, 'false');
         assert.equal($('profileCoverScene').dataset.live, 'false'); assert.equal($('coverPickerScene').dataset.live, 'true');
         assert.equal($('coverPickerFrame').dataset.live, 'false');
