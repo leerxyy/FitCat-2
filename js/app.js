@@ -20,7 +20,7 @@ import { ensureDailyWeather } from './features/weather.js';
 import { initSurfaces } from './ui/surfaces.js';
 import { stopWeatherRequest } from './features/weather.js';
 import { batchMotion } from './ui/motion.js';
-import { initAppearance, renderAppearance } from './features/appearance.js';
+import { initAppearance, renderAppearance, flushAppearance } from './features/appearance.js';
 import { effectiveAppearance } from './core/appearance.js';
 
 let previousAccess;
@@ -80,9 +80,9 @@ function start() {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { flushAppearance(); resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
   setInterval(checkDay, 60000);
-  window.addEventListener('pagehide', () => { resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
+  window.addEventListener('pagehide', () => { flushAppearance(); resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();
   void ensureDailyWeather();
   Promise.resolve(viewportReady).then(() => document.dispatchEvent(new Event('fitcat:ready')));
