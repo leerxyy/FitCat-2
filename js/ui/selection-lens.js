@@ -151,8 +151,11 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     if (!enabled()) { reset(true); return; }
     if (!gesture.active && (x !== gesture.x || y !== gesture.y)) activate();
     if (!gesture.active) return;
-    if (!event.cancelable) { reset(true); return; }
-    event.preventDefault(); follow(x, y);
+    // Pointer movement can be non-cancelable. CSS touch-action owns panning;
+    // pointercancel, not this flag, tells us the browser took the gesture.
+    if (!event.cancelable && source === 'touch') { reset(true); return; }
+    if (event.cancelable) event.preventDefault();
+    follow(x, y);
   }
   function end(id, x, y, event, source) {
     if (!gesture || gesture.id !== id || gesture.source !== source) return;
@@ -172,7 +175,13 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     if (event.button != null && event.button !== 0) return;
     start(event.pointerId, event.clientX, event.clientY, 'pointer', event.target);
   });
-  listen('lostpointercapture', event => { if (gesture?.source === 'pointer' && gesture.id === event.pointerId) reset(true); });
+  listen('lostpointercapture', event => {
+    // A touch initially belongs to the hit button/label. Moving capture here
+    // bubbles lostpointercapture from that child before the next pointermove.
+    // Only losing this track's own capture can cancel this track's gesture.
+    if (event.target !== track || track.hasPointerCapture?.(event.pointerId)) return;
+    if (gesture?.source === 'pointer' && gesture.id === event.pointerId) reset(true);
+  });
   if (!win.PointerEvent) listen('touchstart', event => {
     if (event.touches.length !== 1) { hub.active?.reset(); return; }
     const point = event.touches[0]; start(point.identifier, point.clientX, point.clientY, 'touch', event.target);
