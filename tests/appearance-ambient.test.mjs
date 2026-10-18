@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupDOM } from './dom.mjs';
-import { initAmbient,requestDeviceTilt,disableDeviceTilt,deviceTiltStatus } from '../js/ui/ambient.js';
+import { initAmbient,requestDeviceTilt,disableDeviceTilt,deviceTiltStatus,subscribeAmbientMotion } from '../js/ui/ambient.js';
 import { APPEARANCE_DEFAULTS } from '../js/core/appearance.js';
 
 function harness(){
@@ -65,6 +65,7 @@ test('a no-gesture rejection preserves the opt-in and reconnects on one ordinary
  const h=harness();let calls=0,gesture=false;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return gesture?Promise.resolve('granted'):Promise.reject(new Error('NotAllowedError'));}};
  try{
   const before=new Map(h.env.map);initAmbient(saved);h.step(12);await h.flush();assert.equal(deviceTiltStatus(),'gesture');assert.equal(calls,1);
+  h.step(240);assert.equal(deviceTiltStatus(),'gesture','the sensor watchdog cannot replace a blocked permission with stalled');assert.equal(calls,1);
   document.dispatchEvent(new Event('pointerup'));await h.flush();assert.equal(calls,1,'synthetic taps cannot trigger permission');
   gesture=true;h.tap();h.tap();await h.flush();assert.equal(calls,2,'only one gesture retry per foreground session');
   h.sensor(45,0);h.sensor(45,20);h.step();assert.equal(deviceTiltStatus(),'active');assert.ok(reading().x>5);
@@ -148,4 +149,20 @@ test('changing unrelated appearance values never recenters an active phone',()=>
  try{initAmbient(saved);h.sensor(45,0);h.sensor(45,20);h.step();const before=reading().x;
   document.dispatchEvent(new CustomEvent('fitcat:appearance',{detail:{...saved,transparency:70,glow:50}}));h.sensor(45,20);h.step();assert.ok(Math.abs(reading().x-before)<.05);assert.equal(deviceTiltStatus(),'active');
  }finally{h.close();}
+});
+
+test('a live profile cover receives smoothed tilt inside a sheet while its backdrop stays fixed and resumes softly',()=>{
+ const h=harness();window.DeviceOrientationEvent=class{};
+ let active=true,last={x:0,y:0},calls=0;
+ const release=subscribeAmbientMotion((x,y)=>{last={x,y};calls++;},()=>active);
+ try{
+  initAmbient(saved);h.sensor(45,0);h.sensor(45,8);h.step();const before=reading();
+  document.body.classList.add('dialog-open');h.sensor(50,24);h.step();
+  assert.deepEqual(reading(),before);assert.ok(Math.abs(last.x-before.x)>2);assert.ok(calls>10);
+  h.step(240);assert.equal(h.frames.size,0);
+  const count=calls;active=false;h.sensor(53,29);h.step();assert.equal(calls,count);assert.deepEqual(reading(),before);
+  document.body.classList.remove('dialog-open');document.dispatchEvent(new Event('fitcat:dialogclose'));h.step(1);
+  assert.ok(Math.abs(reading().x-before.x)<2,'resuming does not jump to the cover position');
+  h.step();assert.ok(Math.abs(reading().x-before.x)>2);h.step(240);assert.equal(h.frames.size,0);
+ }finally{release();h.close();}
 });
