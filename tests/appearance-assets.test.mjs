@@ -41,3 +41,10 @@ test('the legacy home opacity is variable; the effect pipeline has no animated p
  }
  assert.doesNotMatch(css,/repeating-radial-gradient|blur\(22px\)|--card-shift/);
 });
+test('finishing a slider adjustment never swaps card tint or backdrop material',()=>{
+ const css=read('styles/appearance.css');
+ for(const rule of css.matchAll(/([^{}]+)\{([^{}]*)\}/g))if(rule[1].includes('[data-appearance-adjusting')){
+  assert.doesNotMatch(rule[2],/(?:backdrop-filter|background(?:-image|-color)?|--appearance-glass[^:]*)\s*:/,'saving must not bring back a different opaque/frosted material');
+ }
+ assert.match(css,/backdrop-filter:\s*var\(--appearance-glass-filter/);
+});

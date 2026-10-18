@@ -81,14 +81,13 @@ body[data-screen="appearancePage"] .app-root { --header-space: 14px; padding-bot
   --glass-tint: rgb(10 28 43 / var(--appearance-glass-alpha, .53));
   background: linear-gradient(135deg, #cee8ff0d, transparent 44%), var(--glass-tint);
   box-shadow: inset 0 1px 1px #def6ff30, inset 0 -1px 1px #87cff91c, 0 7px 22px #00040c26, 0 0 18px rgb(var(--accent-rgb) / var(--appearance-glow-alpha, .09));
-  -webkit-backdrop-filter: blur(8px) saturate(115%); backdrop-filter: blur(8px) saturate(115%);
+  -webkit-backdrop-filter: var(--appearance-glass-filter, none); backdrop-filter: var(--appearance-glass-filter, none);
 }
-:root[data-appearance-ready] .sheet { --glass-tint: rgb(11 27 44 / var(--appearance-sheet-alpha, .84)); background: linear-gradient(135deg, #cee8ff0a, transparent 44%), var(--glass-tint); -webkit-backdrop-filter: blur(16px) saturate(115%); backdrop-filter: blur(16px) saturate(115%); box-shadow: inset 0 1px 1px #def6ff30, 0 -12px 32px #00071455; }
+:root[data-appearance-ready] .sheet { --glass-tint: rgb(11 27 44 / var(--appearance-sheet-alpha, .84)); background: linear-gradient(135deg, #cee8ff0a, transparent 44%), var(--glass-tint); -webkit-backdrop-filter: var(--appearance-sheet-filter, none); backdrop-filter: var(--appearance-sheet-filter, none); box-shadow: inset 0 1px 1px #def6ff30, 0 -12px 32px #00071455; }
 :root[data-appearance-ready] .sheet .card { background: rgb(6 23 38 / var(--appearance-glass-alpha, .53)); -webkit-backdrop-filter: none; backdrop-filter: none; }
 :root[data-appearance-ready] .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: inset 0 2px 4px #e1feff6e, 0 0 19px rgb(var(--accent-rgb) / var(--appearance-glow-alpha, .09)); }
-.appearance-preview-ui { -webkit-backdrop-filter: none; backdrop-filter: none; transform: perspective(900px) rotateX(var(--preview-rotate-x, 0deg)) rotateY(var(--preview-rotate-y, 0deg)); transition: none; }
-/* Pause expensive glass sampling during adjustment. Reading stays stable. */
-:root[data-appearance-adjusting="on"] #appScroller .card { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.appearance-preview-ui { background: linear-gradient(135deg, #cee8ff0d, transparent 44%), rgb(10 28 43 / var(--appearance-glass-alpha, .53)); -webkit-backdrop-filter: var(--appearance-glass-filter, none); backdrop-filter: var(--appearance-glass-filter, none); transform: perspective(900px) rotateX(var(--preview-rotate-x, 0deg)) rotateY(var(--preview-rotate-y, 0deg)); transition: none; }
+/* Pausing decoration must never change the glass itself on input/save. */
 :root[data-appearance-adjusting="on"] .ambient-effects * { animation-play-state: paused; }
 :root[data-appearance-ready] .selection-glint::before, :root[data-appearance-ready] .selection-lens-shine::before { animation-duration: var(--shine-duration, 6s); }
 :root[data-appearance-ready] .settings-data-action .selection-glint::before { animation-duration: var(--shine-tile-duration, 10s); }
@@ -108,5 +107,5 @@ body[data-screen="appearancePage"] #ambientLight .ambient-effects *, body.dialog
 @keyframes appearance-edge-light { from { opacity: .4; } to { opacity: .75; } }
 @media (max-width: 359px) { .appearance-tabs > button, .appearance-motion-control > button { font-size: 11px; } .appearance-theme-grid { gap: 7px; } .appearance-tile-label { font-size: 10px; } .appearance-preview { padding: 13px 12px; } .appearance-preview-ui { padding: 12px; } .appearance-preview-data { gap: 12px; } .appearance-preview-ring small { font-size: 7px; } .appearance-preview-heading > span { font-size: 9px; } .appearance-swatches { gap: 5px; } .appearance-toggle-row > div { font-size: 14px; } }
 /* The explicit opacity setting is preserved; the OS preference removes blur. */
-@media (prefers-reduced-transparency: reduce) { :root[data-appearance-ready] #appScroller :is(.card, .glass, .glass-button), :root[data-appearance-ready] #navDock .bottom-nav, :root[data-appearance-ready] .sheet { -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-transparency: reduce) { :root[data-appearance-ready] #appScroller :is(.card, .glass, .glass-button), :root[data-appearance-ready] #navDock .bottom-nav, :root[data-appearance-ready] .sheet, .appearance-preview-ui { -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (prefers-reduced-motion: reduce) { .ambient-effects, .ambient-depth { display: none !important; } .ambient-wallpaper, .appearance-preview-ui { transform: none !important; } .appearance-effect-thumb * { animation: none !important; } }

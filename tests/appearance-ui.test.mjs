@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { setTimeout as delay } from 'node:timers/promises';
 import { setupDOM, tick, activeProFixture } from './dom.mjs';
 import { APPEARANCE_KEY, APPEARANCE_DEFAULTS, ACCENTS } from '../js/core/appearance.js';
 
@@ -47,6 +48,17 @@ test('Appearance integrates all mockup controls with live app styles, storage, P
   await t.test('all twelve accent choices retain transparency and use one precomputed palette selector',async()=>{
    for(const [key,value] of Object.entries(ACCENTS)){await choice('accent',key);assert.equal(root.style['--accent'],value.color);assert.equal(root.dataset.accent,key);assert.equal(state.appearance.transparency,70);}
    assert.equal(root.style['--tone-h16cff3'],undefined);
+  });
+  await t.test('card glass remains identical after the real autosave delay and after reopening Appearance',async()=>{
+   const input=$('appearancePage').querySelector('[data-appearance-range="transparency"]');
+   input.value=50;input.dispatchEvent(new Event('input',{bubbles:true}));
+   assert.equal(root.dataset.appearanceAdjusting,'on');
+   const material=root.style['--appearance-glass-filter'];assert.match(material,/^blur\(/);
+   await delay(280);assert.equal(root.dataset.appearanceAdjusting,'off');assert.equal(root.style['--appearance-glass-filter'],material);assert.equal(root.style['--appearance-glass-alpha'],'0.5');
+   input.value=70;input.dispatchEvent(new Event('input',{bubbles:true}));assert.equal(root.style['--appearance-glass-filter'],'none');
+   await delay(280);assert.equal(root.style['--appearance-glass-filter'],'none');assert.equal(root.style['--appearance-glass-alpha'],'0.3');assert.equal(state.appearance.transparency,70);
+   await click('[data-action="appearanceBack"]');await click('#openAppearance');
+   assert.equal(input.value,'70');assert.equal(root.style['--appearance-glass-filter'],'none');assert.equal(root.style['--appearance-glass-alpha'],'0.3');
   });
   await t.test('unfinished changes are saved when the page is hidden, with no default value written over them',()=>{
    const input=$('appearancePage').querySelector('[data-appearance-range="glow"]');input.value=44;input.dispatchEvent(new Event('input',{bubbles:true}));

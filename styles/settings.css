@@ -26,7 +26,6 @@ body[data-screen="settingsPage"] .app-root { --header-space: 14px; padding-botto
 #settingsPage .haptics-test { min-height: 38px; padding: 8px 13px; margin: 2px 0 14px 52px; border: 1px solid var(--tone-h81b6d039, #81b6d039); border-radius: 13px; color: var(--tone-hafcadd, #afcadd); background: #17405b25; font-size: 12px; }
 #settingsPage .haptics-test:disabled { opacity: .45; }
 #settingsPage .settings-language-card { padding: 16px 14px; }
-#settingsPage .settings-language-card > h2 { margin: 0 0 12px; font-size: 17px; font-weight: 600; }
 .settings-language-control { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 3px; border: 1px solid var(--tone-h8bcde146, #8bcde146); border-radius: 17px; background: #03142157; }
 .settings-language { position: relative; isolation: isolate; min-width: 0; min-height: 43px; padding: 9px 5px; margin: 0; border: 1px solid transparent; border-radius: 13px; color: var(--tone-hb7cede, #b7cede); background: transparent; font-size: 15px; font-weight: 570; transition: background-color 260ms ease, color 260ms ease, border-color 260ms ease, transform 150ms var(--ease); }
 .settings-language.active { color: var(--tone-hdffaff, #dffaff); background: linear-gradient(145deg, var(--tone-h08cde95c, #08cde95c), var(--tone-h007b9e5c, #007b9e5c)); border-color: var(--tone-h55e4f894, #55e4f894); box-shadow: inset 0 1px 2px var(--tone-hd2fcff35, #d2fcff35), 0 0 13px var(--tone-h15d8f51c, #15d8f51c); }

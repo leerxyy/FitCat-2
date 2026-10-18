@@ -80,10 +80,10 @@ test('all five glass selectors preview freely and commit through the real autosa
     await click('#profilePage [data-value="settingsPage"]');
     await t.test('language preview leaves text unchanged; releasing updates and saves the actual language', async () => {
       begin('settingsLanguageControl', 0); move('settingsLanguageControl', 2);
-      assert.equal(state.preferences.lang, 'ru'); assert.equal($('settingsLanguageTitle').textContent, 'Язык приложения');
+      assert.equal(state.preferences.lang, 'ru'); assert.equal($('settingsLanguageTitle').textContent, 'Язык');
       end('settingsLanguageControl', 2); await tick();
       assert.equal(state.preferences.lang, 'cn'); assert.equal(env.localStorage.getItem('fitcat_lang'), 'cn');
-      assert.equal($('settingsLanguageTitle').textContent, '应用语言'); assert.equal($('settingsLanguageControl').style['--lens-index'], '2');
+      assert.equal($('settingsLanguageTitle').textContent, '语言'); assert.equal($('settingsLanguageControl').style['--lens-index'], '2');
       await click('#settingsLangEn span'); assert.equal(state.preferences.lang, 'en'); assert.equal($('settingsLanguageControl').style['--lens-index'], '1');
       await click('#settingsLangRu'); assert.equal($('settingsLanguageControl').style['--lens-index'], '0');
     });

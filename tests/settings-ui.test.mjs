@@ -20,8 +20,20 @@ test('settings redesign preserves actions, language and PRO access with no redun
       assert.equal($('settingsPage').querySelectorAll('.selection-glint').length, 5);
       assert.equal($('settingsPage').querySelector('button[data-i18n="done"]'), null);
     });
+    await t.test('Appearance and Language have their own headings above their cards',()=>{
+      const appearance=$('settingsAppearanceTitle'),language=$('settingsLanguageTitle');
+      assert.equal(appearance.textContent,'Оформление');assert.equal(language.textContent,'Язык');
+      assert.equal(appearance.parentElement.classList.contains('settings-section'),true);
+      assert.equal(language.parentElement.classList.contains('settings-section'),true);
+      assert.equal($('openAppearance').closest('.settings-section'),appearance.parentElement);
+      assert.equal($('settingsLanguageControl').closest('.settings-section'),language.parentElement);
+      assert.notEqual(appearance.parentElement,$('settingsControlTitle').parentElement);
+      assert.notEqual(appearance.parentElement,language.parentElement);
+      assert.equal(appearance.parentElement.children[0],appearance);assert.equal(language.parentElement.children[0],language);
+      assert.equal(appearance.closest('.card'),null);assert.equal(language.closest('.card'),null);
+    });
     await t.test('language changes save immediately and keep the selected highlight, labels and embedded icons', async () => {
-      for (const [id, language, title] of [['En', 'en', 'App language'], ['Cn', 'cn', '应用语言'], ['Ru', 'ru', 'Язык приложения']]) {
+      for (const [id, language, title] of [['En', 'en', 'Language'], ['Cn', 'cn', '语言'], ['Ru', 'ru', 'Язык']]) {
         await click(`#settingsLang${id} span`); assert.equal(state.preferences.lang, language); assert.equal(env.localStorage.getItem('fitcat_lang'), language);
         assert.equal($('settingsLanguageTitle').textContent, title); assert.equal($('settingsPage').querySelectorAll('.settings-language.active').length, 1);
         assert.equal($('settingsPage').querySelectorAll('.selection-glint').length, 5); assert.equal($('settingsPage').querySelectorAll('.settings-icon').length, 7);
