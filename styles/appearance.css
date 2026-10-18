@@ -28,6 +28,11 @@
 .appearance-sound-check .icon { width: 11px; height: 11px; stroke-width: 2.4; }
 .appearance-sound-card[data-selected="true"] .appearance-sound-check { opacity: 1; transform: scale(1); }
 .appearance-sound-card[data-selected="true"] .selection-glint::before { animation: fitcat-choice-glint var(--shine-duration, 6s) ease-in-out infinite; }
+.appearance-sound-collection-hint { margin: -5px 0 13px; color: var(--muted, #a8bdce); font-size: 12px; line-height: 1.5; }
+.appearance-sound-choice[data-pro-feature="sounds"] { padding-bottom: 40px; }
+.appearance-sound-choice > .pro-feature-badge { top: auto; right: 12px; bottom: 12px; min-width: 43px; height: 18px; font-size: 8px; padding: 2px 6px; }
+.appearance-sound-choice[data-pro-feature="sounds"] > strong { min-height: 2.5em; }
+.appearance-sound-choice.is-pro-locked { color: inherit; opacity: 1; }
 .appearance-audio-volume .appearance-range-heading { font-size: 16px; }.appearance-audio-volume .appearance-range-heading output { font-size: 14px; }
 .appearance-audio-volume-icons { display: flex; justify-content: space-between; color: var(--muted, #a8bdce); }.appearance-audio-volume-icons .icon { width: 18px; height: 18px; }
 .appearance-audio-status { min-height: 18px; margin: -5px 2px 0; color: var(--muted, #a8bdce); font-size: 11px; line-height: 1.5; }

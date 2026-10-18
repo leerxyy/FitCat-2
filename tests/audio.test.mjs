@@ -20,11 +20,11 @@ test('explicit preview works while disabled and resumes synchronously inside its
   assert.equal(f.stats.resumes, 1); assert.equal(await playing, true); assert.equal(f.stats.plays[0].buffer.style, 'drop');
   f.advance(); assert.equal(await f.player.play(), false, 'preview must not opt the user in'); f.player.dispose();
 });
-test('all six sounds share one context and cached decoded buffers, replacing previous previews', async () => {
+test('all twenty sounds share one context and cached decoded buffers, replacing previous previews', async () => {
   const f = fixture();
   for (const style of SOUND_STYLES) { assert.equal(await f.player.play({ style, preview: true }), true); f.advance(); }
-  assert.equal(f.stats.contexts.length, 1); assert.equal(f.stats.decodes, 6); assert.equal(f.stats.stops.length, 5);
-  await f.player.play({ style: 'glass', preview: true }); assert.equal(f.stats.decodes, 6); assert.equal(f.stats.fetches.length, 6);
+  assert.equal(f.stats.contexts.length, 1); assert.equal(f.stats.decodes, 20); assert.equal(f.stats.stops.length, 19);
+  await f.player.play({ style: 'glass', preview: true }); assert.equal(f.stats.decodes, 20); assert.equal(f.stats.fetches.length, 20);
   f.player.dispose();
 });
 test('rapid click and submit feedback is deduplicated, and normal later clicks work', async () => {
@@ -91,14 +91,25 @@ test('dispose and preview cancellation invalidate unfinished playback', async ()
   assert.equal(await pending, false); f.player.dispose(); assert.equal(f.stats.closes, 1);
   assert.equal(await f.player.play({ preview: true }), false);
 });
-test('six distinct local WAVs are short, fade to zero and leave amplitude headroom', () => {
+test('twenty distinct local WAVs are short, fade to zero and leave amplitude headroom', () => {
   const signatures = new Set();
   for (const style of SOUND_STYLES) {
     const bytes = readFileSync(new URL(soundURL(style))); signatures.add(bytes.toString('base64'));
     assert.equal(bytes.toString('ascii', 0, 4), 'RIFF'); assert.equal(bytes.toString('ascii', 8, 12), 'WAVE');
     assert.equal(bytes.readUInt16LE(22), 1); assert.equal(bytes.readUInt32LE(24), 22050); assert.equal(bytes.readUInt16LE(34), 16);
-    assert.ok(bytes.length > 4000 && bytes.length < 10000); assert.equal(bytes.readInt16LE(44), 0); assert.equal(bytes.readInt16LE(bytes.length - 2), 0);
+    assert.ok(bytes.length > 1400 && bytes.length < 5000); assert.equal(bytes.readInt16LE(44), 0); assert.equal(bytes.readInt16LE(bytes.length - 2), 0);
     for (let i = 44; i < bytes.length; i += 2) assert.ok(Math.abs(bytes.readInt16LE(i)) < 20000, style);
   }
-  assert.equal(signatures.size, 6);
+  assert.equal(signatures.size, 20);
+});
+test('paid sounds fall back for ordinary clicks, while everyone may explicitly preview them', async () => {
+  const f=fixture({...enabled,soundStyle:'wood'},{canUse:style=>style==='glass'});
+  assert.equal(await f.player.play(),true);assert.equal(f.stats.plays.at(-1).buffer.style,'glass');f.advance();
+  assert.equal(await f.player.play({style:'wood',preview:true}),true);assert.equal(f.stats.plays.at(-1).buffer.style,'wood');f.player.dispose();
+});
+test('subscription expiry during loading cancels the pending premium click',async()=>{
+ let allowed=true,release;
+ const f=fixture({...enabled,soundStyle:'wood'},{canUse:()=>allowed,fetch:()=>new Promise(resolve=>{release=resolve;})});
+ const pending=f.player.play();await microtasks();allowed=false;release(f.response('wood'));
+ assert.equal(await pending,false);assert.equal(f.stats.plays.length,0);f.player.dispose();
 });

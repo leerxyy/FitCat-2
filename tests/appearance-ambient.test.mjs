@@ -46,6 +46,17 @@ test('a saved grant is restored through the permission API without a repeated se
   h.sensor(50,10);h.sensor(50,25);h.step();assert.equal(deviceTiltStatus(),'active');assert.ok(reading().x>5);h.tap();await h.flush();assert.equal(calls,1);
  }finally{h.close();}
 });
+for(const withReading of [false,true])test(`saving a successful tilt opt-in adopts its connection ${withReading?'after':'before'} sensor data`,async()=>{
+ const h=harness();let calls=0;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return Promise.resolve('granted');}};
+ try{
+  initAmbient();assert.equal(await requestDeviceTilt(),true);assert.equal(calls,1);
+  if(withReading){h.sensor(45,0);h.sensor(45,20);h.step(8);assert.ok(reading().x>1);}
+  document.dispatchEvent(new CustomEvent('fitcat:appearance',{detail:saved}));h.step(18);await h.flush();
+  assert.equal(calls,1,'persisting the flag must not start a second permission probe');
+  if(withReading)assert.ok(reading().x>5,'saving must preserve the neutral pose and movement');
+  else{h.sensor(60,15);h.step();assert.deepEqual(reading(),{x:0,y:0});}
+ }finally{h.close();}
+});
 test('an already-live saved listener needs no redundant permission request',async()=>{
  const h=harness();let calls=0;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return Promise.resolve('granted');}};
  try{initAmbient(saved);h.sensor(45,0);h.step();await h.flush();assert.equal(calls,0);assert.equal(deviceTiltStatus(),'active');}finally{h.close();}

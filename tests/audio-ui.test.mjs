@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { setupDOM, tick } from './dom.mjs';
 import { audioFixture, microtasks } from './audio-fixture.mjs';
-import { SOUND_STYLES, SOUND_DEFAULTS } from '../js/core/sounds.js';
+import { SOUND_STYLES, BASIC_SOUND_STYLES, SOUND_DEFAULTS } from '../js/core/sounds.js';
 import { APPEARANCE_DEFAULTS, APPEARANCE_KEY } from '../js/core/appearance.js';
 
 test('sound feedback integrates preview, autosave, volume, translation and reset in Appearance', async t => {
@@ -17,11 +17,12 @@ test('sound feedback integrates preview, autosave, volume, translation and reset
     await import('../js/app.js');
     const { state } = await import('../js/core/store.js');
     await click('[data-action="showProfile"]'); await click('#profilePage [data-value="settingsPage"]'); await click('#openAppearance'); await click('#appearanceAudioTab');
-    await t.test('new sound tab has six independent selection and preview buttons, disabled by default', () => {
+    await t.test('sound tab has twenty independent choices and previews, disabled by default', () => {
       assert.equal($('appearanceAudioPanel').hidden, false); assert.equal($('appearancePreview').hidden, true);
       assert.equal($('appearanceSoundEnabled').checked, false); assert.equal($('appearanceSoundEnabled').disabled, false); assert.equal(f.stats.contexts.length, 0);
-      assert.equal($('appearanceAudioPanel').querySelectorAll('[data-sound-card]').length, 6);
-      assert.equal($('appearanceAudioPanel').querySelectorAll('[data-audio-preview]').length, 6);
+      assert.equal($('appearanceAudioPanel').querySelectorAll('[data-sound-card]').length, 20);
+      assert.equal($('appearanceAudioPanel').querySelectorAll('[data-audio-preview]').length, 20);
+      assert.equal($('appearanceAudioPanel').querySelectorAll('[data-pro-feature="sounds"]').length,14);
       assert.equal($('appearanceAudioPanel').querySelector('button button'), null);
       assert.equal($('appearanceSoundVolume').value, '25');
     });
@@ -33,7 +34,7 @@ test('sound feedback integrates preview, autosave, volume, translation and reset
       f.stats.plays.at(-1).finish(); assert.equal($('appearanceAudioPanel').querySelector('[data-sound-card="drop"]').dataset.previewing, 'false');
     });
     await t.test('a selected sound saves immediately, remains unique, and another preview leaves it selected', async () => {
-      for (const style of SOUND_STYLES) {
+      for (const style of BASIC_SOUND_STYLES) {
         await click(`[data-appearance-kind="soundStyle"][data-value="${style}"]`);
         assert.equal(state.appearance.soundStyle, style); assert.equal((JSON.parse(env.localStorage.getItem(APPEARANCE_KEY))??APPEARANCE_DEFAULTS).soundStyle, style);
         assert.equal($('appearanceAudioPanel').querySelectorAll('[data-selected="true"]').length, 1);

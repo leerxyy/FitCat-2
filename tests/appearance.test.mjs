@@ -71,3 +71,9 @@ test('audio opt-in, style and volume survive reload and backup while old records
  assert.equal(state.appearance.soundStyle,'velvet');assert.equal(state.appearance.transparency,70);assert.equal(state.appearance.soundVolume,38);
  const sanitized=normalizeAppearance({soundEnabled:'yes',soundStyle:'https://example.com/track',soundVolume:500});assert.equal(sanitized.soundEnabled,false);assert.equal(sanitized.soundStyle,'glass');assert.equal(sanitized.soundVolume,100);
 });
+test('premium audio falls back after expiry without erasing the saved choice or volume',()=>{
+ const saved={...APPEARANCE_DEFAULTS,soundEnabled:true,soundStyle:'wood',soundVolume:43};
+ const basic=effectiveAppearance(saved,false);assert.equal(basic.soundStyle,'glass');assert.equal(basic.soundEnabled,true);assert.equal(basic.soundVolume,43);
+ assert.equal(saved.soundStyle,'wood');assert.equal(effectiveAppearance(saved,true).soundStyle,'wood');
+ for(const soundStyle of ['glass','drop','velvet','spark','pulse','air'])assert.equal(effectiveAppearance({...saved,soundStyle},false).soundStyle,soundStyle);
+});
