@@ -5,6 +5,7 @@ import { $, initials, onAction, openDialog } from '../ui/components.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { reducedMotion, enter, MOTION } from '../ui/motion.js';
 import { subscribeAmbientMotion } from '../ui/ambient.js';
+import { cosmeticTimeline } from '../ui/cosmetic-timeline.js';
 
 const photos = new WeakMap();
 const inView = new WeakMap();
@@ -37,14 +38,11 @@ function renderScene(scene, cover) {
   const artwork = asset ? `url("${asset}")` : 'none';
   if (scene.style.getPropertyValue('--cover-art') !== artwork) scene.style.setProperty('--cover-art', artwork);
   image.hidden = !asset;
-  if (changed && !scene.closest('[hidden]')) enter(image, { y: 0, duration: MOTION.screen });
+  if (changed && !scene.closest('[hidden]')) enter(scene, { y: 0, duration: MOTION.screen });
 }
 function renderFrame(node, value) {
   if (!node) return;
-  const changed = node.dataset.frame !== value;
   setData(node, 'frame', value);
-  const dialog = node.closest('dialog');
-  if (changed && !node.closest('[hidden]') && (!dialog || dialog.open)) enter(node, { y: 0, duration: MOTION.panel });
 }
 function status(kind) {
   const node = $('profile' + (kind === 'frame' ? 'Frame' : 'Cover') + 'Status');
@@ -84,19 +82,20 @@ export function syncProfileStyleMotion() {
   if (!initialized) return;
   const moving = !motionPaused && !document.hidden && !reducedMotion();
   const screen = document.body.dataset.screen;
-  const open = document.querySelector('dialog[open]');
+  const dialogs = document.querySelectorAll('dialog[open]');
+  const open = dialogs[dialogs.length - 1];
   const frameOpen = open?.id === 'profileFrameModal', coverOpen = open?.id === 'profileCoverModal';
   const profileVisible = moving && screen === 'profilePage' && !open && isVisible($('profileIdentityCard'));
   const headerVisible = moving && screen === 'mainPage' && !open && isVisible($('headerAvatarWrap'));
-  setData($('profileAvatarFrame'), 'live', profileVisible);
-  setData($('headerAvatarFrame'), 'live', headerVisible);
-  setData($('framePickerFrame'), 'live', moving && frameOpen && isVisible($('frameStylePreview')));
+  cosmeticTimeline.setLive($('profileAvatarFrame'), profileVisible, $('profileAvatarFrame').dataset.frame);
+  cosmeticTimeline.setLive($('headerAvatarFrame'), headerVisible, $('headerAvatarFrame').dataset.frame);
+  cosmeticTimeline.setLive($('framePickerFrame'), moving && frameOpen && isVisible($('frameStylePreview')), $('framePickerFrame').dataset.frame);
   // The cover picker animates its cover, rather than an additional avatar frame.
-  setData($('coverPickerFrame'), 'live', false);
+  cosmeticTimeline.setLive($('coverPickerFrame'), false);
   liveScenes.clear();
   for (const [id, visible] of [['profileCoverScene', profileVisible], ['framePickerScene', false], ['coverPickerScene', moving && coverOpen && isVisible($('coverStylePreview'))]]) {
     const scene = $(id), active = visible && PREMIUM_PROFILE_COVERS.includes(scene?.dataset.cover);
-    setData(scene, 'live', active);
+    cosmeticTimeline.setLive(scene, active, scene?.dataset.cover);
     if (active) liveScenes.add(scene);
   }
   paintMotion();
