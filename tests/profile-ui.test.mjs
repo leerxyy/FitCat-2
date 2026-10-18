@@ -27,6 +27,11 @@ test('profile redesign keeps existing data, native photo actions, draft fields a
       assert.equal($('profilePhotoEdit').parentElement, $('profilePhotoDelete').parentElement);
       assert.equal($('profilePhotoDelete').closest('button'), $('profilePhotoDelete')); assert.equal($('profilePhoto').querySelector('button'), null);
       assert.ok($('profilePhotoDelete').querySelector('svg')); assert.ok($('profilePhotoEdit').querySelector('svg'));
+      for (const name of ['waist', 'dumbbell', 'muscle']) {
+        const svg = $('profileGoalControl').querySelector(`[data-goal-icon="${name}"]`);
+        assert.ok(svg, name); assert.equal(svg.getAttribute('viewBox'), '0 0 24 24'); assert.equal(svg.getAttribute('stroke'), 'currentColor');
+        assert.ok(svg.querySelector('path').getAttribute('d').length > 20); assert.equal(svg.querySelector('use'), null);
+      }
       await click('#profilePage [data-action="copyUid"]'); assert.equal(copied, '01234567890');
     });
     await t.test('gender and goal remain draft choices until Save and leave exactly one selected option per group', async () => {
