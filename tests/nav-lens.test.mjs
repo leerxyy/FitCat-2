@@ -62,12 +62,35 @@ test('a hold can start dragging without an initial swipe and returning to the sa
     h.pointer('pointerdown', 245); h.hold(); h.pointer('pointerup', 245); assert.deepEqual(h.selected, [2]);
   } finally { h.close(); }
 });
-test('horizontal boundaries clamp the lens while a vertical escape cancels navigation', () => {
+test('edges yield softly and vertical drift never interrupts a continuous drag', () => {
   const h = harness(); try {
     h.pointer('pointerdown', 65); h.pointer('pointermove', 1000); assert.equal(h.nav.style['--lens-index'], '3');
-    h.pointer('pointermove', -100); assert.equal(h.nav.style['--lens-index'], '0'); h.pointer('pointerup', -100); assert.deepEqual(h.selected, []);
-    h.pointer('pointerdown', 65); h.pointer('pointermove', 155, 900); h.pointer('pointerup', 245); assert.deepEqual(h.selected, []);
-    h.pointer('pointerdown', 65); h.pointer('pointermove', 67, 760); h.pointer('pointerup', 245); assert.deepEqual(h.selected, []);
+    assert.ok(parseFloat(h.nav.style['--lens-x']) > 276 && parseFloat(h.nav.style['--lens-x']) < 294);
+    h.pointer('pointermove', -100); assert.equal(h.nav.style['--lens-index'], '0');
+    assert.ok(parseFloat(h.nav.style['--lens-x']) < 6 && parseFloat(h.nav.style['--lens-x']) > -12);
+    h.pointer('pointerup', -100); assert.deepEqual(h.selected, []); assert.equal(h.nav.style['--lens-x'], '6px');
+    h.pointer('pointerdown', 65); h.pointer('pointermove', 155, 900);
+    assert.equal(h.nav.classList.contains('is-scrubbing'), true); assert.equal(h.nav.style['--lens-index'], '1');
+    h.pointer('pointerup', 245, 950); assert.deepEqual(h.selected, [2]);
+    h.pointer('pointerdown', 245); h.pointer('pointermove', 247, 760); h.pointer('pointerup', 335); assert.deepEqual(h.selected, [2, 3]);
+  } finally { h.close(); }
+});
+test('one-pixel and diagonal movements follow immediately without a direction gate or initial hold', () => {
+  const h = harness(); try {
+    h.pointer('pointerdown', 65); h.pointer('pointermove', 66, 740);
+    assert.equal(h.nav.classList.contains('is-scrubbing'), true);
+    assert.ok(Number(h.nav.style['--lens-index']) > 0 && Number(h.nav.style['--lens-index']) < .02);
+    assert.ok(parseFloat(h.nav.style['--lens-y']) > 6); assert.deepEqual(h.selected, []);
+    h.pointer('pointermove', 245, 1000); h.pointer('pointerup', 245, 1000); assert.deepEqual(h.selected, [2]);
+    assert.equal(h.nav.style['--lens-y'], '6px');
+  } finally { h.close(); }
+});
+test('an off-center grab of the selected lens preserves its position and then follows finger displacement', () => {
+  const h = harness(); try {
+    h.pointer('pointerdown', 95); assert.equal(h.nav.style['--lens-index'], '0');
+    h.pointer('pointermove', 140); assert.equal(h.nav.style['--lens-index'], '0.5');
+    h.pointer('pointermove', 185); assert.equal(h.nav.style['--lens-index'], '1');
+    h.pointer('pointerup', 185); assert.deepEqual(h.selected, [1]);
   } finally { h.close(); }
 });
 test('a second finger, OS cancellation and lost pointer capture restore the actual selected tab', () => {

@@ -28,7 +28,7 @@ test('home redesign keeps live food and water and integrates the draggable dock 
       assert.equal(document.querySelector('.meal-group.is-current').dataset.meal, 'lunch');
       assert.equal(document.querySelector('.meal-group.is-current summary').getAttribute('aria-current'), 'true');
       assert.equal(document.querySelectorAll('.meal-outline').length, 2);
-      assert.ok(document.querySelector('.scanner-button .scanner-glint')); assert.ok(document.querySelector('.nav-selection .nav-lens-glint'));
+      assert.ok(document.querySelector('.scanner-button .scanner-glint')); assert.ok(document.querySelector('.nav-selection .selection-lens-shine'));
     });
     await t.test('choosing a meal transfers the highlight without changing records, including after a translation', async () => {
       const raw = env.localStorage.getItem('todayFoods'); await click('[data-meal="breakfast"] summary');

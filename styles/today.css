@@ -55,28 +55,8 @@ body[data-screen="mainPage"] .page-heading { margin-bottom: 17px; }
 #todayPage .water-actions .glass-button { min-height: 45px; border-color: #93d6f45c; background: radial-gradient(ellipse at 40% 0%, #80d8ff19, transparent 75%), #0c3046a3; color: #e9f8ff; }
 #todayPage .water-actions .icon-button { width: 46px; height: 45px; min-height: 45px; border-color: #93d6f45c; }
 
-/* One glass lens stays in the dock, independently of all page animations. */
-.bottom-nav { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-.bottom-nav .nav-selection { z-index: 0; isolation: isolate; overflow: hidden; transform: translate3d(calc(var(--lens-index, var(--active-index)) * 100%), 0, 0); border-color: #96eaff7d; background: radial-gradient(ellipse at 25% 3%, #d5f8ff2b, transparent 68%), linear-gradient(150deg, #1abddd38, #12638033); box-shadow: inset 0 1px 3px #edffff59, inset 0 -2px 9px #39d4f01c, 0 0 14px #18d7ed1d; transition: transform 420ms var(--ease), scale 240ms var(--ease), box-shadow 300ms ease; }
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .bottom-nav .nav-selection { -webkit-backdrop-filter: blur(9px) saturate(165%); backdrop-filter: blur(9px) saturate(165%); } }
-.nav-lens-glint::before { animation: fitcat-choice-glint 6s ease-in-out infinite; }
-.bottom-nav.is-lens-pressed .nav-selection { box-shadow: inset 0 1px 3px #fff9, inset 0 -2px 8px #67e6ff24, 0 0 18px #28d9f334; transition-duration: 180ms; }
-.bottom-nav.is-scrubbing .nav-selection { transition: scale 180ms ease, box-shadow 180ms ease; scale: 1.035 1.08; }
-.bottom-nav.is-scrubbing .nav-lens-glint::before { animation-play-state: paused; }
-.bottom-nav .nav-item > .icon { transform-origin: center; transition: transform 240ms var(--ease), filter 260ms ease; }
-.bottom-nav .nav-item > span { transform-origin: center; transition: transform 240ms var(--ease); }
-.bottom-nav .nav-item.is-active > .icon { transform: translateY(-1px) scale(1.07); }
-.bottom-nav.is-scrubbing .nav-item { transform: none; }
-.bottom-nav.is-lens-pressed .nav-item:not(.is-preview) { color: #a1b6cb; }
-.bottom-nav.is-lens-pressed .nav-item:not(.is-preview) > .icon { transform: none; filter: none; }
-.bottom-nav .nav-item.is-preview { color: #65edff; }
-.bottom-nav .nav-item.is-preview > .icon { transform: translateY(-1px) scale(1.16); filter: drop-shadow(0 0 5px #20d8f04d); }
-.bottom-nav .nav-item.is-preview > span { transform: scale(1.035); }
-.bottom-nav .nav-item.is-preview::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: #31def2; box-shadow: 0 0 7px #16cff36b; }
-.bottom-nav.is-lens-pressed .nav-item:not(.is-preview)::after { opacity: 0; }
-.bottom-nav[hidden] .nav-lens-glint::before, body.dialog-open .nav-lens-glint::before, .keyboard-open .nav-lens-glint::before,
 #todayPage[hidden] .scanner-glint::before, #todayPage[hidden] .meal-outline, body.dialog-open .scanner-glint::before, body.dialog-open .meal-outline { animation-play-state: paused; }
 @media (min-width: 760px) { #todayPage .nutrition-card { padding: 23px 22px; }#todayPage .calorie-summary { margin-bottom: 21px; }#todayPage .calorie-ring { max-width: 210px; }#todayPage .macro-grid { padding-top: 20px; } }
 @media (max-width: 359px) { #todayPage .nutrition-card { padding: 15px 12px; }#todayPage .calorie-summary { grid-template-columns: minmax(44px, .95fr) minmax(0, 2.1fr) minmax(44px, .95fr); }#todayPage .ring-content strong { font-size: 28px; }#todayPage .ring-content span { font-size: 10px; }#todayPage .meal-summary { padding-inline: 8px; gap: 8px; }#todayPage .meal-thumb { width: 41px; height: 45px; }#todayPage .meal-kcal { font-size: 12px; }#todayPage .meal-description strong { font-size: 14px; }#todayPage .meals-card h2, #todayPage .water-card h2 { font-size: 18px; }#todayPage .water-reading { font-size: 12px; } }
-@media (prefers-reduced-motion: reduce) { .scanner-glint, .nav-lens-glint { display: none; }.meal-outline, .bottom-nav .nav-selection, .bottom-nav .nav-item > .icon, .bottom-nav .nav-item > span, #todayPage .meal-summary, #todayPage .meal-thumb { animation: none !important; transition: none !important; }.bottom-nav.is-scrubbing .nav-selection { scale: 1; } }
-@media (prefers-reduced-transparency: reduce) { #todayPage .card { background: #0c2437; }.bottom-nav .nav-selection { background: #15536b; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { .scanner-glint { display: none; }.meal-outline, #todayPage .meal-summary, #todayPage .meal-thumb { animation: none !important; transition: none !important; } }
+@media (prefers-reduced-transparency: reduce) { #todayPage .card { background: #0c2437; } }
