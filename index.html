@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="styles/interactions.css">
   <link rel="stylesheet" href="styles/premium.css">
   <link rel="stylesheet" href="styles/refinement.css">
+  <link rel="stylesheet" href="styles/activity.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -105,39 +106,18 @@
       <p class="water-hint" id="smartWaterHint" hidden></p>
     </section>
   </div>
-</section><div id="activityPage" class="page" data-main-view hidden>
-  <div class="card">
-    <h2 data-i18n="activity">Активность</h2>
-    <div class="activity-daily-options">
-      <button class="activity-daily-item" data-activity="1.2" data-i18n="sedentary" data-action="selectDailyActivity" type="button">Сидячий</button>
-      <button class="activity-daily-item" data-activity="1.375" data-i18n="light" data-action="selectDailyActivity" type="button">Умеренный</button>
-      <button class="activity-daily-item" data-activity="1.55" data-i18n="moderate" data-action="selectDailyActivity" type="button">Активный</button>
-      <button class="activity-daily-item" data-activity="1.725" data-i18n="very_active" data-action="selectDailyActivity" type="button">Очень активный</button>
-    </div>
-    <div class="workout-section">
-      <div>
-        <span data-i18n="workout">Тренировка</span>
-        <div>
-          <label class="apple-switch">
-            <input type="checkbox" id="workoutToggle" aria-label="workoutToggle" data-i18n-label="workout">
-            <span class="slider"></span>
-          </label>
-          <span class="toggle-label" id="workoutToggleLabel" data-i18n="off">Выкл</span>
-        </div>
-      </div>
-      <div id="workoutSettings" hidden>
-        <label data-i18n="workout_intensity">Интенсивность тренировки</label>
-        <div class="segmented-control" id="workoutIntensityControl">
-          <button class="segmented-option active" data-intensity="light" data-i18n="workout_light" data-action="selectWorkoutIntensity" data-value="light" type="button">Лёгкая</button>
-          <button class="segmented-option" data-intensity="moderate" data-i18n="workout_moderate" data-action="selectWorkoutIntensity" data-value="moderate" type="button">Умеренная</button>
-          <button class="segmented-option" data-intensity="intense" data-i18n="workout_intense" data-action="selectWorkoutIntensity" data-value="intense" type="button">Интенсивная</button>
-        </div>
-        <input type="hidden" id="workoutIntensity" value="light">
-      </div>
-    </div>
-    <button class="btn-primary" data-i18n="apply_today" type="button" data-action="applyDailyActivity">Применить на сегодня</button>
+</section><section id="activityPage" class="page activity-page" data-main-view hidden>
+  <div class="activity-layout">
+    <section class="card activity-rhythm-card" aria-labelledby="activityRhythmTitle">
+      <header class="activity-rhythm-heading"><div><h2 id="activityRhythmTitle" data-i18n="activity_rhythm">Твой ритм дня</h2><p data-i18n="activity_choose">Выбери нагрузку на сегодня</p></div><span class="activity-level-meter" id="activityLevelMeter" data-level="2" aria-hidden="true"><i></i><i></i><i></i><i></i></span></header>
+      <div class="activity-daily-options" role="group" aria-labelledby="activityRhythmTitle"><button type="button" class="activity-daily-item" data-action="selectDailyActivity" data-activity="1.2" aria-pressed="false"><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chair"></use></svg></span><span class="activity-choice-copy"><strong data-i18n="sedentary">Сидячий</strong><small data-i18n="activity_sedentary_hint">В основном за столом</small></span><span class="choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="activity-daily-item" data-action="selectDailyActivity" data-activity="1.375" aria-pressed="false"><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#footsteps"></use></svg></span><span class="activity-choice-copy"><strong data-i18n="light">Умеренный</strong><small data-i18n="activity_light_hint">Немного прогулок</small></span><span class="choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="activity-daily-item" data-action="selectDailyActivity" data-activity="1.55" aria-pressed="false"><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#activity"></use></svg></span><span class="activity-choice-copy"><strong data-i18n="moderate">Активный</strong><small data-i18n="activity_moderate_hint">Много движения</small></span><span class="choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="activity-daily-item" data-action="selectDailyActivity" data-activity="1.725" aria-pressed="false"><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#bolt"></use></svg></span><span class="activity-choice-copy"><strong data-i18n="very_active">Очень активный</strong><small data-i18n="activity_intense_hint">Весь день в движении</small></span><span class="choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button></div>
+    </section>
+    <section class="card activity-workout-card" data-i18n-label="workout" aria-label="Тренировка">
+      <div class="activity-workout-row"><button type="button" class="activity-workout-entry" data-action="openWorkout" aria-haspopup="dialog" aria-controls="workoutModal"><span class="choice-icon workout-entry-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#dumbbell"></use></svg></span><span><strong data-i18n="workout">Тренировка</strong><small id="activityWorkoutDetail" data-i18n="activity_workout_hint">Дополнительная нагрузка</small></span><svg class="icon workout-entry-chevron" aria-hidden="true"><use href="assets/icons/sprite.svg#chevron"></use></svg></button><label class="apple-switch"><input type="checkbox" id="activityWorkoutToggle" data-i18n-label="workout" aria-label="Тренировка"><span class="slider"></span></label></div>
+    </section>
+    <div class="activity-apply"><button type="button" class="btn-primary" data-action="applyDailyActivity"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg><span data-i18n="apply_today">Применить на сегодня</span></button><p data-i18n="activity_goal_hint">Нагрузка учитывается в дневной цели калорий</p></div>
   </div>
-</div><div id="analyticsPage" class="page" data-main-view hidden>
+</section><div id="analyticsPage" class="page" data-main-view hidden>
   <div class="card">
     <div>
       <h2 data-i18n="weight_log">Журнал веса</h2>
@@ -482,6 +462,19 @@
   </div>
 </dialog>
 
+  <dialog id="workoutModal" class="sheet workout-sheet" aria-labelledby="workoutTitle" data-swipe-close><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button>
+  <div class="workout-content">
+    <header class="workout-heading"><h2 id="workoutTitle" tabindex="-1" data-i18n="workout">Тренировка</h2></header>
+    <div class="workout-enable-row"><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#dumbbell"></use></svg></span><label for="workoutToggle" data-i18n="workout_include">Учитывать тренировку</label><label class="apple-switch"><input type="checkbox" id="workoutToggle" data-i18n-label="workout_include" aria-label="Учитывать тренировку" aria-controls="workoutSettings"><span class="slider"></span></label><span class="sr-only" id="workoutToggleLabel" data-i18n="off">Выкл</span></div>
+    <p class="workout-off-hint" id="workoutOffHint" data-i18n="workout_off_hint">Включи, чтобы учесть тренировку в целях питания и воды.</p>
+    <div id="workoutSettings" hidden>
+      <h3 id="workoutIntensityTitle" data-i18n="workout_intensity_short">Интенсивность</h3><p class="workout-section-hint" data-i18n="activity_choose">Выбери нагрузку на сегодня</p>
+      <div class="workout-intensity-options" id="workoutIntensityControl" role="group" aria-labelledby="workoutIntensityTitle"><button type="button" class="workout-option" data-action="selectWorkoutIntensity" data-value="light" data-intensity="light" aria-pressed="false"><span class="workout-level-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="workout-choice-copy"><strong data-i18n="workout_light">Лёгкая</strong><small data-i18n="workout_light_hint">Спокойный темп</small></span><span class="workout-choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="workout-option" data-action="selectWorkoutIntensity" data-value="moderate" data-intensity="moderate" aria-pressed="false"><span class="workout-level-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="workout-choice-copy"><strong data-i18n="workout_moderate">Умеренная</strong><small data-i18n="workout_moderate_hint">Средняя нагрузка</small></span><span class="workout-choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="workout-option" data-action="selectWorkoutIntensity" data-value="intense" data-intensity="intense" aria-pressed="false"><span class="workout-level-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="workout-choice-copy"><strong data-i18n="workout_intense">Интенсивная</strong><small data-i18n="workout_intense_hint">Высокая нагрузка</small></span><span class="workout-choice-check" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg></span><span class="selection-glint" aria-hidden="true"></span></button></div><input type="hidden" id="workoutIntensity" value="light">
+      <section class="workout-adjustments" aria-labelledby="workoutAdjustmentTitle"><h3 id="workoutAdjustmentTitle" data-i18n="workout_adjustments">Поправка к дневным целям</h3><div class="workout-adjustment-grid"><div><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#flame"></use></svg></span><span><small data-i18n="workout_food">Питание</small><strong><span aria-hidden="true">+</span><span id="workoutCalorieBonus">0</span></strong><small data-i18n="kcal">ккал</small></span></div><div><span class="choice-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#drop"></use></svg></span><span><small data-i18n="water_title">Вода</small><strong><span aria-hidden="true">+</span><span id="workoutWaterBonus">0</span></strong><small data-i18n="ml">мл</small></span></div></div></section>
+    </div>
+    <div class="workout-done"><button type="button" class="btn-primary" data-close="workoutModal" data-i18n="done">Готово</button></div>
+  </div>
+</dialog>
   <dialog id="smartSearchModal" class="sheet" aria-label="Умный поиск"><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button>
   <div>
     <h2 data-i18n="smart_search">Умный поиск</h2>

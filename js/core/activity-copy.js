@@ -1,0 +1,32 @@
+export const activityCopy = {
+  ru: {
+    activity_rhythm: 'Твой ритм дня', activity_choose: 'Выбери нагрузку на сегодня',
+    activity_sedentary_hint: 'В основном за столом', activity_light_hint: 'Немного прогулок',
+    activity_moderate_hint: 'Много движения', activity_intense_hint: 'Весь день в движении',
+    activity_workout_hint: 'Дополнительная нагрузка', activity_goal_hint: 'Нагрузка учитывается в дневной цели калорий',
+    workout_include: 'Учитывать тренировку', workout_intensity_short: 'Интенсивность',
+    workout_light_hint: 'Спокойный темп', workout_moderate_hint: 'Средняя нагрузка', workout_intense_hint: 'Высокая нагрузка',
+    workout_adjustments: 'Поправка к дневным целям', workout_food: 'Питание',
+    workout_off_hint: 'Включи, чтобы учесть тренировку в целях питания и воды.',
+  },
+  en: {
+    activity_rhythm: 'Your daily rhythm', activity_choose: 'Choose today’s activity level',
+    activity_sedentary_hint: 'Mostly at a desk', activity_light_hint: 'Some walking',
+    activity_moderate_hint: 'Plenty of movement', activity_intense_hint: 'On the move all day',
+    activity_workout_hint: 'Additional activity', activity_goal_hint: 'Activity is included in your daily calorie goal',
+    workout_include: 'Include a workout', workout_intensity_short: 'Intensity',
+    workout_light_hint: 'Easy pace', workout_moderate_hint: 'Moderate effort', workout_intense_hint: 'High effort',
+    workout_adjustments: 'Daily goal adjustment', workout_food: 'Nutrition',
+    workout_off_hint: 'Turn on to include a workout in your nutrition and water goals.',
+  },
+  cn: {
+    activity_rhythm: '你的日常节奏', activity_choose: '选择今天的活动量',
+    activity_sedentary_hint: '大部分时间坐着', activity_light_hint: '少量步行',
+    activity_moderate_hint: '经常活动', activity_intense_hint: '全天保持活动',
+    activity_workout_hint: '额外活动', activity_goal_hint: '活动量会计入每日热量目标',
+    workout_include: '计入训练', workout_intensity_short: '训练强度',
+    workout_light_hint: '轻松节奏', workout_moderate_hint: '中等负荷', workout_intense_hint: '高负荷',
+    workout_adjustments: '每日目标调整', workout_food: '饮食',
+    workout_off_hint: '开启后，将训练计入饮食和饮水目标。',
+  },
+};
