@@ -37,6 +37,6 @@ svg { display: block; }
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
 strong, .tabular { font-variant-numeric: tabular-nums; }
 .noscript-message { padding: 30px; text-align: center; }
-::selection { color: var(--text); background: rgb(22 207 243 / 25%); }
+::selection { color: var(--text); background: var(--tone-r22-207-243-a25, rgb(22 207 243 / 25%)); }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { border-radius: 6px; background: #2b3949; }

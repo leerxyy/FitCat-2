@@ -13,7 +13,7 @@ test('settings redesign preserves actions, language and PRO access with no redun
     await t.test('native data tiles, list rows, selected-language sheen and settings back navigation are present', () => {
       assert.equal(document.activeElement, $('settingsTitle')); assert.equal($('navDock').hidden, true);
       assert.equal($('settingsPage').querySelectorAll('.settings-data-action').length, 2);
-      for (const action of ['exportData', 'importData', 'showProductsManager', 'openAbout']) {
+      for (const action of ['exportData', 'importData', 'showProductsManager', 'openAbout', 'openAppearance']) {
         const button = $('settingsPage').querySelector(`[data-action="${action}"]`); assert.equal(button.tagName, 'BUTTON'); assert.ok(button.querySelector('svg'));
       }
       assert.equal($('settingsPage').querySelectorAll('.settings-language').length, 3);
@@ -24,7 +24,7 @@ test('settings redesign preserves actions, language and PRO access with no redun
       for (const [id, language, title] of [['En', 'en', 'App language'], ['Cn', 'cn', '应用语言'], ['Ru', 'ru', 'Язык приложения']]) {
         await click(`#settingsLang${id} span`); assert.equal(state.preferences.lang, language); assert.equal(env.localStorage.getItem('fitcat_lang'), language);
         assert.equal($('settingsLanguageTitle').textContent, title); assert.equal($('settingsPage').querySelectorAll('.settings-language.active').length, 1);
-        assert.equal($('settingsPage').querySelectorAll('.selection-glint').length, 5); assert.equal($('settingsPage').querySelectorAll('.settings-icon').length, 6);
+        assert.equal($('settingsPage').querySelectorAll('.selection-glint').length, 5); assert.equal($('settingsPage').querySelectorAll('.settings-icon').length, 7);
       }
     });
     await t.test('the vibration preference persists without Done; its test button follows the toggle', async () => {

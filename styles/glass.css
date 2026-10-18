@@ -4,13 +4,13 @@
 .ambient-plane::before { content: ""; position: absolute; inset: 0; }
 .ambient-far { transform: translate3d(calc(var(--parallax-x, 0px) * .45), calc(var(--parallax-y, 0px) * .45), 0); }
 .ambient-near { transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0); }
-.ambient-far::before { background: radial-gradient(ellipse 35% 48% at 75% 8%, rgb(0 119 190 / 27%), transparent 74%), radial-gradient(ellipse 30% 32% at 6% 62%, rgb(0 160 192 / 17%), transparent 75%), radial-gradient(ellipse 40% 32% at 95% 100%, rgb(18 73 137 / 21%), transparent 75%); animation: ambient-drift-far 29s ease-in-out infinite alternate; }
-.ambient-near::before { background: radial-gradient(ellipse 17% 48% at 43% 2%, rgb(0 146 209 / 19%), transparent 77%), radial-gradient(ellipse 24% 33% at 91% 61%, rgb(8 111 174 / 17%), transparent 77%), radial-gradient(ellipse 18% 25% at 8% 100%, rgb(0 188 217 / 13%), transparent 75%); animation: ambient-drift-near 37s ease-in-out infinite alternate; }
+.ambient-far::before { background: radial-gradient(ellipse 35% 48% at 75% 8%, var(--tone-r0-119-190-a27, rgb(0 119 190 / 27%)), transparent 74%), radial-gradient(ellipse 30% 32% at 6% 62%, var(--tone-r0-160-192-a17, rgb(0 160 192 / 17%)), transparent 75%), radial-gradient(ellipse 40% 32% at 95% 100%, var(--tone-r18-73-137-a21, rgb(18 73 137 / 21%)), transparent 75%); animation: ambient-drift-far 29s ease-in-out infinite alternate; }
+.ambient-near::before { background: radial-gradient(ellipse 17% 48% at 43% 2%, var(--tone-r0-146-209-a19, rgb(0 146 209 / 19%)), transparent 77%), radial-gradient(ellipse 24% 33% at 91% 61%, var(--tone-r8-111-174-a17, rgb(8 111 174 / 17%)), transparent 77%), radial-gradient(ellipse 18% 25% at 8% 100%, var(--tone-r0-188-217-a13, rgb(0 188 217 / 13%)), transparent 75%); animation: ambient-drift-near 37s ease-in-out infinite alternate; }
 
 .card, .glass, .glass-button, .sheet {
-  background: linear-gradient(135deg, rgb(206 232 255 / 8%), transparent 44%), linear-gradient(325deg, rgb(12 174 220 / 4%), transparent 65%), var(--glass-tint);
+  background: linear-gradient(135deg, var(--tone-r206-232-255-a8, rgb(206 232 255 / 8%)), transparent 44%), linear-gradient(325deg, var(--tone-r12-174-220-a4, rgb(12 174 220 / 4%)), transparent 65%), var(--glass-tint);
   border-color: var(--glass-edge);
-  box-shadow: inset 0 1px 1px rgb(222 246 255 / 19%), inset 1px 0 1px rgb(209 238 255 / 7%), inset 0 -1px 1px rgb(135 207 249 / 13%), 0 10px 30px rgb(0 4 12 / 19%), 0 0 24px var(--glass-glow);
+  box-shadow: inset 0 1px 1px var(--tone-r222-246-255-a19, rgb(222 246 255 / 19%)), inset 1px 0 1px var(--tone-r209-238-255-a7, rgb(209 238 255 / 7%)), inset 0 -1px 1px var(--tone-r135-207-249-a13, rgb(135 207 249 / 13%)), 0 10px 30px rgb(0 4 12 / 19%), 0 0 24px var(--glass-glow);
 }
 .glass-button, .scanner-button { position: relative; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -20,7 +20,7 @@
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
   .card::before, .glass::before, .glass-button::before {
     content: ""; position: absolute; inset: -1px; z-index: 2; padding: 1px; border-radius: inherit; pointer-events: none;
-    background: linear-gradient(135deg, rgb(233 250 255 / 76%), rgb(101 217 255 / 24%) 17%, transparent 37%, rgb(113 191 255 / 15%) 60%, rgb(126 224 255 / 56%) 83%, rgb(228 246 255 / 32%));
+    background: linear-gradient(135deg, rgb(233 250 255 / 76%), var(--tone-r101-217-255-a24, rgb(101 217 255 / 24%)) 17%, transparent 37%, var(--tone-r113-191-255-a15, rgb(113 191 255 / 15%)) 60%, var(--tone-r126-224-255-a56, rgb(126 224 255 / 56%)) 83%, rgb(228 246 255 / 32%));
     background-size: 220% 220%;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude;
@@ -30,34 +30,34 @@
 .sheet .card { --glass-tint: rgb(5 19 32 / 60%); -webkit-backdrop-filter: none; backdrop-filter: none; }
 .sheet .card::before { opacity: .35; }
 .card > h2, .section-heading { position: relative; z-index: 3; }
-.nutrition-card { --glass-glow: rgb(8 184 235 / 10%); }
+.nutrition-card { --glass-glow: var(--tone-r8-184-235-a10, rgb(8 184 235 / 10%)); }
 .nutrition-card::before { animation-delay: -5s; }
 .meals-card::before { animation-delay: -12s; }
 .water-card::before { animation-delay: -18s; }
-.profile-button { border-color: rgb(137 215 255 / 52%); box-shadow: inset 0 1px 3px rgb(213 242 255 / 30%), inset 0 -3px 9px rgb(27 144 212 / 15%), 0 0 17px rgb(29 176 235 / 17%); }
+.profile-button { border-color: var(--tone-r137-215-255-a52, rgb(137 215 255 / 52%)); box-shadow: inset 0 1px 3px var(--tone-r213-242-255-a30, rgb(213 242 255 / 30%)), inset 0 -3px 9px var(--tone-r27-144-212-a15, rgb(27 144 212 / 15%)), 0 0 17px var(--tone-r29-176-235-a17, rgb(29 176 235 / 17%)); }
 .profile-button, .text-button, .activity-daily-item, .segmented-option { transition: transform .3s var(--ease), background-color .3s ease, color .3s ease, box-shadow .35s ease; }
-.brand-mark { filter: drop-shadow(0 0 7px rgb(185 235 255 / 12%)); }
-.brand-accent { text-shadow: 0 0 18px rgb(22 207 243 / 23%); }
-.btn-primary { position: relative; overflow: hidden; background: linear-gradient(145deg, #32e0f6, #0cc6ec 66%, #15bde9); border: 1px solid rgb(178 244 255 / 47%); box-shadow: inset 0 2px 4px rgb(225 254 255 / 43%), inset 0 -3px 9px rgb(0 111 156 / 17%), 0 0 19px rgb(22 207 243 / 15%), 0 5px 20px rgb(0 148 196 / 12%); }
+.brand-mark { filter: drop-shadow(0 0 7px var(--tone-r185-235-255-a12, rgb(185 235 255 / 12%))); }
+.brand-accent { text-shadow: 0 0 18px var(--tone-r22-207-243-a23, rgb(22 207 243 / 23%)); }
+.btn-primary { position: relative; overflow: hidden; background: linear-gradient(145deg, var(--tone-h32e0f6, #32e0f6), var(--tone-h0cc6ec, #0cc6ec) 66%, var(--tone-h15bde9, #15bde9)); border: 1px solid var(--tone-r178-244-255-a47, rgb(178 244 255 / 47%)); box-shadow: inset 0 2px 4px rgb(225 254 255 / 43%), inset 0 -3px 9px var(--tone-r0-111-156-a17, rgb(0 111 156 / 17%)), 0 0 19px var(--tone-r22-207-243-a15, rgb(22 207 243 / 15%)), 0 5px 20px var(--tone-r0-148-196-a12, rgb(0 148 196 / 12%)); }
 .btn-primary::after { content: ""; position: absolute; inset: -70% auto -70% -50%; width: 35%; background: linear-gradient(90deg, transparent, rgb(236 255 255 / 18%), transparent); transform: rotate(18deg); pointer-events: none; animation: button-sheen 25s ease-in-out infinite; }
-.btn-primary:hover { background: linear-gradient(145deg, #54e8fb, #21d3f1 66%, #26c6ee); }
+.btn-primary:hover { background: linear-gradient(145deg, var(--tone-h54e8fb, #54e8fb), var(--tone-h21d3f1, #21d3f1) 66%, var(--tone-h26c6ee, #26c6ee)); }
 .btn-primary > * { position: relative; z-index: 1; }
-.btn-secondary, .btn-small, .activity-daily-item, .segmented-control { background-color: rgb(20 41 58 / 64%); border-color: rgb(160 207 239 / 18%); box-shadow: inset 0 1px rgb(220 243 255 / 6%); }
+.btn-secondary, .btn-small, .activity-daily-item, .segmented-control { background-color: rgb(20 41 58 / 64%); border-color: var(--tone-r160-207-239-a18, rgb(160 207 239 / 18%)); box-shadow: inset 0 1px var(--tone-r220-243-255-a6, rgb(220 243 255 / 6%)); }
 .btn-secondary:hover, .btn-small:hover { background-color: rgb(31 65 87 / 70%); }
 .icon-button.subtle { box-shadow: none; }
 .glass-button:hover { background-color: rgb(31 69 94 / 62%); }
-.macro-track i, .water-track > i { background: linear-gradient(100deg, #10c4e6, #41e3f4 38%, #16cff3 68%, #22d7f1); background-size: 200% 100%; animation: progress-sheen 14s ease-in-out infinite alternate; box-shadow: 0 0 10px rgb(22 207 243 / 25%); }
+.macro-track i, .water-track > i { background: linear-gradient(100deg, var(--tone-h10c4e6, #10c4e6), var(--tone-h41e3f4, #41e3f4) 38%, var(--tone-h16cff3, #16cff3) 68%, var(--tone-h22d7f1, #22d7f1)); background-size: 200% 100%; animation: progress-sheen 14s ease-in-out infinite alternate; box-shadow: 0 0 10px var(--tone-r22-207-243-a25, rgb(22 207 243 / 25%)); }
 .macro-track, .water-track { box-shadow: inset 0 1px 2px rgb(1 6 13 / 22%); }
-.bottom-nav { --glass-tint: rgb(10 31 48 / 66%); border-color: rgb(133 215 252 / 42%); box-shadow: inset 0 1px 2px rgb(231 250 255 / 33%), inset 0 -2px 7px rgb(72 178 232 / 10%), 0 9px 32px rgb(0 3 10 / 30%), 0 0 25px rgb(11 178 225 / 12%); }
+.bottom-nav { --glass-tint: rgb(10 31 48 / 66%); border-color: var(--tone-r133-215-252-a42, rgb(133 215 252 / 42%)); box-shadow: inset 0 1px 2px rgb(231 250 255 / 33%), inset 0 -2px 7px var(--tone-r72-178-232-a10, rgb(72 178 232 / 10%)), 0 9px 32px rgb(0 3 10 / 30%), 0 0 25px var(--tone-r11-178-225-a12, rgb(11 178 225 / 12%)); }
 .nav-item { transition: color .3s ease, transform .28s var(--ease); }
 .nav-item .icon { transition: filter .4s ease; }
-.nav-item.is-active .icon { filter: drop-shadow(0 0 6px rgb(22 207 243 / 36%)); }
-.nav-item.is-active::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 7px rgb(22 207 243 / 42%); }
+.nav-item.is-active .icon { filter: drop-shadow(0 0 6px var(--tone-r22-207-243-a36, rgb(22 207 243 / 36%))); }
+.nav-item.is-active::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 7px var(--tone-r22-207-243-a42, rgb(22 207 243 / 42%)); }
 .sheet::backdrop { background: rgb(2 9 17 / 53%); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
 .sheet.is-closing { pointer-events: none; }
-.meal-thumb { background: linear-gradient(145deg, rgb(64 126 156 / 27%), rgb(19 57 77 / 43%)); box-shadow: inset 0 1px rgb(225 247 255 / 12%); }
+.meal-thumb { background: linear-gradient(145deg, var(--tone-r64-126-156-a27, rgb(64 126 156 / 27%)), rgb(19 57 77 / 43%)); box-shadow: inset 0 1px rgb(225 247 255 / 12%); }
 .food-toggle, input, select, textarea { transition: border-color .3s ease, background-color .3s ease, box-shadow .3s ease; }
-.food-toggle.checked { box-shadow: 0 0 10px rgb(22 207 243 / 16%); }
-input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgb(22 207 243 / 9%); }
+.food-toggle.checked { box-shadow: 0 0 10px var(--tone-r22-207-243-a16, rgb(22 207 243 / 16%)); }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px var(--tone-r22-207-243-a9, rgb(22 207 243 / 9%)); }
 .is-removing { pointer-events: none; }
 @media (prefers-reduced-transparency: reduce) { .card, .glass, .glass-button, .sheet { --glass-tint: #122638; -webkit-backdrop-filter: none; backdrop-filter: none; } }

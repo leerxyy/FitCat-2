@@ -1,9 +1,10 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.14.2-r1';
+const VERSION = '3.15.0-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
+  'styles/appearance.css', 'js/core/appearance.js', 'js/core/appearance-copy.js', 'js/core/appearance-tones.js', 'js/features/appearance.js', 'assets/backgrounds/mountains.png',
   'styles/selection-lens.css', 'js/ui/selection-lens.js',
   'styles/today.css', 'js/ui/nav-lens.js',
   'styles/settings.css', 'js/core/settings-copy.js',

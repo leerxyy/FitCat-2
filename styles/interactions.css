@@ -3,13 +3,13 @@ button.icon-button.close-button {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px;
   width: 40px; min-width: 40px; height: 40px; min-height: 40px; max-width: 40px;
   padding: 9px; gap: 0; margin: 0; border-radius: 50%;
-  color: #b7d4ec; background: #16456655; border: 1px solid #9bd6ee30;
-  box-shadow: inset 0 1px 1px #d7f8ff0c;
+  color: var(--tone-hb7d4ec, #b7d4ec); background: #16456655; border: 1px solid var(--tone-h9bd6ee30, #9bd6ee30);
+  box-shadow: inset 0 1px 1px var(--tone-hd7f8ff0c, #d7f8ff0c);
   transition: background-color .22s ease, border-color .22s ease, color .22s ease, transform .22s var(--ease);
 }
 button.icon-button.close-button .icon { width: 21px; height: 21px; stroke-width: 1.7; }
 @media (hover: hover) and (pointer: fine) {
-  button.icon-button.close-button:hover { color: #ecfaff; background: #1d526c70; border-color: #94e2f94a; }
+  button.icon-button.close-button:hover { color: #ecfaff; background: #1d526c70; border-color: var(--tone-h94e2f94a, #94e2f94a); }
 }
 button.icon-button.close-button:active { transform: scale(.92); }
 
@@ -19,13 +19,13 @@ button.icon-button.close-button:active { transform: scale(.92); }
 .surface-feedback.surface-pressed { scale: .993; }
 .surface-feedback > .surface-light {
   position: absolute; display: block; inset: -1px; z-index: 4; margin: 0; padding: 0;
-  border: 1px solid #91eaff; border-radius: inherit; pointer-events: none; user-select: none;
+  border: 1px solid var(--tone-h91eaff, #91eaff); border-radius: inherit; pointer-events: none; user-select: none;
   opacity: var(--surface-light, 0); transition: opacity .38s ease, background-position .18s ease-out; background: none;
 }
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
   .surface-feedback > .surface-light {
     border: 0; padding: 1.5px;
-    background-image: radial-gradient(170px circle, #e0fcffed 0%, #5fe2ffb8 22%, #33bfff38 55%, transparent 100%);
+    background-image: radial-gradient(170px circle, var(--tone-he0fcffed, #e0fcffed) 0%, var(--tone-h5fe2ffb8, #5fe2ffb8) 22%, var(--tone-h33bfff38, #33bfff38) 55%, transparent 100%);
     background-size: 340px 340px; background-repeat: no-repeat;
     background-position: calc(var(--surface-x, 0px) - 170px) calc(var(--surface-y, 0px) - 170px);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor;

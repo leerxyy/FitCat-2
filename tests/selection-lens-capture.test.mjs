@@ -42,7 +42,7 @@ function capturedTrack(id) {
     get chosen() { return chosen; }, close() { controller.dispose(); env.restoreTimers(); } };
 }
 
-for (const id of ['bottomNav', 'profileGenderControl', 'profileGoalControl', 'settingsLanguageControl', 'statisticsSwitch']) {
+for (const id of ['bottomNav', 'profileGenderControl', 'profileGoalControl', 'settingsLanguageControl', 'statisticsSwitch', 'appearanceTabs', 'appearanceMotionControl']) {
   test(`a swipe starting on a real ${id} button survives the implicit-to-explicit capture transfer`, () => {
     const h = capturedTrack(id);
     try {
