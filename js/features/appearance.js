@@ -23,6 +23,9 @@ export function applyAppearance() {
   const previous=applied.get(root);
   if(previous?.signature===signature)return settings;
   const palette=ACCENTS[settings.accent], timing=appearanceTimings(settings);
+  // Higher transparency is also clearer glass. Keep this material unchanged
+  // when a drag ends or storage flushes; toggling blur caused an opaque flash.
+  const glassBlur=Number(((70-settings.transparency)*8/55).toFixed(2));
   // Accent tones are precomputed in CSS: no hundreds of synchronous root writes.
   const data={appearanceReady:'',accent:settings.accent,background:settings.background,backgroundEffect:settings.effect,
     backgroundAnimation:settings.animation&&settings.intensity>0?'on':'off',parallax:settings.parallax&&settings.depth>0?'on':'off',
@@ -30,7 +33,9 @@ export function applyAppearance() {
   for(const [name,value] of Object.entries(data))if(root.dataset[name]!==value)root.dataset[name]=value;
   const factor={calm:1.12,standard:1,expressive:1.18}[settings.motion];
   const variables={ '--accent':palette.color, '--accent-strong':palette.strong, '--accent-rgb':appearanceRGB(settings.accent).join(' '), '--accent-wash':`rgba(${appearanceRGB(settings.accent).join(',')},.13)`,
-    '--appearance-glass-alpha':String(Number((1-settings.transparency/100).toFixed(2))), '--appearance-sheet-alpha':String(Number(Math.min(.97,1-settings.transparency/100+.31).toFixed(2))), '--appearance-glow-alpha':String(settings.glow/100*.26), '--glass-glow':`rgba(${appearanceRGB(settings.accent).join(',')},${settings.glow/100*.26})`,
+    '--appearance-glass-alpha':String(Number((1-settings.transparency/100).toFixed(2))), '--appearance-sheet-alpha':String(Number(Math.min(.97,1-settings.transparency/100+.31).toFixed(2))),
+    '--appearance-glass-filter':glassBlur?`blur(${glassBlur}px) saturate(115%)`:'none', '--appearance-sheet-filter':glassBlur?`blur(${Number((glassBlur*1.6).toFixed(2))}px) saturate(115%)`:'none',
+    '--appearance-glow-alpha':String(settings.glow/100*.26), '--glass-glow':`rgba(${appearanceRGB(settings.accent).join(',')},${settings.glow/100*.26})`,
     '--wallpaper-dim':String(settings.dimming/100), '--wallpaper-blur':`${settings.blur/10}px`, '--wallpaper-filter':settings.blur?`blur(${settings.blur/10}px)`:'none', '--effect-opacity':String(settings.intensity/100), '--background-duration':`${timing.background}ms`,
     '--shine-duration':`${timing.glint}ms`, '--shine-tile-duration':`${timing.glint*5/3}ms`, '--shine-scanner-duration':`${timing.glint*17/12}ms`, '--shine-outline-duration':`${timing.glint*4}ms`, '--shine-edge-duration':`${timing.glint*23/6}ms`, '--shine-button-duration':`${timing.glint*25/6}ms`,
     '--motion-press':`${140*factor}ms`, '--motion-screen':`${420*factor}ms`, '--motion-panel':`${300*factor}ms`, '--motion-close':`${200*factor}ms`,
