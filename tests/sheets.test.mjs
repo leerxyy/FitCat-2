@@ -11,6 +11,16 @@ function pointer(target, name, x, y, at, extra = {}) {
   target.dispatchEvent(event); return event;
 }
 function frame() { const pending = [...frames.values()]; frames.clear(); for (const callback of pending) callback(performance.now()); }
+function touch(target, name, y, at, { x = 100, cancelable = true, fingers = 1 } = {}) {
+  const point = { identifier: 7, clientX: x, clientY: y };
+  const list = items => Object.assign({ length: items.length, item: index => items[index] || null }, items);
+  const event = new Event(name, { bubbles: true, cancelable });
+  Object.defineProperties(event, {
+    touches: { value: list(name === 'touchend' || name === 'touchcancel' ? [] : Array.from({ length: fingers }, (_, i) => ({ ...point, identifier: 7 + i }))) },
+    changedTouches: { value: list([point]) }, timeStamp: { value: at },
+  });
+  target.dispatchEvent(event); return event;
+}
 function open(id) {
   const dialog = $(id); dialog.showModal();
   document.dispatchEvent(new CustomEvent('fitcat:dialogopen', { detail: { id } }));
@@ -89,4 +99,53 @@ test('resize cancels a gesture; keyboard activation works with reduced motion an
   assert.equal(initSheetGestures(() => assert.fail('duplicate listener')), dispose);
   const click = new Event('click', { bubbles: true }); Object.defineProperty(click, 'detail', { value: 0 }); handle.dispatchEvent(click);
   assert.deepEqual(closed, [{ id: 'subscriptionDialog', options: undefined }]);
+});
+test('a touch pull on a title closes once without requiring a touch on the handle', () => {
+  const { dialog } = open('foodEntryModal'); const title = $('foodDialogTitle');
+  pointer(title, 'pointerdown', 100, 100, 0, { pointerType: 'touch' });
+  touch(title, 'touchstart', 100, 0);
+  pointer(title, 'pointercancel', 100, 100, 10, { pointerType: 'touch' });
+  const move = touch(title, 'touchmove', 270, 400); frame(); touch(title, 'touchend', 270, 500);
+  pointer(title, 'pointerup', 100, 270, 500, { pointerType: 'touch' });
+  assert.equal(move.defaultPrevented, true);
+  assert.deepEqual(closed, [{ id: dialog.id, options: { fromY: 170 } }]);
+});
+test('content keeps scrolling until the top, then a continuing pull uses only travel beyond that boundary', () => {
+  const { dialog } = open('aboutModal'); const content = $('aboutContent'); dialog.scrollTop = 130;
+  touch(content, 'touchstart', 100, 0);
+  const scrolling = touch(content, 'touchmove', 220, 300); frame();
+  assert.equal(scrolling.defaultPrevented, false); assert.equal(dialog.classList.contains('is-dragging'), false);
+  dialog.scrollTop = 0; const pulling = touch(content, 'touchmove', 300, 600); frame();
+  assert.equal(pulling.defaultPrevented, true); assert.equal(dialog.style.getPropertyValue('--sheet-drag'), '80px');
+  touch(content, 'touchmove', 420, 800); frame(); touch(content, 'touchend', 420, 900);
+  assert.deepEqual(closed, [{ id: 'aboutModal', options: { fromY: 200 } }]);
+});
+test('a nested scroller, an upward movement and editable controls keep native touch behaviour', () => {
+  const { dialog } = open('aboutModal'); const content = $('aboutContent'); content.scrollTop = 70;
+  touch(content, 'touchstart', 100, 0); const nested = touch(content, 'touchmove', 300, 200); touch(content, 'touchend', 300, 300);
+  assert.equal(nested.defaultPrevented, false); assert.equal(dialog.classList.contains('is-dragging'), false);
+  content.scrollTop = 0; touch(content, 'touchstart', 300, 400); const up = touch(content, 'touchmove', 100, 500); touch(content, 'touchend', 100, 600);
+  assert.equal(up.defaultPrevented, false); assert.equal(closed.length, 0);
+  open('foodEntryModal');
+  touch($('foodName'), 'touchstart', 100, 700); const field = touch($('foodName'), 'touchmove', 320, 800); touch($('foodName'), 'touchend', 320, 900);
+  assert.equal(field.defaultPrevented, false); assert.equal(closed.length, 0);
+});
+test('browser-owned pans, selected text and multitouch cannot accidentally close the window', () => {
+  const { dialog } = open('aboutModal'); const content = $('aboutContent');
+  touch(content, 'touchstart', 100, 0); touch(content, 'touchmove', 280, 200, { cancelable: false }); touch(content, 'touchend', 280, 300);
+  assert.equal(closed.length, 0); assert.equal(dialog.classList.contains('is-dragging'), false);
+  window.getSelection = () => ({ isCollapsed: false });
+  touch(content, 'touchstart', 100, 400); touch(content, 'touchmove', 280, 500); touch(content, 'touchend', 280, 600);
+  assert.equal(closed.length, 0); delete window.getSelection;
+  touch(content, 'touchstart', 100, 700); touch(content, 'touchmove', 280, 800); frame();
+  touch(content, 'touchstart', 280, 810, { fingers: 2 }); touch(content, 'touchend', 280, 850);
+  assert.equal(closed.length, 0); assert.equal(dialog.classList.contains('is-dragging'), false);
+});
+test('a short content pull returns and does not swallow an independent button click', () => {
+  const { dialog } = open('foodEntryModal'); const title = $('foodDialogTitle');
+  touch(title, 'touchstart', 100, 0); touch(title, 'touchmove', 150, 300); frame(); touch(title, 'touchend', 150, 400);
+  assert.equal(closed.length, 0); assert.equal(dialog.animations.length, 1);
+  const button = $('foodForm').querySelector('button'); let clicks = 0; button.addEventListener('click', () => ++clicks);
+  const click = new Event('click', { bubbles: true, cancelable: true }); Object.defineProperty(click, 'detail', { value: 1 }); button.dispatchEvent(click);
+  assert.equal(click.defaultPrevented, false); assert.equal(clicks, 1);
 });

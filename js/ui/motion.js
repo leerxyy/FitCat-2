@@ -1,6 +1,6 @@
 // Shared timings keep numbers, progress, navigation and list changes in step.
 export const EASE = 'cubic-bezier(.22, 1, .36, 1)';
-export const MOTION = Object.freeze({ press: 140, screen: 280, panel: 300, close: 200, value: 600, list: 320 });
+export const MOTION = Object.freeze({ press: 140, screen: 420, panel: 300, close: 200, value: 600, list: 320 });
 let batchTime;
 const waterWaves = new WeakMap();
 const tweens = new WeakMap();
@@ -102,9 +102,10 @@ export function switchViews(views, index, direction = 1) {
   if (!outgoing || outgoing === incoming || reducedMotion() || typeof incoming?.animate !== 'function') return;
   const start = visualState(outgoing, { opacity: 1, transform: 'translateX(0)' });
   cancelEntrance(outgoing);
+  const distance = Math.min(64, Math.max(40, (incoming.getBoundingClientRect?.().width || 390) * .14));
   outgoing.hidden = false; outgoing.classList.add('view-leaving');
-  const leave = play(outgoing, [start, { opacity: 0, transform: `translateX(${-direction * 10}px)` }], { duration: MOTION.close });
-  enter(incoming, { x: direction * 14, y: 0, duration: MOTION.screen });
+  const leave = play(outgoing, [start, { opacity: 0, transform: `translateX(${-direction * distance * .7}px)` }], { duration: 320 });
+  enter(incoming, { x: direction * distance, y: 0, duration: MOTION.screen });
   const clean = () => { leave?.cancel(); outgoing.hidden = true; outgoing.classList.remove('view-leaving'); };
   tabTransition = clean;
   if (leave) leave.finished.then(() => { if (tabTransition === clean) { clean(); tabTransition = null; } }, () => {});

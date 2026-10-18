@@ -10,7 +10,7 @@ test('water conditions, gestures and friend transfers share PRO access without b
   const $ = id => document.getElementById(id);
   const originalVideoCount = document.querySelectorAll('video').length;
   const click = async selector => { const node = document.querySelector(selector); assert.ok(node, selector); node.click(); await tick(); await tick(); };
-  const closeSub = () => click('[data-subscription-panel="overview"] [data-close="subscriptionDialog"]');
+  const closeSub = () => click('#subscriptionDialog [data-sheet-handle]');
   let cameraRequests = 0; let stoppedTracks = 0; let closedModels = 0; let pendingCamera;
   const oldHands = globalThis.Hands;
   globalThis.Hands = class {
@@ -66,13 +66,13 @@ test('water conditions, gestures and friend transfers share PRO access without b
       await click('#smartWaterConditions .pro-feature-text'); assert.equal(state.preferences.smartWaterEnabled, false);
       await click('#smartWaterConditions'); assert.equal(state.preferences.smartWaterEnabled, true);
       assert.equal($('smartWaterConditions').getAttribute('aria-pressed'), 'true'); assert.equal($('subscriptionDialog').open, false);
-      await click('.smart-water-heading [data-action="closeSmartWater"]');
+      await click('#smartWaterModal [data-sheet-handle]');
       await click('#walletBadge'); await click('[data-action="walletTransfer"]');
       assert.equal(document.querySelector('[data-wallet-panel="transfer"]').hidden, false);
       const before = env.localStorage.getItem('fitcat_wallet_v1');
       $('walletRecipient').value = '81234567890'; $('walletTransferAmount').value = '25'; submit($('walletTransferForm'));
       assert.match($('walletTransferResult').textContent, /пока недоступны/); assert.equal(env.localStorage.getItem('fitcat_wallet_v1'), before);
-      await click('[data-wallet-panel="transfer"] [data-close="walletDialog"]'); assert.equal(getWallet().snapshot().balance, 0);
+      await click('#walletDialog [data-sheet-handle]'); assert.equal(getWallet().snapshot().balance, 0);
     });
 
     await t.test('a camera permission request that finishes after PRO expiry releases the stream and model', async () => {

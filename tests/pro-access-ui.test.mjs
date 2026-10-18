@@ -17,7 +17,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
   });
   const $ = id => document.getElementById(id);
   const click = async selector => { const node = document.querySelector(selector); assert.ok(node, selector); node.click(); await tick(); await tick(); };
-  const closeSubscription = () => click('[data-subscription-panel="overview"] [data-close="subscriptionDialog"]');
+  const closeSubscription = () => click('#subscriptionDialog [data-sheet-handle]');
   const originalFetch = globalThis.fetch; const originalChart = globalThis.Chart;
   const charts = [];
   globalThis.Chart = class { constructor(context, config) { this.config = config; charts.push(this); } destroy() { this.destroyed = true; } };
@@ -84,7 +84,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
       assert.equal($('waterGoal').textContent, '2,37 л'); assert.match(pastRow().textContent, /91/); assert.equal(pastRow().querySelector('.history-macro-lock'), null);
       await click('[data-subscription-panel="success"] [data-close="subscriptionDialog"]');
       await click('[data-action="openSmartWater"]'); assert.equal($('smartWaterModal').open, true); assert.equal($('subscriptionDialog').open, false);
-      await click('.smart-water-heading [data-action="closeSmartWater"]');
+      await click('#smartWaterModal [data-sheet-handle]');
       for (const metric of ['protein', 'fat', 'carbs']) {
         await click(`[data-action="switchNutritionChart"][data-value="${metric}"]`);
         assert.equal($('subscriptionDialog').open, false); assert.equal(document.querySelector(`[data-nutrition="${metric}"]`).classList.contains('active'), true);
@@ -109,7 +109,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
       assert.equal($('waterGoal').textContent, '1,82 л'); assert.ok(pastRow().querySelector('.history-macro-lock'));
       assert.equal(document.querySelector('[data-nutrition="kcal"]').classList.contains('active'), true);
       releaseWeather(); await tick(); await tick(); assert.equal(state.weather.daily, null); assert.equal(state.preferences.currentTemp, 27);
-      assert.equal(state.templates.length, 5); assert.equal(state.preferences.smartWaterEnabled, true); await click('.smart-water-heading [data-action="closeSmartWater"]');
+      assert.equal(state.templates.length, 5); assert.equal(state.preferences.smartWaterEnabled, true); await click('#smartWaterModal [data-sheet-handle]');
     });
 
     await t.test('saved templates remain usable after expiry, and new templates still require PRO', async () => {

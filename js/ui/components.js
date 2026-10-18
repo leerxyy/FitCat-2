@@ -49,8 +49,8 @@ export function openDialog(id) {
   else dialog.setAttribute('open', '');
   document.dispatchEvent(new CustomEvent('fitcat:dialogopen', { detail: { id } }));
   document.body.classList.add('dialog-open');
-  const heading = $(dialog.getAttribute('aria-labelledby'));
-  if (heading?.getAttribute('tabindex') === '-1') heading.focus({ preventScroll: true });
+  const heading = $(dialog.getAttribute('aria-labelledby')) || dialog.querySelector('h2');
+  if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
   enter(dialog, { y: 20 });
 }
 

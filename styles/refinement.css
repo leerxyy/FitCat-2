@@ -4,7 +4,7 @@
   --radius: 24px;
   --radius-small: 15px;
   --motion-press: 140ms;
-  --motion-screen: 280ms;
+  --motion-screen: 420ms;
   --motion-panel: 300ms;
   --motion-close: 200ms;
   --glass-glow: rgb(17 193 238 / 7%);
@@ -43,14 +43,27 @@ button.icon-button.close-button:active { transform: scale(.94); }
 dialog[open]::backdrop { animation-duration: var(--motion-panel); }
 dialog.is-closing::backdrop { animation-duration: var(--motion-close); }
 
-/* The handle is a real button: tap/keyboard closes, drag only starts here. */
+/* Tap or keyboard closes; pulling from non-interactive content also works at top. */
 .sheet-handle { position: sticky; top: -12px; z-index: 20; display: flex; align-items: center; justify-content: center; width: 76px; min-height: 32px; height: 32px; padding: 0; margin: -8px auto 4px; border: 0; border-radius: 999px; color: #a8c5db; background: transparent; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.sheet-handle, .sheet-handle * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
 .sheet-handle > span { display: block; width: 38px; height: 4px; border-radius: 99px; background: #a8c5db6b; transition: background-color 180ms ease, width 180ms var(--ease); pointer-events: none; }
-.sheet-handle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sheet-handle:focus, .sheet-handle:focus-visible { outline: none; }
+.keyboard-navigation .sheet-handle:focus-visible > span { background: var(--accent); box-shadow: 0 0 0 3px #16cff338; }
+.sheet-heading, .smart-water-heading, [data-swipe-close] h2 { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+[data-swipe-close] .smart-water-heading { grid-template-columns: 1fr; }
+[data-swipe-close] .smart-water-heading > span { display: none; }
 .sheet-handle:active > span { width: 43px; background: #c4e8ffc4; }
 .sheet.is-dragging { transform: translate3d(0, var(--sheet-drag, 0px), 0); transition: none; will-change: transform; }
 .sheet.is-dragging .sheet-handle { cursor: grabbing; }
 #smartWaterModal > .smart-water-content { min-height: calc(100% - 28px); }
+
+/* Native dialogs otherwise anchor to the layout viewport behind the keyboard. */
+.sheet.keyboard-sheet { --keyboard-gap: 8px; position: absolute; inset: calc(var(--visible-top, 0px) + var(--keyboard-gap)) 0 auto; width: min(100%, 560px); height: calc(var(--visible-height, 100dvh) - var(--keyboard-gap)); max-height: calc(var(--visible-height, 100dvh) - var(--keyboard-gap)); margin: 0 auto; scroll-padding: 52px 0 20px; }
+.sheet.keyboard-sheet .autocomplete-list { max-height: min(200px, calc(var(--visible-height, 100dvh) * .4)); }
+.sheet.keyboard-sheet .field { scroll-margin-top: 54px; }
+.subscription-price > svg.coin-icon { display: block; flex: 0 0 20px; min-width: 20px; width: 20px; height: 20px; overflow: visible; filter: none; }
+.subscription-period > .subscription-price { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 359px) { .subscription-price > svg.coin-icon { flex-basis: 17px; min-width: 17px; width: 17px; height: 17px; } }
 
 /* A single traveling light is bounded by the filled, segmented water track. */
 .water-track > i { position: relative; overflow: hidden; border-radius: inherit; }

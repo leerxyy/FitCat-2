@@ -103,6 +103,35 @@ test('pinch zoom keeps its own viewport and is never forced back to the origin',
   } finally { h.close(); }
 });
 
+test('the food form fits above the keyboard and reveals the name with room for search results', () => {
+  const h = harness();
+  try {
+    const sheet = document.getElementById('foodEntryModal'); const name = document.getElementById('foodName');
+    const app = document.getElementById('appScroller'); sheet.showModal(); sheet.scrollTop = 0; app.scrollTop = 420;
+    sheet.getBoundingClientRect = () => ({ top: 188, bottom: 630, height: 442 });
+    name.getBoundingClientRect = () => ({ top: 650 - sheet.scrollTop, bottom: 698 - sheet.scrollTop, height: 48 });
+    h.focus(name); h.viewport.height = 450; h.viewport.offsetTop = 180; h.event(h.viewport, 'resize');
+    assert.equal(sheet.classList.contains('keyboard-sheet'), true); assert.equal(h.root.style.getPropertyValue('--visible-height'), '450px');
+    const rect = name.getBoundingClientRect(); assert.ok(rect.top >= 236); assert.ok(rect.bottom + 120 <= 612);
+    const scroll = sheet.scrollTop; h.event(h.viewport, 'scroll'); assert.equal(sheet.scrollTop, scroll);
+    assert.equal(app.scrollTop, 420); assert.equal(h.root.style.getPropertyValue('--app-height'), '800px');
+    assert.equal(h.dock.classList.contains('keyboard-open'), true);
+  } finally { h.close(); }
+});
+test('keyboard layout leaves closed sheets and restores the normal sheet after dismissal', () => {
+  const h = harness();
+  try {
+    const sheet = document.getElementById('foodEntryModal'); const other = document.getElementById('walletDialog');
+    sheet.showModal(); h.focus(document.getElementById('foodName')); h.viewport.height = 450; h.event(h.viewport, 'resize');
+    assert.equal(sheet.classList.contains('keyboard-sheet'), true); assert.equal(other.classList.contains('keyboard-sheet'), false);
+    sheet.close(); document.activeElement = document.body; h.event(document, 'fitcat:dialogclose');
+    assert.equal(sheet.classList.contains('keyboard-sheet'), false);
+    h.viewport.height = 800; h.viewport.offsetTop = 0; h.event(h.viewport, 'resize'); h.settle();
+    assert.equal(h.dock.classList.contains('keyboard-open'), false); assert.equal(h.root.style.getPropertyValue('--visible-height'), '800px');
+    assert.equal(h.root.style.getPropertyValue('--visible-top'), '0px');
+  } finally { h.close(); }
+});
+
 
 test('a cold iPhone launch immediately covers the physical screen without requiring rotation', async () => {
   const h=harness({configure({root,viewport}) {

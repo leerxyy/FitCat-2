@@ -18,6 +18,28 @@ export function initDock() {
     if (element?.isContentEditable || element?.tagName === 'TEXTAREA') return true;
     return element?.tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'submit', 'file', 'hidden', 'color'].includes(element.type || element.getAttribute?.('type'));
   };
+  const fitSheet = visible => {
+    const input = document.activeElement;
+    const focusedSheet = editable(input) ? input.closest?.('dialog.sheet') : null;
+    for (const sheet of document.querySelectorAll('dialog.sheet')) {
+      const keep = keyboard && sheet.open && (sheet === focusedSheet || (!focusedSheet && sheet.classList.contains('keyboard-sheet')));
+      sheet.classList.toggle('keyboard-sheet', keep);
+    }
+    if (!keyboard || !focusedSheet?.open || typeof input.getBoundingClientRect !== 'function') return;
+    const bounds = focusedSheet.getBoundingClientRect?.(); const field = input.getBoundingClientRect();
+    if (!bounds?.height || !field.height) return;
+    const offsetTop = Math.max(0, viewport?.offsetTop || 0);
+    const top = Math.max(bounds.top + 48, offsetTop + 48);
+    const bottom = Math.min(bounds.bottom, offsetTop + visible) - 18;
+    const room = bottom - top;
+    if (room <= field.height) return;
+    const before = Math.min(24, (room - field.height) / 4);
+    // Leave useful space below the product name for the first search results.
+    const after = input.id === 'foodName' ? Math.min(120, room - field.height - before) : before;
+    const move = field.top - before < top ? field.top - before - top
+      : field.bottom + after > bottom ? field.bottom + after - bottom : 0;
+    if (Math.abs(move) > 1) focusedSheet.scrollTop = Math.max(0, (focusedSheet.scrollTop || 0) + move);
+  };
   const update = () => {
     frame = 0;
     // Pinch zoom keeps its own viewport and scroll position.
@@ -40,9 +62,10 @@ export function initDock() {
       root.style.setProperty('--app-height', `${fullHeight}px`);
       root.style.setProperty('--visible-height', `${keyboard ? visible : fullHeight}px`);
       root.style.setProperty('--visible-top', `${keyboard ? Math.max(0, viewport?.offsetTop || 0) : 0}px`);
-      const size = `${currentWidth}:${fullHeight}`;
+      const size = `${currentWidth}:${fullHeight}:${keyboard ? visible : fullHeight}:${keyboard ? viewport?.offsetTop || 0 : 0}`;
       if (lastSize !== size) { lastSize = size; document.dispatchEvent(new Event('fitcat:viewport')); }
     }
+    fitSheet(visible);
     dock.classList.toggle('keyboard-open', keyboard);
     if (!keyboard) {
       // Only undo browser root pan; preserve the app/dialog's scroll position.
