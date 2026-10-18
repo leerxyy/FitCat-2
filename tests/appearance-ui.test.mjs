@@ -91,7 +91,7 @@ test('Appearance integrates all mockup controls with live app styles, storage, P
   await t.test('motion presets and segmented keyboard navigation keep one selected tab',async()=>{
    await click('#appearanceStyleTab');await choice('motion','calm');assert.equal(root.dataset.uiMotion,'calm');await choice('motion','expressive');assert.equal(root.dataset.uiMotion,'expressive');
    const event=new Event('keydown',{bubbles:true,cancelable:true});event.key='End';$('appearanceTabs').dispatchEvent(event);
-   assert.equal($('appearanceEffectsPanel').hidden,false);assert.equal(document.activeElement,$('appearanceEffectsTab'));
+   assert.equal($('appearanceAudioPanel').hidden,false);assert.equal(document.activeElement,$('appearanceAudioTab'));
    assert.equal($('appearanceTabs').querySelectorAll('[aria-selected="true"]').length,1);
   });
   await t.test('the device-tilt switch requests permission from the gesture, waits for real data and handles denial',async()=>{

@@ -62,3 +62,12 @@ test('account deletion clears appearance but keeps another application and walle
  const adapter=storage({another_app:'keep',fitcat_wallet_v1:'wallet'});loadState(adapter);setAppearance(THEME_PRESETS.amethyst);clearAccount();
  assert.equal(adapter.getItem(APPEARANCE_KEY),null);assert.equal(adapter.getItem('another_app'),'keep');assert.equal(adapter.getItem('fitcat_wallet_v1'),'wallet');
 });
+test('audio opt-in, style and volume survive reload and backup while old records default to silence',()=>{
+ const adapter=storage({fitnessProfile:JSON.stringify(profile),[APPEARANCE_KEY]:JSON.stringify({transparency:70,background:'mountains'})});loadState(adapter);
+ assert.equal(state.appearance.soundEnabled,false);assert.equal(state.appearance.soundStyle,'glass');assert.equal(state.appearance.soundVolume,25);
+ setAppearance({...state.appearance,soundEnabled:true,soundStyle:'velvet',soundVolume:38});loadState(adapter);
+ assert.equal(state.appearance.soundEnabled,true);assert.equal(state.appearance.soundStyle,'velvet');assert.equal(state.appearance.soundVolume,38);
+ const backup=structuredClone(exportSnapshot());setAppearance(APPEARANCE_DEFAULTS);importSnapshot(backup);loadState(adapter);
+ assert.equal(state.appearance.soundStyle,'velvet');assert.equal(state.appearance.transparency,70);assert.equal(state.appearance.soundVolume,38);
+ const sanitized=normalizeAppearance({soundEnabled:'yes',soundStyle:'https://example.com/track',soundVolume:500});assert.equal(sanitized.soundEnabled,false);assert.equal(sanitized.soundStyle,'glass');assert.equal(sanitized.soundVolume,100);
+});
