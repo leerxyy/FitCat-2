@@ -8,7 +8,7 @@ export const premiumCopy = {
     pro_gestures_detail: 'Управляй приложением через камеру: переключай вкладки и добавляй воду.',
     pro_transfers_detail: 'Отправка коинов друзьям — функция PRO+. Переводы между устройствами пока недоступны.',
     pro_macro_locked: 'БЖУ · PRO+', pro_open_macros: 'БЖУ за прошлые дни', pro_templates_saved: 'сохранено',
-    pro_subscription_features: 'Учитывать условия в умной воде, история и графики БЖУ, шаблоны без ограничений и управление жестами. В Basic доступны 3 шаблона, обычный учёт воды, калории, вес и БЖУ за сегодня. Переводы коинов друзьям относятся к PRO+, но пока недоступны. ИИ и персональные планы готовятся к запуску.',
+    pro_subscription_features: 'Учитывать условия в умной воде, история и графики БЖУ, шаблоны без ограничений и управление жестами. В Basic доступны 3 шаблона, обычный учёт воды, калории, вес и БЖУ за сегодня. Переводы коинов друзьям относятся к PRO+, но пока недоступны. Темы «Аметист», «Северное сияние» и фоны «Аврора», «Космос» входят в PRO+. ИИ и персональные планы готовятся к запуску.',
   },
   en: {
     'pro_feature_smart-water': 'Smart water', 'pro_feature_macro-history': 'Macro history', pro_feature_templates: 'More templates', pro_feature_gestures: 'Gesture control', pro_feature_transfers: 'Send to a friend',
@@ -19,7 +19,7 @@ export const premiumCopy = {
     pro_gestures_detail: 'Control the app through your camera: switch tabs and add water.',
     pro_transfers_detail: 'Sending coins to friends is a PRO+ feature. Transfers between devices are not available yet.',
     pro_macro_locked: 'Macros · PRO+', pro_open_macros: 'Macros from previous days', pro_templates_saved: 'saved',
-    pro_subscription_features: 'Smart-water conditions, macro charts and history, unlimited templates, and gesture control. Basic includes 3 templates, ordinary water tracking, calories, weight and today’s macros. Coin transfers are part of PRO+ but are not available yet. AI and personal plans are in development.',
+    pro_subscription_features: 'Smart-water conditions, macro charts and history, unlimited templates, and gesture control. Basic includes 3 templates, ordinary water tracking, calories, weight and today’s macros. Coin transfers are part of PRO+ but are not available yet. Amethyst and Northern lights themes, and Aurora and Cosmos backgrounds, are included in PRO+. AI and personal plans are in development.',
   },
   cn: {
     'pro_feature_smart-water': '智能饮水', 'pro_feature_macro-history': '营养素历史', pro_feature_templates: '更多模板', pro_feature_gestures: '手势控制', pro_feature_transfers: '发送给好友',
@@ -30,6 +30,6 @@ export const premiumCopy = {
     pro_gestures_detail: '通过摄像头操作应用：切换页面及添加饮水记录。',
     pro_transfers_detail: '向好友发送金币属于 PRO+ 功能。跨设备转账暂未开放。',
     pro_macro_locked: '营养素 · PRO+', pro_open_macros: '往日营养素', pro_templates_saved: '已保存',
-    pro_subscription_features: '智能饮水条件、营养素图表与历史、不限数量的模板和手势控制。Basic 提供 3 个模板、普通饮水记录、热量、体重和今日营养素。好友金币转账属于 PRO+，但暂未开放。AI 及个人计划正在开发中。',
+    pro_subscription_features: '智能饮水条件、营养素图表与历史、不限数量的模板和手势控制。Basic 提供 3 个模板、普通饮水记录、热量、体重和今日营养素。好友金币转账属于 PRO+，但暂未开放。PRO+ 还包含紫水晶、北极光主题及极光、宇宙背景。AI 及个人计划正在开发中。',
   },
 };

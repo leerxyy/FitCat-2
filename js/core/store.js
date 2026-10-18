@@ -1,6 +1,7 @@
 import { localDate, nutritionTotal, calculateTargets } from './math.js';
 import { emptyWeather, normalizeWeather } from './weather.js';
 import { hasProAccess, mayCreateTemplate } from './access.js';
+import { APPEARANCE_KEY, APPEARANCE_DEFAULTS, normalizeAppearance } from './appearance.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
@@ -8,6 +9,7 @@ const KEYS = {
   nutrition: 'nutritionHistory', products: 'fitcat_products', templates: 'fitcat_templates',
   friends: 'fitcat_friends', uid: 'fitcat_myUid', photo: 'profilePhoto',
   weather: 'fitcat_weather_v1', photoEdit: 'fitcat_photo_edit_v1',
+  appearance: APPEARANCE_KEY,
 };
 const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
@@ -37,6 +39,7 @@ export const state = {
   friends: [], uid: '', photo: '', photoEdit: null, water: 0, lastDate: '', streak: 0,
   preferences: { ...DEFAULTS },
   weather: emptyWeather(),
+  appearance: { ...APPEARANCE_DEFAULTS },
 };
 let storage;
 
@@ -69,6 +72,7 @@ export function loadState(adapter = globalThis.localStorage) {
   }
   state.preferences = normalizePreferences(state.preferences);
   state.weather = normalizeWeather(readJSON(KEYS.weather, null));
+  state.appearance = normalizeAppearance(readJSON(KEYS.appearance, null));
   if (state.preferences.waterTemperatureMode === 'auto' && state.weather.daily) {
     state.preferences.currentTemp = state.weather.daily.temperature;
   }
@@ -137,6 +141,7 @@ export function persist({ nutrition = false } = {}) {
     if (PREF_KEYS[key]) storage.setItem(PREF_KEYS[key], String(value));
   }
   storage.setItem(KEYS.weather, JSON.stringify(state.weather));
+  storage.setItem(KEYS.appearance, JSON.stringify(state.appearance));
   storage.setItem('waterAmount', String(state.water));
   storage.setItem('lastDate', state.lastDate || new Date().toDateString());
 }
@@ -146,6 +151,13 @@ export function persist({ nutrition = false } = {}) {
 export function setProfile(profile) {
   storage.setItem(KEYS.profile, JSON.stringify(profile));
   state.profile = profile;
+}
+
+export function setAppearance(value) {
+  const next = normalizeAppearance(value);
+  storage.setItem(KEYS.appearance, JSON.stringify(next));
+  state.appearance = next;
+  return next;
 }
 
 function normalizePhotoEdit(value) {
@@ -179,6 +191,7 @@ export function exportSnapshot() {
     settings: state.preferences, friends: state.friends, uid: state.uid, photo: state.photo, photoEdit: state.photoEdit,
     water: state.water, lastDate: state.lastDate,
     weather: state.weather,
+    appearance: state.appearance,
   };
 }
 
@@ -214,6 +227,7 @@ export function importSnapshot(data) {
     photo: typeof data.photo === 'string' && (!data.photo || /^data:image\/(jpeg|png|webp);base64,/.test(data.photo)) ? data.photo : state.photo,
     preferences: normalizePreferences({ ...state.preferences, ...data.settings }),
     weather: normalizeWeather(data.weather),
+    appearance: normalizeAppearance(data.appearance ?? state.appearance),
     water: Math.max(0, Number(data.water) || 0),
     lastDate: typeof data.lastDate === 'string' && !Number.isNaN(new Date(data.lastDate).getTime()) ? data.lastDate : new Date().toDateString(),
   };

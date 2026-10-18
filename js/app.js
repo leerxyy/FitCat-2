@@ -20,6 +20,8 @@ import { ensureDailyWeather } from './features/weather.js';
 import { initSurfaces } from './ui/surfaces.js';
 import { stopWeatherRequest } from './features/weather.js';
 import { batchMotion } from './ui/motion.js';
+import { initAppearance, renderAppearance } from './features/appearance.js';
+import { effectiveAppearance } from './core/appearance.js';
 
 let previousAccess;
 let pendingRender;
@@ -38,6 +40,7 @@ function render() {
   pendingRender?.(); pendingRender = null;
   const scroller = $('appScroller'); const top = scroller?.scrollTop;
   batchMotion(() => {
+    renderAppearance();
     renderPreferences(); renderIdentity(); renderTemplates(); renderSubscription();
     if (state.profile) { renderSummary(); renderFoods(); renderAnalytics(); if (activeTab === 2) renderCharts(); }
   });
@@ -66,7 +69,7 @@ function start() {
   loadState();
   previousAccess = proAccess();
   rollDay(); updateStreak();
-  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAmbient(); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
+  initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initAppearance(); initAmbient(effectiveAppearance(state.appearance, proAccess())); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
   initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');

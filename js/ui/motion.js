@@ -15,6 +15,10 @@ export function reducedMotion() {
   return Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 }
 
+function motionFactor() {
+  return { calm: 1.12, standard: 1, expressive: 1.18 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1;
+}
+
 export function batchMotion(run) {
   const previous = batchTime; batchTime = performance.now();
   try { return run(); } finally { batchTime = previous; }
@@ -31,6 +35,7 @@ export function tweenValue(element, target, render, { duration = MOTION.value, i
   tweens.set(element, job);
   if (reducedMotion() || from === target) { job.current = target; render(target); return; }
   const start = batchTime ?? performance.now();
+  duration *= motionFactor();
   render(from); liveTweens.add(job);
   const tick = now => {
     const progress = Math.max(0, Math.min(1, (now - start) / duration));
@@ -59,7 +64,7 @@ export function animateProgress(element, fraction, kind = 'bar') {
 export function play(element, keyframes, options = {}) {
   if (!element || reducedMotion() || typeof element.animate !== 'function') return null;
   try {
-    const animation = element.animate(keyframes, { duration: MOTION.panel, easing: EASE, fill: 'none', ...options });
+    const animation = element.animate(keyframes, { duration: MOTION.panel, easing: EASE, fill: 'none', ...options, duration: (options.duration ?? MOTION.panel) * motionFactor() });
     animation.finished.catch(() => {});
     return animation;
   } catch { return null; }
@@ -77,6 +82,8 @@ function visualState(element, fallback) {
 
 export function enter(element, { x = 0, y = 10, delay = 0, duration = MOTION.panel } = {}) {
   if (!element) return;
+  const distance = { calm: .45, standard: 1, expressive: 1.3 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1;
+  x *= distance; y *= distance;
   const previous = entrances.get(element);
   const first = previous ? visualState(element, { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` }) : { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` };
   cancelEntrance(element);

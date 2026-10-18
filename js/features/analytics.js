@@ -8,6 +8,7 @@ import { enter, play, cancelEntrance, tweenValue, captureLayout, animateList, MO
 import { requirePro } from '../ui/premium.js';
 import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { haptic } from '../ui/haptics.js';
+import { appearanceColor, effectiveAppearance } from '../core/appearance.js';
 
 let weightChart;
 let nutritionChart;
@@ -189,13 +190,14 @@ export async function renderCharts() {
   if (version !== drawVersion || activeTab !== 2 || statisticsView !== name || document.body.dataset.screen !== 'mainPage') return;
   // Expiry can occur while the chart library is loading.
   updateControls(); setChartStatus(name, '');
+  const chartAccent = effectiveAppearance(state.appearance, proAccess()).accent;
   if (name === 'weight') {
     weightChart?.destroy();
     const context = $('weightChart').getContext('2d');
-    const gradient = context.createLinearGradient(0, 0, 0, 240); gradient.addColorStop(0, 'rgba(22,207,243,.22)'); gradient.addColorStop(1, 'rgba(22,207,243,0)');
+    const gradient = context.createLinearGradient(0, 0, 0, 240); gradient.addColorStop(0, appearanceColor(chartAccent,.22)); gradient.addColorStop(1, appearanceColor(chartAccent,0));
     weightChart = new Chart(context, {
       type: 'line', data: { labels: entries.map(entry => formatDate(entry.date)), datasets: [
-        { label: `${t('stats_weight')}, ${t('kg')}`, data: entries.map(entry => entry.weight), borderColor: '#16CFF3', borderWidth: 2, backgroundColor: gradient, fill: true, tension: .35, pointRadius: entries.length > 20 ? 0 : 3, pointHitRadius: 18, pointBackgroundColor: '#59e7fa', pointBorderWidth: 0 },
+        { label: `${t('stats_weight')}, ${t('kg')}`, data: entries.map(entry => entry.weight), borderColor: appearanceColor(chartAccent), borderWidth: 2, backgroundColor: gradient, fill: true, tension: .35, pointRadius: entries.length > 20 ? 0 : 3, pointHitRadius: 18, pointBackgroundColor: appearanceColor(chartAccent), pointBorderWidth: 0 },
         { label: t('target'), data: entries.map(() => goalWeight()), borderColor: '#8494A8', borderDash: [5, 5], borderWidth: 1, pointRadius: 0, fill: false },
       ] }, options: chartOptions(),
     });
@@ -203,7 +205,7 @@ export async function renderCharts() {
     nutritionChart?.destroy();
     const options = chartOptions(); options.scales.y.beginAtZero = true; options.scales.y.ticks.precision = 0;
     nutritionChart = new Chart($('nutritionChart').getContext('2d'), {
-      type: 'bar', data: { labels: entries.map(entry => formatDate(entry.date)), datasets: [{ label: `${t(nutritionMetric === 'kcal' ? 'calories' : nutritionMetric)}, ${t(nutritionMetric === 'kcal' ? 'kcal' : 'g')}`, data: entries.map(entry => entry[nutritionMetric] || 0), backgroundColor: 'rgba(22,207,243,.65)', hoverBackgroundColor: '#42def6', borderRadius: 6, maxBarThickness: 26 }] }, options,
+      type: 'bar', data: { labels: entries.map(entry => formatDate(entry.date)), datasets: [{ label: `${t(nutritionMetric === 'kcal' ? 'calories' : nutritionMetric)}, ${t(nutritionMetric === 'kcal' ? 'kcal' : 'g')}`, data: entries.map(entry => entry[nutritionMetric] || 0), backgroundColor: appearanceColor(chartAccent,.65), hoverBackgroundColor: appearanceColor(chartAccent), borderRadius: 6, maxBarThickness: 26 }] }, options,
     });
   }
 }
