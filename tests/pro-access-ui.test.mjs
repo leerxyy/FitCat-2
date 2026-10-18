@@ -29,7 +29,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
     await import('../js/app.js');
     const { state, proAccess } = await import('../js/core/store.js');
     const { getWallet } = await import('../js/features/wallet.js');
-    const pastRow = () => document.querySelector(`[data-action="deleteNutritionEntry"][data-value="${past}"]`).closest('.history-item');
+    const pastRow = () => document.querySelector(`#nutritionHistoryList [data-history-date="${past}"]`);
     const saveTemplate = async name => {
       await click('[data-action="openMealTools"]'); await click('#saveTemplateButton');
       assert.equal($('promptDialog').open, true); $('promptInput').value = name; submit($('promptForm')); await tick(); await tick();
@@ -55,6 +55,7 @@ test('PRO feature badges, Basic gates, checkout, expiry and retained templates w
       assert.equal($('subscriptionDialog').open, true); assert.equal($('smartWaterModal').open, false);
       assert.equal($('proFeatureTitle').textContent, 'Умная вода'); assert.match($('subscriptionPurchase').textContent, /Оформить/); await closeSubscription();
       await click('[data-tab="analytics"]');
+      await click('[data-statistics="nutrition"]');
       for (const metric of ['protein', 'fat', 'carbs']) {
         await click(`[data-action="switchNutritionChart"][data-value="${metric}"]`);
         assert.equal($('subscriptionDialog').open, true); assert.equal($('proFeatureTitle').textContent, 'История БЖУ');

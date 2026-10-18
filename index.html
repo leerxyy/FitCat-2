@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="styles/premium.css">
   <link rel="stylesheet" href="styles/refinement.css">
   <link rel="stylesheet" href="styles/activity.css">
+  <link rel="stylesheet" href="styles/statistics.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -117,89 +118,25 @@
     </section>
     <div class="activity-apply"><button type="button" class="btn-primary" data-action="applyDailyActivity"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg><span data-i18n="apply_today">Применить на сегодня</span></button><p data-i18n="activity_goal_hint">Нагрузка учитывается в дневной цели калорий</p></div>
   </div>
-</section><div id="analyticsPage" class="page" data-main-view hidden>
-  <div class="card">
-    <div>
-      <h2 data-i18n="weight_log">Журнал веса</h2>
-      <button class="btn-small" data-i18n="set_goal" type="button" data-action="setWeightGoal">Задать цель</button>
+</section><section id="analyticsPage" class="page" data-main-view hidden>
+  <div class="stats-view-switch" id="statisticsSwitch" role="tablist" data-i18n-label="stats_section" aria-label="Раздел статистики"><button type="button" id="statsWeightButton" role="tab" data-action="switchStatistics" data-statistics="weight" aria-controls="weightStatisticsPanel" aria-selected="true" tabindex="0" class="stats-mode active"><span data-i18n="stats_weight">Вес</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" id="statsNutritionButton" role="tab" data-action="switchStatistics" data-statistics="nutrition" aria-controls="nutritionStatisticsPanel" aria-selected="false" tabindex="-1" class="stats-mode"><span data-i18n="stats_nutrition">Питание</span><span class="selection-glint" aria-hidden="true"></span></button></div>
+  <div class="statistics-panels" id="statisticsPanels">
+    <div class="stats-panel active" id="weightStatisticsPanel" role="tabpanel" aria-labelledby="statsWeightButton">
+      <section class="card stats-weight-card" aria-labelledby="statsCurrentWeightTitle">
+        <div class="stats-weight-top"><span class="stats-feature-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#scale"></use></svg></span><div class="stats-weight-reading"><h2 id="statsCurrentWeightTitle" data-i18n="stats_current_weight">Текущий вес</h2><p><strong id="currentWeightStat">0</strong><span data-i18n="kg">кг</span></p></div><button type="button" class="stats-goal-button" data-action="setWeightGoal"><span><span data-i18n="target">Цель</span> <strong id="weightGoalValue">0 кг</strong></span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#edit"></use></svg></button></div>
+        <div class="stats-weight-summary"><div><span data-i18n="stats_start">Старт</span><strong id="startWeightStat">0 кг</strong></div><div><span data-i18n="stats_change">Изменение</span><strong id="weightChangeStat">0 кг</strong></div><div><span data-i18n="stats_to_goal">До цели</span><strong id="toGoalStat">0 кг</strong></div></div>
+      </section>
+      <section class="card stats-bmi-card" aria-labelledby="statsBMITitle"><span class="stats-feature-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#user"></use></svg></span><div><h2 id="statsBMITitle" data-i18n="stats_bmi">ИМТ</h2><strong id="bmiValue">0</strong></div><span id="bmiCategory" class="stats-bmi-category"></span></section>
+      <button type="button" class="btn-primary stats-add-weight" data-action="openWeightEntry" aria-haspopup="dialog" aria-controls="weightEntryModal"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#plus"></use></svg><span data-i18n="add_weight">Добавить запись веса</span></button>
+      <section class="card stats-history-card" aria-labelledby="statsWeightHistoryTitle"><h2 id="statsWeightHistoryTitle" data-i18n="stats_weight_history">История веса</h2><div class="chart-frame" id="weightChartFrame" hidden><canvas id="weightChart" role="img" data-i18n-label="stats_weight_chart" aria-label="Динамика веса"></canvas></div><div id="weightChartStatus" class="stats-chart-status" role="status" hidden></div><div id="weightHistoryList" class="stats-history-list"></div></section>
     </div>
-    <div id="weightStats">
-      <div class="flex">
-        <div>
-          <div class="text-small" data-i18n="start_weight">Старт</div>
-          <div id="startWeightStat">---</div>
-        </div>
-        <div>
-          <div class="text-small" data-i18n="current_weight">Сейчас</div>
-          <div id="currentWeightStat">---</div>
-        </div>
-        <div>
-          <div class="text-small" data-i18n="change">Изменение</div>
-          <div id="weightChangeStat">---</div>
-        </div>
-        <div>
-          <div class="text-small" data-i18n="to_goal">До цели</div>
-          <div id="toGoalStat">---</div>
-        </div>
-      </div>
-    </div>
-    <div class="bmi-container">
-      <div class="bmi-header">
-        <span class="bmi-value" id="bmiValue">---</span>
-        <span class="bmi-category" id="bmiCategory">---</span>
-      </div>
-      <div class="bmi-scale" id="bmiScale" data-action="showBMITooltip">
-        <div class="bmi-gradient"></div>
-        <div class="bmi-marker" id="bmiMarker"></div>
-        <div class="bmi-tooltip" id="bmiTooltip">Норма</div>
-      </div>
-      <div class="bmi-labels">
-        <span>16</span>
-        <span>18.5</span>
-        <span>25</span>
-        <span>30</span>
-        <span>35</span>
-        <span>40</span>
-      </div>
-    </div>
-    <div class="weight-entry">
-      <input type="number" id="newWeight" data-i18n-placeholder="weight" placeholder="Вес" step="0.1" min="30" max="500" inputmode="decimal" aria-label="Вес">
-      <input type="date" id="weightDate" aria-label="weightDate" data-i18n-label="weight_date">
-      <button class="btn-small" type="button" data-action="addWeightEntry" data-i18n-label="add_weight"><span data-i18n="add_weight">Добавить запись веса</span></button>
-    </div>
-    <div class="chart-frame"><canvas id="weightChart"></canvas></div><div id="weightChartStatus" class="chart-status" hidden></div>
-    <button class="journal-header" data-action="toggleJournal" data-value="weightHistory" type="button">
-      <h3 data-i18n="weight_history">История веса</h3>
-    </button>
-    <div class="journal-content" id="weightHistoryContent">
-      <div id="weightHistoryList"></div>
+    <div class="stats-panel" id="nutritionStatisticsPanel" role="tabpanel" aria-labelledby="statsNutritionButton" aria-hidden="true" hidden inert>
+      <div class="card stats-metrics" role="group" data-i18n-label="stats_metric" aria-label="Показатель питания"><button type="button" class="stats-metric active" data-action="switchNutritionChart" data-value="kcal" data-nutrition="kcal" aria-pressed="true"><span data-i18n="calories">Калории</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="stats-metric" data-action="switchNutritionChart" data-value="protein" data-nutrition="protein" aria-pressed="false" data-pro-feature="macro-history" data-pro-label="protein"><span data-i18n="protein">Белки</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="stats-metric" data-action="switchNutritionChart" data-value="fat" data-nutrition="fat" aria-pressed="false" data-pro-feature="macro-history" data-pro-label="fat"><span data-i18n="fat">Жиры</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="stats-metric" data-action="switchNutritionChart" data-value="carbs" data-nutrition="carbs" aria-pressed="false" data-pro-feature="macro-history" data-pro-label="carbs"><span data-i18n="carbs">Углеводы</span><span class="selection-glint" aria-hidden="true"></span></button></div>
+      <section class="card stats-nutrition-chart" aria-labelledby="nutritionChartTitle"><header class="stats-chart-heading"><h2 id="nutritionChartTitle">Калории за неделю</h2><label class="stats-period"><span class="sr-only" data-i18n="stats_period">Период</span><select id="nutritionPeriod"><option value="7" data-i18n="stats_days_7">7 дней</option><option value="30" data-i18n="stats_days_30">30 дней</option><option value="all" data-i18n="stats_days_all">Всё время</option></select><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chevron"></use></svg></label></header><div class="chart-frame" id="nutritionChartFrame" hidden><canvas id="nutritionChart" role="img" aria-labelledby="nutritionChartTitle"></canvas></div><div id="nutritionChartStatus" class="stats-chart-status" role="status" hidden></div></section>
+      <section class="card stats-history-card" aria-labelledby="statsNutritionHistoryTitle"><h2 id="statsNutritionHistoryTitle" data-i18n="stats_nutrition_history">История питания</h2><div id="nutritionHistoryList" class="stats-history-list"></div><button type="button" id="macroHistoryAccess" class="macro-history-access" data-action="openMacroHistory" data-pro-feature="macro-history" data-pro-label="pro_open_macros"><span data-i18n="pro_open_macros">БЖУ за прошлые дни</span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chevron"></use></svg></button></section>
     </div>
   </div>
-  <div class="card">
-    <h2 data-i18n="nutrition_journal">Журнал питания</h2>
-    <div class="nutrition-switch">
-      <button class="btn-small active" data-nutrition="kcal" type="button" data-action="switchNutritionChart" data-value="kcal">
-        <span data-i18n="calories">Калории</span>
-      </button>
-      <button class="btn-small" data-nutrition="protein" type="button" data-action="switchNutritionChart" data-value="protein" data-pro-feature="macro-history" data-pro-label="protein">
-        <span data-i18n="protein">Белки</span>
-      </button>
-      <button class="btn-small" data-nutrition="fat" type="button" data-action="switchNutritionChart" data-value="fat" data-pro-feature="macro-history" data-pro-label="fat">
-        <span data-i18n="fat">Жиры</span>
-      </button>
-      <button class="btn-small" data-nutrition="carbs" type="button" data-action="switchNutritionChart" data-value="carbs" data-pro-feature="macro-history" data-pro-label="carbs">
-        <span data-i18n="carbs">Углеводы</span>
-      </button>
-    </div>
-    <div class="chart-frame"><canvas id="nutritionChart"></canvas></div><div id="nutritionChartStatus" class="chart-status" hidden></div>
-    <button class="journal-header" data-action="toggleJournal" data-value="nutritionHistory" type="button">
-      <h3 data-i18n="nutrition_history">История питания</h3>
-    </button>
-    <div class="journal-content" id="nutritionHistoryContent">
-      <button type="button" id="macroHistoryAccess" class="macro-history-access" data-action="openMacroHistory" data-pro-feature="macro-history" data-pro-label="pro_open_macros"><span data-i18n="pro_open_macros">БЖУ за прошлые дни</span></button><div id="nutritionHistoryList"></div>
-    </div>
-  </div>
-</div><div id="friendsPage" class="page" data-main-view hidden>
+</section><div id="friendsPage" class="page" data-main-view hidden>
   <div class="card">
     <h2 data-i18n="friends_title">Друзья</h2>
     <div>
@@ -475,6 +412,8 @@
     <div class="workout-done"><button type="button" class="btn-primary" data-close="workoutModal" data-i18n="done">Готово</button></div>
   </div>
 </dialog>
+  <dialog id="weightEntryModal" class="sheet compact-sheet stats-entry-sheet" aria-labelledby="weightEntryTitle" data-swipe-close><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button><header class="sheet-heading"><h2 id="weightEntryTitle" data-i18n="add_weight">Добавить запись веса</h2></header><p class="stats-entry-hint" data-i18n="stats_entry_hint">Запиши измерение — график и сводка обновятся.</p><form id="weightEntryForm"><div class="field"><label for="newWeight" data-i18n="stats_weight_kg">Вес, кг</label><input type="number" id="newWeight" min="30" max="500" step="0.1" inputmode="decimal" placeholder="52,0" required></div><div class="field"><label for="weightDate" data-i18n="weight_date">Дата измерения веса</label><input type="date" id="weightDate" required></div><button type="submit" class="btn-primary" id="saveWeightEntry"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg><span data-i18n="save">Сохранить</span></button></form></dialog>
+<dialog id="statsRecordModal" class="sheet compact-sheet stats-record-sheet" aria-labelledby="statsRecordTitle" data-swipe-close><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button><header class="sheet-heading"><h2 id="statsRecordTitle" data-i18n="stats_record">Запись</h2></header><p class="stats-record-description" id="statsRecordDescription"></p><button type="button" class="btn-secondary danger-text" id="deleteStatsRecord" data-action="deleteStatsRecord"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg><span data-i18n="stats_delete_record">Удалить запись</span></button><button type="button" class="text-button" data-close="statsRecordModal" data-i18n="cancel">Отмена</button></dialog>
   <dialog id="smartSearchModal" class="sheet" aria-label="Умный поиск"><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button>
   <div>
     <h2 data-i18n="smart_search">Умный поиск</h2>

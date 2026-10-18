@@ -74,7 +74,8 @@ test('the real app modules load old data and wire diary, water, language, profil
       assert.deepEqual(weight.options.data.datasets[0].data, [82, 81]);
     });
     await t.test('deleting a sorted history row removes its date rather than the old array index', async () => {
-      await click('[data-action="deleteWeightEntry"][data-value="2026-10-10"]'); assert.equal($('confirmDialog').open, true);
+      await click('[data-action="openStatsRecord"][data-record-kind="weight"][data-value="2026-10-10"]');
+      await click('#deleteStatsRecord'); assert.equal($('confirmDialog').open, true);
       $('confirmAccept').click(); await tick(); assert.deepEqual(state.weight, [{ date: '2026-10-01', weight: 82 }]);
     });
     await t.test('profile, settings and all language versions remain reachable', async () => {
