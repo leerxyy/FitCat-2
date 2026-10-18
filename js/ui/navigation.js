@@ -32,7 +32,7 @@ export function updateHeading() {
   $('pageSubtitle').textContent = activeTab === 0 ? date[0].toUpperCase() + date.slice(1) : t(subtitles[activeTab]);
 }
 
-export function showScreen(id) {
+export function showScreen(id, { x = 0, y = 10, duration = MOTION.panel } = {}) {
   const previous = document.body.dataset.screen;
   for (const screen of document.querySelectorAll('[data-screen-view]')) screen.hidden = screen.id !== id;
   document.body.dataset.screen = id;
@@ -40,7 +40,7 @@ export function showScreen(id) {
   $('navDock').hidden = id !== 'mainPage';
   document.dispatchEvent(new CustomEvent('fitcat:screen', { detail: id }));
   const scroller = $('appScroller'); if (scroller) scroller.scrollTop = 0;
-  if (previous !== id) enter($(id), { y: 10, duration: MOTION.panel });
+  if (previous !== id) enter($(id), { x, y, duration });
 }
 
 export function initNavigation() {

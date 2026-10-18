@@ -1,23 +1,40 @@
 import { state, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../core/store.js';
-import { t } from '../core/i18n.js';
+import { t, locale, number } from '../core/i18n.js';
 import { localDate } from '../core/math.js';
-import { $, icon, initials, onAction, changed, toast, confirmAction } from '../ui/components.js';
-import { showScreen } from '../ui/navigation.js';
+import { $, icon, initials, escapeHTML, onAction, changed, toast, confirmAction } from '../ui/components.js';
+import { showScreen, showTab } from '../ui/navigation.js';
+import { enter, MOTION } from '../ui/motion.js';
+import { initProfileSwipe } from '../ui/profile-swipe.js';
 
-export function renderIdentity() {
-  const header = $('headerPhoto');
-  header.replaceChildren();
+const avatars = new WeakMap();
+let photoVersion = 0;
+
+function renderAvatar(element, initialLabel = '', animate = false) {
+  const previous = avatars.get(element);
+  if (previous?.photo === state.photo && previous?.initialLabel === initialLabel && element.children.length) return;
+  avatars.set(element, { photo: state.photo, initialLabel }); element.replaceChildren();
   if (state.photo) {
-    const image = document.createElement('img'); image.src = state.photo; image.alt = '';
-    header.append(image);
-  } else header.innerHTML = icon('user');
-  $('profileUidDisplay').textContent = state.uid;
-  $('streakCount').textContent = state.streak;
+    const image = document.createElement('img'); image.src = state.photo; image.alt = ''; element.append(image);
+  } else if (initialLabel) {
+    const label = document.createElement('span'); label.className = 'profile-initials'; label.textContent = initialLabel; element.append(label);
+  } else element.innerHTML = icon('user');
+  if (animate) enter(element.firstElementChild || element.children[0], { y: 0, duration: MOTION.panel });
+}
+
+export function renderIdentity({ animatePhoto = false } = {}) {
+  renderAvatar($('headerPhoto'));
+  renderAvatar($('profilePhoto'), initials(state.profile?.name), animatePhoto);
+  $('profilePhoto').setAttribute('aria-label', t('photo_hint'));
+  $('profilePhotoDelete').hidden = !state.photo;
+  $('profileUidDisplay').textContent = state.uid.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1 $2 $3 $4');
+  const plural = new Intl.PluralRules(locale()).select(state.streak);
+  $('profileStreakText').innerHTML = escapeHTML(t('profile_streak_' + plural)).replace('{count}', `<strong id="streakCount">${number(state.streak)}</strong>`);
 }
 
 export function setSegment(target, value) {
   $(target).value = value;
   const container = $(target + 'Control');
+  if (target === 'profileGender') container?.style.setProperty('--segment-index', value === 'male' ? 1 : 0);
   if (container) container.querySelectorAll('.segmented-option').forEach(button => {
     const active = button.dataset.value === value;
     button.classList.toggle('active', active);
@@ -28,16 +45,16 @@ export function setSegment(target, value) {
 function renderProfile() {
   if (!state.profile) return;
   for (const key of ['name', 'age', 'height', 'weight']) $('profile' + key[0].toUpperCase() + key.slice(1)).value = state.profile[key] ?? '';
-  setSegment('profileGender', state.profile.gender);
-  setSegment('profileGoal', state.profile.goal || 'lose');
-  $('profilePhoto').replaceChildren();
-  if (state.photo) {
-    const image = document.createElement('img'); image.src = state.photo; image.alt = t('profile'); $('profilePhoto').append(image);
-  } else {
-    const label = document.createElement('span'); label.className = 'profile-initials'; label.textContent = initials(state.profile.name); $('profilePhoto').append(label);
-  }
-  $('profilePhoto').setAttribute('role', 'button'); $('profilePhoto').tabIndex = 0;
-  $('profilePhoto').setAttribute('aria-label', t('photo_hint'));
+  setSegment('profileGender', state.profile.gender === 'male' ? 'male' : 'female');
+  setSegment('profileGoal', ['lose', 'maintain', 'gain'].includes(state.profile.goal) ? state.profile.goal : 'lose');
+  renderIdentity();
+  $('profileTitle').focus({ preventScroll: true });
+  $('profileForm').querySelectorAll('.card').forEach((card, index) => enter(card, { y: 10, delay: index * 45, duration: MOTION.screen }));
+}
+
+function backToToday() {
+  document.activeElement?.blur?.();
+  showTab('today'); showScreen('mainPage', { x: -28, y: 0, duration: MOTION.screen });
 }
 
 function collectProfile(prefix) {
@@ -48,19 +65,22 @@ function collectProfile(prefix) {
 }
 
 async function uploadPhoto(file) {
+  const request = ++photoVersion;
   if (!file || !file.type.startsWith('image/')) { toast(t('photo_error')); return; }
   if (file.size > 3 * 1024 * 1024) { toast(t('photo_too_large')); return; }
-  const url = URL.createObjectURL(file);
+  let url;
   try {
+    url = URL.createObjectURL(file);
     const image = new Image();
     await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; image.src = url; });
+    if (request !== photoVersion || !state.profile) return;
     const canvas = document.createElement('canvas');
     const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
     canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale);
     const context = canvas.getContext('2d'); context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    setPhoto(canvas.toDataURL('image/jpeg', .84)); renderIdentity(); renderProfile(); toast(t('saved'));
-  } catch (error) { console.error(error); toast(t('photo_error')); }
-  finally { URL.revokeObjectURL(url); }
+    setPhoto(canvas.toDataURL('image/jpeg', .84)); renderIdentity({ animatePhoto: true }); toast(t('saved'));
+  } catch (error) { if (request === photoVersion) { console.error(error); toast(t('photo_error')); } }
+  finally { if (url) URL.revokeObjectURL(url); }
 }
 
 export function initProfile() {
@@ -81,15 +101,16 @@ export function initProfile() {
     const profile = collectProfile('profile');
     if (!profile.name) { $('profileName').focus(); return; }
     state.profile = { ...state.profile, ...profile, goal: $('profileGoal').value };
-    changed(); renderIdentity(); showScreen('mainPage'); toast(t('saved'));
+    changed(); renderIdentity(); backToToday(); toast(t('saved'));
   });
-  onAction('showProfile', () => { renderProfile(); showScreen('profilePage'); });
+  onAction('showProfile', () => { if (state.profile) showScreen('profilePage', { x: 28, y: 0, duration: MOTION.screen }); });
+  onAction('profileBackToToday', backToToday);
+  initProfileSwipe($('profilePage'), backToToday);
   onAction('showPage', button => showScreen(button.dataset.value));
   document.addEventListener('fitcat:screen', event => { if (event.detail === 'profilePage') renderProfile(); });
   onAction('uploadPhoto', () => $('photoInput').click());
-  $('profilePhoto').addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); $('photoInput').click(); } });
-  $('photoInput').addEventListener('change', event => { uploadPhoto(event.target.files[0]); event.target.value = ''; });
-  onAction('deletePhoto', () => { setPhoto(''); renderIdentity(); renderProfile(); });
+  $('photoInput').addEventListener('change', event => { const file = event.target.files?.[0]; if (file) uploadPhoto(file); event.target.value = ''; });
+  onAction('deletePhoto', () => { photoVersion++; const hadPhoto = Boolean(state.photo); setPhoto(''); renderIdentity({ animatePhoto: true }); if (hadPhoto) toast(t('profile_photo_removed')); });
   onAction('copyUid', async () => {
     try { await navigator.clipboard.writeText(state.uid); toast(t('copied')); }
     catch { toast(`${t('my_id')}: ${state.uid}`); }
@@ -113,6 +134,7 @@ export function initProfile() {
   });
   onAction('deleteAccount', async () => {
     if (!(await confirmAction(t('confirm_delete')))) return;
+    photoVersion++;
     clearAccount(); location.reload();
   });
 }

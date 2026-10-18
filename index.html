@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="styles/activity.css">
   <link rel="stylesheet" href="styles/statistics.css">
   <link rel="stylesheet" href="styles/friends.css">
+  <link rel="stylesheet" href="styles/profile.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -147,63 +148,16 @@
   </div>
 </section></div></div>
     </main>
-    <div id="profilePage" hidden data-screen-view="" class="screen narrow-screen">
-  <form class="card" id="profileForm">
-    <div class="profile-header">
-      <button class="btn-small" data-i18n="back" type="button" data-action="showPage" data-value="mainPage">← Назад</button>
-      <h2 data-i18n="profile">Профиль</h2>
-      <div></div>
-    </div>
-    <div class="profile-photo" id="profilePhoto" data-action="uploadPhoto">
-      <span id="profileInitials" class="profile-initials">FC</span>
-    </div>
-    <div>
-      UID:
-      <span id="profileUidDisplay"></span>
-    </div>
-    <div>
-      <button class="btn-small" data-i18n="delete_photo" type="button" data-action="deletePhoto">Удалить фото</button>
-    </div>
-    <div class="profile-meta"><span data-i18n="streak">Серия</span><strong id="streakCount">1</strong><span data-i18n="days">дн.</span><button type="button" class="text-button" data-action="copyUid" data-i18n="copy_id">Скопировать ID</button></div>
-<input type="file" id="photoInput" accept="image/*" hidden aria-label="photoInput" data-i18n-label="photo_hint">
-    <div class="input-group">
-      <label data-i18n="name" for="profileName">Имя</label>
-      <input type="text" id="profileName" required>
-    </div>
-    <div class="input-group">
-      <label data-i18n="age" for="profileAge">Возраст</label>
-      <input type="number" id="profileAge" min="10" max="100" inputmode="decimal" required>
-    </div>
-    <div class="input-group">
-      <label data-i18n="gender">Пол</label>
-      <div class="segmented-control" id="profileGenderControl">
-        <button class="segmented-option" data-gender="female" data-i18n="female" data-action="selectProfileGender" data-value="female" type="button">Женский</button>
-        <button class="segmented-option" data-gender="male" data-i18n="male" data-action="selectProfileGender" data-value="male" type="button">Мужской</button>
-      </div>
-      <input type="hidden" id="profileGender" value="female">
-    </div>
-    <div class="input-group">
-      <label data-i18n="goal">Цель</label>
-      <div class="segmented-control" id="profileGoalControl">
-        <button class="segmented-option active" data-goal="lose" data-i18n="lose" data-action="selectProfileGoal" data-value="lose" type="button">Похудение</button>
-        <button class="segmented-option" data-goal="maintain" data-i18n="maintain" data-action="selectProfileGoal" data-value="maintain" type="button">Поддержание</button>
-        <button class="segmented-option" data-goal="gain" data-i18n="gain" data-action="selectProfileGoal" data-value="gain" type="button">Набор</button>
-      </div>
-      <input type="hidden" id="profileGoal" value="lose">
-    </div>
-    <div class="input-group">
-      <label data-i18n="height" for="profileHeight">Рост (см)</label>
-      <input type="number" id="profileHeight" min="100" max="250" inputmode="decimal" required>
-    </div>
-    <div class="input-group">
-      <label data-i18n="weight" for="profileWeight">Вес (кг)</label>
-      <input type="number" id="profileWeight" min="30" max="500" step="0.1" inputmode="decimal" required>
-    </div>
-    <button class="btn-primary" data-i18n="save" type="submit">Сохранить</button>
-    <button class="btn-secondary" data-i18n="settings" type="button" data-action="showPage" data-value="settingsPage">Настройки</button>
-    <button class="btn-secondary btn-danger" data-i18n="delete_account" type="button" data-action="deleteAccount">Удалить аккаунт</button>
+    <section id="profilePage" class="screen narrow-screen profile-screen" data-screen-view aria-labelledby="profileTitle" hidden>
+  <header class="profile-nav"><button type="button" id="profileBackButton" class="icon-button profile-nav-button profile-back" data-action="profileBackToToday" data-i18n-label="profile_back_today" aria-label="Вернуться на Сегодня"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chevron"></use></svg></button><h1 id="profileTitle" tabindex="-1" data-i18n="profile">Профиль</h1><button type="button" class="icon-button profile-nav-button" data-action="showPage" data-value="settingsPage" data-i18n-label="settings" aria-label="Настройки"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#settings"></use></svg></button></header>
+  <form id="profileForm" class="profile-layout">
+    <section class="card profile-identity-card" aria-labelledby="profileIdentityTitle"><h2 class="sr-only" id="profileIdentityTitle" data-i18n="profile_identity">Фото и имя</h2><div class="profile-identity-main"><div class="profile-avatar-wrap"><button type="button" id="profilePhoto" class="profile-photo" data-action="uploadPhoto" data-i18n-label="photo_hint" aria-label="Нажми, чтобы изменить фото"><span class="profile-initials">FC</span></button><button type="button" id="profilePhotoEdit" class="icon-button profile-photo-action profile-photo-edit" data-action="uploadPhoto" data-i18n-label="profile_change_photo" aria-label="Изменить фото"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#edit"></use></svg></button><button type="button" id="profilePhotoDelete" class="icon-button profile-photo-action profile-photo-delete" data-action="deletePhoto" data-i18n-label="delete_photo" aria-label="Удалить фото" hidden><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg></button></div><div class="profile-name-block"><label for="profileName" data-i18n="name">Имя</label><div class="profile-name-input"><input type="text" id="profileName" autocomplete="nickname" data-i18n-placeholder="name_placeholder" placeholder="Введите имя" required><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#edit"></use></svg></div><div class="profile-id-line"><span class="profile-id-reading">ID <strong id="profileUidDisplay">—</strong></span><button type="button" class="icon-button profile-copy-button" data-action="copyUid" data-i18n-label="copy_id" aria-label="Скопировать ID"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#copy"></use></svg></button></div></div></div><div class="profile-streak"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#flame"></use></svg><span id="profileStreakText"><strong id="streakCount">0</strong></span></div><input type="file" id="photoInput" accept="image/*" data-i18n-label="profile_change_photo" aria-label="Изменить фото" hidden></section>
+    <section class="card profile-data-card" aria-labelledby="profileDataTitle"><h2 id="profileDataTitle" data-i18n="profile_personal_data">Личные данные</h2><div class="profile-data-grid"><div class="field profile-age-field"><label for="profileAge" data-i18n="age">Возраст</label><div class="profile-unit-input"><input type="number" id="profileAge" min="10" max="100" inputmode="numeric" required><span data-i18n="profile_years">лет</span></div></div><div class="field profile-gender-field"><span id="profileGenderLabel" class="profile-field-label" data-i18n="gender">Пол</span><div id="profileGenderControl" class="profile-gender-control" role="group" aria-labelledby="profileGenderLabel"><button type="button" class="segmented-option profile-gender-option" data-action="selectProfileGender" data-value="female" aria-pressed="false"><span data-i18n="female">Женский</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="segmented-option profile-gender-option" data-action="selectProfileGender" data-value="male" aria-pressed="false"><span data-i18n="male">Мужской</span><span class="selection-glint" aria-hidden="true"></span></button></div><input type="hidden" id="profileGender" value="female"></div><div class="field profile-height-field"><label for="profileHeight" data-i18n="profile_height">Рост</label><div class="profile-unit-input"><input type="number" id="profileHeight" min="100" max="250" inputmode="numeric" required><span data-i18n="profile_cm">см</span></div></div><div class="field profile-weight-field"><label for="profileWeight" data-i18n="profile_weight">Вес</label><div class="profile-unit-input"><input type="number" id="profileWeight" min="30" max="500" step="0.1" inputmode="decimal" required><span data-i18n="kg">кг</span></div></div></div></section>
+    <section class="card profile-goal-card" aria-labelledby="profileGoalLabel"><h2 id="profileGoalLabel" data-i18n="profile_my_goal">Моя цель</h2><div id="profileGoalControl" class="profile-goal-control" role="group" aria-labelledby="profileGoalLabel"><button type="button" class="segmented-option profile-goal-option" data-action="selectProfileGoal" data-value="lose" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#waist"></use></svg><span data-i18n="lose">Похудение</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="segmented-option profile-goal-option" data-action="selectProfileGoal" data-value="maintain" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#dumbbell"></use></svg><span data-i18n="maintain">Поддержание</span><span class="selection-glint" aria-hidden="true"></span></button><button type="button" class="segmented-option profile-goal-option" data-action="selectProfileGoal" data-value="gain" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#muscle"></use></svg><span data-i18n="gain">Набор</span><span class="selection-glint" aria-hidden="true"></span></button></div><input type="hidden" id="profileGoal" value="lose"></section>
+    <button type="submit" id="saveProfileButton" class="btn-primary profile-save"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#check"></use></svg><span data-i18n="save">Сохранить</span></button>
+    <button type="button" class="profile-delete-account" data-action="deleteAccount"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#trash"></use></svg><span data-i18n="delete_account">Удалить аккаунт</span></button>
   </form>
-</div>
+</section>
     <div id="settingsPage" hidden data-screen-view="" class="screen narrow-screen">
   <div class="card">
     <h2 data-i18n="settings">Настройки</h2>
