@@ -109,7 +109,7 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     const previous = gesture; gesture = null; clearTimeout(holdTimer);
     if (hub.active === controller) hub.active = null;
     if (suppress && previous) suppressUntil = Date.now() + 500;
-    track.classList.remove('is-scrubbing', 'is-lens-pressed');
+    track.classList.remove('is-scrubbing', 'is-lens-pressed', 'is-lens-held');
     if (previous?.source === 'pointer') {
       try { if (track.hasPointerCapture?.(previous.id)) track.releasePointerCapture(previous.id); } catch { /* The OS may already have released it. */ }
     }
@@ -139,8 +139,8 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     suppressUntil = 0;
     gesture = { id, x, y, layout, grab, source, active: false };
     hub.active = controller; track.classList.add('is-lens-pressed'); follow(x, y);
-    // Holding is optional: any movement, in any direction, starts immediately.
-    holdTimer = setTimeout(() => { if (gesture && enabled()) activate(); }, 200);
+    // Holding only enlarges the glass. It never starts or commits navigation.
+    holdTimer = setTimeout(() => { if (gesture && enabled()) track.classList.add('is-lens-held'); }, 200);
   }
   function activate() {
     clearTimeout(holdTimer); gesture.active = true; track.classList.add('is-scrubbing');
@@ -156,8 +156,11 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
   }
   function end(id, x, y, event, source) {
     if (!gesture || gesture.id !== id || gesture.source !== source) return;
-    const commit = gesture.active && enabled();
-    const destination = Math.round(position(x).index), dragged = gesture.active;
+    // A very quick swipe may end between two frames without a move event.
+    // Release coordinates still complete it, independently of the hold timer.
+    const dragged = gesture.active || x !== gesture.x || y !== gesture.y;
+    const commit = dragged && enabled();
+    const destination = Math.round(position(x).index);
     reset(dragged);
     if (!commit) return;
     if (event.cancelable) event.preventDefault();
