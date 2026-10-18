@@ -99,10 +99,10 @@ test('Appearance integrates all mockup controls with live app styles, storage, P
    try{
     assert.equal(tiltRequests,0);renderAppearance();assert.equal($('appearanceDeviceTilt').disabled,false);
     toggle('deviceTilt',true);await tick();await tick();assert.equal(tiltRequests,1);assert.equal(state.appearance.deviceTilt,true);
-    assert.equal($('appearanceTiltStatus').dataset.state,'waiting');assert.equal($('appearanceRecenterTilt').hidden,true);
+    assert.equal($('appearanceTiltStatus').dataset.state,'waiting');assert.equal($('appearanceRecenterTilt'),null);assert.equal($('appearanceEnableTilt').hidden,true);
     const event=Object.assign(new Event('deviceorientation'),{beta:45,gamma:0});window.dispatchEvent(event);
-    assert.equal($('appearanceTiltStatus').dataset.state,'active');assert.equal($('appearanceRecenterTilt').hidden,false);
-    await click('#appearanceRecenterTilt');toggle('deviceTilt',false);assert.equal(state.appearance.deviceTilt,false);
+    assert.equal($('appearanceTiltStatus').dataset.state,'active');assert.equal($('appearanceEnableTilt').hidden,true);
+    toggle('deviceTilt',false);assert.equal(state.appearance.deviceTilt,false);
     tiltPermission='denied';toggle('deviceTilt',true);await tick();await tick();
     assert.equal(state.appearance.deviceTilt,false);assert.equal($('appearanceDeviceTilt').checked,false);assert.equal($('appearanceTiltStatus').dataset.state,'denied');
    }finally{globalThis.matchMedia=media;tiltPermission='granted';}

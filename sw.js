@@ -1,5 +1,5 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.16.1-r1';
+const VERSION = '3.16.2-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
@@ -14,7 +14,7 @@ const APP_FILES = [
   './', 'index.html', 'manifest.webmanifest',
   'styles/tokens.css', 'styles/base.css', 'styles/components.css', 'styles/layout.css', 'styles/glass.css', 'styles/motion.css', 'styles/subscription.css', 'styles/wallet.css', 'styles/startup.css', 'styles/smart-water.css', 'styles/interactions.css', 'styles/premium.css', 'styles/refinement.css', 'styles/activity.css', 'styles/statistics.css', 'styles/friends.css', 'styles/profile.css',
   'js/app.js', 'js/core/weather.js', 'js/core/weather-copy.js', 'js/core/access.js', 'js/core/premium-copy.js', 'js/core/activity-copy.js', 'js/core/statistics-copy.js', 'js/core/friends-copy.js', 'js/core/profile-copy.js', 'js/core/store.js', 'js/core/math.js', 'js/core/i18n.js', 'js/core/translations.js', 'js/core/loader.js', 'js/core/subscription.js', 'js/core/subscription-copy.js', 'js/core/wallet.js', 'js/core/wallet-copy.js',
-  'js/ui/components.js', 'js/ui/sheets.js', 'js/ui/profile-swipe.js', 'js/ui/premium.js', 'js/ui/navigation.js', 'js/ui/pwa.js', 'js/ui/motion.js', 'js/ui/surfaces.js', 'js/ui/ambient.js', 'js/ui/dock.js', 'js/ui/viewport.js', 'js/ui/orientation.js', 'js/ui/boot.js', 'js/ui/haptics.js',
+  'js/ui/components.js', 'js/ui/sheets.js', 'js/ui/profile-swipe.js', 'js/ui/premium.js', 'js/ui/navigation.js', 'js/ui/pwa.js', 'js/ui/motion.js', 'js/ui/surfaces.js', 'js/ui/ambient.js', 'js/core/tilt.js', 'js/ui/dock.js', 'js/ui/viewport.js', 'js/ui/orientation.js', 'js/ui/boot.js', 'js/ui/haptics.js',
   'js/features/diary.js', 'js/features/profile.js', 'js/features/preferences.js', 'js/features/weather.js', 'js/features/subscription.js', 'js/features/wallet.js',
   'js/features/products.js', 'js/features/analytics.js', 'js/features/gestures.js', 'js/services/friends.js', 'js/services/weather.js',
   'assets/icons/logo.svg', 'assets/icons/sprite.svg', 'assets/icons/app-icon.svg', 'assets/icons/coin.svg', 'assets/icons/coin-art.png',
