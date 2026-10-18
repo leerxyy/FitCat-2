@@ -8,6 +8,7 @@ import { initProfileSwipe } from '../ui/profile-swipe.js';
 import { initPhotoEditor } from '../ui/photo-editor.js';
 import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { haptic } from '../ui/haptics.js';
+import { initProfileStyle, renderProfileStyle, syncProfileStyleMotion } from './profile-style.js';
 
 const avatars = new WeakMap();
 let photoVersion = 0;
@@ -67,6 +68,7 @@ export function renderIdentity({ animatePhoto = false } = {}) {
   $('profileUidDisplay').textContent = state.uid.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1 $2 $3 $4');
   const plural = new Intl.PluralRules(locale()).select(state.streak);
   $('profileStreakText').innerHTML = escapeHTML(t('profile_streak_' + plural)).replace('{count}', `<strong id="streakCount">${number(state.streak)}</strong>`);
+  renderProfileStyle();
 }
 
 export function setSegment(target, value) {
@@ -137,6 +139,7 @@ async function editPhoto() {
 }
 
 export function initProfile() {
+  initProfileStyle();
   photoEditor = initPhotoEditor({ onChoose: () => $('photoInput').click(), onSave: (photo, edit) => {
     setPhoto(photo, edit); photoVersion++;
     renderIdentity({ animatePhoto: true }); toast(t('saved'));
@@ -176,6 +179,7 @@ export function initProfile() {
   document.addEventListener('fitcat:screen', event => {
     if (event.detail === 'profilePage') renderProfile();
     else { flushProfileFeedback(); photoVersion++; photoEditor.discard(); }
+    syncProfileStyleMotion();
   });
   onAction('uploadPhoto', editPhoto);
   $('photoInput').addEventListener('change', event => { const file = event.target.files?.[0]; if (file) uploadPhoto(file); event.target.value = ''; });

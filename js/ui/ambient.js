@@ -3,6 +3,13 @@ import { APPEARANCE_DEFAULTS, normalizeAppearance } from '../core/appearance.js'
 import { tiltPose, tiltOffset } from '../core/tilt.js';
 
 let currentAmbient;
+const motionSubscribers = new Map();
+// Reuse the one smoothed sensor stream; profile cosmetics create no RAF loop
+// and request no additional device permissions.
+export function subscribeAmbientMotion(listener, activeInDialog = () => false, visibility) {
+  motionSubscribers.set(listener, { activeInDialog, visibility });
+  return () => motionSubscribers.delete(listener);
+}
 export function requestDeviceTilt() {
   return currentAmbient ? currentAmbient.requestTilt() : Promise.resolve(false);
 }
@@ -23,6 +30,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   const finePointer=globalThis.matchMedia?.('(hover: hover) and (pointer: fine)');
   let settings=normalizeAppearance(initial),disposed=false,paused=Boolean(document.hidden);
   let frame=0,lastTime=null,x=0,y=0,pointerX=0,pointerY=0;
+  let wallpaperX=0,wallpaperY=0,dialogFollowing=false;
   let enabled=settings.deviceTilt,manualIntent=false,listening=false,origin=null,originHasAlpha=false,originAngle=0;
   let epoch=0,serial=0,pending=null,probeTimer=0,sensorTimer=0;
   let needsGesture=false,gestureUsed=false;
@@ -40,8 +48,12 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
     phase=value;document.dispatchEvent(new CustomEvent('fitcat:tilt-status',{detail:value}));
   }
   function paint(){
-    layer.style.setProperty('--parallax-x',Math.abs(x)<.001?'0px':`${x.toFixed(2)}px`);
-    layer.style.setProperty('--parallax-y',Math.abs(y)<.001?'0px':`${y.toFixed(2)}px`);
+    if(!document.body?.classList.contains('dialog-open')){
+      wallpaperX=x;wallpaperY=y;
+      layer.style.setProperty('--parallax-x',Math.abs(x)<.001?'0px':`${x.toFixed(2)}px`);
+      layer.style.setProperty('--parallax-y',Math.abs(y)<.001?'0px':`${y.toFixed(2)}px`);
+    }
+    for(const listener of motionSubscribers.keys())listener(x,y);
     if(previewVisible){
       preview.style.setProperty('--parallax-x',`${(x*.35).toFixed(2)}px`);
       preview.style.setProperty('--parallax-y',`${(y*.25).toFixed(2)}px`);
@@ -51,7 +63,9 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   }
   const update=now=>{
     frame=0;
-    if(!canRun()||document.body?.classList.contains('dialog-open')){lastTime=null;return;}
+    const dialog=document.body?.classList.contains('dialog-open');
+    if(!canRun()||(dialog&&![...motionSubscribers.values()].some(subscriber=>subscriber.activeInDialog()))){lastTime=null;return;}
+    if(dialog)dialogFollowing=true;
     // Smooth at display cadence, capped at 60 wallpaper paints on 120 Hz screens.
     if(lastTime!==null&&now-lastTime<15.5){frame=requestAnimationFrame(update);return;}
     const elapsed=lastTime===null?1/60:Math.min(.05,Math.max(.001,(now-lastTime)/1000));
@@ -99,7 +113,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
     if(phase!=='active')status('waiting');
     clearTimeout(sensorTimer);
     sensorTimer=setTimeout(()=>{
-      if(!canRun()||!listening||phase==='active'||phase==='denied')return;
+      if(!canRun()||!listening||phase!=='waiting')return;
       needsGesture=!gestureUsed;status('stalled');
     },2500);
   }
@@ -131,6 +145,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
       if(ticket.epoch!==epoch||ticket.serial!==serial||!canRun()||!wantsTilt())return false;
       if(phase==='active')return true;
       // A blocked no-gesture probe is not a preference change or a denial.
+      clearTimeout(sensorTimer);sensorTimer=0;
       needsGesture=!gestureUsed;status(userGesture?'denied':'gesture');return false;
     }).finally(()=>{if(pending===ticket)pending=null;});
     return ticket.promise;
@@ -187,6 +202,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   };
   const visibility=value=>{
     const wasPaused=paused;paused=value;root.classList.toggle('motion-paused',paused);
+    for(const subscriber of motionSubscribers.values())subscriber.visibility?.(paused);
     if(paused||reducedMotion()){
       suspend();finishValueMotion();if(wantsTilt())status('paused');return;
     }
@@ -214,6 +230,13 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   on(document,'fitcat:appearance',configure);on(document,'fitcat:screen',syncPreview);
   on(document,'fitcat:appearance-tab',syncPreview);
   on(document,'close',()=>{lastTime=null;schedule();},true);
+  on(document,'fitcat:dialogclose',()=>{
+    if(document.body?.classList.contains('dialog-open'))return;
+    // A live cover may have followed the phone while its backdrop stayed fixed.
+    // Resume that backdrop from its last painted position, without a jump.
+    if(dialogFollowing){x=wallpaperX;y=wallpaperY;dialogFollowing=false;}
+    lastTime=null;schedule();
+  });
   on(document,'visibilitychange',()=>visibility(Boolean(document.hidden)));
   on(view,'pagehide',()=>visibility(true));on(view,'pageshow',()=>visibility(Boolean(document.hidden)));
   on(preference,'change',()=>visibility(Boolean(document.hidden)));

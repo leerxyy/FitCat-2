@@ -2,6 +2,7 @@ import { localDate, nutritionTotal, calculateTargets } from './math.js';
 import { emptyWeather, normalizeWeather } from './weather.js';
 import { hasProAccess, mayCreateTemplate } from './access.js';
 import { APPEARANCE_KEY, APPEARANCE_DEFAULTS, normalizeAppearance } from './appearance.js';
+import { PROFILE_STYLE_KEY, PROFILE_STYLE_DEFAULTS, normalizeProfileStyle } from './profile-style.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
@@ -10,6 +11,7 @@ const KEYS = {
   friends: 'fitcat_friends', uid: 'fitcat_myUid', photo: 'profilePhoto',
   weather: 'fitcat_weather_v1', photoEdit: 'fitcat_photo_edit_v1',
   appearance: APPEARANCE_KEY,
+  profileStyle: PROFILE_STYLE_KEY,
 };
 const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
@@ -40,6 +42,7 @@ export const state = {
   preferences: { ...DEFAULTS },
   weather: emptyWeather(),
   appearance: { ...APPEARANCE_DEFAULTS },
+  profileStyle: { ...PROFILE_STYLE_DEFAULTS },
 };
 let storage;
 
@@ -73,6 +76,7 @@ export function loadState(adapter = globalThis.localStorage) {
   state.preferences = normalizePreferences(state.preferences);
   state.weather = normalizeWeather(readJSON(KEYS.weather, null));
   state.appearance = normalizeAppearance(readJSON(KEYS.appearance, null));
+  state.profileStyle = normalizeProfileStyle(readJSON(KEYS.profileStyle, null));
   if (state.preferences.waterTemperatureMode === 'auto' && state.weather.daily) {
     state.preferences.currentTemp = state.weather.daily.temperature;
   }
@@ -142,6 +146,7 @@ export function persist({ nutrition = false } = {}) {
   }
   storage.setItem(KEYS.weather, JSON.stringify(state.weather));
   storage.setItem(KEYS.appearance, JSON.stringify(state.appearance));
+  storage.setItem(KEYS.profileStyle, JSON.stringify(state.profileStyle));
   storage.setItem('waterAmount', String(state.water));
   storage.setItem('lastDate', state.lastDate || new Date().toDateString());
 }
@@ -157,6 +162,13 @@ export function setAppearance(value) {
   const next = normalizeAppearance(value);
   storage.setItem(KEYS.appearance, JSON.stringify(next));
   state.appearance = next;
+  return next;
+}
+
+export function setProfileStyle(value) {
+  const next = normalizeProfileStyle(value);
+  storage.setItem(KEYS.profileStyle, JSON.stringify(next));
+  state.profileStyle = next;
   return next;
 }
 
@@ -192,6 +204,7 @@ export function exportSnapshot() {
     water: state.water, lastDate: state.lastDate,
     weather: state.weather,
     appearance: state.appearance,
+    profileStyle: state.profileStyle,
   };
 }
 
@@ -228,6 +241,7 @@ export function importSnapshot(data) {
     preferences: normalizePreferences({ ...state.preferences, ...data.settings }),
     weather: normalizeWeather(data.weather),
     appearance: normalizeAppearance(data.appearance ?? state.appearance),
+    profileStyle: normalizeProfileStyle(data.profileStyle ?? state.profileStyle),
     water: Math.max(0, Number(data.water) || 0),
     lastDate: typeof data.lastDate === 'string' && !Number.isNaN(new Date(data.lastDate).getTime()) ? data.lastDate : new Date().toDateString(),
   };
