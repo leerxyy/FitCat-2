@@ -11,7 +11,8 @@
 .has-selection-lens.is-lens-pressed > button:not(.is-preview) { color: #a9c3d7; text-shadow: none; }
 .has-selection-lens.is-lens-pressed > button:not(.is-preview) > .icon { color: #a2c9df; filter: none; }
 .has-selection-lens > button.is-preview, .has-selection-lens > button.is-preview > .icon { color: #6becff; }
-.has-selection-lens.is-lens-pressed > .selection-lens { scale: 1.02 1.045; box-shadow: inset 0 1px 3px #fff9, inset 0 -2px 8px #67e6ff30, 0 0 18px #28d9f334; }
+.has-selection-lens.is-lens-pressed > .selection-lens { box-shadow: inset 0 1px 3px #fff9, inset 0 -2px 8px #67e6ff30, 0 0 18px #28d9f334; }
+.has-selection-lens.is-lens-held > .selection-lens { scale: 1.02 1.045; }
 .has-selection-lens.is-scrubbing > .selection-lens { transition: scale 180ms ease, box-shadow 180ms ease; }
 .has-selection-lens.is-scrubbing > button > .icon, .has-selection-lens.is-scrubbing > button > span:not(.selection-glint) { transition: color 180ms ease, filter 200ms ease; }
 .selection-lens-shine { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
@@ -19,7 +20,7 @@
 [hidden] .selection-lens-shine::before, body.dialog-open .selection-lens-shine::before, .keyboard-open .selection-lens-shine::before, .view-leaving .selection-lens-shine::before { animation-play-state: paused; }
 .bottom-nav.has-selection-lens { --selection-radius: 99px; }
 .bottom-nav.has-selection-lens > .selection-lens { width: var(--lens-width, calc((100% - 12px) / 4)); height: var(--lens-height, calc(100% - 12px)); }
-.bottom-nav.has-selection-lens.is-lens-pressed > .selection-lens { scale: 1.035 1.08; }
+.bottom-nav.has-selection-lens.is-lens-held > .selection-lens { scale: 1.035 1.08; }
 .bottom-nav.has-selection-lens .nav-item.is-preview::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: #31def2; box-shadow: 0 0 7px #16cff36b; }
 .bottom-nav.has-selection-lens.is-lens-pressed .nav-item:not(.is-preview)::after { opacity: 0; }
 .profile-gender-control.has-selection-lens { --selection-radius: 11px; }

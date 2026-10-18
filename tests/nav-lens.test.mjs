@@ -54,12 +54,29 @@ test('dragging previews fractional positions and commits exactly once on release
     assert.equal(h.click().defaultPrevented, false, 'a fresh physical tap is not a compatibility click from the previous drag');
   } finally { h.close(); }
 });
-test('a hold can start dragging without an initial swipe and returning to the same tab does not navigate', () => {
+test('holding only enlarges the lens: it never activates dragging, captures the finger or commits a tab', () => {
   const h = harness(); try {
-    h.pointer('pointerdown', 65); h.hold(); assert.equal(h.nav.classList.contains('is-scrubbing'), true);
-    h.pointer('pointermove', 245); h.pointer('pointermove', 65); h.pointer('pointerup', 65);
-    assert.deepEqual(h.selected, []); assert.equal(h.nav.style['--lens-index'], '0');
-    h.pointer('pointerdown', 245); h.hold(); h.pointer('pointerup', 245); assert.deepEqual(h.selected, [2]);
+    h.pointer('pointerdown', 65); h.hold();
+    assert.equal(h.nav.classList.contains('is-lens-held'), true); assert.equal(h.nav.classList.contains('is-scrubbing'), false);
+    assert.equal(h.captured.size, 0); assert.deepEqual(h.selected, []);
+    h.pointer('pointerup', 65); assert.equal(h.nav.classList.contains('is-lens-held'), false); assert.equal(h.click().defaultPrevented, false);
+    h.pointer('pointerdown', 245); h.hold(); h.pointer('pointerup', 245); assert.deepEqual(h.selected, []);
+    h.pointer('pointerdown', 65); h.hold(); h.pointer('pointermove', 245); h.pointer('pointerup', 245); assert.deepEqual(h.selected, [2]);
+  } finally { h.close(); }
+});
+test('a swipe starts on its first move without waiting for enlargement or running the hold timer', () => {
+  const h = harness(); try {
+    h.pointer('pointerdown', 65); h.pointer('pointermove', 245);
+    assert.equal(h.nav.classList.contains('is-scrubbing'), true); assert.equal(h.nav.classList.contains('is-lens-held'), false);
+    h.hold(); assert.equal(h.nav.classList.contains('is-lens-held'), false);
+    h.pointer('pointerup', 245); assert.deepEqual(h.selected, [2]);
+  } finally { h.close(); }
+});
+test('a quick swipe also works when the browser supplies down and release but no intermediate move', () => {
+  const h = harness(); try {
+    h.pointer('pointerdown', 65); h.pointer('pointerup', 245); assert.deepEqual(h.selected, [2]);
+    assert.equal(h.nav.style['--lens-index'], '2'); assert.equal(h.click().defaultPrevented, true);
+    h.pointer('pointerdown', 245); h.pointer('pointerup', 65); assert.deepEqual(h.selected, [2, 0]);
   } finally { h.close(); }
 });
 test('edges yield softly and vertical drift never interrupts a continuous drag', () => {
@@ -130,6 +147,14 @@ test('legacy touch events provide the same single-commit drag and reject multipl
     h.touch('touchstart', 65); assert.equal(h.touch('touchmove', 245).defaultPrevented, true); h.touch('touchend', 245); assert.deepEqual(h.selected, [2]);
     h.touch('touchstart', 245); h.touch('touchmove', 65, { touches: [{ identifier: 7, clientX: 65, clientY: 735 }, { identifier: 8, clientX: 90, clientY: 735 }] });
     h.touch('touchend', 65); assert.deepEqual(h.selected, [2]);
+  } finally { h.close(); }
+});
+test('legacy touch swipes work immediately even without a touchmove; a stationary hold stays decorative', () => {
+  const h = harness({ touchFallback: true }); try {
+    h.touch('touchstart', 65); h.touch('touchend', 245); assert.deepEqual(h.selected, [2]);
+    h.touch('touchstart', 245); h.hold(); assert.equal(h.nav.classList.contains('is-lens-held'), true);
+    assert.equal(h.nav.classList.contains('is-scrubbing'), false); h.touch('touchend', 245); assert.deepEqual(h.selected, [2]);
+    assert.equal(h.nav.classList.contains('is-lens-held'), false);
   } finally { h.close(); }
 });
 test('initialization is idempotent and disposal clears captures, timers and event handlers', () => {

@@ -112,5 +112,19 @@ test('all five glass selectors preview freely and commit through the real autosa
       assert.equal($('profileGender').value, 'female'); assert.equal($('profileGoal').value, 'gain');
       assert.equal($('saveProfileButton'), null); assert.equal($('profilePage').hidden, false);
     });
+    await t.test('quick swipes commit all five selectors without a hold or intermediate move event', async () => {
+      begin('profileGenderControl', 0); end('profileGenderControl', 1);
+      assert.equal(state.profile.gender, 'male'); assert.equal(JSON.parse(env.localStorage.getItem('fitnessProfile')).gender, 'male');
+      begin('profileGoalControl', 2); end('profileGoalControl', 0);
+      assert.equal(state.profile.goal, 'lose'); assert.equal(JSON.parse(env.localStorage.getItem('fitnessProfile')).goal, 'lose');
+      await click('#profilePage [data-value="settingsPage"]');
+      begin('settingsLanguageControl', 0); end('settingsLanguageControl', 1);
+      assert.equal(state.preferences.lang, 'en'); assert.equal(env.localStorage.getItem('fitcat_lang'), 'en');
+      await click('#settingsBackButton');
+      begin('bottomNav', 2); end('bottomNav', 0); assert.equal($('todayPage').hidden, false);
+      begin('bottomNav', 0); end('bottomNav', 2); assert.equal($('analyticsPage').hidden, false);
+      begin('statisticsSwitch', 0); end('statisticsSwitch', 1); assert.equal($('nutritionStatisticsPanel').hidden, false);
+      for (const id of layouts.keys()) assert.equal($(id).classList.contains('is-lens-held'), false, id);
+    });
   } finally { env.restoreTimers(); }
 });
