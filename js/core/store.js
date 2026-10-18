@@ -7,7 +7,7 @@ const KEYS = {
   profile: 'fitnessProfile', foods: 'todayFoods', weight: 'weightHistory',
   nutrition: 'nutritionHistory', products: 'fitcat_products', templates: 'fitcat_templates',
   friends: 'fitcat_friends', uid: 'fitcat_myUid', photo: 'profilePhoto',
-  weather: 'fitcat_weather_v1',
+  weather: 'fitcat_weather_v1', photoEdit: 'fitcat_photo_edit_v1',
 };
 const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
@@ -34,7 +34,7 @@ function normalizePreferences(value) {
 }
 export const state = {
   profile: null, foods: [], weight: [], nutrition: [], products: [], templates: [],
-  friends: [], uid: '', photo: '', water: 0, lastDate: '', streak: 0,
+  friends: [], uid: '', photo: '', photoEdit: null, water: 0, lastDate: '', streak: 0,
   preferences: { ...DEFAULTS },
   weather: emptyWeather(),
 };
@@ -74,6 +74,7 @@ export function loadState(adapter = globalThis.localStorage) {
   }
   state.water = Math.max(0, Number(storage.getItem('waterAmount')) || 0);
   state.photo = storage.getItem(KEYS.photo) || '';
+  state.photoEdit = state.photo ? normalizePhotoEdit(readJSON(KEYS.photoEdit, null)) : null;
   state.lastDate = storage.getItem('lastDate') || new Date().toDateString();
   state.uid = storage.getItem(KEYS.uid) || makePublicUid();
   state.streak = Number(storage.getItem('fitcat_streak')) || 0;
@@ -140,17 +141,35 @@ export function persist({ nutrition = false } = {}) {
   storage.setItem('lastDate', state.lastDate || new Date().toDateString());
 }
 
-export function setPhoto(value) {
-  if (value) storage.setItem(KEYS.photo, value);
-  else storage.removeItem(KEYS.photo);
-  state.photo = value;
+function normalizePhotoEdit(value) {
+  if (!value || typeof value.source !== 'string' || !/^data:image\/(jpeg|png|webp);base64,/.test(value.source)) return null;
+  const frame = value.frame;
+  if (!frame || ![frame.zoom, frame.x, frame.y].every(Number.isFinite) || frame.zoom < 1 || frame.zoom > 4) return null;
+  return { source: value.source, frame: { zoom: frame.zoom, x: frame.x, y: frame.y } };
+}
+
+export function setPhoto(value, edit = null) {
+  const nextEdit = value ? normalizePhotoEdit(edit) : null;
+  const previous = new Map([KEYS.photo, KEYS.photoEdit].map(key => [key, storage.getItem(key)]));
+  try {
+    if (nextEdit) storage.setItem(KEYS.photoEdit, JSON.stringify(nextEdit));
+    else storage.removeItem(KEYS.photoEdit);
+    if (value) storage.setItem(KEYS.photo, value);
+    else storage.removeItem(KEYS.photo);
+  } catch (error) {
+    for (const [key, saved] of previous) {
+      try { if (saved == null) storage.removeItem(key); else storage.setItem(key, saved); } catch { /* Try both keys. */ }
+    }
+    throw error;
+  }
+  state.photo = value; state.photoEdit = nextEdit;
 }
 
 export function exportSnapshot() {
   return {
     version: 3, profile: state.profile, foods: state.foods, weight: state.weight,
     nutrition: state.nutrition, products: state.products, templates: state.templates,
-    settings: state.preferences, friends: state.friends, uid: state.uid, photo: state.photo,
+    settings: state.preferences, friends: state.friends, uid: state.uid, photo: state.photo, photoEdit: state.photoEdit,
     water: state.water, lastDate: state.lastDate,
     weather: state.weather,
   };
@@ -191,6 +210,8 @@ export function importSnapshot(data) {
     water: Math.max(0, Number(data.water) || 0),
     lastDate: typeof data.lastDate === 'string' && !Number.isNaN(new Date(data.lastDate).getTime()) ? data.lastDate : new Date().toDateString(),
   };
+  const hasImportedPhoto = typeof data.photo === 'string' && (!data.photo || /^data:image\/(jpeg|png|webp);base64,/.test(data.photo));
+  next.photoEdit = next.photo ? (hasImportedPhoto ? normalizePhotoEdit(data.photoEdit) : state.photoEdit) : null;
   if (next.preferences.waterTemperatureMode === 'auto' && next.weather.daily) {
     next.preferences.currentTemp = next.weather.daily.temperature;
   }
@@ -200,7 +221,7 @@ export function importSnapshot(data) {
   const saved = new Map(keys.map(key => [key, storage.getItem(key)]));
   try {
     Object.assign(state, next);
-    persist(); storage.setItem(KEYS.uid, state.uid); setPhoto(state.photo);
+    persist(); storage.setItem(KEYS.uid, state.uid); setPhoto(state.photo, state.photoEdit);
   } catch (error) {
     Object.assign(state, previous);
     for (const [key, value] of saved) {

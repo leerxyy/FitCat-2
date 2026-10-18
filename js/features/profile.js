@@ -5,9 +5,11 @@ import { $, icon, initials, escapeHTML, onAction, changed, toast, confirmAction 
 import { showScreen, showTab } from '../ui/navigation.js';
 import { enter, MOTION } from '../ui/motion.js';
 import { initProfileSwipe } from '../ui/profile-swipe.js';
+import { initPhotoEditor } from '../ui/photo-editor.js';
 
 const avatars = new WeakMap();
 let photoVersion = 0;
+let photoEditor;
 
 function renderAvatar(element, initialLabel = '', animate = false) {
   const previous = avatars.get(element);
@@ -68,22 +70,38 @@ async function uploadPhoto(file) {
   const request = ++photoVersion;
   if (!file || !file.type.startsWith('image/')) { toast(t('photo_error')); return; }
   if (file.size > 3 * 1024 * 1024) { toast(t('photo_too_large')); return; }
-  let url;
+  let url, handedOff = false;
   try {
     url = URL.createObjectURL(file);
     const image = new Image();
     await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; image.src = url; });
     if (request !== photoVersion || !state.profile) return;
-    const canvas = document.createElement('canvas');
-    const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
-    canvas.width = Math.round(image.naturalWidth * scale); canvas.height = Math.round(image.naturalHeight * scale);
-    const context = canvas.getContext('2d'); context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    setPhoto(canvas.toDataURL('image/jpeg', .84)); renderIdentity({ animatePhoto: true }); toast(t('saved'));
+    const previousPhoto = state.photo;
+    photoEditor.open({ image, valid: () => Boolean(state.profile) && state.photo === previousPhoto,
+      release: () => URL.revokeObjectURL(url) });
+    handedOff = true;
   } catch (error) { if (request === photoVersion) { console.error(error); toast(t('photo_error')); } }
-  finally { if (url) URL.revokeObjectURL(url); }
+  finally { if (url && !handedOff) URL.revokeObjectURL(url); }
+}
+
+async function editPhoto() {
+  if (!state.photo) { $('photoInput').click(); return; }
+  const request = ++photoVersion, previousPhoto = state.photo, edit = state.photoEdit;
+  try {
+    const image = new Image();
+    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; image.src = edit?.source || previousPhoto; });
+    if (request !== photoVersion || !state.profile || state.photo !== previousPhoto) return;
+    photoEditor.open({ image, source: image.src, frame: edit?.frame,
+      valid: () => Boolean(state.profile) && state.photo === previousPhoto });
+  } catch (error) { if (request === photoVersion) { console.error(error); toast(t('photo_error')); } }
 }
 
 export function initProfile() {
+  photoEditor = initPhotoEditor({ onChoose: () => $('photoInput').click(), onSave: (photo, edit) => {
+    setPhoto(photo, edit); photoVersion++;
+    renderIdentity({ animatePhoto: true }); toast(t('saved'));
+  } });
+  $('photoCropModal').addEventListener('close', () => { photoVersion++; });
   for (const [name, target] of [['selectSetupGender', 'setupGender'], ['selectProfileGender', 'profileGender'], ['selectProfileGoal', 'profileGoal']]) {
     onAction(name, button => setSegment(target, button.dataset.value));
   }
@@ -107,10 +125,13 @@ export function initProfile() {
   onAction('profileBackToToday', backToToday);
   initProfileSwipe($('profilePage'), backToToday);
   onAction('showPage', button => showScreen(button.dataset.value));
-  document.addEventListener('fitcat:screen', event => { if (event.detail === 'profilePage') renderProfile(); });
-  onAction('uploadPhoto', () => $('photoInput').click());
+  document.addEventListener('fitcat:screen', event => {
+    if (event.detail === 'profilePage') renderProfile();
+    else { photoVersion++; photoEditor.discard(); }
+  });
+  onAction('uploadPhoto', editPhoto);
   $('photoInput').addEventListener('change', event => { const file = event.target.files?.[0]; if (file) uploadPhoto(file); event.target.value = ''; });
-  onAction('deletePhoto', () => { photoVersion++; const hadPhoto = Boolean(state.photo); setPhoto(''); renderIdentity({ animatePhoto: true }); if (hadPhoto) toast(t('profile_photo_removed')); });
+  onAction('deletePhoto', () => { photoVersion++; photoEditor.discard(); const hadPhoto = Boolean(state.photo); setPhoto(''); renderIdentity({ animatePhoto: true }); if (hadPhoto) toast(t('profile_photo_removed')); });
   onAction('copyUid', async () => {
     try { await navigator.clipboard.writeText(state.uid); toast(t('copied')); }
     catch { toast(`${t('my_id')}: ${state.uid}`); }
@@ -135,6 +156,7 @@ export function initProfile() {
   onAction('deleteAccount', async () => {
     if (!(await confirmAction(t('confirm_delete')))) return;
     photoVersion++;
+    photoEditor.discard();
     clearAccount(); location.reload();
   });
 }
