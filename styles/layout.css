@@ -164,7 +164,6 @@
 .product-item strong { overflow-wrap: anywhere; font-size: 14px; }
 .product-item small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
 #productsPage > .card > div:first-child { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
-#friendsPage .card > div:first-of-type { display: flex; gap: 8px; margin-bottom: 14px; }
 .friend-privacy { line-height: 1.6; margin-bottom: 18px; }
 .friend-item .friend-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: var(--accent-wash); color: var(--accent); font-weight: 650; font-size: 12px; }
 .friend-details { flex: 1; min-width: 0; background: none; padding: 3px; text-align: left; }

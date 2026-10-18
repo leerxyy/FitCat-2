@@ -1,0 +1,32 @@
+export const friendsCopy = {
+  ru: {
+    friends_share_id: 'Поделись ID, чтобы тебя нашли', friends_list: 'Твои друзья',
+    friends_id_hint: '11 цифр из профиля друга', friends_empty_title: 'Вместе легче',
+    friends_empty_description: 'Добавь друга, чтобы видеть его прогресс.',
+    friends_privacy: 'По твоему ID видны имя, цели, сегодняшний дневник и вода.',
+    friends_already_added: 'Этот друг уже есть в списке', friends_added: 'Друг добавлен',
+    friends_remove: 'Удалить из друзей', friends_remove_confirm: 'Удалить «{name}» из списка друзей?', friends_removed: 'Друг удалён из списка',
+    friends_view_progress: 'Посмотреть прогресс', friends_offline: 'Нет интернета. Список друзей сохранён на устройстве.',
+    friends_connect_progress: 'Подключись к интернету, чтобы загрузить прогресс.',
+  },
+  en: {
+    friends_share_id: 'Share your ID so friends can find you', friends_list: 'Your friends',
+    friends_id_hint: '11 digits from your friend’s profile', friends_empty_title: 'Better together',
+    friends_empty_description: 'Add a friend to see their progress.',
+    friends_privacy: 'Your ID gives access to your name, goals, today’s diary and water.',
+    friends_already_added: 'This friend is already on your list', friends_added: 'Friend added',
+    friends_remove: 'Remove friend', friends_remove_confirm: 'Remove “{name}” from your friends?', friends_removed: 'Friend removed',
+    friends_view_progress: 'View progress', friends_offline: 'No internet. Your friends list is saved on this device.',
+    friends_connect_progress: 'Connect to the internet to load progress.',
+  },
+  cn: {
+    friends_share_id: '分享 ID，让朋友找到你', friends_list: '你的好友',
+    friends_id_hint: '好友个人资料中的11位数字', friends_empty_title: '一起更轻松',
+    friends_empty_description: '添加好友，查看对方的进度。',
+    friends_privacy: '通过你的 ID 可查看姓名、目标、今日饮食和饮水记录。',
+    friends_already_added: '该好友已在列表中', friends_added: '已添加好友',
+    friends_remove: '删除好友', friends_remove_confirm: '要从好友列表中删除“{name}”吗？', friends_removed: '已删除好友',
+    friends_view_progress: '查看进度', friends_offline: '暂无网络。好友列表已保存在本设备。',
+    friends_connect_progress: '请连接网络以加载进度。',
+  },
+};

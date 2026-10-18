@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="styles/refinement.css">
   <link rel="stylesheet" href="styles/activity.css">
   <link rel="stylesheet" href="styles/statistics.css">
+  <link rel="stylesheet" href="styles/friends.css">
   <script src="js/ui/boot.js"></script>
   <script type="module" src="js/app.js"></script>
 </head>
@@ -136,17 +137,15 @@
       <section class="card stats-history-card" aria-labelledby="statsNutritionHistoryTitle"><h2 id="statsNutritionHistoryTitle" data-i18n="stats_nutrition_history">История питания</h2><div id="nutritionHistoryList" class="stats-history-list"></div><button type="button" id="macroHistoryAccess" class="macro-history-access" data-action="openMacroHistory" data-pro-feature="macro-history" data-pro-label="pro_open_macros"><span data-i18n="pro_open_macros">БЖУ за прошлые дни</span><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#chevron"></use></svg></button></section>
     </div>
   </div>
-</section><div id="friendsPage" class="page" data-main-view hidden>
-  <div class="card">
-    <h2 data-i18n="friends_title">Друзья</h2>
-    <div>
-      <input type="text" id="friendUidInput" placeholder="Введите UID" aria-label="Введите UID" data-i18n-label="friend_id" data-i18n-placeholder="friend_id">
-      <button class="btn-small" type="button" data-action="addFriend" data-i18n-label="add_friend">+</button>
-    </div>
-    <p class="muted text-small friend-privacy" data-i18n="friend_privacy">Друзья видят твой прогресс по ID.</p><div id="friendsList"></div>
-    <div id="friendsOfflineMsg" hidden>Нет интернета</div>
+</section><section id="friendsPage" class="page" data-main-view hidden>
+  <div class="friends-layout">
+    <section class="card friends-id-card" aria-labelledby="friendsOwnIDTitle"><span class="friends-id-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#user"></use></svg></span><div class="friends-id-copy"><h2 id="friendsOwnIDTitle" data-i18n="my_id">Мой ID</h2><strong id="friendsUidDisplay">—</strong><p data-i18n="friends_share_id">Поделись ID, чтобы тебя нашли</p></div><button type="button" class="icon-button friends-copy-button" data-action="copyUid" data-i18n-label="copy_id" aria-label="Скопировать ID"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#copy"></use></svg></button></section>
+    <section class="card friends-add-card" aria-labelledby="friendsAddTitle"><h2 id="friendsAddTitle" data-i18n="add_friend">Добавить друга</h2><form id="friendAddForm" novalidate><div class="friends-add-row"><label class="sr-only" for="friendUidInput" data-i18n="friend_id">ID друга</label><input type="text" id="friendUidInput" inputmode="numeric" enterkeyhint="done" maxlength="20" autocomplete="off" spellcheck="false" aria-describedby="friendsIdHint friendsIdFeedback" data-i18n-placeholder="friend_id" placeholder="ID друга" required><button type="submit" id="friendAddButton" class="btn-primary friends-add-button" data-action="addFriend" data-i18n-label="add_friend" aria-label="Добавить друга"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#plus"></use></svg><span class="selection-glint" aria-hidden="true"></span></button></div><span class="sr-only" id="friendsIdHint" data-i18n="friends_id_hint">11 цифр из профиля друга</span><p class="friends-field-feedback" id="friendsIdFeedback" role="status" aria-live="polite" hidden></p></form></section>
+    <section class="card friends-results-card" id="friendsResults" data-i18n-label="friends_list" aria-label="Твои друзья"><header class="friends-list-heading" id="friendsListHeading" hidden><h2 data-i18n="friends_list">Твои друзья</h2><span id="friendsCount" class="friends-count">0</span></header><div id="friendsList" class="friends-list"></div></section>
+    <p class="friends-privacy"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#eye"></use></svg><span data-i18n="friends_privacy">По твоему ID видны имя, цели, сегодняшний дневник и вода.</span></p>
+    <div id="friendsOfflineMsg" class="friends-status" role="status" aria-live="polite" hidden></div>
   </div>
-</div></div></div>
+</section></div></div>
     </main>
     <div id="profilePage" hidden data-screen-view="" class="screen narrow-screen">
   <form class="card" id="profileForm">
@@ -459,8 +458,8 @@
     
   </div>
   <div class="about-content" id="aboutContent"></div>
-</dialog><dialog id="friendProgressModal" class="sheet" aria-label="Прогресс друга"><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button>
-  <div>
+</dialog><dialog id="friendProgressModal" class="sheet friend-progress-sheet" aria-labelledby="friendModalName"><button type="button" class="sheet-handle" data-sheet-handle data-i18n-label="close" aria-label="Закрыть"><span aria-hidden="true"></span></button>
+  <div class="sheet-heading friend-progress-heading">
     <h2 id="friendModalName">Прогресс друга</h2>
     <button type="button" data-action="closeFriendProgress" data-i18n-label="close" class="icon-button close-button"><svg class="icon" aria-hidden="true"><use href="assets/icons/sprite.svg#x"></use></svg></button>
   </div>
