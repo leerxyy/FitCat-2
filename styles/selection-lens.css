@@ -1,5 +1,6 @@
 /* A continuous glass layer; the buttons retain native focus and semantics. */
 .has-selection-lens { position: relative; isolation: isolate; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; --selection-radius: 13px; }
+.has-selection-lens button, .has-selection-lens button * { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .has-selection-lens::before { content: none; }
 .has-selection-lens > .selection-lens { position: absolute; z-index: 0; pointer-events: none; isolation: isolate; overflow: hidden; inset: 0 auto auto 0; width: var(--lens-width, 50%); height: var(--lens-height, 100%); border: 1px solid #96eaff99; border-radius: var(--selection-radius); transform: translate3d(var(--lens-x, 0px), var(--lens-y, 0px), 0); background: radial-gradient(ellipse at 25% 3%, #d5f8ff38, transparent 68%), linear-gradient(150deg, #13b7dc45, #11678940); box-shadow: inset 0 1px 3px #edffff70, inset 0 -2px 9px #39d4f024, 0 0 14px #18d7ed24; transition: transform 420ms var(--ease), width 420ms var(--ease), height 420ms var(--ease), scale 220ms var(--ease), box-shadow 260ms ease; }
 .has-selection-lens > button { position: relative; z-index: 1; transform: none; }
