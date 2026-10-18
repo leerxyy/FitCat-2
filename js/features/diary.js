@@ -11,6 +11,18 @@ let editingFood = null;
 let selectedImage = '';
 let foodSignature = '';
 let revealFoodId = '';
+let currentMeal = '';
+const normalizedMeal = food => meals.includes(food?.meal) ? food.meal : 'other';
+
+function selectCurrentMeal(meal) {
+  currentMeal = meal;
+  $('foodListContainer').querySelectorAll('.meal-group').forEach(group => {
+    const active = group.dataset.meal === meal;
+    group.classList.toggle('is-current', active);
+    const summary = group.querySelector('summary');
+    if (active) summary.setAttribute('aria-current', 'true'); else summary.removeAttribute('aria-current');
+  });
+}
 
 export function renderSummary() {
   const total = nutritionTotal(state.foods); const goal = targets();
@@ -51,10 +63,14 @@ export function renderFoods() {
   const highlightId = revealFoodId; revealFoodId = '';
   const expanded = new Set([...container.querySelectorAll('details[open]')].map(item => item.dataset.meal));
   if (!state.foods.length) {
+    currentMeal = '';
     container.innerHTML = `<div class="empty-state">${icon('meal')}<strong>${t('empty_title')}</strong><p>${t('empty_description')}</p></div>`;
     animateList(container, previous);
     return;
   }
+  const highlighted = state.foods.find(food => food.id === highlightId);
+  if (highlighted) currentMeal = normalizedMeal(highlighted);
+  else if (!state.foods.some(food => normalizedMeal(food) === currentMeal)) currentMeal = normalizedMeal(state.foods.at(-1));
   container.innerHTML = meals.map(meal => {
     const foods = state.foods.filter(food => (meals.includes(food.meal) ? food.meal : 'other') === meal);
     if (!foods.length) return '';
@@ -62,12 +78,12 @@ export function renderFoods() {
     const image = safeImage(foods.find(food => safeImage(food.image))?.image);
     const thumb = image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" decoding="async" data-food-image>` : icon(mealIcons[meal]);
     const open = expanded.has(meal) || foods.some(food => food.id === highlightId);
-    return `<details class="meal-group" data-meal="${meal}" data-motion-key="meal-${meal}" ${open ? 'open' : ''}>
-      <summary class="meal-summary" aria-expanded="${open}"><span class="meal-thumb">${thumb}</span><span class="meal-description"><strong>${t(meal)}</strong><small>${escapeHTML(foods.map(food => food.name).join(', '))}</small></span><span class="meal-kcal">${number(total.kcal)} ${t('kcal')}</span>${icon('chevron', 'meal-chevron')}</summary>
+    return `<details class="meal-group${meal === currentMeal ? ' is-current' : ''}" data-meal="${meal}" data-motion-key="meal-${meal}" ${open ? 'open' : ''}>
+      <summary class="meal-summary" aria-expanded="${open}"${meal === currentMeal ? ' aria-current="true"' : ''}><span class="meal-thumb">${thumb}</span><span class="meal-description"><strong>${t(meal)}</strong><small>${escapeHTML(foods.map(food => food.name).join(', '))}</small></span><span class="meal-kcal">${number(total.kcal)} ${t('kcal')}</span>${icon('chevron', 'meal-chevron')}<span class="meal-outline" aria-hidden="true"></span></summary>
       <div class="meal-contents">${foods.map(food => foodRow(food)).join('')}<button type="button" class="text-button" data-action="openFood" data-value="${meal}">${icon('plus')}<span>${t('add_food')}</span></button></div>
     </details>`;
   }).join('');
-  container.querySelectorAll('.meal-summary').forEach(summary => summary.addEventListener('click', event => { event.preventDefault(); toggleMeal(summary.parentElement); }));
+  container.querySelectorAll('.meal-summary').forEach(summary => summary.addEventListener('click', event => { event.preventDefault(); selectCurrentMeal(summary.parentElement.dataset.meal); toggleMeal(summary.parentElement); }));
   container.querySelectorAll('[data-food-image]').forEach(image => image.addEventListener('error', () => { image.parentElement.innerHTML = icon('meal'); }, { once: true }));
   animateList(container, previous, highlightId);
 }

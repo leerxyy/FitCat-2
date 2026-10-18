@@ -1,7 +1,7 @@
 import { state, loadState, rollDay, updateStreak, persist, proAccess } from './core/store.js';
 import { translate } from './core/i18n.js';
 import { $, initActions } from './ui/components.js';
-import { initNavigation, showScreen, updateHeading, activeTab } from './ui/navigation.js';
+import { initNavigation, showScreen, updateHeading, activeTab, resetNavigationGestures } from './ui/navigation.js';
 import { initDiary, renderSummary, renderFoods, renderTemplates } from './features/diary.js';
 import { initProfile, renderIdentity, flushProfileFeedback } from './features/profile.js';
 import { initPreferences, renderPreferences } from './features/preferences.js';
@@ -77,9 +77,9 @@ function start() {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) flushProfileFeedback(); else checkDay(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
   setInterval(checkDay, 60000);
-  window.addEventListener('pagehide', () => { try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
+  window.addEventListener('pagehide', () => { resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();
   void ensureDailyWeather();
   Promise.resolve(viewportReady).then(() => document.dispatchEvent(new Event('fitcat:ready')));
