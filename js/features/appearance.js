@@ -7,7 +7,7 @@ import { enter, reducedMotion, MOTION } from '../ui/motion.js';
 import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { haptic } from '../ui/haptics.js';
-import { requestDeviceTilt, disableDeviceTilt, recenterDeviceTilt, deviceTiltStatus } from '../ui/ambient.js';
+import { requestDeviceTilt, disableDeviceTilt, deviceTiltStatus } from '../ui/ambient.js';
 
 let currentTab = 'style', saveError = false, tiltPending = false;
 let tiltRequest = 0;
@@ -66,11 +66,10 @@ function renderRange(input,settings,keepValue=false){
 }
 function renderTilt(settings=effective()){
   const status=deviceTiltStatus(), supported=status!=='unsupported';
-  const input=$('appearanceDeviceTilt');input.checked=tiltPending||settings.deviceTilt;input.disabled=!settings.parallax||tiltPending||!supported||reducedMotion();
-  $('appearanceEnableTilt').hidden=!(settings.deviceTilt&&status!=='active');
+  const input=$('appearanceDeviceTilt');input.checked=tiltPending||settings.deviceTilt;input.disabled=!settings.parallax||settings.depth===0||tiltPending||!supported||reducedMotion();
+  $('appearanceEnableTilt').hidden=!(settings.deviceTilt&&['gesture','denied','stalled'].includes(status));
   $('appearanceEnableTilt').disabled=!settings.parallax||tiltPending||!supported||reducedMotion();
-  $('appearanceRecenterTilt').hidden=status!=='active'||!settings.deviceTilt;
-  const key=tiltPending?'appearance_gyro_wait':!supported?'appearance_gyro_unavailable':reducedMotion()?'appearance_gyro_reduced':!settings.parallax?'appearance_gyro_enable_parallax':status==='active'&&settings.deviceTilt?'appearance_gyro_on':settings.deviceTilt?'appearance_gyro_resume':status==='denied'?'appearance_gyro_denied':'appearance_gyro_hint';
+  const key=tiltPending?'appearance_gyro_wait':!supported?'appearance_gyro_unavailable':reducedMotion()?'appearance_gyro_reduced':!settings.parallax||settings.depth===0?'appearance_gyro_enable_parallax':status==='active'&&settings.deviceTilt?'appearance_gyro_on':status==='denied'?'appearance_gyro_denied':settings.deviceTilt&&status==='gesture'?'appearance_gyro_gesture':settings.deviceTilt&&status==='stalled'?'appearance_gyro_stalled':settings.deviceTilt?'appearance_gyro_resume':'appearance_gyro_hint';
   $('appearanceTiltStatus').hidden=false;
   $('appearanceTiltStatus').dataset.state=status;
   setText($('appearanceTiltStatus'),t(key));
@@ -185,7 +184,6 @@ export function initAppearance(){
     finally{if(request===tiltRequest){tiltPending=false;renderTilt();}}
   }
   onAction('appearanceTilt',enableTilt);
-  onAction('appearanceRecenterTilt',()=>{recenterDeviceTilt();renderTilt();});
   const motionPreference=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const motionChanged=()=>{ $('appearanceMotionNotice').hidden=!reducedMotion(); };
   if(motionPreference?.addEventListener)motionPreference.addEventListener('change',motionChanged);
