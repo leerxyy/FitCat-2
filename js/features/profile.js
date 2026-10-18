@@ -6,6 +6,8 @@ import { showScreen, showTab } from '../ui/navigation.js';
 import { enter, MOTION } from '../ui/motion.js';
 import { initProfileSwipe } from '../ui/profile-swipe.js';
 import { initPhotoEditor } from '../ui/photo-editor.js';
+import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
+import { haptic } from '../ui/haptics.js';
 
 const avatars = new WeakMap();
 let photoVersion = 0;
@@ -76,6 +78,7 @@ export function setSegment(target, value) {
     button.classList.toggle('active', active);
     button.setAttribute('aria-pressed', String(active));
   });
+  if (container) syncSelectionLens(container);
 }
 
 function renderProfile() {
@@ -139,8 +142,14 @@ export function initProfile() {
     renderIdentity({ animatePhoto: true }); toast(t('saved'));
   } });
   $('photoCropModal').addEventListener('close', () => { photoVersion++; });
-  for (const [name, target] of [['selectSetupGender', 'setupGender'], ['selectProfileGender', 'profileGender'], ['selectProfileGoal', 'profileGoal']]) {
-    onAction(name, button => { setSegment(target, button.dataset.value); if (target !== 'setupGender') { saveProfileField($(target)); flushProfileFeedback(); } });
+  const select = (target, value) => { setSegment(target, value); if (target !== 'setupGender') { saveProfileField($(target)); flushProfileFeedback(); } };
+  for (const [name, target] of [['selectSetupGender', 'setupGender'], ['selectProfileGender', 'profileGender'], ['selectProfileGoal', 'profileGoal']]) onAction(name, button => select(target, button.dataset.value));
+  for (const [target, values, padding, gap] of [['profileGender', ['female', 'male'], 3, 0], ['profileGoal', ['lose', 'maintain', 'gain'], 0, 8]]) {
+    initSelectionLens($(target + 'Control'), { padding, gap,
+      getIndex: () => values.indexOf($(target).value),
+      onSelect: index => { haptic(); select(target, values[index]); },
+      isEnabled: () => document.body.dataset.screen === 'profilePage',
+    });
   }
   $('setupForm').addEventListener('submit', event => {
     event.preventDefault();

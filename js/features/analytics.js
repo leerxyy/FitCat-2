@@ -6,6 +6,8 @@ import { $, icon, escapeHTML, onAction, changed, confirmAction, promptValue, ope
 import { activeTab } from '../ui/navigation.js';
 import { enter, play, cancelEntrance, tweenValue, captureLayout, animateList, MOTION } from '../ui/motion.js';
 import { requirePro } from '../ui/premium.js';
+import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
+import { haptic } from '../ui/haptics.js';
 
 let weightChart;
 let nutritionChart;
@@ -129,6 +131,7 @@ function switchStatistics(name, { animate = true } = {}) {
     button.classList.toggle('active', chosen); button.setAttribute('aria-selected', String(chosen));
     button.setAttribute('tabindex', chosen ? '0' : '-1');
   }
+  syncSelectionLens($('statisticsSwitch'));
   if (previous !== name && animate && activeTab === 2 && !reducedMotion() && typeof incoming.animate === 'function') {
     const direction = name === 'nutrition' ? 1 : -1;
     outgoing.hidden = false; outgoing.classList.add('stats-panel-leaving');
@@ -214,6 +217,11 @@ function validDate(date) {
 export function initAnalytics() {
   $('weightDate').value = localDate();
   onAction('switchStatistics', button => switchStatistics(button.dataset.statistics));
+  initSelectionLens($('statisticsSwitch'), { padding: 4,
+    getIndex: () => views.indexOf(statisticsView),
+    onSelect: index => { haptic(); switchStatistics(views[index]); },
+    isEnabled: () => document.body.dataset.screen === 'mainPage' && activeTab === 2,
+  });
   $('statisticsSwitch').addEventListener('keydown', event => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
