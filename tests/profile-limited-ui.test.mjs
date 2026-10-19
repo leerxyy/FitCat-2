@@ -28,6 +28,10 @@ test('limited collection supplies real animated previews and explicit, permanent
       for(const[id,parts,wings]of [['kitsune',6,0],['pearlguard',7,0],['seraph',11,6]]){
         await click('#frameChoice_'+id);const frame=$('framePickerFrame');
         assert.equal(frame.dataset.frame,id);assert.equal(frame.dataset.limited,'true');assert.equal($('subscriptionDialog').open,false);
+        assert.equal(frame.parentElement.dataset.limited,'true');
+        assert.match(frame.parentElement.style.getPropertyValue('--limited-avatar-aperture'),new RegExp('^url\\("file:.*'+id+'-aperture.webp'));
+        const {LIMITED_FRAME_GEOMETRY}=await import('../js/core/profile-limited-geometry.js');
+        assert.equal(frame.parentElement.style.getPropertyValue('--limited-photo-top'),LIMITED_FRAME_GEOMETRY[id].photo.top+'%');
         assert.match(frame.querySelector('img.collectible-art').getAttribute('src'),new RegExp('/profile-limited/frames/'+id+'-body.webp$'));
         assert.equal(frame.querySelectorAll('.limited-piece').length,parts);assert.equal(frame.querySelectorAll('[data-piece-type="wing"]').length,wings);
         // This project's DOM double stores inline CSS as an attribute; it does
@@ -36,13 +40,14 @@ test('limited collection supplies real animated previews and explicit, permanent
         assert.equal(digits($('collectibleFramePrice').textContent),'9999');assert.equal($('collectibleFrameOffer').dataset.limited,'true');assert.equal(state.profileStyle.frame,'ice');
       }
       assert.equal(env.localStorage.getItem(WALLET_KEY),wallet);assert.equal(env.localStorage.getItem(PROFILE_STYLE_KEY),selected);
-      await close('profileFrameModal');await click('#profileFrameEdit');assert.equal($('framePickerFrame').dataset.frame,'ice');
+      await close('profileFrameModal');await click('#profileFrameEdit');assert.equal($('framePickerFrame').dataset.frame,'ice');assert.equal($('framePickerFrame').parentElement.dataset.limited,'false');
     });
     await t.test('double-tapping Buy charges once and installs bounded hero art and a small header sprite',async()=>{
       await click('#frameChoice_kitsune');$('collectibleFrameBuy').click();$('collectibleFrameBuy').click();await tick();await tick();
       assert.equal(getWallet().snapshot().balance,90001);assert.deepEqual(getWallet().ownedFrames(),['kitsune']);assert.equal(state.profileStyle.frame,'kitsune');
       assert.match($('profileAvatarFrame').querySelector('.collectible-art').getAttribute('src'),/kitsune-body.webp$/);assert.equal($('profileAvatarFrame').querySelectorAll('.limited-piece').length,6);
       assert.match($('headerAvatarFrame').querySelector('.collectible-art').getAttribute('src'),/kitsune-thumb.webp$/);assert.equal($('headerAvatarFrame').querySelector('.collectible-details').children.length,0);
+      for(const id of ['profileAvatarFrame','headerAvatarFrame','framePickerFrame']){assert.equal($(id).parentElement.dataset.limited,'true');assert.match($(id).parentElement.style.getPropertyValue('--limited-avatar-aperture'),/kitsune-aperture.webp/);}
       assert.equal($('frameChoice_kitsune').dataset.owned,'true');assert.equal($('collectibleFramePurchase').hidden,true);assert.match($('walletHistoryList').textContent,/Рамка · Кицунэ/);
     });
     await t.test('a failed style save after payment leaves its receipt and a free Apply button',async()=>{

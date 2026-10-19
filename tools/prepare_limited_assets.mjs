@@ -5,6 +5,7 @@ import { resolve, join } from 'node:path';
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { FRAME_PARTS, COVER_REGIONS } from './profile_limited_geometry.mjs';
+import { measureFrameAperture } from './frame_aperture.mjs';
 const require = createRequire(import.meta.url);
 const sharp = require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES ? join(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES,'sharp') : 'sharp');
 const source = resolve(process.argv[2] || '../work/limited-approved-source');
@@ -57,6 +58,12 @@ for(const [id,parts] of Object.entries(FRAME_PARTS)) {
   distances.sort((a,b)=>a-b);const radius=distances[Math.floor(distances.length*.60)];
   if(!(radius>=245&&radius<=350))throw new Error('Unexpected opening radius: '+id+' '+radius);
   geometry[id]={hole:Number(((radius+4)/512).toFixed(5)),clear:Number((Math.min(radius-28,244)/1024*100).toFixed(3)),pieces:descriptors};
+  const {mask:openingMask,fit}=measureFrameAperture(raw),aperture=`assets/profile-limited/frames/${id}-aperture.webp`;
+  const aperturePixels=Buffer.alloc(1024*1024*4);
+  for(let p=0;p<openingMask.length;p++){aperturePixels[p*4]=aperturePixels[p*4+1]=aperturePixels[p*4+2]=255;aperturePixels[p*4+3]=openingMask[p];}
+  await sharp(aperturePixels,{raw:{width:1024,height:1024,channels:4}}).resize(512,512).webp({lossless:true,alphaQuality:100,effort:5}).toFile(aperture);
+  assets.push({file:aperture,bytes:(await stat(aperture)).size});
+  geometry[id].photo={...fit,aperture};
   const n=512,small=await sharp(body,{raw:{width:1024,height:1024,channels:4}}).resize(n,n).raw().toBuffer();
   const light=Buffer.alloc(n*n*4),aura=Buffer.alloc(n*n*4),material=Buffer.alloc(n*n*4);
   for(let i=0;i<small.length;i+=4){
@@ -67,7 +74,7 @@ for(const [id,parts] of Object.entries(FRAME_PARTS)) {
     material[i]=material[i+1]=material[i+2]=255;material[i+3]=Math.round(a*Math.max(0,Math.min(1,(lum-110)/120))*.9);
   }
   for(const[suffix,map]of[['light',light],['aura',aura],['material',material]])assets.push(await webp(map,n,n,`frames/${id}-${suffix}.webp`,82));
-  receipts.push({kind:'frame',id,generated:true,master_sha256:hash(original),geometry:{hole:geometry[id].hole,clear:geometry[id].clear},articulated_pieces:descriptors,assets});
+  receipts.push({kind:'frame',id,generated:true,master_sha256:hash(original),geometry:{hole:geometry[id].hole,clear:geometry[id].clear,photo:geometry[id].photo},articulated_pieces:descriptors,assets});
 }
 for(const[id,regions]of Object.entries(COVER_REGIONS)) {
   const original=await readFile(join(source,id+'.png')),clean=await readFile(join(source,id+'-clean.png'));
