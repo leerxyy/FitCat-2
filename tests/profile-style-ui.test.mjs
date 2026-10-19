@@ -20,7 +20,7 @@ test('profile cosmetics integrate selection, autosave, PRO+, photo identity and 
       for (const [kind, id] of [['frame', 'profileFrameModal'], ['cover', 'profileCoverModal']]) {
         await click(kind === 'frame' ? '#profileFrameEdit' : '#profileCoverEdit');
         assert.equal($(id).open, true); assert.ok($(id).hasAttribute('data-swipe-close')); assert.ok($(id).querySelector('[data-sheet-handle]'));
-        assert.equal($(id).querySelectorAll('.profile-style-choice').length, kind === 'cover' ? 12 : 8);
+        assert.equal($(id).querySelectorAll('.profile-style-choice').length, kind === 'cover' ? 12 : 13);
         assert.equal($(id).querySelectorAll('[data-pro-feature="profile-style"]').length, 3);
         assert.equal($(id).querySelector('[type="submit"]'), null); assert.equal($(id).querySelector('[data-close]'), null);
         await close(id);
