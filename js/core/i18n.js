@@ -121,8 +121,16 @@ export function locale() {
   return state.preferences.lang === 'cn' ? 'zh-CN' : state.preferences.lang === 'en' ? 'en-US' : 'ru-RU';
 }
 
+const numberFormats = new Map();
 export function number(value, digits = 0) {
-  return new Intl.NumberFormat(locale(), { maximumFractionDigits: digits }).format(Number(value) || 0);
+  const language = locale(), key = `${language}:${digits}`;
+  let formatter = numberFormats.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(language, { maximumFractionDigits: digits });
+    if (numberFormats.size >= 16) numberFormats.clear();
+    numberFormats.set(key, formatter);
+  }
+  return formatter.format(Number(value) || 0);
 }
 
 export function translate(root = document) {

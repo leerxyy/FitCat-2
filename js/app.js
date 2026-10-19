@@ -6,7 +6,7 @@ import { initDiary, renderSummary, renderFoods, renderTemplates } from './featur
 import { initProfile, renderIdentity, flushProfileFeedback } from './features/profile.js';
 import { initPreferences, renderPreferences } from './features/preferences.js';
 import { initProducts, renderProducts } from './features/products.js';
-import { initAnalytics, renderAnalytics, renderCharts } from './features/analytics.js';
+import { initAnalytics, renderAnalytics, renderCharts, invalidateAnalyticsFormats } from './features/analytics.js';
 import { initFriends, queuePublish, loadFriends } from './services/friends.js';
 import { initGestures, stopGestures } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
@@ -23,6 +23,7 @@ import { stopWeatherRequest } from './features/weather.js';
 import { batchMotion } from './ui/motion.js';
 import { initAppearance, renderAppearance, flushAppearance } from './features/appearance.js';
 import { effectiveAppearance } from './core/appearance.js';
+import { applyPerformanceMode } from './ui/performance.js';
 
 let previousAccess;
 let pendingRender;
@@ -68,6 +69,7 @@ function checkDay() {
 
 function start() {
   loadState();
+  applyPerformanceMode(state.preferences.lowDetailMode);
   previousAccess = proAccess();
   rollDay(); updateStreak();
   initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initInterfaceAudio(); initAppearance(); initAmbient(effectiveAppearance(state.appearance, proAccess())); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
@@ -81,7 +83,10 @@ function start() {
     translate(); render(); updateHeading(); renderProducts();
     if (activeTab === 3) loadFriends();
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { void pauseInterfaceAudio(); flushAppearance(); resetNavigationGestures(); flushProfileFeedback(); } else checkDay(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { void pauseInterfaceAudio(); flushAppearance(); resetNavigationGestures(); flushProfileFeedback(); }
+    else { invalidateAnalyticsFormats(); checkDay(); if (activeTab === 2) { renderAnalytics(); renderCharts(); } }
+  });
   setInterval(checkDay, 60000);
   window.addEventListener('pagehide', () => { void pauseInterfaceAudio(); flushAppearance(); resetNavigationGestures(); try { flushProfileFeedback(); rollDay(); persist({ nutrition: Boolean(state.profile) }); } catch { /* Storage may be unavailable during page shutdown. */ } });
   queuePublish(); initPWA();

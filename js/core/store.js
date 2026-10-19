@@ -19,9 +19,10 @@ const DEFAULTS = {
   currentSteps: 8000, currentTemp: 22, smartWaterEnabled: false,
   smartSearchEnabled: false, smartSearchResults: 10,
   hapticsEnabled: true,
+  lowDetailMode: false,
   waterTemperatureMode: 'manual',
 };
-const PREF_KEYS = { ...Object.fromEntries(Object.keys(DEFAULTS).map(key => [key, key])), lang: 'fitcat_lang' };
+const PREF_KEYS = { ...Object.fromEntries(Object.keys(DEFAULTS).map(key => [key, key])), lang: 'fitcat_lang', lowDetailMode: 'fitcat_low_detail_mode_v1' };
 function normalizePreferences(value) {
   const result = { ...DEFAULTS };
   for (const [key, fallback] of Object.entries(DEFAULTS)) {
@@ -139,17 +140,30 @@ export function updateStreak(now = new Date()) {
 export function persist({ nutrition = false } = {}) {
   if (nutrition && state.profile) recordNutrition();
   for (const key of ['profile', 'foods', 'weight', 'nutrition', 'products', 'templates', 'friends']) {
-    if (key === 'profile' && !state.profile) storage.removeItem(KEYS[key]);
-    else storage.setItem(KEYS[key], JSON.stringify(state[key]));
+    if (key === 'profile' && !state.profile) { if (storage.getItem(KEYS[key]) !== null) storage.removeItem(KEYS[key]); }
+    else saveIfChanged(KEYS[key], JSON.stringify(state[key]));
   }
   for (const [key, value] of Object.entries(state.preferences)) {
-    if (PREF_KEYS[key]) storage.setItem(PREF_KEYS[key], String(value));
+    if (PREF_KEYS[key]) saveIfChanged(PREF_KEYS[key], String(value));
   }
-  storage.setItem(KEYS.weather, JSON.stringify(state.weather));
-  storage.setItem(KEYS.appearance, JSON.stringify(state.appearance));
-  storage.setItem(KEYS.profileStyle, JSON.stringify(state.profileStyle));
-  storage.setItem('waterAmount', String(state.water));
-  storage.setItem('lastDate', state.lastDate || new Date().toDateString());
+  saveIfChanged(KEYS.weather, JSON.stringify(state.weather));
+  saveIfChanged(KEYS.appearance, JSON.stringify(state.appearance));
+  saveIfChanged(KEYS.profileStyle, JSON.stringify(state.profileStyle));
+  saveIfChanged('waterAmount', String(state.water));
+  saveIfChanged('lastDate', state.lastDate || new Date().toDateString());
+}
+
+// Compare against storage, not an in-memory cache: imports and other tabs may
+// have replaced it. Saves remain synchronous, with the same error propagation.
+function saveIfChanged(key, value) {
+  if (storage.getItem(key) !== value) storage.setItem(key, value);
+}
+
+export function setLowDetailMode(value) {
+  const enabled = Boolean(value);
+  saveIfChanged(PREF_KEYS.lowDetailMode, String(enabled));
+  state.preferences.lowDetailMode = enabled;
+  return enabled;
 }
 
 // Autosaving a profile field should write only the profile, not the entire diary.

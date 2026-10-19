@@ -17,6 +17,7 @@ import { requirePro, renderPremium } from '../ui/premium.js';
 import { reducedMotion, enter, MOTION } from '../ui/motion.js';
 import { subscribeAmbientMotion } from '../ui/ambient.js';
 import { cosmeticTimeline } from '../ui/cosmetic-timeline.js';
+import { lowDetailMode } from '../ui/performance.js';
 
 const photos = new WeakMap();
 const inView = new WeakMap();
@@ -46,17 +47,19 @@ function renderPhoto(node) {
 }
 function renderScene(scene, cover) {
   if (!scene) return;
-  const changed = scene.dataset.cover !== cover;
+  const quality = lowDetailMode() ? 'static' : 'full';
+  const changed = scene.dataset.cover !== cover || scene.dataset.quality !== quality;
+  setData(scene, 'quality', quality);
   setData(scene, 'cover', cover);
   const city = CITY_PROFILE_COVERS.includes(cover);
   setData(scene, 'city', city);
   const limited = LIMITED_PROFILE_COVERS.includes(cover);
   setData(scene, 'limited', limited);
-  if (changed) scene.querySelector('.scene-limited').innerHTML = limited ? limitedCoverMarkup(cover) : '';
+  if (changed) scene.querySelector('.scene-limited').innerHTML = limited && !lowDetailMode() ? limitedCoverMarkup(cover) : '';
   if (changed && city) {
     for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, cssAssetURL(path));
     CITY_EFFECTS[cover].fog.forEach((value, index) => scene.style.setProperty('--fog-' + ['far', 'mid', 'near'][index], String(value)));
-    scene.querySelector('.city-traffic').innerHTML = cityTrafficMarkup(cover);
+    scene.querySelector('.city-traffic').innerHTML = lowDetailMode() ? '' : cityTrafficMarkup(cover);
   }
   const image = scene.querySelector('.scene-image'), asset = profileCoverAsset(cover);
   if (asset && image.getAttribute('src') !== asset) image.setAttribute('src', asset);
@@ -70,7 +73,9 @@ function renderScene(scene, cover) {
 }
 function renderFrame(node, value) {
   if (!node) return;
-  const changed = node.dataset.frame !== value, collectible = PURCHASABLE_PROFILE_FRAMES.includes(value);
+  const quality = lowDetailMode() ? 'static' : 'full';
+  const changed = node.dataset.frame !== value || node.dataset.quality !== quality, collectible = PURCHASABLE_PROFILE_FRAMES.includes(value);
+  setData(node, 'quality', quality);
   const limited = LIMITED_PROFILE_FRAMES.includes(value), header = node.id === 'headerAvatarFrame';
   setData(node, 'frame', value);
   setData(node, 'collectible', collectible);
@@ -81,7 +86,7 @@ function renderFrame(node, value) {
   setData(node.parentElement, 'fitted', collectible);
   if (collectible && changed) {
     const geometry = LIMITED_FRAME_GEOMETRY[value] || FRAME_GEOMETRY[value];
-    const artwork = limited && !header ? `assets/profile-limited/frames/${value}-body.webp` : collectibleFrameAsset(value, header);
+    const artwork = limited && !header && !lowDetailMode() ? `assets/profile-limited/frames/${value}-body.webp` : collectibleFrameAsset(value, header);
     const image = node.querySelector('.collectible-art');
     if (image.getAttribute('src') !== appAssetURL(artwork)) image.setAttribute('src', appAssetURL(artwork));
     node.style.setProperty('--collectible-art', cssAssetURL(artwork));
@@ -104,7 +109,7 @@ function renderFrame(node, value) {
     }
     node.style.setProperty('--collectible-clear', `${geometry.clear * 2}%`);
     node.parentElement.style.setProperty('--collectible-hole', String(geometry.hole));
-    node.querySelector('.collectible-details').innerHTML = header ? '' : limited ? limitedFrameEffectsMarkup(value) : collectibleEffectsMarkup(value);
+    node.querySelector('.collectible-details').innerHTML = header || lowDetailMode() ? '' : limited ? limitedFrameEffectsMarkup(value) : collectibleEffectsMarkup(value);
   }
 }
 function status(kind) {
@@ -216,13 +221,14 @@ function paintMotion() {
   const x = Math.max(-8, Math.min(8, lastMotion.x * .22));
   const y = Math.max(-6, Math.min(6, lastMotion.y * .16));
   for (const scene of liveScenes) {
-    scene.style.setProperty('--cover-x', `${x.toFixed(2)}px`);
-    scene.style.setProperty('--cover-y', `${y.toFixed(2)}px`);
+    for (const [key, value] of [['--cover-x', `${x.toFixed(2)}px`], ['--cover-y', `${y.toFixed(2)}px`]]) {
+      if (scene.style.getPropertyValue(key) !== value) scene.style.setProperty(key, value);
+    }
   }
 }
 export function syncProfileStyleMotion() {
   if (!initialized) return;
-  const moving = !motionPaused && !document.hidden && !reducedMotion();
+  const moving = !motionPaused && !document.hidden && !reducedMotion() && !lowDetailMode();
   const screen = document.body.dataset.screen;
   const dialogs = document.querySelectorAll('dialog[open]');
   const open = dialogs[dialogs.length - 1];
@@ -328,6 +334,7 @@ export function initProfileStyle() {
   onAction('cancelCityPreview', () => { previewCover = null; cityError = ''; renderProfileStyle(); });
   $('profileCoverModal').addEventListener('close', () => { previewCover = null; cityError = ''; });
   document.addEventListener('fitcat:wallet', renderProfileStyle);
+  document.addEventListener('fitcat:performance', renderProfileStyle);
   onAction('resetProfileStyle', button => {
     const kind = button.dataset.value;
     if (['frame', 'cover'].includes(kind)) choose(kind, PROFILE_STYLE_DEFAULTS[kind]);

@@ -1,6 +1,7 @@
 import { reducedMotion, finishValueMotion } from './motion.js';
 import { APPEARANCE_DEFAULTS, normalizeAppearance } from '../core/appearance.js';
 import { tiltPose, tiltOffset } from '../core/tilt.js';
+import { lowDetailMode } from './performance.js';
 
 let currentAmbient;
 const motionSubscribers = new Map();
@@ -41,24 +42,25 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
     target?.addEventListener?.(type,handler,options);
     listeners.push(()=>target?.removeEventListener?.(type,handler,options));
   };
-  const canRun=()=>!disposed&&!paused&&!reducedMotion()&&settings.parallax&&settings.depth>0;
+  const canRun=()=>!disposed&&!paused&&!reducedMotion()&&!lowDetailMode()&&settings.parallax&&settings.depth>0;
   const wantsTilt=()=>enabled||manualIntent;
   function status(value){
     if(phase===value)return;
     phase=value;document.dispatchEvent(new CustomEvent('fitcat:tilt-status',{detail:value}));
   }
   function paint(){
+    const write=(node,key,value)=>{if(node.style.getPropertyValue?.(key)!==value)node.style.setProperty(key,value);};
     if(!document.body?.classList.contains('dialog-open')){
       wallpaperX=x;wallpaperY=y;
-      layer.style.setProperty('--parallax-x',Math.abs(x)<.001?'0px':`${x.toFixed(2)}px`);
-      layer.style.setProperty('--parallax-y',Math.abs(y)<.001?'0px':`${y.toFixed(2)}px`);
+      write(layer,'--parallax-x',Math.abs(x)<.001?'0px':`${x.toFixed(2)}px`);
+      write(layer,'--parallax-y',Math.abs(y)<.001?'0px':`${y.toFixed(2)}px`);
     }
     for(const listener of motionSubscribers.keys())listener(x,y);
     if(previewVisible){
-      preview.style.setProperty('--parallax-x',`${(x*.35).toFixed(2)}px`);
-      preview.style.setProperty('--parallax-y',`${(y*.25).toFixed(2)}px`);
-      preview.style.setProperty('--preview-rotate-y',`${(x*.055).toFixed(2)}deg`);
-      preview.style.setProperty('--preview-rotate-x',`${(-y*.03).toFixed(2)}deg`);
+      write(preview,'--parallax-x',`${(x*.35).toFixed(2)}px`);
+      write(preview,'--parallax-y',`${(y*.25).toFixed(2)}px`);
+      write(preview,'--preview-rotate-y',`${(x*.055).toFixed(2)}deg`);
+      write(preview,'--preview-rotate-x',`${(-y*.03).toFixed(2)}deg`);
     }
   }
   const update=now=>{
@@ -202,8 +204,8 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   };
   const visibility=value=>{
     const wasPaused=paused;paused=value;root.classList.toggle('motion-paused',paused);
-    for(const subscriber of motionSubscribers.values())subscriber.visibility?.(paused);
-    if(paused||reducedMotion()){
+    for(const subscriber of motionSubscribers.values())subscriber.visibility?.(paused||lowDetailMode());
+    if(paused||reducedMotion()||lowDetailMode()){
       suspend();finishValueMotion();if(wantsTilt())status('paused');return;
     }
     if(wasPaused){suspend();if(wantsTilt())status('waiting');}
@@ -240,6 +242,7 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   on(document,'visibilitychange',()=>visibility(Boolean(document.hidden)));
   on(view,'pagehide',()=>visibility(true));on(view,'pageshow',()=>visibility(Boolean(document.hidden)));
   on(preference,'change',()=>visibility(Boolean(document.hidden)));
+  on(document,'fitcat:performance',()=>visibility(Boolean(document.hidden)));
   on(view,'orientationchange',()=>{if(wantsTilt()&&canRun()){center();status('waiting');}},{passive:true});
   currentAmbient=controller;syncPreview();paint();visibility(paused);
   return controller;

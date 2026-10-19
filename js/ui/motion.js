@@ -1,3 +1,4 @@
+import { lowDetailMode } from './performance.js';
 // Shared timings keep numbers, progress, navigation and list changes in step.
 export const EASE = 'cubic-bezier(.22, 1, .36, 1)';
 export const MOTION = Object.freeze({ press: 140, screen: 420, panel: 300, close: 200, value: 600, list: 320 });
@@ -5,6 +6,7 @@ let batchTime;
 const waterWaves = new WeakMap();
 const tweens = new WeakMap();
 const liveTweens = new Set();
+let valueFrame = 0;
 const exits = new WeakMap();
 const entrances = new WeakMap();
 const heights = new WeakMap();
@@ -16,6 +18,7 @@ export function reducedMotion() {
 }
 
 function motionFactor() {
+  if (lowDetailMode()) return .4;
   return { calm: 1.12, standard: 1, expressive: 1.18 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1;
 }
 
@@ -29,26 +32,34 @@ export function tweenValue(element, target, render, { duration = MOTION.value, i
   target = Number.isFinite(Number(target)) ? Number(target) : 0;
   const previous = tweens.get(element);
   if (previous?.target === target) { previous.render = render; render(previous.current); return; }
-  if (previous) { cancelAnimationFrame(previous.frame); liveTweens.delete(previous); }
+  if (previous) liveTweens.delete(previous);
   const from = previous?.current ?? initial;
-  const job = { current: from, target, render, frame: 0 };
+  const job = { current: from, from, target, render, start: batchTime ?? performance.now(), duration: duration * motionFactor() };
   tweens.set(element, job);
-  if (reducedMotion() || from === target) { job.current = target; render(target); return; }
-  const start = batchTime ?? performance.now();
-  duration *= motionFactor();
+  if (reducedMotion() || lowDetailMode() || from === target) { job.current = target; render(target); stopIdleValueFrame(); return; }
   render(from); liveTweens.add(job);
-  const tick = now => {
-    const progress = Math.max(0, Math.min(1, (now - start) / duration));
-    job.current = from + (target - from) * (1 - (1 - progress) ** 3);
+  if (!valueFrame) valueFrame = requestAnimationFrame(tickValues);
+}
+
+function stopIdleValueFrame() {
+  if (!liveTweens.size && valueFrame) { cancelAnimationFrame(valueFrame); valueFrame = 0; }
+}
+
+function tickValues(now) {
+  valueFrame = 0;
+  for (const job of liveTweens) {
+    const progress = Math.max(0, Math.min(1, (now - job.start) / job.duration));
+    job.current = job.from + (job.target - job.from) * (1 - (1 - progress) ** 3);
+    if (progress === 1) job.current = job.target;
     job.render(job.current);
-    if (progress < 1) job.frame = requestAnimationFrame(tick);
-    else { job.current = target; liveTweens.delete(job); }
-  };
-  job.frame = requestAnimationFrame(tick);
+    if (progress === 1) liveTweens.delete(job);
+  }
+  if (liveTweens.size && !valueFrame) valueFrame = requestAnimationFrame(tickValues);
 }
 
 export function finishValueMotion() {
-  for (const job of liveTweens) { cancelAnimationFrame(job.frame); job.current = job.target; job.render(job.target); }
+  if (valueFrame) cancelAnimationFrame(valueFrame); valueFrame = 0;
+  for (const job of liveTweens) { job.current = job.target; job.render(job.target); }
   liveTweens.clear();
 }
 
@@ -82,7 +93,7 @@ function visualState(element, fallback) {
 
 export function enter(element, { x = 0, y = 10, delay = 0, duration = MOTION.panel } = {}) {
   if (!element) return;
-  const distance = { calm: .45, standard: 1, expressive: 1.3 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1;
+  const distance = lowDetailMode() ? .3 : ({ calm: .45, standard: 1, expressive: 1.3 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1);
   x *= distance; y *= distance;
   const previous = entrances.get(element);
   const first = previous ? visualState(element, { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` }) : { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` };
@@ -138,7 +149,7 @@ export function exitDialog(dialog, finish, { fromY = 0 } = {}) {
 }
 
 export function waterFeedback(wave) {
-  if (!wave || reducedMotion() || globalThis.document?.hidden) return;
+  if (!wave || reducedMotion() || lowDetailMode() || globalThis.document?.hidden) return;
   if (wave.getClientRects && !wave.getClientRects().length) return;
   if (waterWaves.has(wave)) return;
   const animation = play(wave, [
@@ -154,7 +165,7 @@ export function waterFeedback(wave) {
 }
 
 export function captureLayout(container) {
-  if (reducedMotion() || typeof container?.getBoundingClientRect !== 'function' || !container.getClientRects().length) return null;
+  if (reducedMotion() || lowDetailMode() || typeof container?.getBoundingClientRect !== 'function' || !container.getClientRects().length) return null;
   const snapshot = { height: container.getBoundingClientRect().height, nodes: new Map() };
   container.querySelectorAll('[data-motion-key]').forEach(node => {
     if (node.getClientRects().length) snapshot.nodes.set(node.dataset.motionKey, node.getBoundingClientRect());

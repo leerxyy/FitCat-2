@@ -1,0 +1,51 @@
+/* Full mode has no overrides. LDM preserves the original artwork and layout,
+   using a static satin material instead of continuous GPU decoration. */
+.settings-ldm-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; gap: 12px; align-items: center; padding: 17px 0; }
+.ldm-emblem { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid rgb(var(--accent-rgb) / .4); border-radius: 14px; background: linear-gradient(145deg, rgb(var(--accent-rgb) / .17), transparent); color: var(--accent); font-size: 11px; font-weight: 750; letter-spacing: .02em; }
+.settings-ldm-row .apple-switch { width: 44px; height: 27px; }
+.settings-ldm-row .slider::before { width: 21px; height: 21px; }
+.ldm-note { margin: 8px 0 0; color: var(--muted, #9db9ce); font-size: 11px; line-height: 1.6; }
+
+:root[data-low-detail="on"] body *,
+:root[data-low-detail="on"] body *::before,
+:root[data-low-detail="on"] body *::after {
+  animation-play-state: paused !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  will-change: auto !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+/* No full-screen moving planes, duplicate foregrounds or animated masks. */
+:root[data-low-detail="on"] :is(.ambient-depth, .ambient-effects, .ambient-far, .ambient-near,
+  .scene-limited, .scene-city, .scene-atmosphere, .scene-stars, .scene-foreground,
+  .collectible-details, .collectible-light, .collectible-aura, .surface-light,
+  .selection-glint, .selection-lens-shine, .scanner-glint, .meal-outline) { display: none !important; }
+:root[data-low-detail="on"] :is(.avatar-frame > span:not(.frame-body):not(.collectible-shell), .avatar-frame::before, .avatar-frame::after, .collectible-lustre, .collectible-ambient) { display: none !important; }
+:root[data-low-detail="on"] :is(.ambient-wallpaper, .scene-distance, .scene-image, .appearance-preview-ui) { transform: none !important; }
+:root[data-low-detail="on"] :is(.card::before, .glass::before, .glass-button::before, .btn-primary::after) { display: none !important; }
+/* The photo, aperture masks and frame geometry are intentionally untouched. */
+:root[data-low-detail="on"] #appScroller :is(.card, .glass, .glass-button),
+:root[data-low-detail="on"] #navDock .bottom-nav,
+:root[data-low-detail="on"] .sheet {
+  background: linear-gradient(135deg, #cdeaff0c, transparent 50%), rgb(10 28 43 / .92) !important;
+  border-color: rgb(var(--accent-rgb) / .3) !important;
+  box-shadow: inset 0 1px 0 #dff7ff29 !important;
+}
+:root[data-low-detail="on"] #profileIdentityCard[data-has-cover="true"] { background: #0a1c2b !important; }
+:root[data-low-detail="on"] dialog::backdrop {
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  background: rgb(2 9 17 / .7);
+}
+:root[data-low-detail="on"] :is(.selection-lens, .nav-lens) {
+  background: linear-gradient(135deg, rgb(var(--accent-rgb) / .4), rgb(var(--accent-rgb) / .14)) !important;
+  border: 1px solid rgb(var(--accent-rgb) / .55) !important;
+  box-shadow: inset 0 1px 0 #e0fbff38 !important;
+}
+:root[data-low-detail="on"] :is(button, input, select, .slider, .slider::before, .selection-lens) { transition-duration: 140ms !important; }
+/* Loading feedback must still communicate that an operation is in progress. */
+:root[data-low-detail="on"] :is(.startup-spinner, .spinner, [role="progressbar"]),
+:root[data-low-detail="on"] .startup-track::after { animation-play-state: running !important; }
+:root[data-low-detail="on"] .subscription-success .success-emblem,
+:root[data-low-detail="on"] .subscription-success .success-emblem > .icon { animation: none !important; }

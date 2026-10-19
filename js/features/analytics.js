@@ -9,6 +9,7 @@ import { requirePro } from '../ui/premium.js';
 import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { haptic } from '../ui/haptics.js';
 import { appearanceColor, effectiveAppearance } from '../core/appearance.js';
+import { lowDetailMode } from '../ui/performance.js';
 
 let weightChart;
 let nutritionChart;
@@ -23,11 +24,29 @@ let savingWeight = false;
 let weightEntrySession = 0;
 const views = ['weight', 'nutrition'];
 const metrics = ['kcal', 'protein', 'fat', 'carbs'];
+const dateFormats = new Map();
+const historySignatures = new WeakMap();
+const chartSignatures = new Map();
+
+export function invalidateAnalyticsFormats() {
+  dateFormats.clear(); historySignatures.delete($('weightHistoryList')); historySignatures.delete($('nutritionHistoryList'));
+  chartSignatures.clear();
+}
+
+function replaceHistory(node, signature, build) {
+  if (historySignatures.get(node) === signature) return;
+  const snapshot = captureLayout(node);
+  node.innerHTML = build();
+  historySignatures.set(node, signature);
+  animateList(node, snapshot);
+}
 
 function formatDate(date) {
   const parsed = new Date(date + 'T12:00:00');
   if (Number.isNaN(parsed.getTime())) return date;
-  return new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', ...(parsed.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}) }).format(parsed);
+  const withYear = parsed.getFullYear() !== new Date().getFullYear(), key = `${locale()}:${withYear}`;
+  if (!dateFormats.has(key)) dateFormats.set(key, new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', ...(withYear ? { year: 'numeric' } : {}) }));
+  return dateFormats.get(key).format(parsed);
 }
 
 function dateLabel(date) {
@@ -94,21 +113,18 @@ export function renderAnalytics() {
   $('bmiCategory').textContent = t(bmiCategory(bmiValue));
   $('bmiCategory').dataset.category = bmiCategory(bmiValue);
 
-  const weightSnapshot = captureLayout($('weightHistoryList'));
-  $('weightHistoryList').innerHTML = [...sorted].reverse().map(entry => `<div class="history-item stats-history-row" data-history-date="${escapeHTML(entry.date)}" data-motion-key="weight-${escapeHTML(entry.date)}">${dateMarkup(entry.date)}<strong class="stats-history-value">${number(entry.weight, 1)} ${t('kg')}</strong>${recordMenu('weight', entry.date)}</div>`).join('');
+  const historyContext = `${locale()}:${localDate()}`;
+  replaceHistory($('weightHistoryList'), historyContext + JSON.stringify(sorted), () => [...sorted].reverse().map(entry => `<div class="history-item stats-history-row" data-history-date="${escapeHTML(entry.date)}" data-motion-key="weight-${escapeHTML(entry.date)}">${dateMarkup(entry.date)}<strong class="stats-history-value">${number(entry.weight, 1)} ${t('kg')}</strong>${recordMenu('weight', entry.date)}</div>`).join(''));
   $('weightHistoryList').hidden = !sorted.length;
-  animateList($('weightHistoryList'), weightSnapshot);
   if (!sorted.length) { weightChart?.destroy(); weightChart = null; setChartStatus('weight', 'empty'); }
 
   const showPastMacros = proAccess(); const entries = nutritionEntries();
-  const nutritionSnapshot = captureLayout($('nutritionHistoryList'));
-  $('nutritionHistoryList').innerHTML = entries.length ? [...entries].reverse().map(entry => {
+  replaceHistory($('nutritionHistoryList'), historyContext + showPastMacros + JSON.stringify(entries), () => entries.length ? [...entries].reverse().map(entry => {
     const details = showPastMacros || entry.date === localDate()
       ? `<small>${hasNutritionData([entry]) ? `${t('protein_short')} ${number(entry.protein)} · ${t('fat_short')} ${number(entry.fat)} · ${t('carbs_short')} ${number(entry.carbs)}` : escapeHTML(t('stats_no_meals'))}</small>`
       : `<button type="button" class="history-macro-lock" data-action="openMacroHistory" aria-label="${escapeHTML(t('pro_open_macros') + '. ' + t('pro_required'))}">${icon('lock')}<span>${escapeHTML(t('pro_macro_locked'))}</span></button>`;
     return `<div class="history-item stats-history-row" data-history-date="${escapeHTML(entry.date)}" data-motion-key="nutrition-${escapeHTML(entry.date)}">${dateMarkup(entry.date)}<div class="stats-history-value"><strong>${number(entry.kcal)} ${t('kcal')}</strong>${details}</div>${recordMenu('nutrition', entry.date)}</div>`;
-  }).join('') : `<p class="stats-history-empty">${t('stats_empty_history')}</p>`;
-  animateList($('nutritionHistoryList'), nutritionSnapshot);
+  }).join('') : `<p class="stats-history-empty">${t('stats_empty_history')}</p>`);
   if (!hasNutritionData(entries)) { nutritionChart?.destroy(); nutritionChart = null; setChartStatus('nutrition', 'empty'); }
 }
 
@@ -148,7 +164,8 @@ function switchStatistics(name, { animate = true } = {}) {
 
 function chartOptions() {
   return {
-    responsive: true, maintainAspectRatio: false, animation: { duration: reducedMotion() ? 0 : MOTION.value, easing: 'easeOutCubic' },
+    responsive: true, maintainAspectRatio: false, animation: { duration: reducedMotion() || lowDetailMode() ? 0 : MOTION.value, easing: 'easeOutCubic' },
+    ...(lowDetailMode() ? { devicePixelRatio: Math.min(globalThis.devicePixelRatio || 1, 1.5) } : {}),
     plugins: { legend: { display: false }, tooltip: { backgroundColor: '#183348', padding: 11, cornerRadius: 11, displayColors: false } },
     scales: {
       x: { grid: { display: false }, ticks: { color: '#9db9ce', maxTicksLimit: 5, maxRotation: 0, font: { size: 10 } }, border: { display: false } },
@@ -178,6 +195,8 @@ export async function renderCharts() {
   updateControls();
   const name = statisticsView;
   const entries = name === 'weight' ? [...state.weight].sort((a, b) => a.date.localeCompare(b.date)) : nutritionEntries();
+  const signature = JSON.stringify([entries, locale(), localDate(), nutritionMetric, goalWeight(), effectiveAppearance(state.appearance, proAccess()).accent, lowDetailMode()]);
+  if ((name === 'weight' ? weightChart : nutritionChart) && chartSignatures.get(name) === signature) return;
   if (!entries.length || (name === 'nutrition' && !hasNutritionData(entries))) {
     if (name === 'weight') { weightChart?.destroy(); weightChart = null; }
     else { nutritionChart?.destroy(); nutritionChart = null; }
@@ -208,6 +227,7 @@ export async function renderCharts() {
       type: 'bar', data: { labels: entries.map(entry => formatDate(entry.date)), datasets: [{ label: `${t(nutritionMetric === 'kcal' ? 'calories' : nutritionMetric)}, ${t(nutritionMetric === 'kcal' ? 'kcal' : 'g')}`, data: entries.map(entry => entry[nutritionMetric] || 0), backgroundColor: appearanceColor(chartAccent,.65), hoverBackgroundColor: appearanceColor(chartAccent), borderRadius: 6, maxBarThickness: 26 }] }, options,
     });
   }
+  chartSignatures.set(name, signature);
 }
 
 function validDate(date) {
@@ -217,6 +237,7 @@ function validDate(date) {
 }
 
 export function initAnalytics() {
+  document.addEventListener('fitcat:performance', () => { renderAnalytics(); renderCharts(); });
   $('weightDate').value = localDate();
   onAction('switchStatistics', button => switchStatistics(button.dataset.statistics));
   initSelectionLens($('statisticsSwitch'), { padding: 4,

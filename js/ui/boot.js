@@ -1,6 +1,9 @@
 // Small classic entry point: show the brand before the module graph loads.
 (() => {
   const root = document.documentElement;
+  // Restore the rendering policy before the first frame; storage may be blocked.
+  try { root.dataset.lowDetail = localStorage.getItem('fitcat_low_detail_mode_v1') === 'true' ? 'on' : 'off'; }
+  catch { root.dataset.lowDetail = 'off'; }
   root.classList.add('app-starting'); root.setAttribute('aria-busy', 'true');
   let ready = false; let finished = false; let deadline;
   const unlock = () => {
