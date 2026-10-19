@@ -1,5 +1,6 @@
 import { formatPromo, createSubscription } from './subscription.js';
 import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, LEGACY_CITY_COVERS, canonicalCityCover } from './profile-cities.js';
+import { COLLECTIBLE_FRAME_PRICE, COLLECTIBLE_PROFILE_FRAMES } from './profile-frames.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
 export const SUBSCRIPTION_PRICES = Object.freeze({
@@ -22,14 +23,18 @@ const empty = () => ({ version: 1, balance: 0, entries: [], redeemed: [], subscr
 const validTime = value => Number.isSafeInteger(value) && value > 0 && value < 8640000000000000;
 export function validateWallet(value) {
   if (value?.version !== 1 || !Number.isSafeInteger(value.balance) || value.balance < 0 || !Array.isArray(value.entries) || !Array.isArray(value.redeemed)) throw new Error('wallet_corrupt');
-  let balance = 0; const ids = new Set(), covers = new Set();
+  let balance = 0; const ids = new Set(), covers = new Set(), frames = new Set();
   for (const entry of value.entries) {
     if (!entry || typeof entry.id !== 'string' || ids.has(entry.id) || !validTime(entry.at)
-      || !['promo', 'subscription', 'profile-cover'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
+      || !['promo', 'subscription', 'profile-cover', 'profile-frame'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
       || (entry.kind === 'promo' ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
     if (entry.kind === 'profile-cover') {
       if ((!CITY_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)) throw new Error('wallet_corrupt');
       covers.add(entry.cover);
+    }
+    if (entry.kind === 'profile-frame') {
+      if (!COLLECTIBLE_PROFILE_FRAMES.includes(entry.frame) || frames.has(entry.frame) || entry.amount !== -COLLECTIBLE_FRAME_PRICE) throw new Error('wallet_corrupt');
+      frames.add(entry.frame);
     }
     ids.add(entry.id); balance += entry.amount;
     if (!Number.isSafeInteger(balance) || balance < 0 || entry.balanceAfter !== balance) throw new Error('wallet_corrupt');
@@ -105,6 +110,21 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
     });
   }
   const ownedCovers = () => [...new Set(snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => canonicalCityCover(entry.cover)))];
+  async function purchaseFrame(frame, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
+    if (!COLLECTIBLE_PROFILE_FRAMES.includes(frame) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    return commit(value => {
+      const previous = value.entries.find(entry => entry.id === operationId);
+      if (previous) {
+        if (previous.kind !== 'profile-frame' || previous.frame !== frame) throw new Error('wallet_invalid_purchase');
+        return false;
+      }
+      if (value.entries.some(entry => entry.kind === 'profile-frame' && entry.frame === frame)) return false;
+      if (value.balance < COLLECTIBLE_FRAME_PRICE) throw new Error('wallet_insufficient');
+      value.balance -= COLLECTIBLE_FRAME_PRICE;
+      value.entries.push({ id: operationId, kind: 'profile-frame', frame, amount: -COLLECTIBLE_FRAME_PRICE, at: now, balanceAfter: value.balance });
+    });
+  }
+  const ownedFrames = () => snapshot().entries.filter(entry => entry.kind === 'profile-frame').map(entry => entry.frame);
   function status(now = Date.now()) {
     const paid = snapshot().subscription;
     const legacy = createSubscription(storage).status(now);
@@ -114,5 +134,5 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
       activatedAt: record.activatedAt ?? null, expiresAt: record.expiresAt ?? null,
       remainingDays: active ? Math.ceil((record.expiresAt - now) / 86400000) : 0 };
   }
-  return { snapshot, redeem, purchase, purchaseCover, ownedCovers, status };
+  return { snapshot, redeem, purchase, purchaseCover, ownedCovers, purchaseFrame, ownedFrames, status };
 }
