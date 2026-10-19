@@ -1,5 +1,5 @@
 import { formatPromo, createSubscription } from './subscription.js';
-import { CITY_COVER_PRICE, CITY_PROFILE_COVERS } from './profile-cities.js';
+import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, LEGACY_CITY_COVERS, canonicalCityCover } from './profile-cities.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
 export const SUBSCRIPTION_PRICES = Object.freeze({
@@ -28,7 +28,7 @@ export function validateWallet(value) {
       || !['promo', 'subscription', 'profile-cover'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
       || (entry.kind === 'promo' ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
     if (entry.kind === 'profile-cover') {
-      if (!CITY_PROFILE_COVERS.includes(entry.cover) || covers.has(entry.cover)) throw new Error('wallet_corrupt');
+      if ((!CITY_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)) throw new Error('wallet_corrupt');
       covers.add(entry.cover);
     }
     ids.add(entry.id); balance += entry.amount;
@@ -95,16 +95,16 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
     return commit(value => {
       const previous = value.entries.find(entry => entry.id === operationId);
       if (previous) {
-        if (previous.kind !== 'profile-cover' || previous.cover !== cover) throw new Error('wallet_invalid_purchase');
+        if (previous.kind !== 'profile-cover' || canonicalCityCover(previous.cover) !== cover) throw new Error('wallet_invalid_purchase');
         return false;
       }
-      if (value.entries.some(entry => entry.kind === 'profile-cover' && entry.cover === cover)) return false;
+      if (value.entries.some(entry => entry.kind === 'profile-cover' && canonicalCityCover(entry.cover) === cover)) return false;
       if (value.balance < CITY_COVER_PRICE) throw new Error('wallet_insufficient');
       value.balance -= CITY_COVER_PRICE;
       value.entries.push({ id: operationId, kind: 'profile-cover', cover, amount: -CITY_COVER_PRICE, at: now, balanceAfter: value.balance });
     });
   }
-  const ownedCovers = () => snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => entry.cover);
+  const ownedCovers = () => [...new Set(snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => canonicalCityCover(entry.cover)))];
   function status(now = Date.now()) {
     const paid = snapshot().subscription;
     const legacy = createSubscription(storage).status(now);

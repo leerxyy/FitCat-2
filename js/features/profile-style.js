@@ -1,5 +1,6 @@
 import { state, proAccess, setProfileStyle } from '../core/store.js';
 import { PROFILE_STYLE_DEFAULTS, PROFILE_STYLE_KEY, PREMIUM_PROFILE_FRAMES, PREMIUM_PROFILE_COVERS, ANIMATED_PROFILE_COVERS, effectiveProfileStyle, normalizeProfileStyle, profileChoiceAllowed, profileCoverAsset } from '../core/profile-style.js';
+import { CITY_EFFECTS, cityEffectAssets, cityTrafficMarkup } from '../core/profile-city-effects.js';
 import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, PROFILE_CITY_CATALOG } from '../core/profile-cities.js';
 import { t, number } from '../core/i18n.js';
 import { $, initials, onAction, openDialog, toast } from '../ui/components.js';
@@ -38,13 +39,19 @@ function renderScene(scene, cover) {
   if (!scene) return;
   const changed = scene.dataset.cover !== cover;
   setData(scene, 'cover', cover);
-  setData(scene, 'city', CITY_PROFILE_COVERS.includes(cover));
+  const city = CITY_PROFILE_COVERS.includes(cover);
+  setData(scene, 'city', city);
+  if (changed && city) {
+    for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, `url("${path}")`);
+    CITY_EFFECTS[cover].fog.forEach((value, index) => scene.style.setProperty('--fog-' + ['far', 'mid', 'near'][index], String(value)));
+    scene.querySelector('.city-traffic').innerHTML = cityTrafficMarkup(cover);
+  }
   const image = scene.querySelector('.scene-image'), asset = profileCoverAsset(cover);
   if (asset && image.getAttribute('src') !== asset) image.setAttribute('src', asset);
   const artwork = asset ? `url("${asset}")` : 'none';
   if (scene.style.getPropertyValue('--cover-art') !== artwork) scene.style.setProperty('--cover-art', artwork);
   image.hidden = !asset;
-  const width = CITY_PROFILE_COVERS.includes(cover) ? 1440 : 1040, height = CITY_PROFILE_COVERS.includes(cover) ? 960 : 440;
+  const width = CITY_PROFILE_COVERS.includes(cover) ? 1536 : 1040, height = CITY_PROFILE_COVERS.includes(cover) ? 1024 : 440;
   if (image.width !== width) image.width = width;
   if (image.height !== height) image.height = height;
   if (changed && !scene.closest('[hidden]')) enter(scene, { y: 0, duration: MOTION.screen });
@@ -94,10 +101,7 @@ function renderCityOffer(cover, owned) {
   if (!city) return;
   $('cityCoverTitle').textContent = t('profile_cover_' + cover);
   $('cityCoverDetail').textContent = t('profile_city_' + cover + '_detail');
-  $('cityCoverCreditSource').textContent = city.author;
-  $('cityCoverCreditSource').setAttribute('href', city.source);
-  $('cityCoverCreditLicense').textContent = city.license;
-  $('cityCoverCreditLicense').setAttribute('href', city.licenseURL);
+  $('cityCoverCredit').textContent = t('profile_city_original');
   $('cityCoverReturn').hidden = !previewCover;
   const purchased = owned.includes(cover), button = $('cityCoverBuy');
   $('cityCoverPurchase').hidden = purchased;

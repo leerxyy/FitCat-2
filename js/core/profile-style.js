@@ -1,4 +1,4 @@
-import { CITY_PROFILE_COVERS, cityCoverOwned } from './profile-cities.js';
+import { CITY_PROFILE_COVERS, cityCoverOwned, canonicalCityCover } from './profile-cities.js';
 export { CITY_PROFILE_COVERS } from './profile-cities.js';
 // Stored IDs only: imported profiles never introduce arbitrary URLs or CSS.
 export const PROFILE_STYLE_KEY = 'fitcat_profile_style_v1';
@@ -12,7 +12,7 @@ export const ANIMATED_PROFILE_COVERS = Object.freeze([...PREMIUM_PROFILE_COVERS,
 export function normalizeProfileStyle(value) {
   return {
     frame: PROFILE_FRAMES.includes(value?.frame) ? value.frame : PROFILE_STYLE_DEFAULTS.frame,
-    cover: PROFILE_COVERS.includes(value?.cover) || value?.cover === 'none' ? value.cover : PROFILE_STYLE_DEFAULTS.cover,
+    cover: PROFILE_COVERS.includes(canonicalCityCover(value?.cover)) || value?.cover === 'none' ? canonicalCityCover(value.cover) : PROFILE_STYLE_DEFAULTS.cover,
   };
 }
 export function effectiveProfileStyle(value, pro = false, ownedCovers = []) {
