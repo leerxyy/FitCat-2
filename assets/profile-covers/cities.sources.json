@@ -1,0 +1,94 @@
+[
+  {
+    "city": "tokyo",
+    "author": "Michael Day",
+    "license": "CC BY 2.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Shinjuku_in_the_Rain_(6969744906).jpg",
+    "location": "Shinjuku, Tokyo",
+    "year": 2012,
+    "assets": [
+      {
+        "file": "assets/profile-covers/tokyo.webp",
+        "bytes": 174020
+      },
+      {
+        "file": "assets/profile-covers/tokyo-thumb.webp",
+        "bytes": 25376
+      },
+      {
+        "file": "assets/profile-effects/tokyo-lights.webp",
+        "bytes": 84716
+      }
+    ]
+  },
+  {
+    "city": "chongqing",
+    "author": "Maple Doctor",
+    "license": "CC BY-SA 4.0",
+    "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Chongqing_Skyline_At_Night.png",
+    "location": "Hongyadong · Qiansimen Bridge, Chongqing",
+    "year": 2025,
+    "assets": [
+      {
+        "file": "assets/profile-covers/chongqing.webp",
+        "bytes": 264140
+      },
+      {
+        "file": "assets/profile-covers/chongqing-thumb.webp",
+        "bytes": 26890
+      },
+      {
+        "file": "assets/profile-effects/chongqing-lights.webp",
+        "bytes": 118082
+      }
+    ]
+  },
+  {
+    "city": "moscow",
+    "author": "Jukov Nikita",
+    "license": "CC BY 2.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Moscow_City_at_night4.jpg",
+    "location": "Moscow City",
+    "year": 2017,
+    "assets": [
+      {
+        "file": "assets/profile-covers/moscow.webp",
+        "bytes": 263840
+      },
+      {
+        "file": "assets/profile-covers/moscow-thumb.webp",
+        "bytes": 28042
+      },
+      {
+        "file": "assets/profile-effects/moscow-lights.webp",
+        "bytes": 69444
+      }
+    ]
+  },
+  {
+    "city": "dubai",
+    "author": "Robert Bock",
+    "license": "CC0 1.0",
+    "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Dubai_skyline_unsplash.jpg",
+    "location": "Downtown Dubai · Business Bay",
+    "year": 2016,
+    "assets": [
+      {
+        "file": "assets/profile-covers/dubai.webp",
+        "bytes": 124314
+      },
+      {
+        "file": "assets/profile-covers/dubai-thumb.webp",
+        "bytes": 11946
+      },
+      {
+        "file": "assets/profile-effects/dubai-lights.webp",
+        "bytes": 38916
+      }
+    ]
+  }
+]
