@@ -101,10 +101,12 @@ test('weather survives reload and backups while diary, wallet and subscription k
   state.profile = { name: 'Тест', age: 20, gender: 'male', weight: 52, height: 170, goal: 'maintain' };
   state.water = 750; state.preferences.waterTemperatureMode = 'auto'; state.preferences.currentTemp = 27;
   state.weather = { version: 1, location: place, daily: snapshot }; persist();
-  adapter.setItem('fitcat_wallet_v1', 'wallet-preserved'); adapter.setItem('fitcat_subscription_v1', 'subscription-preserved');
+  // Wallets now participate in backups, so use an actual valid legacy ledger.
+  const wallet = JSON.stringify({ version: 1, balance: 47, entries: [{ id: 'legacy-credit', kind: 'promo', amount: 47, at: now.getTime(), balanceAfter: 47 }], redeemed: [], subscription: null });
+  adapter.setItem('fitcat_wallet_v1', wallet); adapter.setItem('fitcat_subscription_v1', 'subscription-preserved');
   loadState(adapter); assert.deepEqual(state.weather.daily, snapshot); assert.equal(state.water, 750);
   const backup = structuredClone(exportSnapshot()); state.weather = emptyWeather(); persist(); importSnapshot(backup); loadState(adapter);
   assert.deepEqual(state.weather.daily, snapshot); assert.equal(state.preferences.currentTemp, 27);
-  assert.equal(adapter.getItem('fitcat_wallet_v1'), 'wallet-preserved'); assert.equal(adapter.getItem('fitcat_subscription_v1'), 'subscription-preserved');
-  clearAccount(); assert.equal(adapter.getItem('fitcat_weather_v1'), null); assert.equal(adapter.getItem('fitcat_wallet_v1'), 'wallet-preserved');
+  assert.equal(adapter.getItem('fitcat_wallet_v1'), wallet); assert.equal(adapter.getItem('fitcat_subscription_v1'), 'subscription-preserved');
+  clearAccount(); assert.equal(adapter.getItem('fitcat_weather_v1'), null); assert.equal(adapter.getItem('fitcat_wallet_v1'), wallet);
 });

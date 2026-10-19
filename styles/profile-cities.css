@@ -1,0 +1,89 @@
+/* Cities use credited real photography. No reconstructed skyline, video,
+   per-droplet elements, animated filters or extra sensor/RAF loop. */
+#profilePage #profileIdentityCard[data-city-cover="true"] { padding-top: clamp(145px, 38vw, 185px); }
+#profileIdentityCard[data-city-cover="true"] > .profile-scene { height: clamp(235px, 65vw, 315px); -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+.sheet.profile-style-sheet > .profile-style-preview[data-city="true"] { height: clamp(215px, 65vw, 310px); }
+.profile-style-preview[data-city="true"] .style-preview-identity { gap: 17px; }
+.profile-style-preview[data-city="true"] .scene-shade { background: linear-gradient(transparent 45%, #03101a6b 72%, #061626ed); }
+.profile-scene[data-city="true"] { background: #040e19; }
+.profile-scene[data-city="true"] .scene-distance { background: #040e19; }
+.profile-scene[data-city="true"] .scene-image { object-position: center; animation: profile-city-camera 32s ease-in-out infinite; }
+/* Retain the complete broad Dubai skyline, including on wider previews. */
+.profile-scene[data-cover="dubai"] .scene-image { object-fit: contain; }
+.scene-city { display: none; z-index: 2; }
+.profile-scene[data-city="true"] .scene-city { display: block; }
+.scene-city > div, .scene-city i { position: absolute; inset: 0; display: block; pointer-events: none; }
+.scene-city .city-distant { transform: translate3d(calc(var(--cover-x) * .25), calc(var(--cover-y) * .25), 0) scale(1.055); }
+.scene-city .city-middle { transform: translate3d(calc(var(--cover-x) * .65), calc(var(--cover-y) * .65), 0); }
+.scene-city .city-near { transform: translate3d(calc(var(--cover-x) * 1.3), calc(var(--cover-y) * 1.3), 0) scale(1.05); }
+.scene-city .city-lights { background-position: center; background-size: cover; background-repeat: no-repeat; mix-blend-mode: screen; animation: profile-city-camera 32s ease-in-out infinite, profile-city-light-pulse 11s ease-in-out infinite; }
+.profile-scene[data-cover="tokyo"] .city-lights { background-image: url('../assets/profile-effects/tokyo-lights.webp'); }
+.profile-scene[data-cover="chongqing"] .city-lights { background-image: url('../assets/profile-effects/chongqing-lights.webp'); animation-duration: 32s, 14s; }
+.profile-scene[data-cover="moscow"] .city-lights { background-image: url('../assets/profile-effects/moscow-lights.webp'); animation-duration: 32s, 17s; }
+.profile-scene[data-cover="dubai"] .city-lights { background-image: url('../assets/profile-effects/dubai-lights.webp'); background-size: contain; animation-duration: 32s, 19s; }
+.scene-city .city-haze { background: radial-gradient(ellipse at 74% 37%, #f377ca38, transparent 43%), radial-gradient(ellipse at 25% 62%, #368cf62b, transparent 35%); mix-blend-mode: screen; animation: profile-city-halo 16s ease-in-out infinite; }
+.profile-scene[data-cover="chongqing"] .city-haze { background: radial-gradient(ellipse at 22% 56%, #f3634c2b, transparent 38%), radial-gradient(ellipse at 70% 38%, #81b6ff20, transparent 35%); }
+.profile-scene[data-cover="moscow"] .city-haze { background: radial-gradient(ellipse at 30% 48%, #4c9dec24, transparent 45%), radial-gradient(ellipse at 72% 61%, #f7c88a24, transparent 27%); }
+.profile-scene[data-cover="dubai"] .city-haze { background: radial-gradient(ellipse at 53% 64%, #f0b65d28, transparent 51%), radial-gradient(ellipse at 74% 42%, #9baedc12, transparent 40%); }
+.scene-city .city-rain-far, .scene-city .city-rain-near,
+.scene-city .city-mist-far, .scene-city .city-mist-near { display: none; }
+.profile-scene[data-cover="tokyo"] .city-rain-far { display: block; inset: -256px -5% -256px; background: url('../assets/profile-effects/city-rain-far.svg') repeat; background-size: 512px 256px; opacity: .6; animation: profile-city-rain 3.8s linear infinite; }
+.profile-scene[data-cover="tokyo"] .city-rain-near { display: block; inset: -256px -6% -256px; background: url('../assets/profile-effects/city-rain-near.svg') repeat; background-size: 512px 256px; opacity: .72; animation: profile-city-rain 2.7s linear infinite; }
+.profile-scene[data-cover="chongqing"] .city-mist-far,
+.profile-scene[data-cover="moscow"] .city-mist-far { display: block; inset: 5% -12% -4%; background: url('../assets/profile-effects/city-fog-far.svg') center / 100% 100%; opacity: .68; animation: profile-city-fog-far 29s ease-in-out infinite; }
+.profile-scene[data-cover="chongqing"] .city-mist-near { display: block; inset: 20% -13% -12%; background: url('../assets/profile-effects/city-fog-near.svg') center / 100% 100%; opacity: .62; animation: profile-city-fog-near 37s ease-in-out infinite; }
+.profile-scene[data-cover="moscow"] .city-mist-far { opacity: .14; }
+.scene-city .city-water { background: var(--cover-art) center / cover no-repeat; mix-blend-mode: screen; -webkit-mask-image: linear-gradient(transparent 64%, #000 84%); mask-image: linear-gradient(transparent 64%, #000 84%); opacity: .15; animation: profile-city-reflections 9s ease-in-out infinite; }
+.profile-scene[data-cover="tokyo"] .city-water { -webkit-mask-image: linear-gradient(transparent 71%, #000 89%); mask-image: linear-gradient(transparent 71%, #000 89%); opacity: .14; animation-duration: 12s; }
+.profile-scene[data-cover="dubai"] .city-water { background-size: contain; opacity: .2; }
+.profile-scene[data-cover="moscow"] .city-water { display: none; }
+/* Pause every city layer from the same visibility switch as all other covers. */
+.profile-scene .scene-city i { animation-play-state: var(--cosmetic-play) !important; }
+@keyframes profile-city-camera {
+  0%, 100% { transform: translate3d(-.3%, .2%, 0) scale(1.015); }
+  35% { transform: translate3d(.3%, -.3%, 0) scale(1.022); }
+  70% { transform: translate3d(.1%, .25%, 0) scale(1.018); }
+}
+@keyframes profile-city-rain { from { transform: translate3d(0, -256px, 0); } to { transform: translate3d(0, 0, 0); } }
+@keyframes profile-city-light-pulse { 0%, 100% { opacity: .12; } 38% { opacity: .42; } 72% { opacity: .24; } }
+@keyframes profile-city-halo { 0%, 100% { transform: scale(1.02); opacity: .25; } 50% { transform: translate3d(.4%, -.2%, 0) scale(1.05); opacity: .7; } }
+@keyframes profile-city-fog-far { 0%, 100% { transform: translate3d(-3%, 0, 0) scale(1.04); } 45% { transform: translate3d(4%, 2%, 0) scale(1.12); } }
+@keyframes profile-city-fog-near { 0%, 100% { transform: translate3d(4%, 1%, 0) scale(1.06); } 55% { transform: translate3d(-5%, -1%, 0) scale(1.13); } }
+@keyframes profile-city-reflections { 0%, 100% { transform: translate3d(-.4%, 0, 0) scaleX(1.012); opacity: .1; } 42% { transform: translate3d(.4%, .15%, 0) scaleX(1.02); opacity: .24; } 76% { transform: translate3d(-.1%, -.1%, 0) scaleX(1.015); opacity: .17; } }
+
+.city-cover-offer { margin: 0 0 21px; padding: 17px 16px 12px; border: 1px solid #afbed342; border-radius: 20px; background: linear-gradient(145deg, #24394a70, #0b223958); }
+.city-offer-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.city-offer-heading > h3 { margin: 0; font-size: 21px; color: #e8f4ff; font-weight: 650; }
+.city-forever { display: inline-flex; flex: 0 0 auto; padding: 4px 8px; border: 1px solid #d0bb8859; border-radius: 20px; color: #f3dba9; background: #b6985110; font-size: 10px; line-height: 1.3; font-weight: 600; }
+.city-offer-detail { margin: 12px 0; color: #c0d0de; font-size: 13px; line-height: 1.6; }
+.city-purchase-note { margin: 10px 0 12px; color: #99b0c3; font-size: 11px; line-height: 1.5; }
+.sheet .city-cover-buy { gap: 8px; margin: 0; min-height: 49px; border-radius: 16px; }
+.city-cover-buy > img, .city-balance img, .city-choice-price img { display: inline-block; flex: 0 0 auto; object-fit: contain; visibility: visible; opacity: 1; }
+.city-cover-buy > strong { font-size: 17px; font-weight: 720; }
+.city-cover-buy:disabled { opacity: .47; }
+.city-balance { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 13px 1px 0; color: #aabed0; font-size: 12px; }
+.city-balance > span:last-child { display: inline-flex; align-items: center; gap: 6px; }
+.city-balance strong { font-weight: 550; color: #d0e3ef; }
+.city-shortfall, .city-purchase-error { margin: 10px 0 0; color: #f0bda7; font-size: 12px; line-height: 1.5; }
+.city-owned { margin: 13px 0 0; color: #a6e8d6; font-size: 12px; }
+.city-cover-apply { width: 100%; margin-top: 12px; }
+.city-tilt-hint { margin: 13px 0 0; color: #819db2; font-size: 10px; line-height: 1.6; }
+.city-credit { margin: 12px 0 0; padding-top: 11px; border-top: 1px solid #a2b8ce1a; color: #7e98ae; font-size: 10px; line-height: 1.65; }
+.city-credit a { color: #9cb6ca; text-decoration: underline; text-underline-offset: 2px; }
+.city-credit-adapted { display: block; margin-top: 2px; }
+.city-cover-offer .city-return { display: inline-flex; min-height: 39px; margin-top: 5px; padding: 10px 0 2px; font-size: 11px; color: #a9cddc; }
+.city-style-collection { padding-top: 23px; margin-top: 25px; border-top: 1px solid #abc8df25; }
+.city-style-collection > h3 { justify-content: space-between; }
+.city-choice .style-cover-sample { aspect-ratio: 1.5; }
+.city-choice[data-value="dubai"] .style-cover-sample img { object-fit: contain; background: #051120; }
+.city-choice-price { display: flex; align-items: center; align-self: flex-start; gap: 5px; min-height: 24px; margin: 3px 11px 0; color: #c2d5df; font-size: 12px; }
+.city-choice[data-owned="true"] .city-choice-price { color: #9ddfcf; font-size: 11px; }
+.city-choice[data-owned="true"] .city-choice-price img { display: none; }
+.city-choice.is-preview { border-color: #b8a9f4b8; box-shadow: 0 0 14px #aaa1ea14, inset 0 0 0 1px #baa9f219; }
+.city-choice.is-preview .style-choice-check { border-color: #c4b5f099; }
+@media (prefers-reduced-motion: reduce) {
+  .profile-scene[data-city="true"] .scene-image, .profile-scene .scene-city i { animation: none !important; }
+  .scene-city > div { transform: none !important; }
+  .profile-scene[data-city="true"] .city-rain-far, .profile-scene[data-city="true"] .city-rain-near { opacity: .2; }
+  #profilePage #profileIdentityCard[data-city-cover] { transition: none; }
+}

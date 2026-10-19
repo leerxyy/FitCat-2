@@ -1,9 +1,10 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.19.1-r1';
+const VERSION = '3.20.0-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
+  'js/core/profile-cities.js', 'js/core/profile-city-copy.js', 'styles/profile-cities.css', 'assets/profile-covers/cities.sources.json', 'CITY-CREDITS.md', 'assets/profile-covers/tokyo.webp', 'assets/profile-covers/tokyo-thumb.webp', 'assets/profile-covers/chongqing.webp', 'assets/profile-covers/chongqing-thumb.webp', 'assets/profile-covers/moscow.webp', 'assets/profile-covers/moscow-thumb.webp', 'assets/profile-covers/dubai.webp', 'assets/profile-covers/dubai-thumb.webp', 'assets/profile-effects/tokyo-lights.webp', 'assets/profile-effects/chongqing-lights.webp', 'assets/profile-effects/moscow-lights.webp', 'assets/profile-effects/dubai-lights.webp', 'assets/profile-effects/city-rain-far.svg', 'assets/profile-effects/city-rain-near.svg', 'assets/profile-effects/city-fog-far.svg', 'assets/profile-effects/city-fog-near.svg',
   'js/ui/cosmetic-timeline.js', 'assets/profile-effects/stars-2.svg', 'assets/profile-effects/stars-3.svg', 'assets/profile-effects/stars-4.svg', 'assets/profile-effects/aurora-far.svg', 'assets/profile-effects/mist-far.svg',
   'js/core/profile-style.js', 'js/core/profile-style-copy.js', 'js/features/profile-style.js', 'styles/profile-style.css', 'assets/profile-covers/aurora-thumb.webp', 'assets/profile-covers/aurora.webp', 'assets/profile-covers/cosmos-thumb.webp', 'assets/profile-covers/cosmos.webp', 'assets/profile-covers/dunes-thumb.webp', 'assets/profile-covers/dunes.webp', 'assets/profile-covers/forest-thumb.webp', 'assets/profile-covers/forest.webp', 'assets/profile-covers/lake-thumb.webp', 'assets/profile-covers/lake.webp', 'assets/profile-covers/mist-thumb.webp', 'assets/profile-covers/mist.webp', 'assets/profile-covers/ocean-thumb.webp', 'assets/profile-covers/ocean.webp', 'assets/profile-covers/summits-thumb.webp', 'assets/profile-covers/summits.webp', 'assets/profile-effects/aurora.svg', 'assets/profile-effects/cosmos.svg', 'assets/profile-effects/mist.svg', 'assets/profile-effects/stars.svg',
   'js/core/sounds.js', 'js/ui/sounds.js',

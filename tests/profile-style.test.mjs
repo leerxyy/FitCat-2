@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { PROFILE_STYLE_KEY, PROFILE_STYLE_DEFAULTS, PROFILE_FRAMES, PROFILE_COVERS, PREMIUM_PROFILE_FRAMES, PREMIUM_PROFILE_COVERS, normalizeProfileStyle, effectiveProfileStyle, profileChoiceAllowed, profileCoverAsset } from '../js/core/profile-style.js';
+import { PROFILE_STYLE_KEY, PROFILE_STYLE_DEFAULTS, PROFILE_FRAMES, PROFILE_COVERS, PREMIUM_PROFILE_FRAMES, PREMIUM_PROFILE_COVERS, CITY_PROFILE_COVERS, normalizeProfileStyle, effectiveProfileStyle, profileChoiceAllowed, profileCoverAsset } from '../js/core/profile-style.js';
 import { state, loadState, setProfileStyle, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../js/core/store.js';
 
 const profile = { name: 'Meow', age: 20, gender: 'male', height: 165, weight: 52, goal: 'maintain' };
@@ -12,9 +12,10 @@ function storage(initial = {}) {
 
 test('both profile collections have five usable Basic choices and three exclusive PRO+ choices', () => {
   for (const [kind, all, premium] of [['frame', PROFILE_FRAMES, PREMIUM_PROFILE_FRAMES], ['cover', PROFILE_COVERS, PREMIUM_PROFILE_COVERS]]) {
-    assert.equal(all.length, 8); assert.equal(new Set(all).size, 8); assert.equal(premium.length, 3);
+    const expected = kind === 'cover' ? 12 : 8;
+    assert.equal(all.length, expected); assert.equal(new Set(all).size, expected); assert.equal(premium.length, 3);
     assert.equal(all.filter(value => profileChoiceAllowed(kind, value, false)).length, 5);
-    for (const value of all) assert.equal(profileChoiceAllowed(kind, value, true), true);
+    for (const value of all) assert.equal(profileChoiceAllowed(kind, value, true, CITY_PROFILE_COVERS), true);
     for (const value of premium) assert.equal(profileChoiceAllowed(kind, value, false), false);
   }
   assert.equal(profileChoiceAllowed('cover', 'none'), true);
