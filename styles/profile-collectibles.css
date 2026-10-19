@@ -1,0 +1,84 @@
+/* Original detailed alpha sprites + small native layers. No animated filters,
+   videos, canvas, per-frame JS, or running gallery animations. */
+.avatar-frame > .collectible-shell { display: none; }
+.avatar-frame[data-collectible="true"] { inset: var(--collectible-inset, -45%); border-radius: 0; }
+.avatar-frame[data-collectible="true"] > span:not(.collectible-shell) { display: none; }
+.avatar-frame[data-collectible="true"] > .collectible-shell { display: block; inset: 0; border-radius: 0; -webkit-mask-image: radial-gradient(circle closest-side, transparent var(--collectible-clear), #000 calc(var(--collectible-clear) + .35%)); mask-image: radial-gradient(circle closest-side, transparent var(--collectible-clear), #000 calc(var(--collectible-clear) + .35%)); }
+.collectible-shell > span, .collectible-lustre > i { position: absolute; inset: 0; display: block; pointer-events: none; }
+.collectible-art { background: var(--collectible-art) center / 100% 100% no-repeat; }
+.collectible-lustre { overflow: hidden; mix-blend-mode: screen; -webkit-mask: var(--collectible-light) center / 100% 100% no-repeat; mask: var(--collectible-light) center / 100% 100% no-repeat; }
+.collectible-lustre > i { inset: -20% auto -20% -45%; width: 34%; background: linear-gradient(105deg, transparent, #fff6d140 25%, #fffef3e8 51%, #ffdfab55 72%, transparent); animation: profile-collectible-sheen calc(var(--shine-duration, 6000ms) * 1.4) ease-in-out infinite; }
+.collectible-ambient { background: var(--collectible-aura) center / 100% 100% no-repeat; mix-blend-mode: screen; opacity: .5; animation: profile-collectible-aura 7.7s ease-in-out infinite; }
+.collectible-details { color: #ffecbf; }
+.collectible-details > svg { display: block; width: 100%; height: 100%; overflow: visible; fill: currentColor; }
+.frame-cloud { fill: none; stroke: #e8f0d7; stroke-width: 5; stroke-linecap: round; opacity: .4; animation: profile-collectible-cloud 13.7s ease-in-out infinite; }
+.frame-cloud.cloud-two { stroke-width: 4; opacity: .35; animation-duration: 18.3s; animation-direction: reverse; }
+.frame-pearl { fill: #aeffe1; opacity: .4; transform-origin: 796px 728px; animation: profile-collectible-pearl 4.8s ease-in-out infinite; }
+.frame-star { opacity: .25; animation: profile-collectible-star 6.7s ease-in-out var(--spark-delay, 0s) infinite; }
+.frame-chronos-outer { fill: none; stroke: #ffe8b1; stroke-width: 3; transform-origin: 512px 512px; opacity: .75; animation: profile-collectible-orbit 53s linear infinite; }
+.collectible-details > .collectible-gear { position: absolute; display: block; overflow: hidden; clip-path: circle(49.5%); border-radius: 50%; animation: profile-collectible-orbit var(--gear-cycle) linear infinite; animation-direction: var(--gear-direction); }
+.collectible-gear > img { position: absolute; display: block; height: auto; max-width: none; pointer-events: none; }
+.collectible-details > .collectible-gear.is-balance { animation-name: profile-collectible-balance; animation-timing-function: ease-in-out; }
+.frame-satellite { fill: none; stroke: #c2a1ff; stroke-width: 3.5; transform-origin: 512px 512px; animation: profile-collectible-orbit 24s linear infinite; }
+.frame-satellite .frame-moon { fill: #e3d9ff; stroke: #b1e2ff; stroke-width: 5; }
+.frame-satellite.satellite-two { opacity: .65; stroke: #8ccfff; animation-duration: 37s; animation-direction: reverse; }
+.frame-ember { fill: #ffe2a1; opacity: .7; animation: profile-collectible-ember 7.9s ease-in-out infinite; }
+.frame-ember.ember-two { animation-duration: 9.7s; animation-delay: -4.8s; }
+.frame-ember.ember-three { animation-duration: 11.1s; animation-delay: -6.2s; }
+.avatar-frame[data-frame="eclipse"] .collectible-lustre > i { background: linear-gradient(105deg, transparent, #d8b0ff55 25%, #edddffff 51%, #9cdaff55 72%, transparent); animation-duration: calc(var(--shine-duration, 6000ms) * 1.8); }
+.avatar-frame[data-frame="eclipse"] .collectible-ambient { animation-duration: 12.9s; }
+.avatar-frame[data-frame="frostcrown"] .collectible-details { color: #f0fbff; }
+.avatar-frame[data-frame="frostcrown"] .collectible-lustre > i { background: linear-gradient(105deg, transparent, #afeaff60 25%, #ffffff 51%, #bfddff60 72%, transparent); animation-duration: calc(var(--shine-duration, 6000ms) * 1.65); }
+.avatar-frame[data-frame="frostcrown"] .collectible-ambient { animation-duration: 9.3s; }
+.avatar-frame[data-frame="frostcrown"] .frame-cloud { stroke: #c1e9ff; animation-duration: 17.9s; }
+.avatar-frame[data-frame="phoenix"] .collectible-ambient { animation-name: profile-collectible-heat; animation-duration: 6.8s; }
+.avatar-frame[data-frame="phoenix"] .collectible-lustre > i { background: linear-gradient(105deg, transparent, #ffb96977 25%, #fff6c9ff 51%, #ff7d3d66 72%, transparent); animation-duration: calc(var(--shine-duration, 6000ms) * 1.3); }
+/* Pause inherited by every animation, including nested SVG and gear windows. */
+.avatar-frame .collectible-shell *, .avatar-frame .collectible-shell { animation-play-state: var(--cosmetic-play, paused) !important; }
+:root[data-glints="off"] .collectible-lustre, :root[data-glints="off"] .collectible-details .frame-star { display: none; }
+/* The header shows a smaller photograph inside a bounded, static art sprite;
+   only one light sweep remains animated at this size. */
+.header-avatar-wrap[data-collectible="true"] > .avatar-frame { inset: -3px; }
+.header-avatar-wrap[data-collectible="true"] > .profile-button { position: absolute; inset: 0; margin: auto; width: calc((100% + 6px) * var(--collectible-hole)); height: calc((100% + 6px) * var(--collectible-hole)); transform: none; }
+.header-avatar-wrap .collectible-details, .header-avatar-wrap .collectible-ambient { display: none; }
+.header-avatar-wrap .collectible-lustre > i { animation-duration: calc(var(--shine-duration, 6000ms) * 2); }
+/* Full-size framing gives the ornaments room and keeps edit controls usable. */
+#profileIdentityCard[data-collectible-frame="true"] .profile-identity-main { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-avatar-wrap { margin: 47px auto 45px; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-name-block { width: 100%; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-name-block > label { text-align: center; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-id-line { justify-content: center; flex-wrap: wrap; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-photo-delete { top: -32px; right: -42px; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-photo-edit { bottom: -29px; right: -42px; }
+#profileIdentityCard[data-collectible-frame="true"] .profile-frame-edit { left: -42px; bottom: -29px; }
+.sheet.profile-style-sheet > #frameStylePreview[data-collectible="true"] { height: 332px; }
+#frameStylePreview[data-collectible="true"] .style-preview-identity { inset: 0 20px 20px; flex-direction: column; justify-content: flex-end; gap: 52px; }
+#frameStylePreview[data-collectible="true"] .style-preview-avatar { width: 104px; height: 104px; flex: 0 0 104px; margin-top: 48px; }
+#frameStylePreview[data-collectible="true"] .style-preview-copy { text-align: center; gap: 4px; }
+#frameStylePreview[data-collectible="true"] .style-preview-copy > strong { font-size: 19px; }
+#coverStylePreview[data-collectible="true"] .style-preview-avatar { flex-basis: 52px; width: 52px; height: 52px; margin: 14px 15px; }
+.collectible-collection > h3 { justify-content: space-between; }
+.collectible-choice { padding: 10px 10px 12px; }
+.collectible-choice .collectible-sample { position: relative; display: block; width: 100%; aspect-ratio: 1; margin-bottom: 6px; }
+.collectible-sample > .style-sample-initials { position: absolute; inset: 0; display: grid; place-items: center; font-size: 24px; background: radial-gradient(circle closest-side, #071b2b 51%, transparent 52%); }
+.collectible-sample > img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; -webkit-mask-image: radial-gradient(circle closest-side, transparent 45%, #000 45.5%); mask-image: radial-gradient(circle closest-side, transparent 45%, #000 45.5%); }
+.collectible-choice .city-choice-price { margin: 4px 2px 0; }
+.collectible-choice[data-owned="true"] .city-choice-price { color: #a6e8d6; }
+.collectible-choice[data-owned="true"] .city-choice-price img { display: none; }
+.collectible-choice.is-preview { border-color: #d8b978bb; box-shadow: inset 0 0 0 1px #d8b97825, 0 0 15px #d8b97812; }
+.frame-purchase-offer { border-color: #d8b97855; background: linear-gradient(135deg, #5f4b2a30, #112d4460); }
+.frame-purchase-offer .city-cover-buy { width: 100%; }
+@keyframes profile-collectible-sheen { 0%, 12% { transform: translate3d(-105%,0,0); opacity: 0; } 22% { opacity: .38; } 43% { opacity: .95; } 66% { opacity: .5; } 82%, 100% { transform: translate3d(560%,0,0); opacity: 0; } }
+@keyframes profile-collectible-aura { 0%, 100% { opacity: .15; transform: translate3d(-.8%,.2%,0) scale(1); } 51% { opacity: .88; transform: translate3d(.8%,-.35%,0) scale(1.015); } }
+@keyframes profile-collectible-heat { 0%, 100% { opacity: .15; transform: translate3d(0,.8%,0) scale(1); } 46% { opacity: .95; transform: translate3d(0,-.7%,0) scale(1.018); } }
+@keyframes profile-collectible-cloud { 0%, 100% { opacity: .18; transform: translate3d(-12px,3px,0); } 49% { opacity: .7; transform: translate3d(16px,-5px,0); } }
+@keyframes profile-collectible-pearl { 0%, 100% { opacity: .12; transform: scale(.86); } 49% { opacity: .66; transform: scale(1.38); } }
+@keyframes profile-collectible-star { 0%, 100% { opacity: .13; transform: scale(.65); } 48% { opacity: .93; transform: scale(1.16); } }
+@keyframes profile-collectible-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes profile-collectible-balance { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(16deg); } }
+@keyframes profile-collectible-ember { 0% { opacity: 0; transform: translate3d(-7px,20px,0); } 23% { opacity: .9; } 72% { opacity: .55; } 100% { opacity: 0; transform: translate3d(13px,-65px,0); } }
+@media (prefers-reduced-motion: reduce) {
+  .avatar-frame .collectible-shell, .avatar-frame .collectible-shell * { animation: none !important; transition: none !important; }
+  .collectible-lustre, .frame-ember { display: none; }
+  .collectible-ambient { opacity: .25; transform: none; }
+}
