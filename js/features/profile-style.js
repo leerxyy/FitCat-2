@@ -5,6 +5,7 @@ import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, PROFILE_CITY_CATALOG } from '../
 import { COLLECTIBLE_FRAME_PRICE, COLLECTIBLE_PROFILE_FRAMES, collectibleFrameAsset } from '../core/profile-frames.js';
 import { FRAME_GEOMETRY } from '../core/profile-frame-geometry.js';
 import { collectibleEffectsMarkup } from '../core/profile-frame-effects.js';
+import { appAssetURL, cssAssetURL } from '../core/asset-url.js';
 import { t, number } from '../core/i18n.js';
 import { $, initials, onAction, openDialog, toast } from '../ui/components.js';
 import { getWallet, purchaseCoverWithCoins, purchaseFrameWithCoins, walletError } from './wallet.js';
@@ -47,13 +48,13 @@ function renderScene(scene, cover) {
   const city = CITY_PROFILE_COVERS.includes(cover);
   setData(scene, 'city', city);
   if (changed && city) {
-    for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, `url("${path}")`);
+    for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, cssAssetURL(path));
     CITY_EFFECTS[cover].fog.forEach((value, index) => scene.style.setProperty('--fog-' + ['far', 'mid', 'near'][index], String(value)));
     scene.querySelector('.city-traffic').innerHTML = cityTrafficMarkup(cover);
   }
   const image = scene.querySelector('.scene-image'), asset = profileCoverAsset(cover);
   if (asset && image.getAttribute('src') !== asset) image.setAttribute('src', asset);
-  const artwork = asset ? `url("${asset}")` : 'none';
+  const artwork = asset ? cssAssetURL(asset) : 'none';
   if (scene.style.getPropertyValue('--cover-art') !== artwork) scene.style.setProperty('--cover-art', artwork);
   image.hidden = !asset;
   const width = CITY_PROFILE_COVERS.includes(cover) ? 1536 : 1040, height = CITY_PROFILE_COVERS.includes(cover) ? 1024 : 440;
@@ -69,10 +70,12 @@ function renderFrame(node, value) {
   setData(node.parentElement, 'collectible', collectible);
   if (collectible && changed) {
     const geometry = FRAME_GEOMETRY[value];
-    node.style.setProperty('--collectible-art', `url("${collectibleFrameAsset(value, node.id === 'headerAvatarFrame')}")`);
-    node.style.setProperty('--collectible-light', `url("assets/profile-frames/${value}-light.webp")`);
-    node.style.setProperty('--collectible-aura', `url("assets/profile-frames/${value}-aura.webp")`);
-    node.style.setProperty('--collectible-inset', `${((1 - 1 / geometry.hole) * 50).toFixed(3)}%`);
+    const artwork = collectibleFrameAsset(value, node.id === 'headerAvatarFrame');
+    const image = node.querySelector('.collectible-art');
+    if (image.getAttribute('src') !== appAssetURL(artwork)) image.setAttribute('src', appAssetURL(artwork));
+    node.style.setProperty('--collectible-art', cssAssetURL(artwork));
+    node.style.setProperty('--collectible-light', cssAssetURL(`assets/profile-frames/${value}-light.webp`));
+    node.style.setProperty('--collectible-aura', cssAssetURL(`assets/profile-frames/${value}-aura.webp`));
     node.style.setProperty('--collectible-clear', `${geometry.clear * 2}%`);
     node.parentElement.style.setProperty('--collectible-hole', String(geometry.hole));
     node.querySelector('.collectible-details').innerHTML = node.id === 'headerAvatarFrame' ? '' : collectibleEffectsMarkup(value);
