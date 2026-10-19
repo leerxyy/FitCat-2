@@ -56,7 +56,7 @@
 
 /* A profile cover stays inside the identity card, never behind editable fields. */
 #profilePage #profileIdentityCard { position: relative; isolation: isolate; overflow: hidden; padding-top: 111px; transition: padding-top .42s var(--ease); }
-#profileIdentityCard > .profile-identity-main, #profileIdentityCard > .profile-streak { position: relative; z-index: 2; }
+#profileIdentityCard > .profile-identity-main, #profileIdentityCard > .profile-achievements { position: relative; z-index: 2; }
 #profilePage #profileIdentityCard[data-has-cover="false"] { padding-top: 24px; }
 #profileIdentityCard > .profile-scene { position: absolute; inset: 0 0 auto; height: 193px; z-index: -1; border-radius: 23px 23px 0 0; -webkit-mask-image: linear-gradient(#000 52%, transparent); mask-image: linear-gradient(#000 52%, transparent); }
 #profileIdentityCard > .profile-scene .scene-shade { background: linear-gradient(180deg, transparent 18%, #071c2d10 43%, #081e307a 70%, #081e30da 94%); }

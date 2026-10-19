@@ -24,8 +24,8 @@ body[data-screen="profilePage"] .app-root { --header-space: 14px; padding-bottom
 .profile-id-reading { color: var(--tone-ha6c3d7, #a6c3d7); font-size: 11px; min-width: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }.profile-id-reading > strong { font-weight: 500; letter-spacing: .02em; }
 .profile-copy-button { display: grid; place-items: center; flex: 0 0 auto; width: 31px; min-width: 31px; height: 31px; min-height: 31px; padding: 7px; border-radius: 50%; border: 1px solid var(--tone-h80bedc50, #80bedc50); background: linear-gradient(140deg, var(--tone-h5dc8ed10, #5dc8ed10), #0a2b4169); color: var(--tone-hb9dff5, #b9dff5); }
 .profile-copy-button .icon { width: 16px; height: 16px; }
-.profile-streak { display: flex; align-items: center; gap: 10px; padding-top: 13px; margin-top: 16px; border-top: 1px solid var(--tone-h93c7e52c, #93c7e52c); color: var(--tone-hb9cddd, #b9cddd); font-size: 12px; line-height: 1.4; }
-.profile-streak > .icon { width: 23px; height: 25px; color: var(--tone-h20d4f0, #20d4f0); }.profile-streak strong { margin-right: 3px; color: #f1f8ff; font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.profile-achievements { display: flex; align-items: center; gap: 10px; padding-top: 13px; margin-top: 16px; border-top: 1px solid var(--tone-h93c7e52c, #93c7e52c); color: var(--tone-hb9cddd, #b9cddd); font-size: 12px; line-height: 1.4; }
+.profile-achievements > .icon { width: 23px; height: 25px; flex: 0 0 23px; color: var(--tone-h20d4f0, #20d4f0); }
 .profile-data-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 13px 12px; }
 .profile-data-grid .field { min-width: 0; margin: 0; gap: 0; }
 .profile-data-grid .field > label, .profile-data-grid .profile-field-label { margin-bottom: 6px; color: var(--tone-hafc7da, #afc7da); font-size: 12px; line-height: 1.3; }

@@ -75,8 +75,10 @@ function renderFrame(node, value) {
   setData(node, 'frame', value);
   setData(node, 'collectible', collectible);
   setData(node, 'limited', limited);
+  setData(node, 'fitted', collectible);
   setData(node.parentElement, 'collectible', collectible);
   setData(node.parentElement, 'limited', limited);
+  setData(node.parentElement, 'fitted', collectible);
   if (collectible && changed) {
     const geometry = LIMITED_FRAME_GEOMETRY[value] || FRAME_GEOMETRY[value];
     const artwork = limited && !header ? `assets/profile-limited/frames/${value}-body.webp` : collectibleFrameAsset(value, header);
@@ -86,8 +88,11 @@ function renderFrame(node, value) {
     const folder = limited ? 'assets/profile-limited/frames' : 'assets/profile-frames';
     node.style.setProperty('--collectible-light', cssAssetURL(`${folder}/${value}-light.webp`));
     node.style.setProperty('--collectible-aura', cssAssetURL(`${folder}/${value}-aura.webp`));
+    if (['dragon', 'phoenix', 'frostcrown'].includes(value)) node.style.setProperty('--collectible-contour', cssAssetURL(`${folder}/${value}-contour.webp`));
     if (limited) {
       node.style.setProperty('--limited-material', cssAssetURL(`${folder}/${value}-material.webp`));
+    }
+    {
       // A frame's opening is often above the centre of its ornament canvas.
       // The native photo and opaque backing share that exact opening mask.
       const fit = geometry.photo, parent = node.parentElement;

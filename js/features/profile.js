@@ -1,7 +1,7 @@
 import { state, setProfile, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../core/store.js';
-import { t, locale, number } from '../core/i18n.js';
+import { t } from '../core/i18n.js';
 import { localDate } from '../core/math.js';
-import { $, icon, initials, escapeHTML, onAction, changed, toast, confirmAction } from '../ui/components.js';
+import { $, icon, initials, onAction, changed, toast, confirmAction } from '../ui/components.js';
 import { showScreen, showTab } from '../ui/navigation.js';
 import { enter, MOTION } from '../ui/motion.js';
 import { initProfileSwipe } from '../ui/profile-swipe.js';
@@ -66,8 +66,7 @@ export function renderIdentity({ animatePhoto = false } = {}) {
   $('profilePhoto').setAttribute('aria-label', t('photo_hint'));
   $('profilePhotoDelete').hidden = !state.photo;
   $('profileUidDisplay').textContent = state.uid.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1 $2 $3 $4');
-  const plural = new Intl.PluralRules(locale()).select(state.streak);
-  $('profileStreakText').innerHTML = escapeHTML(t('profile_streak_' + plural)).replace('{count}', `<strong id="streakCount">${number(state.streak)}</strong>`);
+  $('profileAchievementsText').textContent = t('profile_achievements_soon');
   renderProfileStyle();
 }
 

@@ -116,7 +116,7 @@ export const LIMITED_FRAME_GEOMETRY = Object.freeze({
         "right": 788,
         "bottom": 761
       },
-      "openingPixels": 228732,
+      "openingPixels": 228759,
       "aperture": "assets/profile-limited/frames/kitsune-aperture.webp"
     }
   },
@@ -252,7 +252,7 @@ export const LIMITED_FRAME_GEOMETRY = Object.freeze({
         "right": 793,
         "bottom": 709
       },
-      "openingPixels": 215957,
+      "openingPixels": 215995,
       "aperture": "assets/profile-limited/frames/pearlguard-aperture.webp"
     }
   },
