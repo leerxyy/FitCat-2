@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { setupDOM } from './dom.mjs';
 import { initAmbient,requestDeviceTilt,disableDeviceTilt,deviceTiltStatus,subscribeAmbientMotion } from '../js/ui/ambient.js';
 import { APPEARANCE_DEFAULTS } from '../js/core/appearance.js';
+import { applyPerformanceMode } from '../js/ui/performance.js';
 
 function harness(){
  const env=setupDOM(),old=Object.fromEntries(['requestAnimationFrame','cancelAnimationFrame','matchMedia','performance','setTimeout','clearTimeout'].map(key=>[key,globalThis[key]]));
@@ -25,6 +26,21 @@ function harness(){
 }
 const reading=()=>({x:parseFloat(document.getElementById('ambientLight').style['--parallax-x']),y:parseFloat(document.getElementById('ambientLight').style['--parallax-y'])});
 const saved={...APPEARANCE_DEFAULTS,deviceTilt:true};
+
+test('LDM cancels live background frames and sensor delivery, then restores the saved tilt intent',async()=>{
+ const h=harness();let calls=0;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return Promise.resolve('granted');}};
+ try{
+  initAmbient(saved);await h.flush();h.sensor(89,5);h.sensor(89,35);assert.ok(h.frames.size>0);
+  applyPerformanceMode(true);assert.equal(h.frames.size,0);assert.deepEqual(reading(),{x:0,y:0});
+  h.sensor(89,-35);h.step();assert.deepEqual(reading(),{x:0,y:0});assert.equal(h.frames.size,0);
+  const before=calls;h.tap();await h.flush();assert.equal(calls,before);
+  applyPerformanceMode(false);await h.flush();h.sensor(89,5);h.sensor(89,30);h.step();assert.ok(reading().x>0);
+ }finally{h.close();}
+});
+test('launching directly in LDM starts neither a sensor request nor an ambient animation loop',async()=>{
+ const h=harness();let calls=0;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return Promise.resolve('granted');}};
+ try{applyPerformanceMode(true);initAmbient(saved);h.step();h.tap();await h.flush();assert.equal(calls,0);assert.equal(h.frames.size,0);}finally{h.close();}
+});
 
 test('opted-out users never trigger a sensor permission request from launch or ordinary taps',async()=>{
  const h=harness();let calls=0;window.DeviceOrientationEvent=class{static requestPermission(){calls++;return Promise.resolve('granted');}};

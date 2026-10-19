@@ -66,6 +66,20 @@ test('rapid water taps share one light pass; later additions can start a fresh p
   reduce = true; waterFeedback(element()); assert.equal(frames.size, 0);
   reduce = false; const hidden = element(); hidden.getClientRects = () => []; waterFeedback(hidden); assert.equal(hidden.animations.length, 0);
 });
+test('forty simultaneous counters share one frame callback with unchanged cubic interpolation', () => {
+  const values = [];
+  for (let i = 0; i < 40; i++) tweenValue(element(), 100, value => { values[i] = value; }, { initial: 0 });
+  assert.equal(frames.size, 1);
+  step(300); assert.ok(values.every(value => value === 87.5)); assert.equal(frames.size, 1);
+  step(600); assert.ok(values.every(value => value === 100)); assert.equal(frames.size, 0);
+});
+test('LDM counters settle immediately and cancel existing shared work on finish', () => {
+  tweenValue(element(), 10, () => {}, { initial: 0 }); assert.equal(frames.size, 1);
+  globalThis.document = { documentElement: { dataset: { lowDetail: 'on' } } };
+  const node = element(); let value;
+  tweenValue(node, 200, current => { value = current; }, { initial: 0 });
+  assert.equal(value, 200); finishValueMotion(); assert.equal(frames.size, 0);
+});
 test('ring and bar progress share a smooth update and stop at valid limits', () => {
   const ring = element(); const bar = element(); animateProgress(ring, .5, 'ring'); animateProgress(bar, .5);
   assert.equal(ring.style.strokeDashoffset, '100'); step(380);

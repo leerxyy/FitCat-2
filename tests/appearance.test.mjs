@@ -55,7 +55,7 @@ test('backup round trips appearance; old backups preserve current appearance and
  const backup=structuredClone(exportSnapshot());setAppearance(APPEARANCE_DEFAULTS);importSnapshot(backup);loadState(adapter);assert.equal(state.appearance.accent,'blue');
  importSnapshot({profile,foods:[],weight:[]});assert.equal(state.appearance.speed,70);
  const before=structuredClone(state.appearance),write=adapter.setItem;
- adapter.setItem=(key,value)=>{if(key==='lastDate')throw new Error('quota');write(key,value);};
+ adapter.setItem=(key,value)=>{if(key===APPEARANCE_KEY)throw new Error('quota');write(key,value);};
  assert.throws(()=>importSnapshot({...backup,appearance:THEME_PRESETS.aurora}),/quota/);assert.deepEqual(state.appearance,before);assert.deepEqual(JSON.parse(adapter.getItem(APPEARANCE_KEY)),before);
 });
 test('account deletion clears appearance but keeps another application and wallet storage intact',()=>{

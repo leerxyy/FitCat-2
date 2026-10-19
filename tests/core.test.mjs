@@ -101,7 +101,7 @@ test('a malformed backup does not replace existing data', () => {
 test('failed import storage writes restore the original state and keys', () => {
   state.profile = { ...profile }; state.foods = [{ ...eaten }]; persist();
   const saved = structuredClone(state); const raw = new Map(storage.map); const write = storage.setItem.bind(storage);
-  let fail = true; storage.setItem = (key, value) => { if (key === 'nutritionHistory' && fail) { fail = false; throw new Error('quota'); } write(key, value); };
+  let fail = true; storage.setItem = (key, value) => { if (key === 'todayFoods' && fail) { fail = false; throw new Error('quota'); } write(key, value); };
   assert.throws(() => importSnapshot({ profile: { ...profile, name: 'Другой' }, foods: [planned], weight: [] }), /quota/);
   assert.deepEqual(state, saved); assert.deepEqual(storage.map, raw);
 });
