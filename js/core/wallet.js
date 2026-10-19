@@ -1,6 +1,7 @@
 import { formatPromo, createSubscription } from './subscription.js';
-import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, LEGACY_CITY_COVERS, canonicalCityCover } from './profile-cities.js';
-import { COLLECTIBLE_FRAME_PRICE, COLLECTIBLE_PROFILE_FRAMES } from './profile-frames.js';
+import { PURCHASABLE_PROFILE_COVERS, LEGACY_CITY_COVERS, canonicalCityCover, profileCoverPrice } from './profile-cities.js';
+import { PURCHASABLE_PROFILE_FRAMES, profileFramePrice } from './profile-frames.js';
+import { LIMITED_PROFILE_COVERS } from './profile-limited.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
 export const SUBSCRIPTION_PRICES = Object.freeze({
@@ -29,11 +30,12 @@ export function validateWallet(value) {
       || !['promo', 'subscription', 'profile-cover', 'profile-frame'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
       || (entry.kind === 'promo' ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
     if (entry.kind === 'profile-cover') {
-      if ((!CITY_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)) throw new Error('wallet_corrupt');
+      if ((!PURCHASABLE_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)
+        || (LIMITED_PROFILE_COVERS.includes(entry.cover) && entry.amount !== -profileCoverPrice(entry.cover))) throw new Error('wallet_corrupt');
       covers.add(entry.cover);
     }
     if (entry.kind === 'profile-frame') {
-      if (!COLLECTIBLE_PROFILE_FRAMES.includes(entry.frame) || frames.has(entry.frame) || entry.amount !== -COLLECTIBLE_FRAME_PRICE) throw new Error('wallet_corrupt');
+      if (!PURCHASABLE_PROFILE_FRAMES.includes(entry.frame) || frames.has(entry.frame) || entry.amount !== -profileFramePrice(entry.frame)) throw new Error('wallet_corrupt');
       frames.add(entry.frame);
     }
     ids.add(entry.id); balance += entry.amount;
@@ -96,7 +98,8 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
   // The debit and entitlement are one ledger write. Retrying an owned cover or
   // the same operation cannot charge again, including from another local tab.
   async function purchaseCover(cover, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
-    if (!CITY_PROFILE_COVERS.includes(cover) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    if (!PURCHASABLE_PROFILE_COVERS.includes(cover) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    const price = profileCoverPrice(cover);
     return commit(value => {
       const previous = value.entries.find(entry => entry.id === operationId);
       if (previous) {
@@ -104,14 +107,15 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
         return false;
       }
       if (value.entries.some(entry => entry.kind === 'profile-cover' && canonicalCityCover(entry.cover) === cover)) return false;
-      if (value.balance < CITY_COVER_PRICE) throw new Error('wallet_insufficient');
-      value.balance -= CITY_COVER_PRICE;
-      value.entries.push({ id: operationId, kind: 'profile-cover', cover, amount: -CITY_COVER_PRICE, at: now, balanceAfter: value.balance });
+      if (value.balance < price) throw new Error('wallet_insufficient');
+      value.balance -= price;
+      value.entries.push({ id: operationId, kind: 'profile-cover', cover, amount: -price, at: now, balanceAfter: value.balance });
     });
   }
   const ownedCovers = () => [...new Set(snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => canonicalCityCover(entry.cover)))];
   async function purchaseFrame(frame, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
-    if (!COLLECTIBLE_PROFILE_FRAMES.includes(frame) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    if (!PURCHASABLE_PROFILE_FRAMES.includes(frame) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    const price = profileFramePrice(frame);
     return commit(value => {
       const previous = value.entries.find(entry => entry.id === operationId);
       if (previous) {
@@ -119,9 +123,9 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
         return false;
       }
       if (value.entries.some(entry => entry.kind === 'profile-frame' && entry.frame === frame)) return false;
-      if (value.balance < COLLECTIBLE_FRAME_PRICE) throw new Error('wallet_insufficient');
-      value.balance -= COLLECTIBLE_FRAME_PRICE;
-      value.entries.push({ id: operationId, kind: 'profile-frame', frame, amount: -COLLECTIBLE_FRAME_PRICE, at: now, balanceAfter: value.balance });
+      if (value.balance < price) throw new Error('wallet_insufficient');
+      value.balance -= price;
+      value.entries.push({ id: operationId, kind: 'profile-frame', frame, amount: -price, at: now, balanceAfter: value.balance });
     });
   }
   const ownedFrames = () => snapshot().entries.filter(entry => entry.kind === 'profile-frame').map(entry => entry.frame);

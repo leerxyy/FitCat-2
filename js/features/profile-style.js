@@ -1,8 +1,11 @@
 import { state, proAccess, setProfileStyle } from '../core/store.js';
 import { PROFILE_STYLE_DEFAULTS, PROFILE_STYLE_KEY, PREMIUM_PROFILE_FRAMES, PREMIUM_PROFILE_COVERS, ANIMATED_PROFILE_COVERS, effectiveProfileStyle, normalizeProfileStyle, profileChoiceAllowed, profileCoverAsset } from '../core/profile-style.js';
 import { CITY_EFFECTS, cityEffectAssets, cityTrafficMarkup } from '../core/profile-city-effects.js';
-import { CITY_COVER_PRICE, CITY_PROFILE_COVERS, PROFILE_CITY_CATALOG } from '../core/profile-cities.js';
-import { COLLECTIBLE_FRAME_PRICE, COLLECTIBLE_PROFILE_FRAMES, collectibleFrameAsset } from '../core/profile-frames.js';
+import { CITY_PROFILE_COVERS, PURCHASABLE_PROFILE_COVERS, profileCoverPrice } from '../core/profile-cities.js';
+import { PURCHASABLE_PROFILE_FRAMES, profileFramePrice, collectibleFrameAsset } from '../core/profile-frames.js';
+import { LIMITED_PROFILE_COVERS, LIMITED_PROFILE_FRAMES } from '../core/profile-limited.js';
+import { LIMITED_FRAME_GEOMETRY } from '../core/profile-limited-geometry.js';
+import { limitedFrameEffectsMarkup, limitedCoverMarkup } from '../core/profile-limited-effects.js';
 import { FRAME_GEOMETRY } from '../core/profile-frame-geometry.js';
 import { collectibleEffectsMarkup } from '../core/profile-frame-effects.js';
 import { appAssetURL, cssAssetURL } from '../core/asset-url.js';
@@ -47,6 +50,9 @@ function renderScene(scene, cover) {
   setData(scene, 'cover', cover);
   const city = CITY_PROFILE_COVERS.includes(cover);
   setData(scene, 'city', city);
+  const limited = LIMITED_PROFILE_COVERS.includes(cover);
+  setData(scene, 'limited', limited);
+  if (changed) scene.querySelector('.scene-limited').innerHTML = limited ? limitedCoverMarkup(cover) : '';
   if (changed && city) {
     for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, cssAssetURL(path));
     CITY_EFFECTS[cover].fog.forEach((value, index) => scene.style.setProperty('--fog-' + ['far', 'mid', 'near'][index], String(value)));
@@ -57,28 +63,32 @@ function renderScene(scene, cover) {
   const artwork = asset ? cssAssetURL(asset) : 'none';
   if (scene.style.getPropertyValue('--cover-art') !== artwork) scene.style.setProperty('--cover-art', artwork);
   image.hidden = !asset;
-  const width = CITY_PROFILE_COVERS.includes(cover) ? 1536 : 1040, height = CITY_PROFILE_COVERS.includes(cover) ? 1024 : 440;
+  const width = city || limited ? 1536 : 1040, height = city || limited ? 1024 : 440;
   if (image.width !== width) image.width = width;
   if (image.height !== height) image.height = height;
   if (changed && !scene.closest('[hidden]')) enter(scene, { y: 0, duration: MOTION.screen });
 }
 function renderFrame(node, value) {
   if (!node) return;
-  const changed = node.dataset.frame !== value, collectible = COLLECTIBLE_PROFILE_FRAMES.includes(value);
+  const changed = node.dataset.frame !== value, collectible = PURCHASABLE_PROFILE_FRAMES.includes(value);
+  const limited = LIMITED_PROFILE_FRAMES.includes(value), header = node.id === 'headerAvatarFrame';
   setData(node, 'frame', value);
   setData(node, 'collectible', collectible);
+  setData(node, 'limited', limited);
   setData(node.parentElement, 'collectible', collectible);
   if (collectible && changed) {
-    const geometry = FRAME_GEOMETRY[value];
-    const artwork = collectibleFrameAsset(value, node.id === 'headerAvatarFrame');
+    const geometry = LIMITED_FRAME_GEOMETRY[value] || FRAME_GEOMETRY[value];
+    const artwork = limited && !header ? `assets/profile-limited/frames/${value}-body.webp` : collectibleFrameAsset(value, header);
     const image = node.querySelector('.collectible-art');
     if (image.getAttribute('src') !== appAssetURL(artwork)) image.setAttribute('src', appAssetURL(artwork));
     node.style.setProperty('--collectible-art', cssAssetURL(artwork));
-    node.style.setProperty('--collectible-light', cssAssetURL(`assets/profile-frames/${value}-light.webp`));
-    node.style.setProperty('--collectible-aura', cssAssetURL(`assets/profile-frames/${value}-aura.webp`));
+    const folder = limited ? 'assets/profile-limited/frames' : 'assets/profile-frames';
+    node.style.setProperty('--collectible-light', cssAssetURL(`${folder}/${value}-light.webp`));
+    node.style.setProperty('--collectible-aura', cssAssetURL(`${folder}/${value}-aura.webp`));
+    if (limited) node.style.setProperty('--limited-material', cssAssetURL(`${folder}/${value}-material.webp`));
     node.style.setProperty('--collectible-clear', `${geometry.clear * 2}%`);
     node.parentElement.style.setProperty('--collectible-hole', String(geometry.hole));
-    node.querySelector('.collectible-details').innerHTML = node.id === 'headerAvatarFrame' ? '' : collectibleEffectsMarkup(value);
+    node.querySelector('.collectible-details').innerHTML = header ? '' : limited ? limitedFrameEffectsMarkup(value) : collectibleEffectsMarkup(value);
   }
 }
 function status(kind) {
@@ -93,13 +103,14 @@ function renderPicker(kind, settings) {
   renderPhoto($(kind + 'PickerPhoto'));
   const displayedFrame = kind === 'frame' && previewFrame ? previewFrame : settings.frame;
   renderFrame($(kind + 'PickerFrame'), displayedFrame);
-  setData($(kind + 'StylePreview'), 'collectible', COLLECTIBLE_PROFILE_FRAMES.includes(displayedFrame));
+  setData($(kind + 'StylePreview'), 'collectible', PURCHASABLE_PROFILE_FRAMES.includes(displayedFrame));
   const displayedCover = kind === 'cover' && previewCover ? previewCover : settings.cover;
   renderScene($(kind + 'PickerScene'), displayedCover);
   setData($(kind + 'StylePreview'), 'city', CITY_PROFILE_COVERS.includes(displayedCover));
+  setData($(kind + 'StylePreview'), 'limited', LIMITED_PROFILE_COVERS.includes(displayedCover));
   $(kind + 'PickerName').textContent = state.profile?.name || 'FitCat';
   $(kind + 'StyleSelected').textContent = t(kind === 'cover' && displayedCover === 'none' ? 'profile_style_no_cover' : `profile_${kind}_${kind === 'cover' ? displayedCover : displayedFrame}`);
-  $(kind + 'StyleExpired').hidden = settings[kind] === state.profileStyle[kind] || (kind === 'cover' ? CITY_PROFILE_COVERS.includes(state.profileStyle.cover) : COLLECTIBLE_PROFILE_FRAMES.includes(state.profileStyle.frame));
+  $(kind + 'StyleExpired').hidden = settings[kind] === state.profileStyle[kind] || (kind === 'cover' ? PURCHASABLE_PROFILE_COVERS.includes(state.profileStyle.cover) : PURCHASABLE_PROFILE_FRAMES.includes(state.profileStyle.frame));
   const owned = ownedCovers();
   const frames = ownedFrames();
   for (const button of dialog.querySelectorAll('[data-profile-style-kind]')) {
@@ -109,17 +120,19 @@ function renderPicker(kind, settings) {
     button.setAttribute('aria-pressed', String(selected));
     const label = button.querySelector('.style-sample-initials');
     if (label) label.textContent = initials(state.profile?.name);
-    if (kind === 'cover' && CITY_PROFILE_COVERS.includes(button.dataset.value)) {
+    if (kind === 'cover' && PURCHASABLE_PROFILE_COVERS.includes(button.dataset.value)) {
+      const cost = profileCoverPrice(button.dataset.value);
       const purchased = owned.includes(button.dataset.value), price = button.querySelector('[data-city-price]');
       setData(button, 'owned', purchased);
-      price.textContent = purchased ? t('profile_city_owned') : number(CITY_COVER_PRICE);
-      button.setAttribute('aria-label', `${t('profile_cover_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_city_preview') + '. ' + number(CITY_COVER_PRICE) + ' FitCat Coins'}`);
+      price.textContent = purchased ? t('profile_city_owned') : number(cost);
+      button.setAttribute('aria-label', `${t('profile_cover_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_city_preview') + '. ' + number(cost) + ' FitCat Coins'}`);
     }
-    if (kind === 'frame' && COLLECTIBLE_PROFILE_FRAMES.includes(button.dataset.value)) {
+    if (kind === 'frame' && PURCHASABLE_PROFILE_FRAMES.includes(button.dataset.value)) {
+      const cost = profileFramePrice(button.dataset.value);
       const purchased = frames.includes(button.dataset.value);
       setData(button, 'owned', purchased);
-      button.querySelector('[data-frame-price]').textContent = purchased ? t('profile_city_owned') : number(COLLECTIBLE_FRAME_PRICE);
-      button.setAttribute('aria-label', `${t('profile_frame_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_frame_preview') + '. ' + number(COLLECTIBLE_FRAME_PRICE) + ' FitCat Coins'}`);
+      button.querySelector('[data-frame-price]').textContent = purchased ? t('profile_city_owned') : number(cost);
+      button.setAttribute('aria-label', `${t('profile_frame_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_frame_preview') + '. ' + number(cost) + ' FitCat Coins'}`);
     }
   }
   if (kind === 'cover') renderCityOffer(displayedCover, owned);
@@ -127,8 +140,9 @@ function renderPicker(kind, settings) {
   status(kind);
 }
 function renderFrameOffer(frame, owned) {
-  const collectible = COLLECTIBLE_PROFILE_FRAMES.includes(frame);
+  const collectible = PURCHASABLE_PROFILE_FRAMES.includes(frame), price = profileFramePrice(frame);
   $('collectibleFrameOffer').hidden = !collectible;
+  setData($('collectibleFrameOffer'), 'limited', LIMITED_PROFILE_FRAMES.includes(frame));
   if (!collectible) return;
   $('collectibleFrameTitle').textContent = t('profile_frame_' + frame);
   $('collectibleFrameDetail').textContent = t('profile_frame_' + frame + '_detail');
@@ -139,25 +153,27 @@ function renderFrameOffer(frame, owned) {
   $('collectibleFrameOwned').textContent = t(installed ? 'profile_city_applied' : 'profile_city_owned');
   $('collectibleFrameApply').hidden = !purchased || installed;
   $('collectibleFrameApply').dataset.value = frame;
-  $('collectibleFramePrice').textContent = number(COLLECTIBLE_FRAME_PRICE);
+  $('collectibleFramePrice').textContent = number(price);
   $('collectibleFrameBuyLabel').textContent = t(buyingFrame ? 'profile_city_buying' : 'profile_city_buy');
   let balance = 0, corrupt = false;
   try { balance = getWallet()?.snapshot().balance ?? 0; } catch { corrupt = true; }
   $('collectibleFrameBalance').textContent = number(balance);
-  const insufficient = !purchased && balance < COLLECTIBLE_FRAME_PRICE;
+  const insufficient = !purchased && balance < price;
   $('collectibleFrameBuy').disabled = Boolean(buyingFrame) || insufficient || corrupt;
   $('collectibleFrameShortfall').hidden = !insufficient || corrupt;
-  $('collectibleFrameShortfallAmount').textContent = number(Math.max(0, COLLECTIBLE_FRAME_PRICE - balance));
+  $('collectibleFrameShortfallAmount').textContent = number(Math.max(0, price - balance));
   $('collectibleFrameError').hidden = !frameError && !corrupt;
   $('collectibleFrameError').textContent = corrupt ? t('wallet_corrupt') : frameError;
 }
 function renderCityOffer(cover, owned) {
-  const city = PROFILE_CITY_CATALOG[cover];
-  $('cityCoverOffer').hidden = !city;
-  if (!city) return;
+  const paid = PURCHASABLE_PROFILE_COVERS.includes(cover), limited = LIMITED_PROFILE_COVERS.includes(cover), price = profileCoverPrice(cover);
+  $('cityCoverOffer').hidden = !paid;
+  setData($('cityCoverOffer'), 'limited', limited);
+  if (!paid) return;
   $('cityCoverTitle').textContent = t('profile_cover_' + cover);
-  $('cityCoverDetail').textContent = t('profile_city_' + cover + '_detail');
-  $('cityCoverCredit').textContent = t('profile_city_original');
+  $('cityCoverDetail').textContent = t(`profile_${limited ? 'limited' : 'city'}_${cover}_detail`);
+  $('cityCoverCredit').dataset.i18n = limited ? 'profile_limited_original' : 'profile_city_original';
+  $('cityCoverCredit').textContent = t($('cityCoverCredit').dataset.i18n);
   $('cityCoverReturn').hidden = !previewCover;
   const purchased = owned.includes(cover), button = $('cityCoverBuy');
   $('cityCoverPurchase').hidden = purchased;
@@ -166,15 +182,15 @@ function renderCityOffer(cover, owned) {
   $('cityCoverOwned').textContent = t(installed ? 'profile_city_applied' : 'profile_city_owned');
   $('cityCoverApply').hidden = !purchased || installed;
   $('cityCoverApply').dataset.value = cover;
-  $('cityCoverPrice').textContent = number(CITY_COVER_PRICE);
+  $('cityCoverPrice').textContent = number(price);
   $('cityCoverBuyLabel').textContent = t(buyingCover ? 'profile_city_buying' : 'profile_city_buy');
   let balance = 0, corrupt = false;
   try { balance = getWallet()?.snapshot().balance ?? 0; } catch { corrupt = true; }
   $('cityCoverBalance').textContent = number(balance);
-  const insufficient = !purchased && balance < CITY_COVER_PRICE;
+  const insufficient = !purchased && balance < price;
   button.disabled = Boolean(buyingCover) || insufficient || corrupt;
   $('cityCoverShortfall').hidden = !insufficient || corrupt;
-  $('cityCoverShortfallAmount').textContent = number(Math.max(0, CITY_COVER_PRICE - balance));
+  $('cityCoverShortfallAmount').textContent = number(Math.max(0, price - balance));
   $('cityCoverError').hidden = !cityError && !corrupt;
   $('cityCoverError').textContent = corrupt ? t('wallet_corrupt') : cityError;
 }
@@ -216,18 +232,19 @@ export function renderProfileStyle() {
   renderFrame($('headerAvatarFrame'), settings.frame);
   setData($('profileIdentityCard'), 'hasCover', settings.cover !== 'none');
   setData($('profileIdentityCard'), 'cityCover', CITY_PROFILE_COVERS.includes(settings.cover));
-  setData($('profileIdentityCard'), 'collectibleFrame', COLLECTIBLE_PROFILE_FRAMES.includes(settings.frame));
+  setData($('profileIdentityCard'), 'limitedCover', LIMITED_PROFILE_COVERS.includes(settings.cover));
+  setData($('profileIdentityCard'), 'collectibleFrame', PURCHASABLE_PROFILE_FRAMES.includes(settings.frame));
   renderScene($('profileCoverScene'), settings.cover);
   renderPicker('frame', settings); renderPicker('cover', settings);
   syncProfileStyleMotion();
 }
 function choose(kind, value) {
-  if (kind === 'frame' && COLLECTIBLE_PROFILE_FRAMES.includes(value) && !ownedFrames().includes(value)) {
+  if (kind === 'frame' && PURCHASABLE_PROFILE_FRAMES.includes(value) && !ownedFrames().includes(value)) {
     previewFrame = value; frameError = ''; errors.frame = false; renderProfileStyle();
     $('profileFrameModal').scrollTo?.({ top: 0, behavior: reducedMotion() ? 'instant' : 'smooth' });
     return;
   }
-  if (kind === 'cover' && CITY_PROFILE_COVERS.includes(value) && !ownedCovers().includes(value)) {
+  if (kind === 'cover' && PURCHASABLE_PROFILE_COVERS.includes(value) && !ownedCovers().includes(value)) {
     previewCover = value; cityError = ''; errors.cover = false; renderProfileStyle();
     $('profileCoverModal').scrollTo?.({ top: 0, behavior: reducedMotion() ? 'instant' : 'smooth' });
     return;
@@ -248,7 +265,7 @@ function choose(kind, value) {
 }
 async function buyCollectibleFrame() {
   const frame = previewFrame;
-  if (!COLLECTIBLE_PROFILE_FRAMES.includes(frame) || buyingFrame || $('collectibleFrameBuy').disabled) return;
+  if (!PURCHASABLE_PROFILE_FRAMES.includes(frame) || buyingFrame || $('collectibleFrameBuy').disabled) return;
   buyingFrame = frame; frameError = ''; renderProfileStyle();
   try {
     await purchaseFrameWithCoins(frame);
@@ -261,7 +278,7 @@ async function buyCollectibleFrame() {
 }
 async function buyCityCover() {
   const cover = previewCover;
-  if (!CITY_PROFILE_COVERS.includes(cover) || buyingCover || $('cityCoverBuy').disabled) return;
+  if (!PURCHASABLE_PROFILE_COVERS.includes(cover) || buyingCover || $('cityCoverBuy').disabled) return;
   buyingCover = cover; cityError = ''; renderProfileStyle();
   try {
     await purchaseCoverWithCoins(cover);

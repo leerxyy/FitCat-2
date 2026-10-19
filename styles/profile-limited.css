@@ -1,0 +1,118 @@
+/* Six original cosmetics. Motion is native, bounded and paused by the shared
+   cosmetic clock. No live thumbnails, animated filters, video or JS tick loop. */
+.limited-collection > h3 { color: #f1dab0; }
+.limited-collection > .style-collection-hint { max-width: 36ch; }
+.limited-style-grid { gap: 11px; }
+.limited-choice { position: relative; padding: 10px; border-color: #e6c58b40; background: linear-gradient(155deg, #5e4b2b27, #0a2435a8 65%); overflow: hidden; }
+.limited-choice.is-preview { border-color: #ffe0a6c9; box-shadow: inset 0 0 0 1px #f9d99a30, 0 0 15px #e6bf701a; }
+.limited-choice .style-choice-footer { align-items: flex-start; gap: 5px; min-height: 33px; line-height: 1.3; }
+.limited-choice .style-choice-footer > [data-i18n] { overflow-wrap: anywhere; }
+.limited-choice .city-choice-price { color: #f3dfb2; margin: 6px 0 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.limited-choice[data-owned="true"] .city-choice-price { color: #a9ead9; }
+.limited-choice[data-owned="true"] .city-choice-price img { display: none; }
+.limited-edition { display: table; margin: 6px 0; font-size: 8px; line-height: 1.4; letter-spacing: .15em; font-weight: 700; color: #f2d393; }
+.limited-frame-sample { position: relative; display: block; width: 100%; aspect-ratio: 1; border-radius: 13px; background: radial-gradient(circle, #18395155, #06172622 65%); }
+.limited-frame-sample img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.city-cover-offer[data-limited="true"] { border-color: #dcb97f69; background: linear-gradient(135deg, #624b282f, #09263d85); }
+.city-cover-offer[data-limited="true"] .city-forever { color: #efd39d; border-color: #e2c38a45; }
+/* Cover dimensions depend on the cover, never on the selected avatar frame. */
+#profilePage #profileIdentityCard[data-limited-cover="true"] { padding-top: calc(66.6667% - 24px); }
+#profileIdentityCard[data-limited-cover="true"] > .profile-scene { height: auto; aspect-ratio: 1.5; -webkit-mask-image: linear-gradient(#000 79%, transparent); mask-image: linear-gradient(#000 79%, transparent); }
+#profileIdentityCard[data-limited-cover="true"] > .profile-scene .scene-shade { background: linear-gradient(transparent 65%, #081e3038 83%, #081e30d4); }
+.sheet.profile-style-sheet > #coverStylePreview[data-limited="true"] { height: auto; aspect-ratio: 1.5; }
+#coverStylePreview[data-limited="true"] .scene-shade { background: linear-gradient(transparent 63%, #03101a5c 81%, #061626d9); }
+/* The existing 260px frame try-on stage and profile grid remain unchanged. */
+.scene-limited { display: none; z-index: 2; }
+.profile-scene[data-limited="true"] .scene-limited { display: block; contain: layout style paint; }
+.profile-scene[data-limited="true"] .scene-image { object-position: center; animation: profile-limited-camera 39.7s ease-in-out infinite; }
+.limited-world, .limited-world > div, .limited-camera, .limited-camera > img, .limited-world i,
+.limited-world span, .limited-cover-life, .limited-mid-life { position: absolute; inset: 0; display: block; pointer-events: none; }
+.limited-world img, .limited-cover-life, .limited-mid-life { width: 100%; height: 100%; max-width: none; object-fit: cover; }
+.limited-world i { background-position: center; background-size: cover; background-repeat: no-repeat; }
+.limited-far { transform: translate3d(calc(var(--cover-x) * .25), calc(var(--cover-y) * .25), 0) scale(1.055); }
+.limited-camera { animation: profile-limited-camera 39.7s ease-in-out infinite; }
+.limited-depth { transform: translate3d(calc(var(--cover-x) * .65), calc(var(--cover-y) * .65), 0); }
+.limited-front { transform: translate3d(calc(var(--cover-x) * .95), calc(var(--cover-y) * .95), 0) scale(1.055); }
+.limited-near { transform: translate3d(calc(var(--cover-x) * 1.25), calc(var(--cover-y) * 1.25), 0); }
+.limited-light-a, .limited-light-b { mix-blend-mode: screen; }
+.limited-light-a { background-image: var(--limited-light-a); animation: profile-limited-lantern-a 7.3s ease-in-out infinite; }
+.limited-light-b { background-image: var(--limited-light-b); animation: profile-limited-lantern-b 10.9s ease-in-out -3.1s infinite; }
+.limited-surface { -webkit-mask: var(--limited-surface-mask) center / cover no-repeat; mask: var(--limited-surface-mask) center / cover no-repeat; }
+.limited-front-light { -webkit-mask: var(--limited-front) center / cover no-repeat; mask: var(--limited-front) center / cover no-repeat; }
+.limited-cloud-bed { -webkit-mask: var(--limited-occlusion) center / cover no-repeat; mask: var(--limited-occlusion) center / cover no-repeat; }
+.limited-cloud-one { background-image: url('../assets/profile-effects/city-cloud-far.webp'); animation: profile-limited-cloud-far 27.3s ease-in-out infinite; }
+.limited-cloud-two { background-image: url('../assets/profile-effects/city-cloud-mid.webp'); animation: profile-limited-cloud-near 35.9s ease-in-out -13.7s infinite; }
+.limited-mist-near { background-image: url('../assets/profile-effects/city-cloud-near.webp'); -webkit-mask: linear-gradient(transparent 60%, #000 95%); mask: linear-gradient(transparent 60%, #000 95%); animation: profile-limited-cloud-near 43.1s ease-in-out -22.3s infinite; }
+.limited-world[data-world="scarlet"] .limited-cloud-bed { opacity: .83; }
+.limited-world[data-world="atlantis"] .limited-cloud-bed { opacity: .23; mix-blend-mode: screen; }
+.limited-world[data-world="atlantis"] .limited-mist-near { opacity: .1; }
+.limited-world[data-world="cathedral"] .limited-cloud-bed { opacity: .94; }
+.limited-world[data-world="cathedral"] .limited-mist-near { opacity: .7; }
+.limited-rays { background: linear-gradient(111deg, transparent 7%, #c3faff26 8%, transparent 12%, transparent 22%, #e4ffff3b 24%, transparent 29%, transparent 40%, #b4f4ff27 42%, transparent 49%, transparent 61%, #efffff30 63%, transparent 68%, transparent 76%, #b5ebff23 78%, transparent 84%); -webkit-mask: linear-gradient(#000, transparent 77%); mask: linear-gradient(#000, transparent 77%); transform-origin: 53% 0; mix-blend-mode: screen; animation: profile-limited-rays 23.9s ease-in-out infinite; }
+.limited-world[data-world="cathedral"] .limited-rays { background: linear-gradient(66deg, transparent 4%, #ffe4ae33 6%, transparent 14%, transparent 19%, #fff3d72e 23%, transparent 32%, transparent); clip-path: polygon(0 0, 24% 0, 62% 94%, 10% 94%); }
+.limited-caustics { mix-blend-mode: screen; overflow: hidden; }
+.limited-world .limited-caustics > i { inset: -8%; background-size: 78% 84%; opacity: .43; background-image: url('../assets/profile-limited/effects/caustics-1.webp'); animation: profile-limited-caustic-a 16.7s ease-in-out infinite; }
+.limited-world .limited-caustics > i + i { opacity: .29; background-image: url('../assets/profile-limited/effects/caustics-2.webp'); animation: profile-limited-caustic-b 21.3s ease-in-out -8.2s infinite; }
+.limited-mid-life, .limited-cover-life { overflow: hidden; }
+.limited-petal { opacity: 0; animation: profile-limited-petal-fall var(--part-cycle) linear var(--part-phase) infinite; }
+.limited-petal-turn { fill: #ffa6b2; stroke: #ffdee25c; stroke-width: .8px; animation: profile-limited-petal-turn var(--part-cycle) ease-in-out var(--part-phase) infinite; }
+.limited-petal .petal-vein { fill: none; stroke: #ffd8d8b3; stroke-width: 1.3px; }
+.limited-shoal { fill: #072e53; stroke: #88d6ef7a; stroke-width: 1.2px; opacity: 0; animation: profile-limited-fish var(--part-cycle) linear var(--part-phase) infinite; }
+.limited-bubble-rise { fill: #c3f8ff09; stroke: #cefbffbd; stroke-width: 1.8px; opacity: 0; animation: profile-limited-bubble var(--part-cycle) linear var(--part-phase) infinite; }
+.limited-bubble-rise path { fill: none; stroke: #efffff; stroke-width: 2px; stroke-linecap: round; }
+.limited-dust { fill: #fff2cf; opacity: 0; animation: profile-limited-dust var(--part-cycle) linear var(--part-phase) infinite; }
+.profile-scene[data-limited="true"] .scene-image, .scene-limited *, .scene-limited *::before, .scene-limited *::after { animation-play-state: var(--cosmetic-play, paused) !important; }
+/* Individually cropped appendages: no full-sized copy of the whole ring for
+   each moving piece. Their positions never participate in page layout. */
+.collectible-details > .limited-piece { position: absolute; display: block; inset: auto; animation: profile-limited-sway var(--part-cycle) ease-in-out var(--part-phase) infinite; }
+.limited-piece > img { display: block; width: 100%; height: 100%; max-width: none; pointer-events: none; }
+.limited-piece[data-piece-type="wing"] { animation-name: profile-limited-wing; }
+.limited-piece[data-piece-type="ribbon"] { animation-name: profile-limited-silk; }
+.limited-piece-light { position: absolute; inset: 0; display: block; background: linear-gradient(116deg, transparent 12%, #fff7d54d 38%, transparent 67%); -webkit-mask: var(--piece-art) center / 100% 100% no-repeat; mask: var(--piece-art) center / 100% 100% no-repeat; mix-blend-mode: screen; animation: profile-limited-piece-glint calc(var(--part-cycle) * 1.3) ease-in-out var(--part-phase) infinite; }
+.limited-material { position: absolute; inset: 0; overflow: hidden; -webkit-mask: var(--limited-material) center / 100% 100% no-repeat; mask: var(--limited-material) center / 100% 100% no-repeat; mix-blend-mode: screen; }
+.limited-material > i { position: absolute; inset: -30%; display: block; background: conic-gradient(from 36deg, transparent, #ffb96990 12%, transparent 24%, #fff0ac85 39%, transparent 55%, #ff9ba05e 72%, transparent 84%); opacity: .28; animation: profile-limited-material calc(var(--shine-duration, 6000ms) * 4.7) linear infinite; }
+.avatar-frame[data-frame="pearlguard"] .limited-material > i { background: conic-gradient(from 15deg, transparent, #69e6f7a8 12%, #bdebdc3d 22%, transparent 30%, #f8b6eb99 45%, transparent 57%, #fff0aca6 72%, #b0c8ff8a 85%, transparent); opacity: .35; animation-duration: calc(var(--shine-duration, 6000ms) * 5.3); }
+.avatar-frame[data-frame="seraph"] .limited-material > i { background: conic-gradient(from 50deg, transparent, #fff2c8a6 17%, transparent 29%, #afdcff9e 44%, transparent 57%, #e3c1ff83 75%, transparent); opacity: .28; animation-direction: reverse; }
+.avatar-frame[data-frame="pearlguard"] .collectible-lustre > i { background: linear-gradient(105deg, transparent, #d1f8ff66 25%, #ffffffdd 51%, #f6d7ee66 72%, transparent); }
+.limited-jewels { position: absolute; inset: 0; }
+.limited-jewel { position: absolute; display: block; border-radius: 50%; background: radial-gradient(ellipse, #fffcebb3, #bbf4ff42 40%, transparent 72%); mix-blend-mode: screen; animation: profile-limited-opal 8.3s ease-in-out var(--part-phase) infinite; }
+.limited-frame-life { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: #fff4d5; }
+.limited-star { animation: profile-limited-star 7.7s ease-in-out var(--part-phase) infinite; }
+.limited-halo { fill: none; stroke: #fff0b6b3; stroke-width: 1.7px; transform-origin: 512px 96px; animation: profile-limited-halo 25.7s ease-in-out infinite; }
+.limited-fox-fire { opacity: 0; animation: profile-limited-fox-fire 12.7s ease-in-out var(--part-phase) infinite; }
+.fox-fire-halo { fill: #ff863d80; stroke: #ffc76e; stroke-width: 2px; }
+.fox-fire-core { fill: #fff0bb; }
+.limited-frame-bubble { fill: #d7f5ff0f; stroke: #d9fbffc2; stroke-width: 2px; animation: profile-limited-frame-bubble var(--part-cycle) linear var(--part-phase) infinite; }
+:root[data-glints="off"] .limited-material, :root[data-glints="off"] .limited-piece-light, :root[data-glints="off"] .limited-jewels, :root[data-glints="off"] .limited-star { display: none; }
+.header-avatar-wrap .avatar-frame[data-limited="true"] .collectible-lustre > i { opacity: .5; }
+@keyframes profile-limited-camera { 0%,100% { transform: translate3d(-.12%, .07%, 0) scale(1.007); } 37% { transform: translate3d(.13%, -.1%, 0) scale(1.012); } 73% { transform: translate3d(.04%, .12%, 0) scale(1.009); } }
+@keyframes profile-limited-lantern-a { 0%,100% { opacity: .18; } 27% { opacity: .62; } 54% { opacity: .4; } 78% { opacity: .8; } }
+@keyframes profile-limited-lantern-b { 0%,100% { opacity: .62; } 33% { opacity: .2; } 71% { opacity: .7; } }
+@keyframes profile-limited-cloud-far { 0%,100% { transform: translate3d(-4%, 1%, 0) scale(1.09); opacity: .44; } 47% { transform: translate3d(5%, -2%, 0) scale(1.14); opacity: .86; } }
+@keyframes profile-limited-cloud-near { 0%,100% { transform: translate3d(5%, 1%, 0) scale(1.13); opacity: .24; } 48% { transform: translate3d(-6%, -2%, 0) scale(1.19); opacity: .76; } }
+@keyframes profile-limited-rays { 0%,100% { transform: rotate(-1.3deg) scaleX(.98); opacity: .5; } 51% { transform: rotate(1.8deg) scaleX(1.05); opacity: .95; } }
+@keyframes profile-limited-caustic-a { 0%,100% { transform: translate3d(-2%,1%,0) scale(1.04,.98); opacity: .31; } 48% { transform: translate3d(3%,-2%,0) scale(.98,1.06); opacity: .63; } }
+@keyframes profile-limited-caustic-b { 0%,100% { transform: translate3d(3%,-1%,0) scale(.98,1.05); opacity: .24; } 52% { transform: translate3d(-3%,2%,0) scale(1.07,.97); opacity: .48; } }
+@keyframes profile-limited-petal-fall { 0% { opacity: 0; transform: translate3d(0,-25px,0); } 12% { opacity: .85; } 78% { opacity: .8; } 100% { opacity: 0; transform: translate3d(var(--petal-x),var(--petal-y),0); } }
+@keyframes profile-limited-petal-turn { 0%,100% { transform: rotate(-32deg) scaleX(.55); } 50% { transform: rotate(45deg) scaleX(1); } }
+@keyframes profile-limited-fish { 0% { opacity: 0; transform: translate3d(0,9px,0); } 12% { opacity: .73; } 80% { opacity: .65; } 100% { opacity: 0; transform: translate3d(var(--school-x),-28px,0); } }
+@keyframes profile-limited-bubble { 0% { opacity: 0; transform: translate3d(0,30px,0) scale(.82); } 14% { opacity: .77; } 78% { opacity: .52; } 100% { opacity: 0; transform: translate3d(var(--bubble-x),-310px,0) scale(1.05); } }
+@keyframes profile-limited-dust { 0% { opacity: 0; transform: translate3d(0,16px,0); } 25% { opacity: .82; } 72% { opacity: .49; } 100% { opacity: 0; transform: translate3d(var(--dust-x),-90px,0); } }
+@keyframes profile-limited-sway { 0%,100% { transform: rotate(calc(var(--part-angle) * -.65)); } 34% { transform: rotate(var(--part-angle)); } 71% { transform: rotate(calc(var(--part-angle) * -.12)); } }
+@keyframes profile-limited-wing { 0%,100% { transform: rotate(calc(var(--part-angle) * -.45)); } 42% { transform: rotate(var(--part-angle)); } 76% { transform: rotate(calc(var(--part-angle) * .3)); } }
+@keyframes profile-limited-silk { 0%,100% { transform: rotate(calc(var(--part-angle) * -.55)) skewX(-.35deg); } 46% { transform: rotate(var(--part-angle)) skewX(.65deg); } }
+@keyframes profile-limited-piece-glint { 0%,100% { opacity: .08; } 51% { opacity: .67; } }
+@keyframes profile-limited-material { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes profile-limited-opal { 0%,100% { opacity: .16; transform: translate(-50%,-50%) scale(.8); } 53% { opacity: .94; transform: translate(-50%,-50%) scale(1.24); } }
+@keyframes profile-limited-star { 0%,100% { opacity: .07; transform: scale(.58); } 48% { opacity: .96; transform: scale(1.13); } }
+@keyframes profile-limited-halo { 0%,100% { transform: rotate(-4deg) scaleX(.98); opacity: .32; } 49% { transform: rotate(4deg) scaleX(1.05); opacity: .88; } }
+@keyframes profile-limited-fox-fire { 0% { opacity: 0; transform: translate3d(-5px,23px,0) scale(.85); } 22% { opacity: .87; } 71% { opacity: .68; } 100% { opacity: 0; transform: translate3d(10px,-38px,0) scale(1.08); } }
+@keyframes profile-limited-frame-bubble { 0% { opacity: 0; transform: translate3d(0,20px,0); } 18% { opacity: .7; } 76% { opacity: .55; } 100% { opacity: 0; transform: translate3d(6px,-70px,0); } }
+@media (prefers-reduced-motion: reduce) {
+  .profile-scene[data-limited="true"] { --cover-x: 0px !important; --cover-y: 0px !important; }
+  .profile-scene[data-limited="true"] .scene-image, .scene-limited *, .avatar-frame[data-limited="true"] .collectible-shell * { animation: none !important; transition: none !important; }
+  .limited-petal, .limited-bubble-rise, .limited-dust, .limited-fox-fire, .limited-frame-bubble, .limited-star, .limited-jewels, .limited-piece-light { display: none; }
+  .limited-world .limited-cloud-one, .limited-world .limited-cloud-two, .limited-world .limited-mist-near { opacity: .2; }
+  .limited-world .limited-light-a, .limited-world .limited-light-b, .limited-material > i { opacity: .22; }
+  .limited-shoal { opacity: .55; }
+}

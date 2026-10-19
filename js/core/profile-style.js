@@ -1,14 +1,15 @@
-import { CITY_PROFILE_COVERS, cityCoverOwned, canonicalCityCover } from './profile-cities.js';
-import { COLLECTIBLE_PROFILE_FRAMES, collectibleFrameOwned } from './profile-frames.js';
+import { CITY_PROFILE_COVERS, PURCHASABLE_PROFILE_COVERS, profileCoverOwned, canonicalCityCover } from './profile-cities.js';
+import { PURCHASABLE_PROFILE_FRAMES, collectibleFrameOwned } from './profile-frames.js';
+import { LIMITED_PROFILE_COVERS, limitedAsset } from './profile-limited.js';
 export { CITY_PROFILE_COVERS } from './profile-cities.js';
 // Stored IDs only: imported profiles never introduce arbitrary URLs or CSS.
 export const PROFILE_STYLE_KEY = 'fitcat_profile_style_v1';
 export const PROFILE_STYLE_DEFAULTS = Object.freeze({ frame: 'ice', cover: 'mist' });
-export const PROFILE_FRAMES = Object.freeze(['ice', 'silver', 'jade', 'graphite', 'quartz', 'spectrum', 'orbit', 'aurora', ...COLLECTIBLE_PROFILE_FRAMES]);
-export const PROFILE_COVERS = Object.freeze(['mist', 'lake', 'dunes', 'forest', 'ocean', 'aurora', 'cosmos', 'summits', ...CITY_PROFILE_COVERS]);
+export const PROFILE_FRAMES = Object.freeze(['ice', 'silver', 'jade', 'graphite', 'quartz', 'spectrum', 'orbit', 'aurora', ...PURCHASABLE_PROFILE_FRAMES]);
+export const PROFILE_COVERS = Object.freeze(['mist', 'lake', 'dunes', 'forest', 'ocean', 'aurora', 'cosmos', 'summits', ...PURCHASABLE_PROFILE_COVERS]);
 export const PREMIUM_PROFILE_FRAMES = Object.freeze(['spectrum', 'orbit', 'aurora']);
 export const PREMIUM_PROFILE_COVERS = Object.freeze(['aurora', 'cosmos', 'summits']);
-export const ANIMATED_PROFILE_COVERS = Object.freeze([...PREMIUM_PROFILE_COVERS, ...CITY_PROFILE_COVERS]);
+export const ANIMATED_PROFILE_COVERS = Object.freeze([...PREMIUM_PROFILE_COVERS, ...PURCHASABLE_PROFILE_COVERS]);
 
 export function normalizeProfileStyle(value) {
   return {
@@ -19,16 +20,17 @@ export function normalizeProfileStyle(value) {
 export function effectiveProfileStyle(value, pro = false, ownedCovers = [], ownedFrames = []) {
   const next = normalizeProfileStyle(value);
   if (!pro && PREMIUM_PROFILE_FRAMES.includes(next.frame)) next.frame = PROFILE_STYLE_DEFAULTS.frame;
-  if (COLLECTIBLE_PROFILE_FRAMES.includes(next.frame) && !collectibleFrameOwned(next.frame, ownedFrames)) next.frame = PROFILE_STYLE_DEFAULTS.frame;
+  if (PURCHASABLE_PROFILE_FRAMES.includes(next.frame) && !collectibleFrameOwned(next.frame, ownedFrames)) next.frame = PROFILE_STYLE_DEFAULTS.frame;
   if (!pro && PREMIUM_PROFILE_COVERS.includes(next.cover)) next.cover = PROFILE_STYLE_DEFAULTS.cover;
-  if (CITY_PROFILE_COVERS.includes(next.cover) && !cityCoverOwned(next.cover, ownedCovers)) next.cover = PROFILE_STYLE_DEFAULTS.cover;
+  if (PURCHASABLE_PROFILE_COVERS.includes(next.cover) && !profileCoverOwned(next.cover, ownedCovers)) next.cover = PROFILE_STYLE_DEFAULTS.cover;
   return next;
 }
 export function profileChoiceAllowed(kind, value, pro = false, ownedCovers = [], ownedFrames = []) {
-  if (kind === 'frame') return PROFILE_FRAMES.includes(value) && (pro || !PREMIUM_PROFILE_FRAMES.includes(value)) && (!COLLECTIBLE_PROFILE_FRAMES.includes(value) || collectibleFrameOwned(value, ownedFrames));
-  if (kind === 'cover') return (PROFILE_COVERS.includes(value) || value === 'none') && (pro || !PREMIUM_PROFILE_COVERS.includes(value)) && (!CITY_PROFILE_COVERS.includes(value) || cityCoverOwned(value, ownedCovers));
+  if (kind === 'frame') return PROFILE_FRAMES.includes(value) && (pro || !PREMIUM_PROFILE_FRAMES.includes(value)) && (!PURCHASABLE_PROFILE_FRAMES.includes(value) || collectibleFrameOwned(value, ownedFrames));
+  if (kind === 'cover') return (PROFILE_COVERS.includes(value) || value === 'none') && (pro || !PREMIUM_PROFILE_COVERS.includes(value)) && (!PURCHASABLE_PROFILE_COVERS.includes(value) || profileCoverOwned(value, ownedCovers));
   return false;
 }
 export function profileCoverAsset(cover, thumbnail = false) {
+  if (LIMITED_PROFILE_COVERS.includes(cover)) return limitedAsset('cover', cover, thumbnail);
   return PROFILE_COVERS.includes(cover) ? `assets/profile-covers/${cover}${thumbnail ? '-thumb' : ''}.webp` : '';
 }
