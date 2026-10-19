@@ -17,47 +17,61 @@ test('cities offer a live preview, explicit coin purchase and permanent Basic ac
     const { getWallet } = await import('../js/features/wallet.js');
     const { renderProfileStyle, syncProfileStyleMotion } = await import('../js/features/profile-style.js');
     await click('[data-action="showProfile"]'); await click('#profileCoverEdit');
-    await t.test('the city collection has four real-photo tiles, no PRO+ gate and visible coin icons', () => {
+    await t.test('the city collection has four approved generated-art tiles, no PRO+ gate and visible coin icons', () => {
       assert.equal($('profileCoverModal').querySelectorAll('.city-choice').length, 4);
-      for (const city of ['tokyo', 'chongqing', 'moscow', 'dubai']) {
+      for (const city of ['hongkong', 'chongqing', 'moscow', 'dubai']) {
         const tile = $('coverChoice_' + city);
         assert.equal(tile.hasAttribute('data-pro-feature'), false); assert.ok(tile.querySelector('.city-choice-price img'));
         assert.equal(tile.querySelector('[data-city-price]').textContent, '299');
       }
     });
+    await t.test('each city preview receives its own masks, cloud strengths and native moving routes', async () => {
+      const counts = {chongqing:0, moscow:4, dubai:12, hongkong:4};
+      for (const [city, count] of Object.entries(counts)) {
+        await click('#coverChoice_' + city);
+        const scene = $('coverPickerScene');
+        assert.equal(scene.dataset.city, 'true');
+        assert.match(scene.style.getPropertyValue('--city-light-a'), new RegExp('city-' + city + '-light-a'));
+        assert.match(scene.style.getPropertyValue('--city-water-mask'), new RegExp('city-' + city + '-water-mask'));
+        assert.equal(scene.querySelectorAll('.city-traffic path').length, count);
+        assert.ok(scene.querySelector('.city-fog-far')); assert.ok(scene.querySelector('.city-water-b'));
+      }
+      await click('#cityCoverReturn');
+      assert.equal(state.profileStyle.cover, 'mist'); assert.equal(getWallet().snapshot().balance, 2000);
+    });
     await t.test('previewing a locked city changes only the preview, never selection or coins', async () => {
       const before = env.localStorage.getItem(WALLET_KEY), selected = env.localStorage.getItem(PROFILE_STYLE_KEY);
-      await click('#coverChoice_tokyo');
-      assert.equal($('subscriptionDialog').open, false); assert.equal($('coverPickerScene').dataset.cover, 'tokyo');
+      await click('#coverChoice_hongkong');
+      assert.equal($('subscriptionDialog').open, false); assert.equal($('coverPickerScene').dataset.cover, 'hongkong');
       assert.equal($('profileCoverScene').dataset.cover, 'mist'); assert.equal(state.profileStyle.cover, 'mist');
       assert.equal(env.localStorage.getItem(WALLET_KEY), before); assert.equal(env.localStorage.getItem(PROFILE_STYLE_KEY), selected);
       assert.equal($('cityCoverOffer').hidden, false); assert.equal($('cityCoverBuy').disabled, false);
-      assert.equal($('cityCoverTitle').textContent, 'Токио'); assert.equal($('cityCoverCreditSource').textContent, 'Michael Day');
+      assert.equal($('cityCoverTitle').textContent, 'Гонконг'); assert.match($('cityCoverCredit').textContent, /Сгенерировано/);
       await click('#cityCoverReturn'); assert.equal($('coverPickerScene').dataset.cover, 'mist'); assert.equal($('cityCoverOffer').hidden, true);
-      await click('#coverChoice_tokyo'); await close(); await click('#profileCoverEdit');
+      await click('#coverChoice_hongkong'); await close(); await click('#profileCoverEdit');
       assert.equal($('coverPickerScene').dataset.cover, 'mist');
     });
     await t.test('the separate buy action charges once, applies the cover and records the correct wallet title', async () => {
-      await click('#coverChoice_tokyo'); $('cityCoverBuy').click(); $('cityCoverBuy').click(); await tick(); await tick();
-      assert.equal(getWallet().snapshot().balance, 1701); assert.deepEqual(getWallet().ownedCovers(), ['tokyo']);
-      assert.equal(state.profileStyle.cover, 'tokyo'); assert.equal($('profileCoverScene').dataset.cover, 'tokyo');
+      await click('#coverChoice_hongkong'); $('cityCoverBuy').click(); $('cityCoverBuy').click(); await tick(); await tick();
+      assert.equal(getWallet().snapshot().balance, 1701); assert.deepEqual(getWallet().ownedCovers(), ['hongkong']);
+      assert.equal(state.profileStyle.cover, 'hongkong'); assert.equal($('profileCoverScene').dataset.cover, 'hongkong');
       assert.equal($('profileIdentityCard').dataset.cityCover, 'true'); assert.equal($('cityCoverPurchase').hidden, true);
-      assert.equal($('coverChoice_tokyo').dataset.owned, 'true'); assert.equal($('coverChoice_tokyo').querySelector('[data-city-price]').textContent, 'Куплено');
-      assert.match($('walletHistoryList').textContent, /Обложка · Токио/); assert.doesNotMatch($('walletHistoryList').textContent, /PRO\+ · undefined/);
+      assert.equal($('coverChoice_hongkong').dataset.owned, 'true'); assert.equal($('coverChoice_hongkong').querySelector('[data-city-price]').textContent, 'Куплено');
+      assert.match($('walletHistoryList').textContent, /Обложка · Гонконг/); assert.doesNotMatch($('walletHistoryList').textContent, /PRO\+ · undefined/);
     });
     await t.test('a paid cover survives reload, reset and subscription expiry without another charge', async () => {
       const saved = env.localStorage.getItem(WALLET_KEY);
-      loadState(env.localStorage); renderProfileStyle(); assert.equal($('profileCoverScene').dataset.cover, 'tokyo');
+      loadState(env.localStorage); renderProfileStyle(); assert.equal($('profileCoverScene').dataset.cover, 'hongkong');
       await click('#profileCoverModal [data-action="resetProfileStyle"]'); assert.equal(state.profileStyle.cover, 'mist');
-      await click('#coverChoice_tokyo'); assert.equal(state.profileStyle.cover, 'tokyo'); assert.equal(env.localStorage.getItem(WALLET_KEY), saved);
+      await click('#coverChoice_hongkong'); assert.equal(state.profileStyle.cover, 'hongkong'); assert.equal(env.localStorage.getItem(WALLET_KEY), saved);
       for (const [key, value] of Object.entries(activeProFixture())) env.localStorage.setItem(key, value);
       document.dispatchEvent(new Event('fitcat:subscription')); await tick(); env.localStorage.removeItem('fitcat_subscription_v1');
-      document.dispatchEvent(new Event('fitcat:subscription')); await tick(); assert.equal($('profileCoverScene').dataset.cover, 'tokyo');
+      document.dispatchEvent(new Event('fitcat:subscription')); await tick(); assert.equal($('profileCoverScene').dataset.cover, 'hongkong');
     });
     await t.test('a failed wallet write leaves balance and profile untouched and a retry is safe', async () => {
       await click('#coverChoice_chongqing'); const saved = env.localStorage.getItem(WALLET_KEY), write = env.localStorage.setItem;
       env.localStorage.setItem = (key, value) => { if (key === WALLET_KEY) throw new Error('quota'); write(key, value); };
-      try { await click('#cityCoverBuy'); assert.equal(env.localStorage.getItem(WALLET_KEY), saved); assert.equal(state.profileStyle.cover, 'tokyo'); assert.equal($('cityCoverError').hidden, false); }
+      try { await click('#cityCoverBuy'); assert.equal(env.localStorage.getItem(WALLET_KEY), saved); assert.equal(state.profileStyle.cover, 'hongkong'); assert.equal($('cityCoverError').hidden, false); }
       finally { env.localStorage.setItem = write; }
       await click('#cityCoverBuy'); assert.equal(state.profileStyle.cover, 'chongqing'); assert.equal(getWallet().snapshot().balance, 1402);
     });
@@ -82,7 +96,7 @@ test('cities offer a live preview, explicit coin purchase and permanent Basic ac
       const saved = env.localStorage.getItem(WALLET_KEY); await click('#cityCoverApply'); assert.equal(state.profileStyle.cover, 'dubai'); assert.equal(env.localStorage.getItem(WALLET_KEY), saved);
     });
     await t.test('only the visible city hero runs; phase persists and hidden/reduced states pause every layer', async () => {
-      const media = globalThis.matchMedia, animation = { animationName: 'profile-city-rain', currentTime: 0 }; let seeks = 0;
+      const media = globalThis.matchMedia, animation = { animationName: 'profile-city-neon-a', currentTime: 0 }; let seeks = 0;
       $('coverPickerScene').getAnimations = () => { seeks++; return [animation]; };
       globalThis.matchMedia = () => ({ matches: false });
       try {
@@ -98,8 +112,8 @@ test('cities offer a live preview, explicit coin purchase and permanent Basic ac
     await t.test('all three languages keep source credits and paid selection intact', async () => {
       for (const [language, title] of [['en', 'Dubai'], ['cn', '迪拜'], ['ru', 'Дубай']]) {
         state.preferences.lang = language; document.dispatchEvent(new Event('fitcat:language')); await tick();
-        assert.equal($('cityCoverTitle').textContent, title); assert.equal(state.profileStyle.cover, 'dubai'); assert.equal($('cityCoverCreditSource').textContent, 'Robert Bock');
-        assert.match($('cityCoverCreditLicense').getAttribute('href'), /publicdomain/);
+        assert.equal($('cityCoverTitle').textContent, title); assert.equal(state.profileStyle.cover, 'dubai'); assert.ok($('cityCoverCredit').textContent.length > 15);
+        assert.equal($('cityCoverCreditSource'), null);
       }
     });
   } finally { env.restoreTimers(); }
