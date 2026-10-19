@@ -22,6 +22,31 @@
 .sheet.profile-style-sheet > #coverStylePreview[data-limited="true"] { height: auto; aspect-ratio: 1.5; }
 #coverStylePreview[data-limited="true"] .scene-shade { background: linear-gradient(transparent 63%, #03101a5c 81%, #061626d9); }
 /* The existing 260px frame try-on stage and profile grid remain unchanged. */
+/* Real alpha sprites already contain a transparent opening. A circle in the
+   centre of the sprite would cut away masks, lower nacre and wing roots. */
+.avatar-frame[data-limited="true"] > .collectible-shell { -webkit-mask: none; mask: none; }
+:is(.profile-avatar-wrap, .header-avatar-wrap, .style-preview-avatar)[data-limited="true"] { isolation: isolate; }
+/* This backing and the ornament occupy exactly the same square. The backing
+   is opaque only in the measured opening, so a cover cannot show through it.
+   It never changes the avatar slot, identity grid or edit-button positions. */
+:is(.profile-avatar-wrap, .header-avatar-wrap, .style-preview-avatar)[data-limited="true"] > :is(.profile-photo, .profile-button, .style-avatar-image) {
+  position: absolute; inset: -3px; z-index: 1; margin: 0; width: auto; height: auto;
+  min-width: 0; min-height: 0; padding: 0; border: 0; border-radius: 0;
+  overflow: hidden; background: #0c3149; box-shadow: none; transform: none;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  -webkit-mask: var(--limited-avatar-aperture) center / 100% 100% no-repeat;
+  mask: var(--limited-avatar-aperture) center / 100% 100% no-repeat; mask-mode: alpha;
+}
+:is(.profile-avatar-wrap, .header-avatar-wrap, .style-preview-avatar)[data-limited="true"] > :is(.profile-photo, .profile-button, .style-avatar-image) > :is(img, .profile-initials) {
+  position: absolute; inset: auto; left: var(--limited-photo-left); top: var(--limited-photo-top);
+  display: grid; place-items: center; margin: 0; max-width: none;
+  width: var(--limited-photo-size); height: var(--limited-photo-size);
+  object-fit: cover; border-radius: 50%;
+}
+.header-avatar-wrap[data-limited="true"] > .profile-button > .icon {
+  position: absolute; inset: auto; left: var(--limited-icon-left); top: var(--limited-icon-top);
+  width: var(--limited-icon-size); height: var(--limited-icon-size); margin: 0;
+}
 .scene-limited { display: none; z-index: 2; }
 .profile-scene[data-limited="true"] .scene-limited { display: block; contain: layout style paint; }
 .profile-scene[data-limited="true"] .scene-image { object-position: center; animation: profile-limited-camera 39.7s ease-in-out infinite; }

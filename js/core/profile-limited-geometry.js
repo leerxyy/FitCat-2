@@ -1,4 +1,4 @@
-// Generated from the production alpha sprites and authored cutting mattes.
+// Generated from original alpha sprites; photo fit follows each real opening.
 export const LIMITED_FRAME_GEOMETRY = Object.freeze({
   "kitsune": {
     "hole": 0.55078,
@@ -100,7 +100,25 @@ export const LIMITED_FRAME_GEOMETRY = Object.freeze({
         "angle": -4,
         "phase": -4.1
       }
-    ]
+    ],
+    "photo": {
+      "centerX": 49.902344,
+      "centerY": 48.779297,
+      "size": 55.957031,
+      "left": 21.923828,
+      "top": 20.800781,
+      "iconSize": 24.621094,
+      "iconLeft": 37.591797,
+      "iconTop": 36.46875,
+      "bounds": {
+        "left": 234,
+        "top": 238,
+        "right": 788,
+        "bottom": 761
+      },
+      "openingPixels": 228732,
+      "aperture": "assets/profile-limited/frames/kitsune-aperture.webp"
+    }
   },
   "pearlguard": {
     "hole": 0.57031,
@@ -218,7 +236,25 @@ export const LIMITED_FRAME_GEOMETRY = Object.freeze({
         "angle": 3.2,
         "phase": -11.22
       }
-    ]
+    ],
+    "photo": {
+      "centerX": 50,
+      "centerY": 43.457031,
+      "size": 57.128906,
+      "left": 21.435547,
+      "top": 14.892578,
+      "iconSize": 25.136719,
+      "iconLeft": 37.431641,
+      "iconTop": 30.888672,
+      "bounds": {
+        "left": 231,
+        "top": 181,
+        "right": 793,
+        "bottom": 709
+      },
+      "openingPixels": 215957,
+      "aperture": "assets/profile-limited/frames/pearlguard-aperture.webp"
+    }
   },
   "seraph": {
     "hole": 0.52344,
@@ -400,6 +436,24 @@ export const LIMITED_FRAME_GEOMETRY = Object.freeze({
         "angle": 3.1,
         "phase": -6.4
       }
-    ]
+    ],
+    "photo": {
+      "centerX": 49.951172,
+      "centerY": 44.726563,
+      "size": 54.492188,
+      "left": 22.705078,
+      "top": 17.480469,
+      "iconSize": 23.976563,
+      "iconLeft": 37.962891,
+      "iconTop": 32.738281,
+      "bounds": {
+        "left": 245,
+        "top": 203,
+        "right": 778,
+        "bottom": 713
+      },
+      "openingPixels": 209748,
+      "aperture": "assets/profile-limited/frames/seraph-aperture.webp"
+    }
   }
 });
