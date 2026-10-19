@@ -25,7 +25,7 @@
             "right": 788,
             "bottom": 761
           },
-          "openingPixels": 228732,
+          "openingPixels": 228759,
           "aperture": "assets/profile-limited/frames/kitsune-aperture.webp"
         }
       },
@@ -178,7 +178,7 @@
         },
         {
           "file": "assets/profile-limited/frames/kitsune-aperture.webp",
-          "bytes": 3350
+          "bytes": 3500
         }
       ]
     },
@@ -205,7 +205,7 @@
             "right": 793,
             "bottom": 709
           },
-          "openingPixels": 215957,
+          "openingPixels": 215995,
           "aperture": "assets/profile-limited/frames/pearlguard-aperture.webp"
         }
       },
@@ -378,7 +378,7 @@
         },
         {
           "file": "assets/profile-limited/frames/pearlguard-aperture.webp",
-          "bytes": 5228
+          "bytes": 5322
         }
       ]
     },
@@ -667,7 +667,6 @@
       "id": "scarlet",
       "generated": true,
       "master_sha256": "e7170a6812e689b57ed8fda7c43fc8f1bdc491c11b14dd9180a1817a737d538e",
-      "hidden_clean_plate_sha256": "b469a0c91b91444ed9adb8ea2b56615d80c78f29df20715590d86618b8da0a31",
       "layer_dimensions": [
         1536,
         1024
@@ -679,11 +678,7 @@
       "assets": [
         {
           "file": "assets/profile-limited/covers/scarlet.webp",
-          "bytes": 490426
-        },
-        {
-          "file": "assets/profile-limited/covers/scarlet-front.webp",
-          "bytes": 216212
+          "bytes": 633964
         },
         {
           "file": "assets/profile-limited/covers/scarlet-thumb.webp",
@@ -691,11 +686,15 @@
         },
         {
           "file": "assets/profile-limited/covers/scarlet-light-a.webp",
-          "bytes": 98942
+          "bytes": 60188
         },
         {
           "file": "assets/profile-limited/covers/scarlet-light-b.webp",
-          "bytes": 51958
+          "bytes": 36378
+        },
+        {
+          "file": "assets/profile-limited/covers/scarlet-glow-mask.webp",
+          "bytes": 44166
         },
         {
           "file": "assets/profile-limited/covers/scarlet-surface-mask.webp",
@@ -703,16 +702,20 @@
         },
         {
           "file": "assets/profile-limited/covers/scarlet-occlusion.webp",
-          "bytes": 18346
+          "bytes": 16978
+        },
+        {
+          "file": "assets/profile-limited/covers/scarlet-rays.webp",
+          "bytes": 35900
         }
-      ]
+      ],
+      "composition": "Whole approved image, with pixel-registered emissive maps and separate soft atmospheric depth. No geometric foreground slicing or clean-plate replacement."
     },
     {
       "kind": "cover",
       "id": "atlantis",
       "generated": true,
       "master_sha256": "10e6c50496f7e76b4f6acdf8b1cac2a5506829502180b63681e45b9bd27f0eb5",
-      "hidden_clean_plate_sha256": "634626a66cce96f293c15bfe43cb65f19ee6f9cef0075a077be36496d864378c",
       "layer_dimensions": [
         1536,
         1024
@@ -724,11 +727,7 @@
       "assets": [
         {
           "file": "assets/profile-limited/covers/atlantis.webp",
-          "bytes": 659038
-        },
-        {
-          "file": "assets/profile-limited/covers/atlantis-front.webp",
-          "bytes": 386622
+          "bytes": 801176
         },
         {
           "file": "assets/profile-limited/covers/atlantis-thumb.webp",
@@ -736,28 +735,36 @@
         },
         {
           "file": "assets/profile-limited/covers/atlantis-light-a.webp",
-          "bytes": 97402
+          "bytes": 82850
         },
         {
           "file": "assets/profile-limited/covers/atlantis-light-b.webp",
-          "bytes": 64058
+          "bytes": 52966
+        },
+        {
+          "file": "assets/profile-limited/covers/atlantis-glow-mask.webp",
+          "bytes": 74860
         },
         {
           "file": "assets/profile-limited/covers/atlantis-surface-mask.webp",
-          "bytes": 8054
+          "bytes": 8064
         },
         {
           "file": "assets/profile-limited/covers/atlantis-occlusion.webp",
-          "bytes": 17776
+          "bytes": 19096
+        },
+        {
+          "file": "assets/profile-limited/covers/atlantis-rays.webp",
+          "bytes": 63212
         }
-      ]
+      ],
+      "composition": "Whole approved image, with pixel-registered emissive maps and separate soft atmospheric depth. No geometric foreground slicing or clean-plate replacement."
     },
     {
       "kind": "cover",
       "id": "cathedral",
       "generated": true,
       "master_sha256": "b11be6a2585766bccd917e02e2d15b636032e3e82bec7563534f554c1a188785",
-      "hidden_clean_plate_sha256": "e32f0839d6827a9f81b5a0edd4c8deed7ca295235b405fff1ea217a529a51e3c",
       "layer_dimensions": [
         1536,
         1024
@@ -769,11 +776,7 @@
       "assets": [
         {
           "file": "assets/profile-limited/covers/cathedral.webp",
-          "bytes": 445808
-        },
-        {
-          "file": "assets/profile-limited/covers/cathedral-front.webp",
-          "bytes": 194318
+          "bytes": 596806
         },
         {
           "file": "assets/profile-limited/covers/cathedral-thumb.webp",
@@ -781,21 +784,30 @@
         },
         {
           "file": "assets/profile-limited/covers/cathedral-light-a.webp",
-          "bytes": 76542
+          "bytes": 71070
         },
         {
           "file": "assets/profile-limited/covers/cathedral-light-b.webp",
-          "bytes": 78954
+          "bytes": 76568
+        },
+        {
+          "file": "assets/profile-limited/covers/cathedral-glow-mask.webp",
+          "bytes": 84100
         },
         {
           "file": "assets/profile-limited/covers/cathedral-surface-mask.webp",
-          "bytes": 6072
+          "bytes": 6070
         },
         {
           "file": "assets/profile-limited/covers/cathedral-occlusion.webp",
-          "bytes": 12342
+          "bytes": 11684
+        },
+        {
+          "file": "assets/profile-limited/covers/cathedral-rays.webp",
+          "bytes": 39596
         }
-      ]
+      ],
+      "composition": "Whole approved image, with pixel-registered emissive maps and separate soft atmospheric depth. No geometric foreground slicing or clean-plate replacement."
     },
     {
       "kind": "effect",
