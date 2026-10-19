@@ -27,6 +27,15 @@ test('collectible frames preview, purchase, save and animate independently of PR
         await click('#frameChoice_'+id);
         assert.equal($('subscriptionDialog').open,false);assert.equal($('framePickerFrame').dataset.frame,id);assert.equal($('framePickerFrame').dataset.collectible,'true');assert.equal($('frameStylePreview').dataset.collectible,'true');
         assert.match($('framePickerFrame').style.getPropertyValue('--collectible-art'),new RegExp('profile-frames/'+id+'\\.webp'));assert.ok($('framePickerFrame').querySelector('.collectible-details svg'));
+        const image=$('framePickerFrame').querySelector('img.collectible-art');
+        assert.ok(image,'Artwork must be a real image element, not only a CSS background');
+        assert.match(image.getAttribute('src'),new RegExp('^file:.*?/assets/profile-frames/'+id+'\\.webp$'));
+        for(const property of ['--collectible-art','--collectible-light','--collectible-aura']){
+          const value=$('framePickerFrame').style.getPropertyValue(property);
+          assert.match(value,/^url\("file:\/\//,'Every inherited CSS image value must be absolute');
+          const actual=JSON.parse(value.slice(4,-1));
+          assert.equal(new URL(actual,'https://example.test/FitCat-2/styles/profile-collectibles.css').href,actual);
+        }
         assert.equal(state.profileStyle.frame,'ice');assert.equal($('profileAvatarFrame').dataset.frame,'ice');
         assert.equal(env.localStorage.getItem(WALLET_KEY),wallet);assert.equal(env.localStorage.getItem(PROFILE_STYLE_KEY),style);
       }
@@ -37,6 +46,8 @@ test('collectible frames preview, purchase, save and animate independently of PR
       await click('#frameChoice_dragon');$('collectibleFrameBuy').click();$('collectibleFrameBuy').click();await tick();await tick();
       assert.equal(getWallet().snapshot().balance,1771);assert.deepEqual(getWallet().ownedFrames(),['dragon']);assert.equal(state.profileStyle.frame,'dragon');
       assert.equal($('profileAvatarFrame').dataset.frame,'dragon');assert.equal($('headerAvatarFrame').dataset.frame,'dragon');assert.equal($('profileIdentityCard').dataset.collectibleFrame,'true');
+      assert.match($('profileAvatarFrame').querySelector('img.collectible-art').getAttribute('src'),/\/assets\/profile-frames\/dragon.webp$/);
+      assert.match($('headerAvatarFrame').querySelector('img.collectible-art').getAttribute('src'),/\/assets\/profile-frames\/dragon-thumb.webp$/);
       assert.equal($('collectibleFramePurchase').hidden,true);assert.equal($('frameChoice_dragon').dataset.owned,'true');assert.equal($('frameChoice_dragon').querySelector('[data-frame-price]').textContent,'Куплено');
       assert.match($('walletHistoryList').textContent,/Рамка · Небесный дракон/);assert.doesNotMatch($('walletHistoryList').textContent,/PRO\+ · undefined/);
       assert.match($('headerAvatarFrame').style.getPropertyValue('--collectible-art'),/dragon-thumb/);assert.equal($('headerAvatarFrame').querySelector('.collectible-details').children.length,0);

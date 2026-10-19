@@ -1,4 +1,4 @@
-# FitCat collectible avatar frames — 3.22.0
+# FitCat collectible avatar frames — 3.22.1
 
 The five artworks were generated specifically for FitCat from the five-frame
 concept sheet approved by the user in this conversation. They are original
@@ -24,8 +24,10 @@ five original transparent PNG masters as its input directory. It is not used
 by the deployed PWA.
 
 The empty avatar opening is protected with a native radial mask, so decorative
-orbit lines do not cross the face. The large profile and preview retain full
-detail. The header uses its thumbnail and only the small light sweep; gear,
+orbit lines do not cross the face. The profile keeps its existing avatar slot
+and field layout; the try-on stage has the same dimensions for every frame.
+Artwork uses a native image element. CSS effect URLs resolve from the application
+root, including GitHub Pages subdirectories. The header uses its thumbnail and only the small light sweep; gear,
 cloud and particle layers are hidden there.
 
 Motion uses native CSS transforms and opacity. There are no additional timers,

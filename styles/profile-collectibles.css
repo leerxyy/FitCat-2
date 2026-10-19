@@ -1,11 +1,12 @@
 /* Original detailed alpha sprites + small native layers. No animated filters,
    videos, canvas, per-frame JS, or running gallery animations. */
 .avatar-frame > .collectible-shell { display: none; }
-.avatar-frame[data-collectible="true"] { inset: var(--collectible-inset, -45%); border-radius: 0; }
+.avatar-frame[data-collectible="true"] { inset: -3px; border-radius: 0; }
 .avatar-frame[data-collectible="true"] > span:not(.collectible-shell) { display: none; }
 .avatar-frame[data-collectible="true"] > .collectible-shell { display: block; inset: 0; border-radius: 0; -webkit-mask-image: radial-gradient(circle closest-side, transparent var(--collectible-clear), #000 calc(var(--collectible-clear) + .35%)); mask-image: radial-gradient(circle closest-side, transparent var(--collectible-clear), #000 calc(var(--collectible-clear) + .35%)); }
-.collectible-shell > span, .collectible-lustre > i { position: absolute; inset: 0; display: block; pointer-events: none; }
+.collectible-shell > span, .collectible-shell > .collectible-art, .collectible-lustre > i { position: absolute; inset: 0; display: block; pointer-events: none; }
 .collectible-art { background: var(--collectible-art) center / 100% 100% no-repeat; }
+.collectible-shell > img.collectible-art { width: 100%; height: 100%; object-fit: contain; max-width: none; background: none; }
 .collectible-lustre { overflow: hidden; mix-blend-mode: screen; -webkit-mask: var(--collectible-light) center / 100% 100% no-repeat; mask: var(--collectible-light) center / 100% 100% no-repeat; }
 .collectible-lustre > i { inset: -20% auto -20% -45%; width: 34%; background: linear-gradient(105deg, transparent, #fff6d140 25%, #fffef3e8 51%, #ffdfab55 72%, transparent); animation: profile-collectible-sheen calc(var(--shine-duration, 6000ms) * 1.4) ease-in-out infinite; }
 .collectible-ambient { background: var(--collectible-aura) center / 100% 100% no-repeat; mix-blend-mode: screen; opacity: .5; animation: profile-collectible-aura 7.7s ease-in-out infinite; }
@@ -42,21 +43,18 @@
 .header-avatar-wrap[data-collectible="true"] > .profile-button { position: absolute; inset: 0; margin: auto; width: calc((100% + 6px) * var(--collectible-hole)); height: calc((100% + 6px) * var(--collectible-hole)); transform: none; }
 .header-avatar-wrap .collectible-details, .header-avatar-wrap .collectible-ambient { display: none; }
 .header-avatar-wrap .collectible-lustre > i { animation-duration: calc(var(--shine-duration, 6000ms) * 2); }
-/* Full-size framing gives the ornaments room and keeps edit controls usable. */
-#profileIdentityCard[data-collectible-frame="true"] .profile-identity-main { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-avatar-wrap { margin: 47px auto 45px; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-name-block { width: 100%; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-name-block > label { text-align: center; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-id-line { justify-content: center; flex-wrap: wrap; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-photo-delete { top: -32px; right: -42px; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-photo-edit { bottom: -29px; right: -42px; }
-#profileIdentityCard[data-collectible-frame="true"] .profile-frame-edit { left: -42px; bottom: -29px; }
-.sheet.profile-style-sheet > #frameStylePreview[data-collectible="true"] { height: 332px; }
-#frameStylePreview[data-collectible="true"] .style-preview-identity { inset: 0 20px 20px; flex-direction: column; justify-content: flex-end; gap: 52px; }
-#frameStylePreview[data-collectible="true"] .style-preview-avatar { width: 104px; height: 104px; flex: 0 0 104px; margin-top: 48px; }
-#frameStylePreview[data-collectible="true"] .style-preview-copy { text-align: center; gap: 4px; }
-#frameStylePreview[data-collectible="true"] .style-preview-copy > strong { font-size: 19px; }
-#coverStylePreview[data-collectible="true"] .style-preview-avatar { flex-basis: 52px; width: 52px; height: 52px; margin: 14px 15px; }
+/* Art stays inside the existing avatar slot. Changing the cosmetic never
+   changes the profile grid, margins, card height or edit-button positions. */
+.profile-avatar-wrap[data-collectible="true"] > .profile-photo,
+.style-preview-avatar[data-collectible="true"] > .style-avatar-image { position: absolute; inset: 0; margin: auto; width: calc((100% + 6px) * var(--collectible-hole)); height: calc((100% + 6px) * var(--collectible-hole)); }
+.profile-avatar-wrap[data-collectible="true"] .profile-initials { font-size: 19px; }
+/* The large try-on stage is the same size for Basic, PRO+ and collectible
+   choices, including when a city is selected behind the avatar. */
+.sheet.profile-style-sheet > #frameStylePreview { height: 260px; aspect-ratio: auto; }
+#frameStylePreview .style-preview-identity { inset: 16px 20px; flex-direction: column; justify-content: center; gap: 10px; }
+#frameStylePreview .style-preview-avatar { width: 160px; height: 160px; flex: 0 0 160px; }
+#frameStylePreview .style-preview-copy { text-align: center; gap: 4px; max-width: 100%; }
+#frameStylePreview .style-preview-copy > strong { font-size: 19px; }
 .collectible-collection > h3 { justify-content: space-between; }
 .collectible-choice { padding: 10px 10px 12px; }
 .collectible-choice .collectible-sample { position: relative; display: block; width: 100%; aspect-ratio: 1; margin-bottom: 6px; }
