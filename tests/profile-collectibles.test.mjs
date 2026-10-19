@@ -92,7 +92,9 @@ test('five original alpha sprites and thumbnails are bounded offline WebP assets
   assert.deepEqual(records.map(x=>x.frame),COLLECTIBLE_PROFILE_FRAMES);
   let total=0;
   for(const record of records){
-    assert.equal(record.generated,true);assert.match(record.master_sha256,/^[a-f0-9]{64}$/);assert.equal(record.assets.length,4);
+    assert.equal(record.generated,true);assert.match(record.master_sha256,/^[a-f0-9]{64}$/);
+    assert.ok(record.assets.some(asset=>asset.file===record.geometry.photo.aperture));
+    assert.equal(new Set(record.assets.map(asset=>asset.file)).size,record.assets.length);
     for(const asset of record.assets){const buffer=readFileSync(new URL('../'+asset.file,import.meta.url));assert.equal(buffer.subarray(0,4).toString(),'RIFF');assert.equal(buffer.subarray(8,12).toString(),'WEBP');assert.equal(buffer.length,asset.bytes);total+=buffer.length;}
   }
   assert.ok(total<4000000,'Keep all frame artwork, thumbs and effect maps under 4 MB');

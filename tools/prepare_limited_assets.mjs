@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { FRAME_PARTS, COVER_REGIONS } from './profile_limited_geometry.mjs';
 import { measureFrameAperture } from './frame_aperture.mjs';
+import {prepareCoverLayers} from './profile_cover_layers.mjs';
 const require = createRequire(import.meta.url);
 const sharp = require(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES ? join(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES,'sharp') : 'sharp');
 const source = resolve(process.argv[2] || '../work/limited-approved-source');
@@ -77,32 +78,9 @@ for(const [id,parts] of Object.entries(FRAME_PARTS)) {
   receipts.push({kind:'frame',id,generated:true,master_sha256:hash(original),geometry:{hole:geometry[id].hole,clear:geometry[id].clear,photo:geometry[id].photo},articulated_pieces:descriptors,assets});
 }
 for(const[id,regions]of Object.entries(COVER_REGIONS)) {
-  const original=await readFile(join(source,id+'.png')),clean=await readFile(join(source,id+'-clean.png'));
-  const w=1536,h=1024,raw=await sharp(original).resize(w,h,{fit:'cover'}).ensureAlpha().raw().toBuffer();
-  const cleanRaw=await sharp(clean).resize(w,h,{fit:'cover'}).ensureAlpha().raw().toBuffer();
-  const mask=await matte(regions.front,w,h,{blur:.7});
-  const extended=await matte(regions.front,w,h,{stroke:52,blur:2.3});
-  const front=Buffer.from(raw),base=Buffer.from(raw),assets=[];
-  for(let i=0;i<raw.length;i+=4){front[i+3]=mask[i+3];const t=extended[i+3]/255;for(let c=0;c<3;c++)base[i+c]=Math.round(raw[i+c]*(1-t)+cleanRaw[i+c]*t);}
-  assets.push(await webp(base,w,h,`covers/${id}.webp`,89));
-  assets.push(await webp(front,w,h,`covers/${id}-front.webp`,89));
-  const thumb=await sharp(raw,{raw:{width:w,height:h,channels:4}}).resize(480,320).raw().toBuffer();
-  assets.push(await webp(thumb,480,320,`covers/${id}-thumb.webp`,84));
-  const n=768,m=512,small=await sharp(raw,{raw:{width:w,height:h,channels:4}}).resize(n,m).raw().toBuffer();
-  const lightA=Buffer.alloc(n*m*4),lightB=Buffer.alloc(n*m*4);
-  for(let y=0;y<m;y++)for(let x=0;x<n;x++){
-    const q=(y*n+x)*4,r=small[q],g=small[q+1],b=small[q+2],lum=(r+g+b)/3;
-    const warm=r>b*1.14&&g>b*.85&&r>135;
-    const eligible=regions.light.warm?warm:(b>130&&g>135&&lum>142&&y>m*.21);
-    if(!eligible)continue;
-    const chosen=x/n<regions.light.splitX?lightA:lightB;
-    chosen[q]=r;chosen[q+1]=g;chosen[q+2]=b;chosen[q+3]=Math.round(Math.min(210,Math.max(0,(Math.max(r,g,b)-100)*1.3)));
-  }
-  for(const[suffix,map]of[['light-a',lightA],['light-b',lightB]])assets.push(await webp(map,n,m,`covers/${id}-${suffix}.webp`,82));
-  for(const[suffix,polygons]of[['surface-mask',regions.surface],['occlusion',regions.atmosphere]]){
-    const map=await matte(polygons,n,m,{blur:suffix==='occlusion'?15:3});assets.push(await webp(map,n,m,`covers/${id}-${suffix}.webp`,80));
-  }
-  receipts.push({kind:'cover',id,generated:true,master_sha256:hash(original),hidden_clean_plate_sha256:hash(clean),layer_dimensions:[w,h],effect_dimensions:[n,m],assets});
+  const original=await readFile(join(source,id+'.png'));
+  const layers=await prepareCoverLayers(sharp,original,id,regions);
+  receipts.push({kind:'cover',id,generated:true,master_sha256:hash(original),...layers});
 }
 // Small code-authored light textures, not video frames or runtime noise.
 for(let variant=0;variant<2;variant++){

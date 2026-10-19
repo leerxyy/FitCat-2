@@ -28,6 +28,8 @@ test('collectible frames preview, purchase, save and animate independently of PR
         assert.equal($('subscriptionDialog').open,false);assert.equal($('framePickerFrame').dataset.frame,id);assert.equal($('framePickerFrame').dataset.collectible,'true');assert.equal($('frameStylePreview').dataset.collectible,'true');
         assert.match($('framePickerFrame').style.getPropertyValue('--collectible-art'),new RegExp('profile-frames/'+id+'\\.webp'));assert.ok($('framePickerFrame').querySelector('.collectible-details svg'));
         const image=$('framePickerFrame').querySelector('img.collectible-art');
+        assert.equal($('framePickerFrame').parentElement.dataset.fitted,'true');
+        assert.match($('framePickerFrame').parentElement.style.getPropertyValue('--limited-avatar-aperture'),new RegExp('^url\\("file:.*'+id+'-aperture.webp'));
         assert.ok(image,'Artwork must be a real image element, not only a CSS background');
         assert.match(image.getAttribute('src'),new RegExp('^file:.*?/assets/profile-frames/'+id+'\\.webp$'));
         for(const property of ['--collectible-art','--collectible-light','--collectible-aura']){

@@ -26,7 +26,7 @@ test('profile autosaves valid fields and choices without a Save button or losing
       await click('[data-tab="friends"]'); await click('[data-action="showProfile"]');
       assert.equal($('profilePage').hidden, false); assert.equal($('navDock').hidden, true); assert.equal(document.activeElement, $('profileTitle'));
       for (const [key, value] of Object.entries({ profileName: 'Meow', profileAge: '20', profileHeight: '165', profileWeight: '52', profileGender: 'male', profileGoal: 'maintain' })) assert.equal($(key).value, value);
-      assert.equal($('profileUidDisplay').textContent, '012 345 678 90'); assert.match($('profileStreakText').textContent, /2 дня подряд/);
+      assert.equal($('profileUidDisplay').textContent, '012 345 678 90'); assert.equal($('profileAchievementsText').textContent, 'Скоро здесь появятся достижения');
       assert.equal($('saveProfileButton'), null); assert.equal($('profileForm').querySelector('button[type="submit"]'), null);
       assert.equal($('profilePhotoDelete').hidden, false); assert.equal($('profilePhotoEdit').parentElement, $('profilePhotoDelete').parentElement);
       assert.equal($('profilePhoto').querySelector('button'), null); assert.ok($('profilePhotoDelete').querySelector('svg'));
@@ -87,14 +87,18 @@ test('profile autosaves valid fields and choices without a Save button or losing
       assert.equal(JSON.parse(env.localStorage.getItem('fitnessProfile')).name, 'Сохранено свайпом');
       loadState(env.localStorage); await click('[data-action="showProfile"]'); assert.equal($('profileName').value, 'Сохранено свайпом');
     });
-    await t.test('translation retains typed fields, inline icons and glints; plural forms stay correct', async () => {
+    await t.test('achievements replace the streak display without mutating history; translations retain typed fields and glints', async () => {
       $('profileName').value = 'Текущий ввод';
-      for (const [count, expected] of [[1, '1 день подряд'], [2, '2 дня подряд'], [5, '5 дней подряд'], [21, '21 день подряд']]) {
-        state.streak = count; renderIdentity(); assert.equal($('profileStreakText').textContent, expected);
+      for (const count of [1, 2, 5, 21]) {
+        state.streak = count; renderIdentity(); assert.equal(state.streak, count);
+        assert.equal($('profileStreakText'), null); assert.equal($('streakCount'), null);
+        assert.equal($('profileAchievementsText').textContent, 'Скоро здесь появятся достижения');
       }
+      assert.ok(document.querySelector('.profile-achievements use[href$="#achievement"]'));
       for (const [language, title] of [['en', 'Personal details'], ['cn', '个人资料'], ['ru', 'Личные данные']]) {
         state.preferences.lang = language; document.dispatchEvent(new Event('fitcat:language')); await tick();
-        assert.equal($('profileDataTitle').textContent, title); assert.equal($('profileName').value, 'Текущий ввод');
+        assert.equal($('profileDataTitle').textContent, title);
+        assert.equal($('profileAchievementsText').textContent, {ru:'Скоро здесь появятся достижения',en:'Achievements are coming soon',cn:'成就即将上线'}[language]); assert.equal($('profileName').value, 'Текущий ввод');
         assert.equal($('profileGoalControl').querySelectorAll('svg').length, 3); assert.equal($('profileGoalControl').querySelectorAll('.selection-glint').length, 3);
         assert.equal($('profileGenderControl').querySelectorAll('.selection-glint').length, 2); assert.equal($('profileUidDisplay').textContent, '012 345 678 90');
       }

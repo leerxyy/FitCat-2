@@ -107,7 +107,7 @@ test('animation layers preserve intrinsic layout, share the paused clock and avo
   assert.equal((feature.match(/subscribeAmbientMotion\(/g)||[]).length,1);assert.ok(html.includes('styles/profile-limited.css'));
   for(const name of css.matchAll(/@keyframes\s+([^\s{]+)/g))assert.ok(name[1].startsWith('profile-'));
   for(const id of LIMITED_PROFILE_FRAMES){const markup=limitedFrameEffectsMarkup(id);assert.match(markup,/limited-piece/);assert.doesNotMatch(markup,/url\("assets\//);assert.match(markup,/&quot;file:\/\//);}
-  for(const id of LIMITED_PROFILE_COVERS){const markup=limitedCoverMarkup(id);assert.match(markup,/limited-front/);assert.match(markup,/&quot;file:\/\//);assert.doesNotMatch(markup,/<video|<canvas/);}
+  for(const id of LIMITED_PROFILE_COVERS){const markup=limitedCoverMarkup(id);assert.match(markup,/limited-light-flow/);assert.match(markup,/limited-rays/);assert.doesNotMatch(markup,/-front\.webp/);assert.match(markup,/&quot;file:\/\//);assert.doesNotMatch(markup,/<video|<canvas/);}
 });
 test('all three languages name every new item and explain separate permanent purchases',()=>{
   const keys=Object.keys(profileLimitedCopy.ru).sort();

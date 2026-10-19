@@ -64,7 +64,9 @@ test('limited collection supplies real animated previews and explicit, permanent
         await click('#coverChoice_'+id);const scene=$('coverPickerScene'),world=scene.querySelector('.limited-world');
         assert.equal(scene.dataset.limited,'true');assert.equal(scene.dataset.city,'false');assert.equal($('coverStylePreview').dataset.limited,'true');
         assert.match(scene.querySelector('.scene-image').getAttribute('src'),new RegExp('profile-limited/covers/'+id+'.webp$'));
-        assert.match(world.getAttribute('style'),new RegExp('--limited-front:url\\("file:.*'+id+'-front.webp'));assert.ok(world.querySelector('.limited-front img'));
+        assert.match(world.getAttribute('style'),new RegExp('--limited-rays:url\\("file:.*'+id+'-rays.webp'));
+        assert.ok(world.querySelector('.limited-light-flow'));assert.ok(world.querySelector('.limited-rays'));
+        assert.equal(world.querySelector('img'),null,'The approved cover remains one intact image; duplicate moving cut-outs would recreate clipped branches and arches');
         assert.ok(world.querySelector('.limited-far'));assert.ok(world.querySelector('.limited-depth'));assert.ok(world.querySelector('.limited-near'));
         assert.equal(world.querySelectorAll('.limited-petal').length,id==='scarlet'?12:0);assert.equal(world.querySelectorAll('.limited-shoal').length,id==='atlantis'?3:0);assert.equal(world.querySelectorAll('.limited-bubble-rise').length,id==='atlantis'?9:0);assert.equal(world.querySelectorAll('.limited-dust').length,id==='cathedral'?14:0);
         assert.equal(digits($('cityCoverPrice').textContent),'9999');assert.match($('cityCoverCredit').textContent,/фантазийная/);assert.equal(state.profileStyle.cover,'mist');

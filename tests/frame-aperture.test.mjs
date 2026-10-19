@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {measureFrameAperture} from '../tools/frame_aperture.mjs';
 import {LIMITED_FRAME_GEOMETRY} from '../js/core/profile-limited-geometry.js';
+import {FRAME_GEOMETRY} from '../js/core/profile-frame-geometry.js';
 
 function fixture(size=400){
   const rgba=new Uint8Array(size*size*4),cx=size*.5,cy=size*.4,rx=size*.285,ry=size*.263;
@@ -29,6 +30,16 @@ test('invalid or unclosed artwork cannot produce a giant mask over the whole pro
   assert.throws(()=>measureFrameAperture(new Uint8Array(400*400*4),400),/unclosed_avatar_opening/);
   const solid=new Uint8Array(400*400*4).fill(255);assert.throws(()=>measureFrameAperture(solid,400),/opaque_avatar_opening/);
 });
+test('an orbital wire cannot leave a disconnected crescent of the photograph transparent',()=>{
+  const size=400,raw=fixture(size);
+  for(let y=210;y<=212;y++)for(let x=90;x<310;x++)raw[(y*size+x)*4+3]=255;
+  // A separate window in the outer ornament must still show the background.
+  for(let y=190;y<200;y++)for(let x=342;x<349;x++)raw[(y*size+x)*4+3]=0;
+  const {opening,mask,fit}=measureFrameAperture(raw,size);
+  assert.equal(opening[245*size+200],1);assert.equal(mask[245*size+200],255);
+  assert.equal(opening[194*size+345],0);assert.equal(mask[194*size+345],0);
+  assert.ok(Math.abs(fit.centerY-40)<.2,'The restored crescent must retain the real aperture center');
+});
 test('each production frame has an independent measured opening and a tiny offline alpha mask',()=>{
   const sw=readFileSync(new URL('../sw.js',import.meta.url),'utf8'),source=JSON.parse(readFileSync(new URL('../assets/profile-limited/sources.json',import.meta.url),'utf8'));
   assert.ok(LIMITED_FRAME_GEOMETRY.pearlguard.photo.centerY<45);assert.ok(LIMITED_FRAME_GEOMETRY.seraph.photo.centerY<46);
@@ -41,9 +52,23 @@ test('each production frame has an independent measured opening and a tiny offli
 });
 test('limited art uses its own alpha and a co-located opaque photo backing without resizing the profile',()=>{
   const css=readFileSync(new URL('../styles/profile-limited.css',import.meta.url),'utf8');
-  assert.match(css,/\.avatar-frame\[data-limited="true"\] > \.collectible-shell \{ -webkit-mask: none; mask: none; \}/);
+  assert.match(css,/\.avatar-frame\[data-fitted="true"\] > \.collectible-shell \{ -webkit-mask: none; mask: none; \}/);
   assert.match(css,/mask: var\(--limited-avatar-aperture\) center \/ 100% 100% no-repeat/);
   assert.match(css,/inset: -3px; z-index: 1; margin: 0; width: auto; height: auto/);
   assert.match(css,/background: #0c3149/);assert.match(css,/left: var\(--limited-photo-left\); top: var\(--limited-photo-top\)/);
   assert.doesNotMatch(css,/#profileIdentityCard\[data-collectible-frame=/);assert.doesNotMatch(css,/#frameStylePreview\[data-collectible=/);
+});
+test('Chronos, Phoenix and the redrawn Frost Crown fit their own openings, with no common circular crop',()=>{
+  assert.ok(FRAME_GEOMETRY.chronos.photo.centerY<48);
+  assert.ok(FRAME_GEOMETRY.phoenix.photo.centerY<49);
+  assert.ok(FRAME_GEOMETRY.frostcrown.photo.centerY>50);
+  for(const[id,g]of Object.entries(FRAME_GEOMETRY)) {
+    const f=g.photo;assert.ok(f.openingPixels>100000&&f.openingPixels<500000,id);
+    assert.ok(f.left>=0&&f.top>=0&&f.left+f.size<=100&&f.top+f.size<=100,id);
+    assert.ok(Math.abs(f.left+f.size/2-f.centerX)<.000002);
+    const bytes=readFileSync(new URL('../'+f.aperture,import.meta.url));assert.ok(bytes.length<12000);
+    assert.equal(bytes.subarray(8,12).toString(),'WEBP');
+  }
+  const css=readFileSync(new URL('../styles/profile-collectibles.css',import.meta.url),'utf8');
+  assert.doesNotMatch(css,/mask-image:\s*radial-gradient/,'Native alpha must retain inward feathers and gear teeth in both the hero and tiles');
 });

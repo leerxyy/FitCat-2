@@ -1,4 +1,4 @@
-# FitCat collectible avatar frames — 3.22.1
+# FitCat collectible avatar frames — 3.24.0
 
 The five artworks were generated specifically for FitCat from the five-frame
 concept sheet approved by the user in this conversation. They are original
@@ -6,11 +6,11 @@ imagegen outputs, not downloaded commercial game frames or stock artwork.
 
 | Stored ID | Russian title | Visible moving layers |
 | --- | --- | --- |
-| `dragon` | Небесный дракон | Scale highlights, jade-pearl pulse, cloud contours, emissive detail |
+| `dragon` | Небесный дракон | Gold/jade contour flow, scale highlights, pearl pulse and orbit, eye glow, cloud wisps and glints |
 | `chronos` | Хронос | Three rotating gear windows, oscillating balance, fine outer chapter ring, metal sweep |
 | `eclipse` | Затмение | Two orbital light groups, star glints, flowing violet corona |
-| `frostcrown` | Ледяная корона | Separate facet glints, cold mist contours, refracted-light map |
-| `phoenix` | Феникс | Heat-light map, feather sweep, three gently rising ember groups |
+| `frostcrown` | Ледяная корона | Redrawn restrained ice ring with three crown crystals, cool contour flow, facet glints and ice motes |
+| `phoenix` | Феникс | Eight animated flame tongues, red/yellow contour flow, heat map, feather sweep and rising embers |
 
 Each item costs **229 FitCat Coins**, once. Ownership is recorded in the local
 wallet receipt and does not require PRO+. The collection is decorative and
@@ -19,16 +19,13 @@ does not affect nutrition calculations or activity data.
 `assets/profile-frames/frames.sources.json` records the original master hashes,
 derived asset sizes and opening geometry. The local build tool
 `tools/prepare_frame_assets.mjs` produces a 1024×1024 alpha sprite, a 320×320
-static thumbnail and two 512×512 effect maps per frame. The tool requires the
+static thumbnail and two 512×512 effect maps per frame, plus a small measured aperture mask. Dragon, Phoenix and Frost Crown also use a precomputed 512×512 edge-light mask. The tool requires the
 five original transparent PNG masters as its input directory. It is not used
 by the deployed PWA.
 
-The empty avatar opening is protected with a native radial mask, so decorative
-orbit lines do not cross the face. The profile keeps its existing avatar slot
-and field layout; the try-on stage has the same dimensions for every frame.
-Artwork uses a native image element. CSS effect URLs resolve from the application
-root, including GitHub Pages subdirectories. The header uses its thumbnail and only the small light sweep; gear,
-cloud and particle layers are hidden there.
+Every paid frame uses its own measured alpha opening, including asymmetric or off-center openings. An opaque backing and the photo share that exact aperture; the cover cannot leak through it. The artwork and thumbnails retain their native alpha, with no destructive central circular crop. The profile keeps its existing avatar slot and field layout; the try-on stage has the same dimensions for every frame. Artwork uses a native image element. CSS image URLs resolve from the application root, including GitHub Pages subdirectories. The header uses its thumbnail and only the small light sweep; gears, clouds, flames and particles are hidden there.
+
+Frost Crown was replaced at the user's request in 3.24.0 with original artwork made using the built-in imagegen tool. The final production prompt and normalization notes are recorded in `FRAME-ART-PROMPTS.json`. It retains the same stored `frostcrown` ID and all ownership receipts. High-resolution PNG masters remain outside the deployment ZIP. `tools/prepare_collectible_fit.mjs` refreshes aperture/contour masks without changing the other four approved artworks.
 
 Motion uses native CSS transforms and opacity. There are no additional timers,
 requestAnimationFrame loops, video files, animated filters or sensor listeners.
