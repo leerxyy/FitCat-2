@@ -1,4 +1,5 @@
 import { formatPromo, createSubscription } from './subscription.js';
+import { CITY_COVER_PRICE, CITY_PROFILE_COVERS } from './profile-cities.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
 export const SUBSCRIPTION_PRICES = Object.freeze({
@@ -19,23 +20,30 @@ export function addCalendarMonths(timestamp, months) {
 }
 const empty = () => ({ version: 1, balance: 0, entries: [], redeemed: [], subscription: null });
 const validTime = value => Number.isSafeInteger(value) && value > 0 && value < 8640000000000000;
-function read(storage) {
-  const raw = storage.getItem(WALLET_KEY);
-  if (raw == null) return empty();
-  let value;
-  try { value = JSON.parse(raw); } catch { throw new Error('wallet_corrupt'); }
+export function validateWallet(value) {
   if (value?.version !== 1 || !Number.isSafeInteger(value.balance) || value.balance < 0 || !Array.isArray(value.entries) || !Array.isArray(value.redeemed)) throw new Error('wallet_corrupt');
-  let balance = 0; const ids = new Set();
+  let balance = 0; const ids = new Set(), covers = new Set();
   for (const entry of value.entries) {
     if (!entry || typeof entry.id !== 'string' || ids.has(entry.id) || !validTime(entry.at)
-      || !['promo', 'subscription'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
-      || (entry.kind === 'promo' && entry.amount < 0) || (entry.kind === 'subscription' && entry.amount > 0)) throw new Error('wallet_corrupt');
+      || !['promo', 'subscription', 'profile-cover'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
+      || (entry.kind === 'promo' ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
+    if (entry.kind === 'profile-cover') {
+      if (!CITY_PROFILE_COVERS.includes(entry.cover) || covers.has(entry.cover)) throw new Error('wallet_corrupt');
+      covers.add(entry.cover);
+    }
     ids.add(entry.id); balance += entry.amount;
     if (!Number.isSafeInteger(balance) || balance < 0 || entry.balanceAfter !== balance) throw new Error('wallet_corrupt');
   }
   if (balance !== value.balance || value.redeemed.some(hash => !/^[a-f0-9]{64}$/.test(hash))) throw new Error('wallet_corrupt');
   if (value.subscription && (!validTime(value.subscription.activatedAt) || !validTime(value.subscription.expiresAt) || value.subscription.expiresAt <= value.subscription.activatedAt)) throw new Error('wallet_corrupt');
   return value;
+}
+function read(storage) {
+  const raw = storage.getItem(WALLET_KEY);
+  if (raw == null) return empty();
+  let value;
+  try { value = JSON.parse(raw); } catch { throw new Error('wallet_corrupt'); }
+  return validateWallet(value);
 }
 
 function defaultLock(work) {
@@ -80,6 +88,23 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
       value.entries.push({ id: operationId, kind: 'subscription', amount: -term.price, months: term.months, at: now, balanceAfter: balance, expiresAt });
     });
   }
+  // The debit and entitlement are one ledger write. Retrying an owned cover or
+  // the same operation cannot charge again, including from another local tab.
+  async function purchaseCover(cover, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
+    if (!CITY_PROFILE_COVERS.includes(cover) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
+    return commit(value => {
+      const previous = value.entries.find(entry => entry.id === operationId);
+      if (previous) {
+        if (previous.kind !== 'profile-cover' || previous.cover !== cover) throw new Error('wallet_invalid_purchase');
+        return false;
+      }
+      if (value.entries.some(entry => entry.kind === 'profile-cover' && entry.cover === cover)) return false;
+      if (value.balance < CITY_COVER_PRICE) throw new Error('wallet_insufficient');
+      value.balance -= CITY_COVER_PRICE;
+      value.entries.push({ id: operationId, kind: 'profile-cover', cover, amount: -CITY_COVER_PRICE, at: now, balanceAfter: value.balance });
+    });
+  }
+  const ownedCovers = () => snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => entry.cover);
   function status(now = Date.now()) {
     const paid = snapshot().subscription;
     const legacy = createSubscription(storage).status(now);
@@ -89,5 +114,5 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
       activatedAt: record.activatedAt ?? null, expiresAt: record.expiresAt ?? null,
       remainingDays: active ? Math.ceil((record.expiresAt - now) / 86400000) : 0 };
   }
-  return { snapshot, redeem, purchase, status };
+  return { snapshot, redeem, purchase, purchaseCover, ownedCovers, status };
 }

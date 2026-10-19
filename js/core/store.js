@@ -3,6 +3,7 @@ import { emptyWeather, normalizeWeather } from './weather.js';
 import { hasProAccess, mayCreateTemplate } from './access.js';
 import { APPEARANCE_KEY, APPEARANCE_DEFAULTS, normalizeAppearance } from './appearance.js';
 import { PROFILE_STYLE_KEY, PROFILE_STYLE_DEFAULTS, normalizeProfileStyle } from './profile-style.js';
+import { createWallet, validateWallet, WALLET_KEY } from './wallet.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
@@ -205,6 +206,7 @@ export function exportSnapshot() {
     weather: state.weather,
     appearance: state.appearance,
     profileStyle: state.profileStyle,
+    wallet: createWallet(storage).snapshot(),
   };
 }
 
@@ -223,6 +225,10 @@ export function importSnapshot(data) {
     || !['female', 'male'].includes(data.profile.gender) || !['lose', 'maintain', 'gain'].includes(data.profile.goal || 'lose')
     || !Array.isArray(data.foods) || !Array.isArray(data.weight)) invalid();
   for (const key of ['nutrition', 'products', 'templates', 'friends']) if (data[key] != null && !Array.isArray(data[key])) invalid();
+  let importedWallet;
+  if (Object.hasOwn(data, 'wallet')) {
+    try { importedWallet = structuredClone(validateWallet(data.wallet)); } catch { invalid(); }
+  }
   if (data.weight.some(item => !item || !validDate(item.date) || !numeric(item.weight, 30, 500))) invalid();
   if ((data.nutrition || []).some(item => !item || !validDate(item.date) || ['kcal', 'protein', 'fat', 'carbs'].some(key => !numeric(item[key] ?? 0, 0, 100000)))) invalid();
   const next = {
@@ -252,11 +258,12 @@ export function importSnapshot(data) {
   }
   // Validate everything before replacing state, and restore prior keys if a write fails.
   const previous = structuredClone(state);
-  const keys = [...Object.values(KEYS), ...Object.values(PREF_KEYS), 'waterAmount', 'lastDate'];
+  const keys = [...Object.values(KEYS), ...Object.values(PREF_KEYS), 'waterAmount', 'lastDate', WALLET_KEY];
   const saved = new Map(keys.map(key => [key, storage.getItem(key)]));
   try {
     Object.assign(state, next);
     persist(); storage.setItem(KEYS.uid, state.uid); setPhoto(state.photo, state.photoEdit);
+    if (importedWallet) storage.setItem(WALLET_KEY, JSON.stringify(importedWallet));
   } catch (error) {
     Object.assign(state, previous);
     for (const [key, value] of saved) {

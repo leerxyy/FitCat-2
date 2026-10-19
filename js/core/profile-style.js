@@ -1,10 +1,13 @@
+import { CITY_PROFILE_COVERS, cityCoverOwned } from './profile-cities.js';
+export { CITY_PROFILE_COVERS } from './profile-cities.js';
 // Stored IDs only: imported profiles never introduce arbitrary URLs or CSS.
 export const PROFILE_STYLE_KEY = 'fitcat_profile_style_v1';
 export const PROFILE_STYLE_DEFAULTS = Object.freeze({ frame: 'ice', cover: 'mist' });
 export const PROFILE_FRAMES = Object.freeze(['ice', 'silver', 'jade', 'graphite', 'quartz', 'spectrum', 'orbit', 'aurora']);
-export const PROFILE_COVERS = Object.freeze(['mist', 'lake', 'dunes', 'forest', 'ocean', 'aurora', 'cosmos', 'summits']);
+export const PROFILE_COVERS = Object.freeze(['mist', 'lake', 'dunes', 'forest', 'ocean', 'aurora', 'cosmos', 'summits', ...CITY_PROFILE_COVERS]);
 export const PREMIUM_PROFILE_FRAMES = Object.freeze(['spectrum', 'orbit', 'aurora']);
 export const PREMIUM_PROFILE_COVERS = Object.freeze(['aurora', 'cosmos', 'summits']);
+export const ANIMATED_PROFILE_COVERS = Object.freeze([...PREMIUM_PROFILE_COVERS, ...CITY_PROFILE_COVERS]);
 
 export function normalizeProfileStyle(value) {
   return {
@@ -12,15 +15,16 @@ export function normalizeProfileStyle(value) {
     cover: PROFILE_COVERS.includes(value?.cover) || value?.cover === 'none' ? value.cover : PROFILE_STYLE_DEFAULTS.cover,
   };
 }
-export function effectiveProfileStyle(value, pro = false) {
+export function effectiveProfileStyle(value, pro = false, ownedCovers = []) {
   const next = normalizeProfileStyle(value);
   if (!pro && PREMIUM_PROFILE_FRAMES.includes(next.frame)) next.frame = PROFILE_STYLE_DEFAULTS.frame;
   if (!pro && PREMIUM_PROFILE_COVERS.includes(next.cover)) next.cover = PROFILE_STYLE_DEFAULTS.cover;
+  if (CITY_PROFILE_COVERS.includes(next.cover) && !cityCoverOwned(next.cover, ownedCovers)) next.cover = PROFILE_STYLE_DEFAULTS.cover;
   return next;
 }
-export function profileChoiceAllowed(kind, value, pro = false) {
+export function profileChoiceAllowed(kind, value, pro = false, ownedCovers = []) {
   if (kind === 'frame') return PROFILE_FRAMES.includes(value) && (pro || !PREMIUM_PROFILE_FRAMES.includes(value));
-  if (kind === 'cover') return (PROFILE_COVERS.includes(value) || value === 'none') && (pro || !PREMIUM_PROFILE_COVERS.includes(value));
+  if (kind === 'cover') return (PROFILE_COVERS.includes(value) || value === 'none') && (pro || !PREMIUM_PROFILE_COVERS.includes(value)) && (!CITY_PROFILE_COVERS.includes(value) || cityCoverOwned(value, ownedCovers));
   return false;
 }
 export function profileCoverAsset(cover, thumbnail = false) {
