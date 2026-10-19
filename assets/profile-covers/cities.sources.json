@@ -1,93 +1,165 @@
 [
   {
-    "city": "tokyo",
-    "author": "Michael Day",
-    "license": "CC BY 2.0",
-    "licenseURL": "https://creativecommons.org/licenses/by/2.0/",
-    "source": "https://commons.wikimedia.org/wiki/File:Shinjuku_in_the_Rain_(6969744906).jpg",
-    "location": "Shinjuku, Tokyo",
-    "year": 2012,
-    "assets": [
-      {
-        "file": "assets/profile-covers/tokyo.webp",
-        "bytes": 174020
-      },
-      {
-        "file": "assets/profile-covers/tokyo-thumb.webp",
-        "bytes": 25376
-      },
-      {
-        "file": "assets/profile-effects/tokyo-lights.webp",
-        "bytes": 84716
-      }
-    ]
-  },
-  {
     "city": "chongqing",
-    "author": "Maple Doctor",
-    "license": "CC BY-SA 4.0",
-    "licenseURL": "https://creativecommons.org/licenses/by-sa/4.0/",
-    "source": "https://commons.wikimedia.org/wiki/File:Chongqing_Skyline_At_Night.png",
-    "location": "Hongyadong · Qiansimen Bridge, Chongqing",
-    "year": 2025,
+    "location": "Chongqing · Yuzhong",
+    "generated": true,
+    "generation": "Original image generated in this conversation; approved by user",
+    "master_sha256": "c94aae5abd59b7e8df56ebb692a4d34acb0e111d9032ae57ae6c266a86e29026",
     "assets": [
       {
         "file": "assets/profile-covers/chongqing.webp",
-        "bytes": 264140
+        "bytes": 540110
       },
       {
         "file": "assets/profile-covers/chongqing-thumb.webp",
-        "bytes": 26890
+        "bytes": 46456
       },
       {
-        "file": "assets/profile-effects/chongqing-lights.webp",
-        "bytes": 118082
+        "file": "assets/profile-effects/city-chongqing-light-a.webp",
+        "bytes": 144450
+      },
+      {
+        "file": "assets/profile-effects/city-chongqing-light-b.webp",
+        "bytes": 164430
+      },
+      {
+        "file": "assets/profile-effects/city-chongqing-glass.webp",
+        "bytes": 14270
+      },
+      {
+        "file": "assets/profile-effects/city-chongqing-water-mask.webp",
+        "bytes": 2776
+      },
+      {
+        "file": "assets/profile-effects/city-chongqing-water-a.webp",
+        "bytes": 60000
+      },
+      {
+        "file": "assets/profile-effects/city-chongqing-water-b.webp",
+        "bytes": 60126
       }
     ]
   },
   {
     "city": "moscow",
-    "author": "Jukov Nikita",
-    "license": "CC BY 2.0",
-    "licenseURL": "https://creativecommons.org/licenses/by/2.0/",
-    "source": "https://commons.wikimedia.org/wiki/File:Moscow_City_at_night4.jpg",
     "location": "Moscow City",
-    "year": 2017,
+    "generated": true,
+    "generation": "Original image generated in this conversation; approved by user",
+    "master_sha256": "25a583c768301ffc4eb584d73621adcc9e607b2bf468d26271180282d888c7df",
     "assets": [
       {
         "file": "assets/profile-covers/moscow.webp",
-        "bytes": 263840
+        "bytes": 467448
       },
       {
         "file": "assets/profile-covers/moscow-thumb.webp",
-        "bytes": 28042
+        "bytes": 41184
       },
       {
-        "file": "assets/profile-effects/moscow-lights.webp",
-        "bytes": 69444
+        "file": "assets/profile-effects/city-moscow-light-a.webp",
+        "bytes": 133398
+      },
+      {
+        "file": "assets/profile-effects/city-moscow-light-b.webp",
+        "bytes": 142378
+      },
+      {
+        "file": "assets/profile-effects/city-moscow-glass.webp",
+        "bytes": 31154
+      },
+      {
+        "file": "assets/profile-effects/city-moscow-water-mask.webp",
+        "bytes": 1258
+      },
+      {
+        "file": "assets/profile-effects/city-moscow-water-a.webp",
+        "bytes": 73918
+      },
+      {
+        "file": "assets/profile-effects/city-moscow-water-b.webp",
+        "bytes": 74086
       }
     ]
   },
   {
     "city": "dubai",
-    "author": "Robert Bock",
-    "license": "CC0 1.0",
-    "licenseURL": "https://creativecommons.org/publicdomain/zero/1.0/",
-    "source": "https://commons.wikimedia.org/wiki/File:Dubai_skyline_unsplash.jpg",
-    "location": "Downtown Dubai · Business Bay",
-    "year": 2016,
+    "location": "Dubai · Downtown",
+    "generated": true,
+    "generation": "Original image generated in this conversation; approved by user",
+    "master_sha256": "562394bd9e68d74052d10616e15d6f3b158f8d2c81c49a3bfb74cc35fffd343b",
     "assets": [
       {
         "file": "assets/profile-covers/dubai.webp",
-        "bytes": 124314
+        "bytes": 533898
       },
       {
         "file": "assets/profile-covers/dubai-thumb.webp",
-        "bytes": 11946
+        "bytes": 48192
       },
       {
-        "file": "assets/profile-effects/dubai-lights.webp",
-        "bytes": 38916
+        "file": "assets/profile-effects/city-dubai-light-a.webp",
+        "bytes": 161072
+      },
+      {
+        "file": "assets/profile-effects/city-dubai-light-b.webp",
+        "bytes": 191426
+      },
+      {
+        "file": "assets/profile-effects/city-dubai-glass.webp",
+        "bytes": 7206
+      },
+      {
+        "file": "assets/profile-effects/city-dubai-water-mask.webp",
+        "bytes": 2112
+      },
+      {
+        "file": "assets/profile-effects/city-dubai-water-a.webp",
+        "bytes": 41898
+      },
+      {
+        "file": "assets/profile-effects/city-dubai-water-b.webp",
+        "bytes": 42186
+      }
+    ]
+  },
+  {
+    "city": "hongkong",
+    "location": "Hong Kong · Victoria Harbour",
+    "generated": true,
+    "generation": "Original image generated in this conversation; approved by user",
+    "master_sha256": "c23adef1c025182718ec2bc01d236e9a63f5bf63cf31d6fbad904f2bc737e349",
+    "assets": [
+      {
+        "file": "assets/profile-covers/hongkong.webp",
+        "bytes": 495608
+      },
+      {
+        "file": "assets/profile-covers/hongkong-thumb.webp",
+        "bytes": 44000
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-light-a.webp",
+        "bytes": 134788
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-light-b.webp",
+        "bytes": 153182
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-glass.webp",
+        "bytes": 9544
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-water-mask.webp",
+        "bytes": 2000
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-water-a.webp",
+        "bytes": 43982
+      },
+      {
+        "file": "assets/profile-effects/city-hongkong-water-b.webp",
+        "bytes": 43822
       }
     ]
   }
