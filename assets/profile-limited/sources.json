@@ -9,7 +9,25 @@
       "master_sha256": "c69e19833af1759c9a43330f13cedf6a9dbed49ee3f82a63d5201192a6c0b4a0",
       "geometry": {
         "hole": 0.55078,
-        "clear": 23.828
+        "clear": 23.828,
+        "photo": {
+          "centerX": 49.902344,
+          "centerY": 48.779297,
+          "size": 55.957031,
+          "left": 21.923828,
+          "top": 20.800781,
+          "iconSize": 24.621094,
+          "iconLeft": 37.591797,
+          "iconTop": 36.46875,
+          "bounds": {
+            "left": 234,
+            "top": 238,
+            "right": 788,
+            "bottom": 761
+          },
+          "openingPixels": 228732,
+          "aperture": "assets/profile-limited/frames/kitsune-aperture.webp"
+        }
       },
       "articulated_pieces": [
         {
@@ -157,6 +175,10 @@
         {
           "file": "assets/profile-limited/frames/kitsune-material.webp",
           "bytes": 44256
+        },
+        {
+          "file": "assets/profile-limited/frames/kitsune-aperture.webp",
+          "bytes": 3350
         }
       ]
     },
@@ -167,7 +189,25 @@
       "master_sha256": "f8e427ecb1bdc8a7d0482d2e855fb57994d106bd4d8c5bba8d672de8b7f6a457",
       "geometry": {
         "hole": 0.57031,
-        "clear": 23.828
+        "clear": 23.828,
+        "photo": {
+          "centerX": 50,
+          "centerY": 43.457031,
+          "size": 57.128906,
+          "left": 21.435547,
+          "top": 14.892578,
+          "iconSize": 25.136719,
+          "iconLeft": 37.431641,
+          "iconTop": 30.888672,
+          "bounds": {
+            "left": 231,
+            "top": 181,
+            "right": 793,
+            "bottom": 709
+          },
+          "openingPixels": 215957,
+          "aperture": "assets/profile-limited/frames/pearlguard-aperture.webp"
+        }
       },
       "articulated_pieces": [
         {
@@ -335,6 +375,10 @@
         {
           "file": "assets/profile-limited/frames/pearlguard-material.webp",
           "bytes": 70942
+        },
+        {
+          "file": "assets/profile-limited/frames/pearlguard-aperture.webp",
+          "bytes": 5228
         }
       ]
     },
@@ -345,7 +389,25 @@
       "master_sha256": "30816dd821b0431b86296f5d781198d4aaba8b7a82eb55d1803ceb1fa35625f7",
       "geometry": {
         "hole": 0.52344,
-        "clear": 23.047
+        "clear": 23.047,
+        "photo": {
+          "centerX": 49.951172,
+          "centerY": 44.726563,
+          "size": 54.492188,
+          "left": 22.705078,
+          "top": 17.480469,
+          "iconSize": 23.976563,
+          "iconLeft": 37.962891,
+          "iconTop": 32.738281,
+          "bounds": {
+            "left": 245,
+            "top": 203,
+            "right": 778,
+            "bottom": 713
+          },
+          "openingPixels": 209748,
+          "aperture": "assets/profile-limited/frames/seraph-aperture.webp"
+        }
       },
       "articulated_pieces": [
         {
@@ -593,6 +655,10 @@
         {
           "file": "assets/profile-limited/frames/seraph-material.webp",
           "bytes": 30934
+        },
+        {
+          "file": "assets/profile-limited/frames/seraph-aperture.webp",
+          "bytes": 3650
         }
       ]
     },
