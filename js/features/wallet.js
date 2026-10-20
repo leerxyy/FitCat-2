@@ -66,7 +66,7 @@ export function renderWallet() {
   const rows = value.entries.filter(entry => filter === 'all' || (filter === 'in' ? entry.amount > 0 : entry.amount < 0)).slice().reverse();
   $('walletHistoryList').innerHTML = rows.length ? rows.map(entry => {
     const incoming = entry.amount > 0;
-    const title = incoming ? t('promo_label') : entry.kind === 'profile-cover'
+    const title = entry.kind === 'developer' ? t('developer_receipt') : incoming ? t('promo_label') : entry.kind === 'profile-cover'
       ? `${t('profile_city_receipt')} · ${t('profile_cover_' + canonicalCityCover(entry.cover))}${entry.cover === 'tokyo' ? ' · ' + t('profile_city_replaced') : ''}` : entry.kind === 'profile-frame' ? `${t('profile_frame_receipt')} · ${t('profile_frame_' + entry.frame)}` : `PRO+ · ${t('subscription_term_' + entry.months)}`;
     const date = new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(entry.at));
     return `<div class="wallet-transaction"><span class="wallet-transaction-icon">${icon(incoming ? 'gift' : 'check')}</span><div><strong>${escapeHTML(title)}</strong><small>${t(incoming ? 'wallet_income' : 'wallet_expense')} · ${escapeHTML(date)}</small></div><span class="wallet-amount ${incoming ? 'is-income' : ''}"><img src="assets/icons/coin.svg" alt="" width="20" height="20">${incoming ? '+' : '−'}${number(Math.abs(entry.amount))}</span></div>`;

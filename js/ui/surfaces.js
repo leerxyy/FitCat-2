@@ -1,4 +1,5 @@
 import { reducedMotion } from './motion.js';
+import { lowDetailMode } from './performance.js';
 
 // Decorative feedback only. Native clicks, focus, selection and scrolling keep
 // their normal behaviour; no card gains a fake button role or a new action.
@@ -48,7 +49,7 @@ export function initSurfaces() {
   }
   function reset() { active = null; hover = null; clearTimers(); clearFrame(); fade(); }
   function illuminate(surface, clientX, clientY, strength) {
-    if (disposed || document.hidden || reducedMotion() || surface.isConnected === false) return false;
+    if (disposed || document.hidden || reducedMotion() || lowDetailMode() || surface.isConnected === false) return false;
     const point = edgePoint(surface, clientX, clientY);
     if (!point) return false;
     if (!prepared.has(surface)) {
@@ -64,7 +65,7 @@ export function initSurfaces() {
   }
 
   function down(event) {
-    if (document.hidden || reducedMotion()) return;
+    if (document.hidden || reducedMotion() || lowDetailMode()) return;
     if (event.isPrimary === false || (event.button != null && event.button !== 0)) { reset(); return; }
     if (active && active.id !== event.pointerId) { reset(); return; }
     const surface = pick(event.target);
@@ -80,7 +81,7 @@ export function initSurfaces() {
       if (Math.hypot(event.clientX - active.x, event.clientY - active.y) > 9) reset();
       return;
     }
-    if (event.pointerType === 'touch' || !finePointer?.matches || reducedMotion() || document.hidden) return;
+    if (event.pointerType === 'touch' || !finePointer?.matches || reducedMotion() || lowDetailMode() || document.hidden) return;
     const surface = pick(event.target); hover = surface;
     if (!surface) { clearFrame(); fade(); return; }
     move = { surface, x: event.clientX, y: event.clientY };
@@ -123,6 +124,7 @@ export function initSurfaces() {
   listen(document, 'pointercancel', reset, { passive: true });
   listen(document, 'scroll', reset, { passive: true, capture: true });
   listen(document, 'fitcat:tab', reset);
+  listen(document, 'fitcat:performance', reset);
   listen(document, 'fitcat:dialogclose', reset);
   listen(document, 'visibilitychange', () => { if (document.hidden) reset(); });
   listen(window, 'blur', reset);

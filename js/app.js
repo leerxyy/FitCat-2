@@ -8,7 +8,7 @@ import { initPreferences, renderPreferences } from './features/preferences.js';
 import { initProducts, renderProducts } from './features/products.js';
 import { initAnalytics, renderAnalytics, renderCharts, invalidateAnalyticsFormats } from './features/analytics.js';
 import { initFriends, queuePublish, loadFriends } from './services/friends.js';
-import { initGestures, stopGestures } from './features/gestures.js';
+import { initGestures, stopGestures, renderGestureGuide } from './features/gestures.js';
 import { initPWA } from './ui/pwa.js';
 import { initAmbient } from './ui/ambient.js';
 import { initDock } from './ui/dock.js';
@@ -24,6 +24,7 @@ import { batchMotion } from './ui/motion.js';
 import { initAppearance, renderAppearance, flushAppearance } from './features/appearance.js';
 import { effectiveAppearance } from './core/appearance.js';
 import { applyPerformanceMode } from './ui/performance.js';
+import { initAchievements } from './features/achievements.js';
 
 let previousAccess;
 let pendingRender;
@@ -73,14 +74,14 @@ function start() {
   previousAccess = proAccess();
   rollDay(); updateStreak();
   initActions(); const viewportReady = initDock(); initOrientation(); initHaptics(); initInterfaceAudio(); initAppearance(); initAmbient(effectiveAppearance(state.appearance, proAccess())); initSurfaces(); initNavigation(); initDiary(); initProfile(); initPreferences();
-  initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription();
+  initProducts(); initAnalytics(); initFriends(); initGestures(); initWallet(); initSubscription(); initAchievements();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
   document.addEventListener('fitcat:change', renderChange);
   document.addEventListener('fitcat:subscription', checkAccess);
   document.addEventListener('fitcat:wallet', checkAccess);
   document.addEventListener('fitcat:language', () => {
-    translate(); render(); updateHeading(); renderProducts();
+    translate(); render(); updateHeading(); renderProducts(); renderGestureGuide();
     if (activeTab === 3) loadFriends();
   });
   document.addEventListener('visibilitychange', () => {

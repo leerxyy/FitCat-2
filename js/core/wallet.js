@@ -4,6 +4,8 @@ import { PURCHASABLE_PROFILE_FRAMES, profileFramePrice } from './profile-frames.
 import { LIMITED_PROFILE_COVERS } from './profile-limited.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
+export const DEVELOPER_GRANT_ID = 'fitcat-developer-grant-v1';
+export const DEVELOPER_COINS = 999999;
 export const SUBSCRIPTION_PRICES = Object.freeze({
   '1': Object.freeze({ months: 1, old: 229, price: 29 }),
   '3': Object.freeze({ months: 3, old: 687, price: 649 }),
@@ -27,8 +29,9 @@ export function validateWallet(value) {
   let balance = 0; const ids = new Set(), covers = new Set(), frames = new Set();
   for (const entry of value.entries) {
     if (!entry || typeof entry.id !== 'string' || ids.has(entry.id) || !validTime(entry.at)
-      || !['promo', 'subscription', 'profile-cover', 'profile-frame'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
-      || (entry.kind === 'promo' ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
+      || !['promo', 'developer', 'subscription', 'profile-cover', 'profile-frame'].includes(entry.kind) || !Number.isSafeInteger(entry.amount) || entry.amount === 0
+      || (['promo', 'developer'].includes(entry.kind) ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
+    if (entry.kind === 'developer' && (entry.id !== DEVELOPER_GRANT_ID || entry.amount !== DEVELOPER_COINS)) throw new Error('wallet_corrupt');
     if (entry.kind === 'profile-cover') {
       if ((!PURCHASABLE_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)
         || (LIMITED_PROFILE_COVERS.includes(entry.cover) && entry.amount !== -profileCoverPrice(entry.cover))) throw new Error('wallet_corrupt');
@@ -58,6 +61,7 @@ function defaultLock(work) {
   // Older engines still serialize operations in this tab. No server protection is implied.
   const task = localQueue.then(work); localQueue = task.catch(() => {}); return task;
 }
+export const withWalletLock = defaultLock;
 
 export function createWallet(storage = globalThis.localStorage, { lock = defaultLock } = {}) {
   const snapshot = () => structuredClone(read(storage));

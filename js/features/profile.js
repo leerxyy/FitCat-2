@@ -1,4 +1,5 @@
-import { state, setProfile, setPhoto, exportSnapshot, importSnapshot, clearAccount } from '../core/store.js';
+import { state, setProfile, setPhoto, exportSnapshot, importSnapshot, clearAccount, isDeveloperCommand, activateDeveloper } from '../core/store.js';
+import { renderAchievements } from './achievements.js';
 import { t } from '../core/i18n.js';
 import { localDate } from '../core/math.js';
 import { $, icon, initials, onAction, changed, toast, confirmAction } from '../ui/components.js';
@@ -14,6 +15,8 @@ const avatars = new WeakMap();
 let photoVersion = 0;
 let photoEditor;
 let feedbackTimer, profileChanged = false;
+let developerPending = false;
+let creatingProfile = false;
 const profileFields = { profileName: 'name', profileAge: 'age', profileHeight: 'height', profileWeight: 'weight', profileGender: 'gender', profileGoal: 'goal' };
 
 function profileStatus(key = 'profile_auto_hint') {
@@ -30,6 +33,20 @@ function saveProfileField(input, showInvalid = false) {
   const key = profileFields[input?.id];
   if (!key || !state.profile) return;
   const raw = input.value.trim(); let value = raw, valid = Boolean(raw);
+  if (key === 'name' && isDeveloperCommand(raw)) {
+    input.setAttribute('aria-invalid', 'false');
+    if (developerPending) return;
+    developerPending = true;
+    void activateDeveloper(raw).then(result => {
+      if (!result) return;
+      if (input.value.trim() === raw) input.value = result.name;
+      renderIdentity(); profileStatus('profile_auto_saved');
+      document.dispatchEvent(new Event('fitcat:wallet'));
+      document.dispatchEvent(new Event('fitcat:change'));
+      toast(t(result.already ? 'developer_already' : 'developer_grant'));
+    }).catch(error => { console.error(error); profileStatus('save_error'); toast(t('save_error')); }).finally(() => { developerPending = false; });
+    return;
+  }
   if (key === 'gender') valid = ['female', 'male'].includes(raw);
   else if (key === 'goal') valid = ['lose', 'maintain', 'gain'].includes(raw);
   else if (key !== 'name') {
@@ -66,7 +83,7 @@ export function renderIdentity({ animatePhoto = false } = {}) {
   $('profilePhoto').setAttribute('aria-label', t('photo_hint'));
   $('profilePhotoDelete').hidden = !state.photo;
   $('profileUidDisplay').textContent = state.uid.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1 $2 $3 $4');
-  $('profileAchievementsText').textContent = t('profile_achievements_soon');
+  renderAchievements();
   renderProfileStyle();
 }
 
@@ -153,13 +170,20 @@ export function initProfile() {
       isEnabled: () => document.body.dataset.screen === 'profilePage',
     });
   }
-  $('setupForm').addEventListener('submit', event => {
+  $('setupForm').addEventListener('submit', async event => {
     event.preventDefault();
+    if (creatingProfile) return;
     if (!$('setupForm').reportValidity()) return;
     const profile = collectProfile('setup');
     if (!profile.name) { $('setupName').focus(); return; }
-    state.profile = { ...profile, goal: 'lose', startWeight: profile.weight, targetWeight: Math.round(profile.weight * .9 * 10) / 10 };
-    state.lastDate = new Date().toDateString(); changed(); renderIdentity(); showScreen('mainPage');
+    const previous = state.profile;
+    creatingProfile = true;
+    try {
+      state.profile = { ...profile, goal: 'lose', startWeight: profile.weight, targetWeight: Math.round(profile.weight * .9 * 10) / 10 };
+      if (isDeveloperCommand(profile.name)) { await activateDeveloper(profile.name); document.dispatchEvent(new Event('fitcat:wallet')); toast(t('developer_grant')); }
+      state.lastDate = new Date().toDateString(); changed(); renderIdentity(); showScreen('mainPage');
+    } catch (error) { state.profile = previous; console.error(error); toast(t('save_error')); }
+    finally { creatingProfile = false; }
   });
   $('profileForm').addEventListener('submit', event => {
     event.preventDefault();

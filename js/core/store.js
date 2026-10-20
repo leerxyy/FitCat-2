@@ -3,7 +3,8 @@ import { emptyWeather, normalizeWeather } from './weather.js';
 import { hasProAccess, mayCreateTemplate } from './access.js';
 import { APPEARANCE_KEY, APPEARANCE_DEFAULTS, normalizeAppearance } from './appearance.js';
 import { PROFILE_STYLE_KEY, PROFILE_STYLE_DEFAULTS, normalizeProfileStyle } from './profile-style.js';
-import { createWallet, validateWallet, WALLET_KEY } from './wallet.js';
+import { createWallet, validateWallet, WALLET_KEY, withWalletLock, addCalendarMonths, DEVELOPER_GRANT_ID, DEVELOPER_COINS } from './wallet.js';
+import { ACHIEVEMENTS_KEY, normalizeAchievements, collectAchievements, developerAchievements } from './achievements.js';
 
 // Keep the original storage keys so an update on the same origin preserves data.
 const KEYS = {
@@ -13,6 +14,7 @@ const KEYS = {
   weather: 'fitcat_weather_v1', photoEdit: 'fitcat_photo_edit_v1',
   appearance: APPEARANCE_KEY,
   profileStyle: PROFILE_STYLE_KEY,
+  achievements: ACHIEVEMENTS_KEY,
 };
 const DEFAULTS = {
   lang: 'ru', dailyActivity: 1.375, workoutEnabled: false, workoutIntensity: 'light',
@@ -45,6 +47,7 @@ export const state = {
   weather: emptyWeather(),
   appearance: { ...APPEARANCE_DEFAULTS },
   profileStyle: { ...PROFILE_STYLE_DEFAULTS },
+  achievements: normalizeAchievements(null),
 };
 let storage;
 
@@ -79,6 +82,7 @@ export function loadState(adapter = globalThis.localStorage) {
   state.weather = normalizeWeather(readJSON(KEYS.weather, null));
   state.appearance = normalizeAppearance(readJSON(KEYS.appearance, null));
   state.profileStyle = normalizeProfileStyle(readJSON(KEYS.profileStyle, null));
+  state.achievements = normalizeAchievements(readJSON(KEYS.achievements, null));
   if (state.preferences.waterTemperatureMode === 'auto' && state.weather.daily) {
     state.preferences.currentTemp = state.weather.daily.temperature;
   }
@@ -107,7 +111,7 @@ export function proAccess() { return hasProAccess(storage); }
 export function templateSlotAvailable() { return mayCreateTemplate(state.templates.length, storage); }
 
 export function recordNutrition(date = localDate()) {
-  const record = { date, ...nutritionTotal(state.foods) };
+  const record = { date, ...nutritionTotal(state.foods), foodCount: state.foods.length };
   const index = state.nutrition.findIndex(item => item.date === date);
   if (index < 0) state.nutrition.push(record);
   else state.nutrition[index] = record;
@@ -151,6 +155,46 @@ export function persist({ nutrition = false } = {}) {
   saveIfChanged(KEYS.profileStyle, JSON.stringify(state.profileStyle));
   saveIfChanged('waterAmount', String(state.water));
   saveIfChanged('lastDate', state.lastDate || new Date().toDateString());
+  syncAchievements();
+}
+
+export function syncAchievements() {
+  const stored = normalizeAchievements(readJSON(KEYS.achievements, null));
+  const cached = state.achievements;
+  const next = collectAchievements({ ...stored, days:[...stored.days,...cached.days], products:[...stored.products,...cached.products], unlocked:{...cached.unlocked,...stored.unlocked}, developer:stored.developer||cached.developer }, state);
+  saveIfChanged(KEYS.achievements, JSON.stringify(next));
+  state.achievements = next;
+  return next;
+}
+
+export const isDeveloperCommand = value => /\/dev(?=$|\s)/i.test(String(value));
+export async function activateDeveloper(command, now = Date.now()) {
+  if (!isDeveloperCommand(command) || !state.profile) return null;
+  if (!Number.isSafeInteger(now) || now <= 0) throw new Error('invalid_developer_time');
+  const account = state.uid, originalName = state.profile.name;
+  return withWalletLock(() => {
+    if (!state.profile || state.uid !== account) throw new Error('developer_cancelled');
+    const wallet = createWallet(storage).snapshot();
+    const already = wallet.entries.some(entry => entry.id === DEVELOPER_GRANT_ID);
+    if (!already) {
+      const expiresAt = Math.max(addCalendarMonths(now, 99 * 12), wallet.subscription?.expiresAt || 0, createWallet(storage).status(now).expiresAt || 0);
+      wallet.balance += DEVELOPER_COINS;
+      wallet.subscription = { activatedAt: now, expiresAt };
+      wallet.entries.push({ id: DEVELOPER_GRANT_ID, kind: 'developer', amount: DEVELOPER_COINS, at: now, balanceAfter: wallet.balance, expiresAt });
+      validateWallet(wallet);
+    }
+    const name = state.profile.name !== originalName && !isDeveloperCommand(state.profile.name) ? state.profile.name : String(command).replace(/\/dev(?=$|\s)/gi, '').trim() || originalName.replace(/\/dev(?=$|\s)/gi, '').trim() || 'Meow';
+    const profile = { ...state.profile, name }, achievements = developerAchievements(collectAchievements(state.achievements, state), new Date(now));
+    const writes = [[KEYS.profile, JSON.stringify(profile)], [KEYS.achievements, JSON.stringify(achievements)], [WALLET_KEY, JSON.stringify(wallet)]];
+    const saved = writes.map(([key]) => [key, storage.getItem(key)]);
+    try { for (const [key, value] of writes) saveIfChanged(key, value); }
+    catch (error) {
+      for (const [key, value] of saved) try { if (value === null) storage.removeItem(key); else storage.setItem(key, value); } catch { /* Continue restoring other records. */ }
+      throw error;
+    }
+    state.profile = profile; state.achievements = achievements;
+    return { already, name, balance: wallet.balance };
+  });
 }
 
 // Compare against storage, not an in-memory cache: imports and other tabs may
@@ -220,6 +264,7 @@ export function exportSnapshot() {
     weather: state.weather,
     appearance: state.appearance,
     profileStyle: state.profileStyle,
+    achievements: state.achievements,
     wallet: createWallet(storage).snapshot(),
   };
 }
@@ -262,6 +307,7 @@ export function importSnapshot(data) {
     weather: normalizeWeather(data.weather),
     appearance: normalizeAppearance(data.appearance ?? state.appearance),
     profileStyle: normalizeProfileStyle(data.profileStyle ?? state.profileStyle),
+    achievements: normalizeAchievements(data.achievements ?? state.achievements),
     water: Math.max(0, Number(data.water) || 0),
     lastDate: typeof data.lastDate === 'string' && !Number.isNaN(new Date(data.lastDate).getTime()) ? data.lastDate : new Date().toDateString(),
   };
@@ -291,4 +337,5 @@ export function clearAccount() {
   // GitHub Pages projects share an origin. Never clear unrelated applications.
   for (const key of [...Object.values(KEYS), ...Object.values(PREF_KEYS), 'waterAmount', 'lastDate', 'fitcat_streak', 'fitcat_lastOpen']) storage.removeItem(key);
   for (const key of ['card_waterCard_collapsed', 'card_mealsCard_collapsed', 'journal_weightHistory_collapsed', 'journal_nutritionHistory_collapsed']) storage.removeItem(key);
+  state.achievements = normalizeAchievements(null);
 }
