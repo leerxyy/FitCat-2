@@ -55,6 +55,10 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
   const buttons = [...track.querySelectorAll(selector)], hub = getHub(doc, win), handlers = [];
   if (!buttons.length) throw new Error('A selection lens needs native choice buttons.');
   let gesture = null, holdTimer, suppressUntil = 0;
+  let visual = null, targetVisual = null, visualFrame = 0, visualTime = 0;
+  const requestFrame = run => (win.requestAnimationFrame || globalThis.requestAnimationFrame).call(win, run);
+  const cancelFrame = id => (win.cancelAnimationFrame || globalThis.cancelAnimationFrame).call(win, id);
+  const reduce = () => Boolean((win.matchMedia || globalThis.matchMedia)?.call(win, '(prefers-reduced-motion: reduce)').matches);
   track.classList.add('has-selection-lens');
   track.setAttribute('data-no-profile-swipe', ''); track.setAttribute('data-no-main-swipe', ''); track.setAttribute('data-no-surface-feedback', '');
   const listen = (name, handler, options) => {
@@ -89,13 +93,53 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     });
     return { left: rect.left, scale, border, boxes, centers: boxes.map(box => box.x + box.width / 2) };
   }
+  function drawVisual() {
+    for (const key of ['x','y','width','height']) {
+      const value = `${Number(visual[key].toFixed(3))}px`, name = '--lens-display-' + key;
+      if (track.style.getPropertyValue(name) !== value) track.style.setProperty(name, value);
+    }
+  }
+  function stopVisual() {
+    if (visualFrame) cancelFrame(visualFrame);
+    visualFrame = 0; visualTime = 0; track.classList.remove('is-lens-animating');
+  }
+  function tickVisual(now) {
+    visualFrame = 0;
+    if (!targetVisual || doc.hidden || !enabled() || reduce()) {
+      if (targetVisual) { visual = { ...targetVisual }; drawVisual(); }
+      stopVisual(); return;
+    }
+    const elapsed = Math.min(64, Math.max(1, now - visualTime)); visualTime = now;
+    // Short input latency while following; a longer, monotonic settle after
+    // release. LDM uses these same timings and removes only decorative work.
+    const follow = 1 - Math.exp(-elapsed / (gesture?.active ? 28 : 68));
+    let remaining = 0;
+    for (const key of ['x','y','width','height']) {
+      visual[key] += (targetVisual[key] - visual[key]) * follow;
+      remaining = Math.max(remaining, Math.abs(targetVisual[key] - visual[key]));
+    }
+    if (remaining < .025) { visual = { ...targetVisual }; drawVisual(); stopVisual(); return; }
+    drawVisual(); visualFrame = requestFrame(tickVisual);
+  }
+  function aimVisual(next) {
+    targetVisual = next;
+    if (!visual || reduce() || doc.hidden) { stopVisual(); visual = { ...next }; drawVisual(); return; }
+    if (['x','y','width','height'].every(key => Math.abs(visual[key] - next[key]) < .025)) return;
+    if (!visualFrame) {
+      visualTime = performance.now(); track.classList.add('is-lens-animating');
+      visualFrame = requestFrame(tickVisual);
+    }
+  }
   function paint(index = selectedIndex(), preview = -1, layout = measure(), edge = 0, drift = 0) {
     track.style.setProperty('--lens-index', String(index));
     if (layout) {
       const first = layout.boxes[Math.floor(index)], last = layout.boxes[Math.ceil(index)], fraction = index % 1;
+      const next = {};
       for (const [variable, key, offset] of [['x', 'x', edge], ['y', 'y', drift], ['width', 'width', 0], ['height', 'height', 0]]) {
-        track.style.setProperty('--lens-' + variable, `${first[key] + (last[key] - first[key]) * fraction + offset}px`);
+        next[variable] = first[key] + (last[key] - first[key]) * fraction + offset;
+        track.style.setProperty('--lens-' + variable, `${next[variable]}px`);
       }
+      aimVisual(next);
     }
     buttons.forEach((button, i) => {
       const focus = Math.max(0, 1 - Math.abs(index - i));
@@ -105,7 +149,7 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
       button.style.setProperty('--choice-lift', `${-focus}px`);
     });
   }
-  function reset(suppress = false) {
+  function reset(suppress = false, repaint = true) {
     const previous = gesture; gesture = null; clearTimeout(holdTimer);
     if (hub.active === controller) hub.active = null;
     if (suppress && previous) suppressUntil = Date.now() + 500;
@@ -113,7 +157,7 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     if (previous?.source === 'pointer') {
       try { if (track.hasPointerCapture?.(previous.id)) track.releasePointerCapture(previous.id); } catch { /* The OS may already have released it. */ }
     }
-    paint();
+    if (repaint) paint();
   }
   function position(x) {
     const { layout, grab } = gesture, centers = layout.centers;
@@ -164,8 +208,10 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     const dragged = gesture.active || x !== gesture.x || y !== gesture.y;
     const commit = dragged && enabled();
     const destination = Math.round(position(x).index);
-    reset(dragged);
-    if (!commit) return;
+    // Do not paint the old selected index between pointer release and commit.
+    // Native selection handlers can also synchronise this track during onSelect.
+    reset(dragged, false);
+    if (!commit) { paint(); return; }
     if (event.cancelable) event.preventDefault();
     if (!buttons[destination].disabled && destination !== selectedIndex()) {
       onSelect(destination);
@@ -194,10 +240,10 @@ export function initSelectionLens(track, { getIndex, onSelect, selector = 'butto
     event.preventDefault(); event.stopImmediatePropagation();
   }, { capture: true });
   const observer = win.ResizeObserver ? new win.ResizeObserver(() => reset(true)) : null;
-  const controller = { reset: () => reset(true), sync: () => reset(true), move, end,
+  const controller = { reset: () => reset(true), sync: () => { if (!gesture) paint(); }, move, end,
     owns: (id, source) => gesture?.id === id && gesture?.source === source,
     dispose() {
-      reset(); observer?.disconnect(); handlers.forEach(remove => remove());
+      reset(); stopVisual(); observer?.disconnect(); handlers.forEach(remove => remove());
       owners.delete(track); hub.clients.delete(controller);
       if (!hub.clients.size) hub.dispose();
     },
