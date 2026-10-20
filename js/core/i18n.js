@@ -12,8 +12,6 @@ import { settingsCopy } from './settings-copy.js';
 import { appearanceCopy } from './appearance-copy.js';
 import { profileStyleCopy } from './profile-style-copy.js';
 import { profileCityCopy } from './profile-city-copy.js';
-import { profileFrameCopy } from './profile-frame-copy.js';
-import { profileLimitedCopy } from './profile-limited-copy.js';
 import { engagementCopy } from './engagement-copy.js';
 
 const additions = {
@@ -112,7 +110,7 @@ const additions = {
   },
 };
 
-for (const language of Object.keys(additions)) Object.assign(translations[language], additions[language], subscriptionCopy[language], walletCopy[language], weatherCopy[language], premiumCopy[language], activityCopy[language], statisticsCopy[language], friendsCopy[language], profileCopy[language], settingsCopy[language], appearanceCopy[language], profileStyleCopy[language], profileCityCopy[language], profileFrameCopy[language], profileLimitedCopy[language], engagementCopy[language]);
+for (const language of Object.keys(additions)) Object.assign(translations[language], additions[language], subscriptionCopy[language], walletCopy[language], weatherCopy[language], premiumCopy[language], activityCopy[language], statisticsCopy[language], friendsCopy[language], profileCopy[language], settingsCopy[language], appearanceCopy[language], profileStyleCopy[language], profileCityCopy[language], engagementCopy[language]);
 
 export function t(key) {
   return translations[state.preferences.lang]?.[key] ?? translations.ru[key] ?? key;

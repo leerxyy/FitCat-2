@@ -2,7 +2,7 @@
 .has-selection-lens { position: relative; isolation: isolate; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; --selection-radius: 13px; }
 .has-selection-lens button, .has-selection-lens button * { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .has-selection-lens::before { content: none; }
-.has-selection-lens > .selection-lens { position: absolute; z-index: 0; pointer-events: none; isolation: isolate; overflow: hidden; inset: 0 auto auto 0; width: var(--lens-width, 50%); height: var(--lens-height, 100%); border: 1px solid var(--tone-h96eaff99, #96eaff99); border-radius: var(--selection-radius); transform: translate3d(var(--lens-x, 0px), var(--lens-y, 0px), 0); background: radial-gradient(ellipse at 25% 3%, var(--tone-hd5f8ff38, #d5f8ff38), transparent 68%), linear-gradient(150deg, var(--tone-h13b7dc45, #13b7dc45), var(--tone-h11678940, #11678940)); box-shadow: inset 0 1px 3px #edffff70, inset 0 -2px 9px var(--tone-h39d4f024, #39d4f024), 0 0 14px var(--tone-h18d7ed24, #18d7ed24); transition: transform 420ms var(--ease), width 420ms var(--ease), height 420ms var(--ease), scale 220ms var(--ease), box-shadow 260ms ease; }
+.has-selection-lens > .selection-lens { position: absolute; z-index: 0; pointer-events: none; isolation: isolate; overflow: hidden; inset: 0 auto auto 0; width: var(--lens-display-width, 50%); height: var(--lens-display-height, 100%); border: 1px solid var(--tone-h96eaff99, #96eaff99); border-radius: var(--selection-radius); transform: translate3d(var(--lens-display-x, 0px), var(--lens-display-y, 0px), 0); background: radial-gradient(ellipse at 25% 3%, var(--tone-hd5f8ff38, #d5f8ff38), transparent 68%), linear-gradient(150deg, var(--tone-h13b7dc45, #13b7dc45), var(--tone-h11678940, #11678940)); box-shadow: inset 0 1px 3px #edffff70, inset 0 -2px 9px var(--tone-h39d4f024, #39d4f024), 0 0 14px var(--tone-h18d7ed24, #18d7ed24); transition: scale 300ms var(--ease), box-shadow 300ms ease; contain: layout paint; }
 .has-selection-lens > button { position: relative; z-index: 1; transform: none; }
 .has-selection-lens > button:active:not(:disabled) { transform: none; }
 .has-selection-lens > button.active { background: transparent; border-color: transparent; box-shadow: none; }
@@ -14,13 +14,13 @@
 .has-selection-lens > button.is-preview, .has-selection-lens > button.is-preview > .icon { color: var(--tone-h6becff, #6becff); }
 .has-selection-lens.is-lens-pressed > .selection-lens { box-shadow: inset 0 1px 3px #fff9, inset 0 -2px 8px var(--tone-h67e6ff30, #67e6ff30), 0 0 18px var(--tone-h28d9f334, #28d9f334); }
 .has-selection-lens.is-lens-held > .selection-lens { scale: 1.02 1.045; }
-.has-selection-lens.is-scrubbing > .selection-lens { transition: scale 180ms ease, box-shadow 180ms ease; }
+.has-selection-lens.is-scrubbing > .selection-lens { transition: scale 260ms ease, box-shadow 260ms ease; }
 .has-selection-lens.is-scrubbing > button > .icon, .has-selection-lens.is-scrubbing > button > span:not(.selection-glint) { transition: color 180ms ease, filter 200ms ease; }
 .selection-lens-shine { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
 .selection-lens-shine::before { content: ""; position: absolute; inset: -50% auto -50% -60%; width: 45%; background: linear-gradient(90deg, transparent, var(--tone-hc4faff0a, #c4faff0a) 25%, #e5ffff38 50%, var(--tone-hc4faff0a, #c4faff0a) 75%, transparent); opacity: 0; transform: translate3d(-100%, 0, 0) skewX(-18deg); animation: fitcat-choice-glint 6s ease-in-out infinite; }
 [hidden] .selection-lens-shine::before, body.dialog-open .selection-lens-shine::before, .keyboard-open .selection-lens-shine::before, .view-leaving .selection-lens-shine::before { animation-play-state: paused; }
 .bottom-nav.has-selection-lens { --selection-radius: 99px; }
-.bottom-nav.has-selection-lens > .selection-lens { width: var(--lens-width, calc((100% - 12px) / 4)); height: var(--lens-height, calc(100% - 12px)); }
+.bottom-nav.has-selection-lens > .selection-lens { width: var(--lens-display-width, calc((100% - 12px) / 4)); height: var(--lens-display-height, calc(100% - 12px)); }
 .bottom-nav.has-selection-lens.is-lens-held > .selection-lens { scale: 1.035 1.08; }
 .bottom-nav.has-selection-lens .nav-item.is-preview::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--tone-h31def2, #31def2); box-shadow: 0 0 7px var(--tone-h16cff36b, #16cff36b); }
 .bottom-nav.has-selection-lens.is-lens-pressed .nav-item:not(.is-preview)::after { opacity: 0; }
@@ -29,6 +29,7 @@
 .profile-goal-control.has-selection-lens > button.active, .profile-goal-control.has-selection-lens > button.is-preview { border-color: transparent; }
 .stats-view-switch.has-selection-lens { --selection-radius: 19px; }
 .stats-view-switch.has-selection-lens > .selection-lens { background: radial-gradient(ellipse at 25% 3%, var(--tone-hd5f8ff30, #d5f8ff30), transparent 68%), linear-gradient(120deg, var(--tone-h0396c6a3, #0396c6a3), var(--tone-h00c9e967, #00c9e967)); }
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .has-selection-lens > .selection-lens { -webkit-backdrop-filter: blur(9px) saturate(165%); backdrop-filter: blur(9px) saturate(165%); } }
+/* The moving layer has no live backdrop sampling. The surrounding glass supplies depth. */
+.has-selection-lens.is-lens-animating > .selection-lens, .has-selection-lens.is-scrubbing > .selection-lens { will-change: transform; }
 @media (prefers-reduced-motion: reduce) { .selection-lens-shine { display: none; }.has-selection-lens > .selection-lens, .has-selection-lens > button > .icon, .has-selection-lens > button > span { transition: none !important; }.has-selection-lens.is-lens-pressed > .selection-lens { scale: 1 !important; }.has-selection-lens > button > .icon, .has-selection-lens > button > span { transform: none !important; } }
 @media (prefers-reduced-transparency: reduce) { .has-selection-lens > .selection-lens { background: #15536b !important; -webkit-backdrop-filter: none; backdrop-filter: none; } }

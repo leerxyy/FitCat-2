@@ -175,3 +175,20 @@
   .profile-scene .scene-distance, .profile-scene .scene-atmosphere, .profile-scene .scene-foreground { transform: none; }
   #profilePage #profileIdentityCard, .profile-style-choice, .style-choice-check { transition: none; }
 }
+
+/* A frame's inner opening exactly meets the photo: outset equals band width.
+   Concentric geometry is shared by the profile, header and picker samples. */
+.avatar-frame { inset: calc(-1 * var(--frame-band)); }
+.header-avatar-wrap > .avatar-frame { --frame-band: 2.5px; --orbit-dot: 2.5px; inset: calc(-1 * var(--frame-band)); }
+.avatar-frame[data-frame="graphite"] { --frame-band: 4px; }
+.header-avatar-wrap > .avatar-frame[data-frame="graphite"] { --frame-band: 2px; }
+.avatar-frame[data-frame="graphite"] .frame-body { border: 1px solid #ced9e2ad; background: conic-gradient(from 32deg,#27313c,#b7c3ce 18%,#313e4c 32%,#14202c 50%,#a7b6c3 68%,#344450 84%,#27313c); }
+.avatar-frame[data-frame="graphite"] .frame-facet { inset: 1px; border: 1px solid #dde8f057; opacity: .55; }
+.avatar-frame[data-frame="orbit"] { --frame-band: 4px; }
+.header-avatar-wrap > .avatar-frame[data-frame="orbit"] { --frame-band: 2px; }
+.avatar-frame[data-frame="orbit"] > .frame-orbit { inset: -4px; border: 1px solid #aacff777; border-radius: 50%; --rim-offset: 0deg; animation: profile-rim-turn 27s linear infinite; }
+.avatar-frame[data-frame="orbit"] > .orbit-two { inset: -8px; --rim-offset: 132deg; border-color: #b7b0e74d; transform: rotate(132deg); animation: profile-rim-turn 39s linear infinite reverse; }
+.avatar-frame[data-frame="orbit"] > .orbit-three { display: none; }
+.avatar-frame[data-frame="orbit"] .frame-orbit > i { top: 50%; left: 100%; transform: translate(-50%,-50%); width: var(--orbit-dot,4px); height: var(--orbit-dot,4px); }
+.header-avatar-wrap > .avatar-frame[data-frame="orbit"] > .frame-orbit { inset: -2px; }
+.header-avatar-wrap > .avatar-frame[data-frame="orbit"] > .orbit-two { inset: -4px; }

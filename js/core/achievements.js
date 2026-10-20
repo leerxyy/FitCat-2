@@ -3,10 +3,6 @@ import { localDate } from './math.js';
 export const ACHIEVEMENTS_KEY = 'fitcat_achievements_v1';
 export const STABILITY_LEVELS = Object.freeze([7, 30, 60, 90]);
 export const ACHIEVEMENT_IDS = Object.freeze(['first', 'rhythm', 'stable7', 'stable30', 'stable60', 'stable90', 'balance', 'choice']);
-export const ACHIEVEMENT_ATLAS = Object.freeze({
-  stable7: [48, 24, 380, 453], stable30: [469, 25, 382, 451], stable60: [906, 23, 395, 462], stable90: [1343, 24, 391, 459],
-  first: [26, 483, 435, 389], rhythm: [481, 476, 329, 393], balance: [877, 502, 430, 359], choice: [1374, 478, 342, 399],
-});
 const validDay = value => {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(value + 'T12:00:00Z');

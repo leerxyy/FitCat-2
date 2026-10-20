@@ -18,7 +18,7 @@ export function reducedMotion() {
 }
 
 function motionFactor() {
-  if (lowDetailMode()) return .4;
+  if (lowDetailMode()) return 1;
   return { calm: 1.12, standard: 1, expressive: 1.18 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1;
 }
 

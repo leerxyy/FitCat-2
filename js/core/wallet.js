@@ -1,7 +1,6 @@
 import { formatPromo, createSubscription } from './subscription.js';
 import { PURCHASABLE_PROFILE_COVERS, LEGACY_CITY_COVERS, canonicalCityCover, profileCoverPrice } from './profile-cities.js';
-import { PURCHASABLE_PROFILE_FRAMES, profileFramePrice } from './profile-frames.js';
-import { LIMITED_PROFILE_COVERS } from './profile-limited.js';
+import { RETIRED_COVER_PRICES, RETIRED_FRAME_PRICES } from './retired-cosmetics.js';
 
 export const WALLET_KEY = 'fitcat_wallet_v1';
 export const DEVELOPER_GRANT_ID = 'fitcat-developer-grant-v1';
@@ -33,12 +32,12 @@ export function validateWallet(value) {
       || (['promo', 'developer'].includes(entry.kind) ? entry.amount < 0 : entry.amount > 0)) throw new Error('wallet_corrupt');
     if (entry.kind === 'developer' && (entry.id !== DEVELOPER_GRANT_ID || entry.amount !== DEVELOPER_COINS)) throw new Error('wallet_corrupt');
     if (entry.kind === 'profile-cover') {
-      if ((!PURCHASABLE_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover)) || covers.has(entry.cover)
-        || (LIMITED_PROFILE_COVERS.includes(entry.cover) && entry.amount !== -profileCoverPrice(entry.cover))) throw new Error('wallet_corrupt');
+      if ((!PURCHASABLE_PROFILE_COVERS.includes(entry.cover) && !LEGACY_CITY_COVERS.includes(entry.cover) && !Object.hasOwn(RETIRED_COVER_PRICES, entry.cover)) || covers.has(entry.cover)
+        || (Object.hasOwn(RETIRED_COVER_PRICES, entry.cover) && entry.amount !== -RETIRED_COVER_PRICES[entry.cover])) throw new Error('wallet_corrupt');
       covers.add(entry.cover);
     }
     if (entry.kind === 'profile-frame') {
-      if (!PURCHASABLE_PROFILE_FRAMES.includes(entry.frame) || frames.has(entry.frame) || entry.amount !== -profileFramePrice(entry.frame)) throw new Error('wallet_corrupt');
+      if (!Object.hasOwn(RETIRED_FRAME_PRICES, entry.frame) || frames.has(entry.frame) || entry.amount !== -RETIRED_FRAME_PRICES[entry.frame]) throw new Error('wallet_corrupt');
       frames.add(entry.frame);
     }
     ids.add(entry.id); balance += entry.amount;
@@ -117,21 +116,7 @@ export function createWallet(storage = globalThis.localStorage, { lock = default
     });
   }
   const ownedCovers = () => [...new Set(snapshot().entries.filter(entry => entry.kind === 'profile-cover').map(entry => canonicalCityCover(entry.cover)))];
-  async function purchaseFrame(frame, { now = Date.now(), operationId = crypto.randomUUID() } = {}) {
-    if (!PURCHASABLE_PROFILE_FRAMES.includes(frame) || !validTime(now) || typeof operationId !== 'string' || !/^[\w-]{1,80}$/.test(operationId)) throw new Error('wallet_invalid_purchase');
-    const price = profileFramePrice(frame);
-    return commit(value => {
-      const previous = value.entries.find(entry => entry.id === operationId);
-      if (previous) {
-        if (previous.kind !== 'profile-frame' || previous.frame !== frame) throw new Error('wallet_invalid_purchase');
-        return false;
-      }
-      if (value.entries.some(entry => entry.kind === 'profile-frame' && entry.frame === frame)) return false;
-      if (value.balance < price) throw new Error('wallet_insufficient');
-      value.balance -= price;
-      value.entries.push({ id: operationId, kind: 'profile-frame', frame, amount: -price, at: now, balanceAfter: value.balance });
-    });
-  }
+  async function purchaseFrame() { throw new Error('wallet_invalid_purchase'); }
   const ownedFrames = () => snapshot().entries.filter(entry => entry.kind === 'profile-frame').map(entry => entry.frame);
   function status(now = Date.now()) {
     const paid = snapshot().subscription;

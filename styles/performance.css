@@ -19,10 +19,10 @@
 }
 /* No full-screen moving planes, duplicate foregrounds or animated masks. */
 :root[data-low-detail="on"] :is(.ambient-depth, .ambient-effects, .ambient-far, .ambient-near,
-  .scene-limited, .scene-city, .scene-atmosphere, .scene-stars, .scene-foreground,
-  .collectible-details, .collectible-light, .collectible-aura, .surface-light,
+  .scene-city, .scene-atmosphere, .scene-stars, .scene-foreground,
+  .surface-light,
   .selection-glint, .selection-lens-shine, .scanner-glint, .meal-outline) { display: none !important; }
-:root[data-low-detail="on"] :is(.avatar-frame > span:not(.frame-body):not(.collectible-shell), .avatar-frame::before, .avatar-frame::after, .collectible-lustre, .collectible-ambient) { display: none !important; }
+:root[data-low-detail="on"] :is(.avatar-frame > span:not(.frame-body), .avatar-frame::before, .avatar-frame::after) { display: none !important; }
 :root[data-low-detail="on"] :is(.ambient-wallpaper, .scene-distance, .scene-image, .appearance-preview-ui) { transform: none !important; }
 :root[data-low-detail="on"] :is(.card::before, .glass::before, .glass-button::before, .btn-primary::after) { display: none !important; }
 /* The photo, aperture masks and frame geometry are intentionally untouched. */
@@ -43,9 +43,13 @@
   border: 1px solid rgb(var(--accent-rgb) / .55) !important;
   box-shadow: inset 0 1px 0 #e0fbff38 !important;
 }
-:root[data-low-detail="on"] :is(button, input, select, .slider, .slider::before, .selection-lens) { transition-duration: 140ms !important; }
+:root[data-low-detail="on"] :is(button, input, select, .slider, .slider::before) { transition-duration: 220ms !important; }
 /* Loading feedback must still communicate that an operation is in progress. */
 :root[data-low-detail="on"] :is(.startup-spinner, .spinner, [role="progressbar"]),
 :root[data-low-detail="on"] .startup-track::after { animation-play-state: running !important; }
 :root[data-low-detail="on"] .subscription-success .success-emblem,
 :root[data-low-detail="on"] .subscription-success .success-emblem > .icon { animation: none !important; }
+
+/* Functional motion stays fluid in LDM; heavy reflections and idle effects stay off. */
+:root[data-low-detail="on"] .has-selection-lens > .selection-lens { transition-duration: 300ms !important; }
+:root[data-low-detail="on"] .has-selection-lens > button > :is(.icon,span) { transition-duration: 260ms !important; }

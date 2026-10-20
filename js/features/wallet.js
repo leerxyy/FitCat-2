@@ -1,5 +1,6 @@
 import { createWallet, WALLET_KEY } from '../core/wallet.js';
 import { canonicalCityCover } from '../core/profile-cities.js';
+import { RETIRED_COVER_PRICES, retiredCosmeticName } from '../core/retired-cosmetics.js';
 import { formatPromo } from '../core/subscription.js';
 import { state, proAccess } from '../core/store.js';
 import { t, number, locale } from '../core/i18n.js';
@@ -67,7 +68,7 @@ export function renderWallet() {
   $('walletHistoryList').innerHTML = rows.length ? rows.map(entry => {
     const incoming = entry.amount > 0;
     const title = entry.kind === 'developer' ? t('developer_receipt') : incoming ? t('promo_label') : entry.kind === 'profile-cover'
-      ? `${t('profile_city_receipt')} · ${t('profile_cover_' + canonicalCityCover(entry.cover))}${entry.cover === 'tokyo' ? ' · ' + t('profile_city_replaced') : ''}` : entry.kind === 'profile-frame' ? `${t('profile_frame_receipt')} · ${t('profile_frame_' + entry.frame)}` : `PRO+ · ${t('subscription_term_' + entry.months)}`;
+      ? `${t('profile_city_receipt')} · ${Object.hasOwn(RETIRED_COVER_PRICES,entry.cover) ? retiredCosmeticName(entry.cover,state.preferences.lang) : t('profile_cover_' + canonicalCityCover(entry.cover))}${entry.cover === 'tokyo' ? ' · ' + t('profile_city_replaced') : ''}` : entry.kind === 'profile-frame' ? `${t('profile_frames')} · ${retiredCosmeticName(entry.frame,state.preferences.lang)}` : `PRO+ · ${t('subscription_term_' + entry.months)}`;
     const date = new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(entry.at));
     return `<div class="wallet-transaction"><span class="wallet-transaction-icon">${icon(incoming ? 'gift' : 'check')}</span><div><strong>${escapeHTML(title)}</strong><small>${t(incoming ? 'wallet_income' : 'wallet_expense')} · ${escapeHTML(date)}</small></div><span class="wallet-amount ${incoming ? 'is-income' : ''}"><img src="assets/icons/coin.svg" alt="" width="20" height="20">${incoming ? '+' : '−'}${number(Math.abs(entry.amount))}</span></div>`;
   }).join('') : `<p class="wallet-empty">${t('wallet_history_empty')}</p>`;

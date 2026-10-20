@@ -15,7 +15,7 @@ let mode='normal',step=0,advanceTimer,leaveRunning=false,resumeAfterGuide=false,
 const tracker=new GestureTracker();
 const steps=['tabs','click','scroll'];
 function syncControls(){
- for(const id of ['gestureEnabledToggle','gestureGuideToggle'])if($(id))$(id).checked=active||starting;
+ if($('gestureGuideToggle'))$('gestureGuideToggle').checked=active||starting;
  $('gestureToggleBtn').setAttribute('aria-pressed',String(active));
  $('gestureToggleBtn').setAttribute('aria-busy',String(starting));
  if($('gestureStartTraining'))$('gestureStartTraining').disabled=starting;
@@ -118,7 +118,7 @@ function processGestures(results){
 }
 function openGuide(){
  if(!requirePro('gestures'))return;
- resumeAfterGuide=active;leaveRunning=false;mode='idle';if(cursor)cursor.hidden=true;showIntro();syncControls();openDialog('gestureGuideModal');
+ resumeAfterGuide=active;leaveRunning=false;mode='idle';if(cursor)cursor.hidden=true;$('gestureGuideError').hidden=true;showIntro();syncControls();openDialog('gestureGuideModal');
 }
 async function train(){
  leaveRunning=false;showStep(0);
@@ -137,7 +137,7 @@ export function initGestures(){
  onAction('skipGestureStep',()=>{clearTimeout(advanceTimer);advanceTimer=0;showStep(Math.min(step+1,3));});
  onAction('repeatGestureHint',()=>{tracker.reset();enter($('gesturePracticeHint'),{y:3});});
  onAction('gestureTargetHint',()=>toast(t('gesture_click_hint')));
- for(const id of ['gestureEnabledToggle','gestureGuideToggle'])$(id).addEventListener('change',async event=>{
+ $('gestureGuideToggle').addEventListener('change',async event=>{
   if(!event.target.checked)stopGestures();else await startGestures($('gestureGuideModal').open?'idle':'normal');syncControls();
  });
  $('gestureGuideModal').addEventListener('close',()=>{

@@ -1,5 +1,6 @@
 import { state, syncAchievements } from '../core/store.js';
-import { ACHIEVEMENT_IDS, ACHIEVEMENT_ATLAS, STABILITY_LEVELS, achievementProgress, ACHIEVEMENTS_KEY, normalizeAchievements } from '../core/achievements.js';
+import { ACHIEVEMENT_IDS, STABILITY_LEVELS, achievementProgress, ACHIEVEMENTS_KEY, normalizeAchievements } from '../core/achievements.js';
+import { achievementArt as art } from '../ui/achievement-art.js';
 import { $, icon, escapeHTML, onAction, openDialog, toast } from '../ui/components.js';
 import { t, number } from '../core/i18n.js';
 import { enter } from '../ui/motion.js';
@@ -8,12 +9,6 @@ let selected = 'first', signatures = new WeakMap();
 const label = id => t('achievement_' + (id.startsWith('stable') ? 'stability' : id === 'dev' ? 'developer' : id));
 const levelLabel = id => t('achievement_days').replace('{days}', number(Number(id.replace('stable', ''))));
 const material = id => t('achievement_' + ({ stable7:'silver', stable30:'gold', stable60:'platinum', stable90:'diamond' }[id] || 'stability'));
-function art(id) {
- if (id === 'dev') return '<span class="developer-art" aria-hidden="true"><img src="assets/icons/developer.svg" alt="" width="28" height="24"></span>';
- const [x,y,w,h] = ACHIEVEMENT_ATLAS[id] || ACHIEVEMENT_ATLAS.first;
- const style = `--badge-ratio:${w/h};--badge-bg-size:${1774/w*100}% ${887/h*100}%;--badge-bg-position:${x/(1774-w)*100}% ${y/(887-h)*100}%;--badge-delay:-${((performance.now()/1000 + ACHIEVEMENT_IDS.indexOf(id)*2.1)%14).toFixed(2)}s`;
- return `<span class="achievement-art" style="${style}" aria-hidden="true"><i class="achievement-glint"></i></span>`;
-}
 function item(id, compact = false) {
  const earned = id === 'dev' ? state.achievements.developer : Boolean(state.achievements.unlocked[id]);
  const title = id.startsWith('stable') ? `${label(id)} · ${levelLabel(id)}` : label(id);

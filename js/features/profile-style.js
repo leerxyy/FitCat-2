@@ -2,16 +2,10 @@ import { state, proAccess, setProfileStyle } from '../core/store.js';
 import { PROFILE_STYLE_DEFAULTS, PROFILE_STYLE_KEY, PREMIUM_PROFILE_FRAMES, PREMIUM_PROFILE_COVERS, ANIMATED_PROFILE_COVERS, effectiveProfileStyle, normalizeProfileStyle, profileChoiceAllowed, profileCoverAsset } from '../core/profile-style.js';
 import { CITY_EFFECTS, cityEffectAssets, cityTrafficMarkup } from '../core/profile-city-effects.js';
 import { CITY_PROFILE_COVERS, PURCHASABLE_PROFILE_COVERS, profileCoverPrice } from '../core/profile-cities.js';
-import { PURCHASABLE_PROFILE_FRAMES, profileFramePrice, collectibleFrameAsset } from '../core/profile-frames.js';
-import { LIMITED_PROFILE_COVERS, LIMITED_PROFILE_FRAMES } from '../core/profile-limited.js';
-import { LIMITED_FRAME_GEOMETRY } from '../core/profile-limited-geometry.js';
-import { limitedFrameEffectsMarkup, limitedCoverMarkup } from '../core/profile-limited-effects.js';
-import { FRAME_GEOMETRY } from '../core/profile-frame-geometry.js';
-import { collectibleEffectsMarkup } from '../core/profile-frame-effects.js';
 import { appAssetURL, cssAssetURL } from '../core/asset-url.js';
 import { t, number } from '../core/i18n.js';
 import { $, initials, onAction, openDialog, toast } from '../ui/components.js';
-import { getWallet, purchaseCoverWithCoins, purchaseFrameWithCoins, walletError } from './wallet.js';
+import { getWallet, purchaseCoverWithCoins, walletError } from './wallet.js';
 import { WALLET_KEY } from '../core/wallet.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { reducedMotion, enter, MOTION } from '../ui/motion.js';
@@ -27,10 +21,8 @@ let initialized = false;
 let motionPaused = false;
 let lastMotion = { x: 0, y: 0 };
 let previewCover = null, buyingCover = '', cityError = '';
-let previewFrame = null, buyingFrame = '', frameError = '';
 function ownedCovers() { try { return getWallet()?.ownedCovers() ?? []; } catch { return []; } }
-function ownedFrames() { try { return getWallet()?.ownedFrames() ?? []; } catch { return []; } }
-const effective = () => effectiveProfileStyle(state.profileStyle, proAccess(), ownedCovers(), ownedFrames());
+const effective = () => effectiveProfileStyle(state.profileStyle, proAccess(), ownedCovers());
 
 function setData(node, key, value) {
   if (node && node.dataset[key] !== String(value)) node.dataset[key] = String(value);
@@ -53,9 +45,6 @@ function renderScene(scene, cover) {
   setData(scene, 'cover', cover);
   const city = CITY_PROFILE_COVERS.includes(cover);
   setData(scene, 'city', city);
-  const limited = LIMITED_PROFILE_COVERS.includes(cover);
-  setData(scene, 'limited', limited);
-  if (changed) scene.querySelector('.scene-limited').innerHTML = limited && !lowDetailMode() ? limitedCoverMarkup(cover) : '';
   if (changed && city) {
     for (const [key, path] of Object.entries(cityEffectAssets(cover))) scene.style.setProperty('--city-' + key, cssAssetURL(path));
     CITY_EFFECTS[cover].fog.forEach((value, index) => scene.style.setProperty('--fog-' + ['far', 'mid', 'near'][index], String(value)));
@@ -66,51 +55,15 @@ function renderScene(scene, cover) {
   const artwork = asset ? cssAssetURL(asset) : 'none';
   if (scene.style.getPropertyValue('--cover-art') !== artwork) scene.style.setProperty('--cover-art', artwork);
   image.hidden = !asset;
-  const width = city || limited ? 1536 : 1040, height = city || limited ? 1024 : 440;
+  const width = city ? 1536 : 1040, height = city ? 1024 : 440;
   if (image.width !== width) image.width = width;
   if (image.height !== height) image.height = height;
   if (changed && !scene.closest('[hidden]')) enter(scene, { y: 0, duration: MOTION.screen });
 }
 function renderFrame(node, value) {
   if (!node) return;
-  const quality = lowDetailMode() ? 'static' : 'full';
-  const changed = node.dataset.frame !== value || node.dataset.quality !== quality, collectible = PURCHASABLE_PROFILE_FRAMES.includes(value);
-  setData(node, 'quality', quality);
-  const limited = LIMITED_PROFILE_FRAMES.includes(value), header = node.id === 'headerAvatarFrame';
   setData(node, 'frame', value);
-  setData(node, 'collectible', collectible);
-  setData(node, 'limited', limited);
-  setData(node, 'fitted', collectible);
-  setData(node.parentElement, 'collectible', collectible);
-  setData(node.parentElement, 'limited', limited);
-  setData(node.parentElement, 'fitted', collectible);
-  if (collectible && changed) {
-    const geometry = LIMITED_FRAME_GEOMETRY[value] || FRAME_GEOMETRY[value];
-    const artwork = limited && !header && !lowDetailMode() ? `assets/profile-limited/frames/${value}-body.webp` : collectibleFrameAsset(value, header);
-    const image = node.querySelector('.collectible-art');
-    if (image.getAttribute('src') !== appAssetURL(artwork)) image.setAttribute('src', appAssetURL(artwork));
-    node.style.setProperty('--collectible-art', cssAssetURL(artwork));
-    const folder = limited ? 'assets/profile-limited/frames' : 'assets/profile-frames';
-    node.style.setProperty('--collectible-light', cssAssetURL(`${folder}/${value}-light.webp`));
-    node.style.setProperty('--collectible-aura', cssAssetURL(`${folder}/${value}-aura.webp`));
-    if (['dragon', 'phoenix', 'frostcrown'].includes(value)) node.style.setProperty('--collectible-contour', cssAssetURL(`${folder}/${value}-contour.webp`));
-    if (limited) {
-      node.style.setProperty('--limited-material', cssAssetURL(`${folder}/${value}-material.webp`));
-    }
-    {
-      // A frame's opening is often above the centre of its ornament canvas.
-      // The native photo and opaque backing share that exact opening mask.
-      const fit = geometry.photo, parent = node.parentElement;
-      parent.style.setProperty('--limited-avatar-aperture', cssAssetURL(fit.aperture));
-      for (const [property, value] of Object.entries({
-        'photo-left': fit.left, 'photo-top': fit.top, 'photo-size': fit.size,
-        'icon-left': fit.iconLeft, 'icon-top': fit.iconTop, 'icon-size': fit.iconSize,
-      })) parent.style.setProperty('--limited-' + property, `${value}%`);
-    }
-    node.style.setProperty('--collectible-clear', `${geometry.clear * 2}%`);
-    node.parentElement.style.setProperty('--collectible-hole', String(geometry.hole));
-    node.querySelector('.collectible-details').innerHTML = header || lowDetailMode() ? '' : limited ? limitedFrameEffectsMarkup(value) : collectibleEffectsMarkup(value);
-  }
+  setData(node, 'quality', lowDetailMode() ? 'static' : 'full');
 }
 function status(kind) {
   const node = $('profile' + (kind === 'frame' ? 'Frame' : 'Cover') + 'Status');
@@ -122,22 +75,19 @@ function renderPicker(kind, settings) {
   const dialog = $('profile' + (kind === 'frame' ? 'Frame' : 'Cover') + 'Modal');
   if (!dialog?.open) return;
   renderPhoto($(kind + 'PickerPhoto'));
-  const displayedFrame = kind === 'frame' && previewFrame ? previewFrame : settings.frame;
+  const displayedFrame = settings.frame;
   renderFrame($(kind + 'PickerFrame'), displayedFrame);
-  setData($(kind + 'StylePreview'), 'collectible', PURCHASABLE_PROFILE_FRAMES.includes(displayedFrame));
   const displayedCover = kind === 'cover' && previewCover ? previewCover : settings.cover;
   renderScene($(kind + 'PickerScene'), displayedCover);
   setData($(kind + 'StylePreview'), 'city', CITY_PROFILE_COVERS.includes(displayedCover));
-  setData($(kind + 'StylePreview'), 'limited', LIMITED_PROFILE_COVERS.includes(displayedCover));
   $(kind + 'PickerName').textContent = state.profile?.name || 'FitCat';
   $(kind + 'StyleSelected').textContent = t(kind === 'cover' && displayedCover === 'none' ? 'profile_style_no_cover' : `profile_${kind}_${kind === 'cover' ? displayedCover : displayedFrame}`);
-  $(kind + 'StyleExpired').hidden = settings[kind] === state.profileStyle[kind] || (kind === 'cover' ? PURCHASABLE_PROFILE_COVERS.includes(state.profileStyle.cover) : PURCHASABLE_PROFILE_FRAMES.includes(state.profileStyle.frame));
+  $(kind + 'StyleExpired').hidden = settings[kind] === state.profileStyle[kind] || (kind === 'cover' && PURCHASABLE_PROFILE_COVERS.includes(state.profileStyle.cover));
   const owned = ownedCovers();
-  const frames = ownedFrames();
   for (const button of dialog.querySelectorAll('[data-profile-style-kind]')) {
     const selected = button.dataset.value === settings[kind];
     button.classList.toggle('active', selected);
-    button.classList.toggle('is-preview', (kind === 'cover' ? previewCover : previewFrame) === button.dataset.value);
+    button.classList.toggle('is-preview', (kind === 'cover' ? previewCover : null) === button.dataset.value);
     button.setAttribute('aria-pressed', String(selected));
     const label = button.querySelector('.style-sample-initials');
     if (label) label.textContent = initials(state.profile?.name);
@@ -148,52 +98,18 @@ function renderPicker(kind, settings) {
       price.textContent = purchased ? t('profile_city_owned') : number(cost);
       button.setAttribute('aria-label', `${t('profile_cover_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_city_preview') + '. ' + number(cost) + ' FitCat Coins'}`);
     }
-    if (kind === 'frame' && PURCHASABLE_PROFILE_FRAMES.includes(button.dataset.value)) {
-      const cost = profileFramePrice(button.dataset.value);
-      const purchased = frames.includes(button.dataset.value);
-      setData(button, 'owned', purchased);
-      button.querySelector('[data-frame-price]').textContent = purchased ? t('profile_city_owned') : number(cost);
-      button.setAttribute('aria-label', `${t('profile_frame_' + button.dataset.value)}. ${purchased ? t('profile_city_owned') : t('profile_frame_preview') + '. ' + number(cost) + ' FitCat Coins'}`);
-    }
+
   }
   if (kind === 'cover') renderCityOffer(displayedCover, owned);
-  else renderFrameOffer(displayedFrame, frames);
   status(kind);
 }
-function renderFrameOffer(frame, owned) {
-  const collectible = PURCHASABLE_PROFILE_FRAMES.includes(frame), price = profileFramePrice(frame);
-  $('collectibleFrameOffer').hidden = !collectible;
-  setData($('collectibleFrameOffer'), 'limited', LIMITED_PROFILE_FRAMES.includes(frame));
-  if (!collectible) return;
-  $('collectibleFrameTitle').textContent = t('profile_frame_' + frame);
-  $('collectibleFrameDetail').textContent = t('profile_frame_' + frame + '_detail');
-  $('collectibleFrameReturn').hidden = !previewFrame;
-  const purchased = owned.includes(frame), installed = effective().frame === frame;
-  $('collectibleFramePurchase').hidden = purchased;
-  $('collectibleFrameOwned').hidden = !purchased;
-  $('collectibleFrameOwned').textContent = t(installed ? 'profile_city_applied' : 'profile_city_owned');
-  $('collectibleFrameApply').hidden = !purchased || installed;
-  $('collectibleFrameApply').dataset.value = frame;
-  $('collectibleFramePrice').textContent = number(price);
-  $('collectibleFrameBuyLabel').textContent = t(buyingFrame ? 'profile_city_buying' : 'profile_city_buy');
-  let balance = 0, corrupt = false;
-  try { balance = getWallet()?.snapshot().balance ?? 0; } catch { corrupt = true; }
-  $('collectibleFrameBalance').textContent = number(balance);
-  const insufficient = !purchased && balance < price;
-  $('collectibleFrameBuy').disabled = Boolean(buyingFrame) || insufficient || corrupt;
-  $('collectibleFrameShortfall').hidden = !insufficient || corrupt;
-  $('collectibleFrameShortfallAmount').textContent = number(Math.max(0, price - balance));
-  $('collectibleFrameError').hidden = !frameError && !corrupt;
-  $('collectibleFrameError').textContent = corrupt ? t('wallet_corrupt') : frameError;
-}
 function renderCityOffer(cover, owned) {
-  const paid = PURCHASABLE_PROFILE_COVERS.includes(cover), limited = LIMITED_PROFILE_COVERS.includes(cover), price = profileCoverPrice(cover);
+  const paid = PURCHASABLE_PROFILE_COVERS.includes(cover), price = profileCoverPrice(cover);
   $('cityCoverOffer').hidden = !paid;
-  setData($('cityCoverOffer'), 'limited', limited);
   if (!paid) return;
   $('cityCoverTitle').textContent = t('profile_cover_' + cover);
-  $('cityCoverDetail').textContent = t(`profile_${limited ? 'limited' : 'city'}_${cover}_detail`);
-  $('cityCoverCredit').dataset.i18n = limited ? 'profile_limited_original' : 'profile_city_original';
+  $('cityCoverDetail').textContent = t(`profile_city_${cover}_detail`);
+  $('cityCoverCredit').dataset.i18n = 'profile_city_original';
   $('cityCoverCredit').textContent = t($('cityCoverCredit').dataset.i18n);
   $('cityCoverReturn').hidden = !previewCover;
   const purchased = owned.includes(cover), button = $('cityCoverBuy');
@@ -254,49 +170,28 @@ export function renderProfileStyle() {
   renderFrame($('headerAvatarFrame'), settings.frame);
   setData($('profileIdentityCard'), 'hasCover', settings.cover !== 'none');
   setData($('profileIdentityCard'), 'cityCover', CITY_PROFILE_COVERS.includes(settings.cover));
-  setData($('profileIdentityCard'), 'limitedCover', LIMITED_PROFILE_COVERS.includes(settings.cover));
-  setData($('profileIdentityCard'), 'collectibleFrame', PURCHASABLE_PROFILE_FRAMES.includes(settings.frame));
   renderScene($('profileCoverScene'), settings.cover);
   renderPicker('frame', settings); renderPicker('cover', settings);
   syncProfileStyleMotion();
 }
 function choose(kind, value) {
-  if (kind === 'frame' && PURCHASABLE_PROFILE_FRAMES.includes(value) && !ownedFrames().includes(value)) {
-    previewFrame = value; frameError = ''; errors.frame = false; renderProfileStyle();
-    $('profileFrameModal').scrollTo?.({ top: 0, behavior: reducedMotion() ? 'instant' : 'smooth' });
-    return;
-  }
   if (kind === 'cover' && PURCHASABLE_PROFILE_COVERS.includes(value) && !ownedCovers().includes(value)) {
     previewCover = value; cityError = ''; errors.cover = false; renderProfileStyle();
     $('profileCoverModal').scrollTo?.({ top: 0, behavior: reducedMotion() ? 'instant' : 'smooth' });
     return;
   }
   const premium = (kind === 'frame' ? PREMIUM_PROFILE_FRAMES : PREMIUM_PROFILE_COVERS).includes(value);
-  if (!profileChoiceAllowed(kind, value, true, ownedCovers(), ownedFrames())) return;
+  if (!profileChoiceAllowed(kind, value, true, ownedCovers())) return;
   if (premium && !requirePro('profile-style')) return;
   try {
     if (state.profileStyle[kind] !== value) setProfileStyle({ ...state.profileStyle, [kind]: value });
     if (kind === 'cover') { previewCover = null; cityError = ''; }
-    else { previewFrame = null; frameError = ''; }
     errors[kind] = false;
     renderProfileStyle();
     document.dispatchEvent(new CustomEvent('fitcat:profile-style', { detail: { kind } }));
   } catch (error) {
     console.error(error); errors[kind] = true; renderProfileStyle();
   }
-}
-async function buyCollectibleFrame() {
-  const frame = previewFrame;
-  if (!PURCHASABLE_PROFILE_FRAMES.includes(frame) || buyingFrame || $('collectibleFrameBuy').disabled) return;
-  buyingFrame = frame; frameError = ''; renderProfileStyle();
-  try {
-    await purchaseFrameWithCoins(frame);
-    setProfileStyle({ ...state.profileStyle, frame });
-    previewFrame = null; errors.frame = false;
-    document.dispatchEvent(new CustomEvent('fitcat:profile-style', { detail: { kind: 'frame' } }));
-    toast(`${t('profile_frame_purchased')}: ${t('profile_frame_' + frame)}`);
-  } catch (error) { frameError = walletError(error); }
-  finally { buyingFrame = ''; renderProfileStyle(); }
 }
 async function buyCityCover() {
   const cover = previewCover;
@@ -320,16 +215,11 @@ export function initProfileStyle() {
     const kind = button.dataset.value;
     if (!['frame', 'cover'].includes(kind) || !state.profile) return;
     if (kind === 'cover') { previewCover = null; cityError = ''; }
-    else { previewFrame = null; frameError = ''; }
     openDialog(kind === 'frame' ? 'profileFrameModal' : 'profileCoverModal');
     renderProfileStyle(); renderPremium();
   });
   onAction('chooseProfileStyle', button => choose(button.dataset.profileStyleKind, button.dataset.value));
   onAction('buyCityCover', buyCityCover);
-  onAction('buyCollectibleFrame', buyCollectibleFrame);
-  onAction('applyCollectibleFrame', button => choose('frame', button.dataset.value));
-  onAction('cancelFramePreview', () => { previewFrame = null; frameError = ''; renderProfileStyle(); });
-  $('profileFrameModal').addEventListener('close', () => { previewFrame = null; frameError = ''; });
   onAction('applyCityCover', button => choose('cover', button.dataset.value));
   onAction('cancelCityPreview', () => { previewCover = null; cityError = ''; renderProfileStyle(); });
   $('profileCoverModal').addEventListener('close', () => { previewCover = null; cityError = ''; });
