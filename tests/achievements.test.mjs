@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ACHIEVEMENT_IDS, STABILITY_LEVELS, collectAchievements, normalizeAchievements, achievementProgress, longestRun, ACHIEVEMENT_ATLAS, ACHIEVEMENTS_KEY } from '../js/core/achievements.js';
+import { ACHIEVEMENT_IDS, STABILITY_LEVELS, collectAchievements, normalizeAchievements, achievementProgress, longestRun, ACHIEVEMENTS_KEY } from '../js/core/achievements.js';
 import { loadState, state, persist, activateDeveloper, exportSnapshot, importSnapshot, clearAccount, isDeveloperCommand } from '../js/core/store.js';
 import { createWallet, WALLET_KEY, DEVELOPER_COINS } from '../js/core/wallet.js';
 
@@ -13,7 +13,7 @@ const data=(nutrition=[],other={})=>({profile,foods:[],nutrition,templates:[],pr
 const storage=(seed={})=>{const map=new Map(Object.entries(seed));return{map,getItem:key=>map.get(key)??null,setItem:(key,value)=>map.set(key,String(value)),removeItem:key=>map.delete(key)};};
 
 test('stability has exactly 7, 30, 60 and 90 day tiers; no annual tier or atlas sprite exists',()=>{
- assert.deepEqual(STABILITY_LEVELS,[7,30,60,90]);assert.equal(ACHIEVEMENT_IDS.length,8);assert.equal(Object.keys(ACHIEVEMENT_ATLAS).length,8);assert.ok(!ACHIEVEMENT_IDS.includes('stable365'));
+ assert.deepEqual(STABILITY_LEVELS,[7,30,60,90]);assert.equal(ACHIEVEMENT_IDS.length,8);assert.ok(!ACHIEVEMENT_IDS.includes('stable365'));
 });
 test('opening the app and empty archived days award nothing',()=>{
  const result=collectAchievements(null,data([{date:day(0),kcal:0}]),now);assert.equal(result.days.length,0);assert.deepEqual(result.unlocked,{});

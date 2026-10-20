@@ -37,7 +37,7 @@ test('achievement descriptions, developer command and skippable gesture practice
    assert.ok($('gestureGuideIntro').querySelector('[data-action="skipGestureTraining"]'));assert.ok($('gesturePractice').querySelector('[data-action="skipGestureTraining"]'));
   });
   await t.test('the switch starts one camera, and training reuses it without changing the diary or real tabs',async()=>{
-   await change('gestureGuideToggle',true);assert.equal(cameras,1);assert.equal($('gestureEnabledToggle').checked,true);
+   await change('gestureGuideToggle',true);assert.equal(cameras,1);assert.equal($('gestureGuideToggle').checked,true);
    await click('#gestureStartTraining');assert.equal(cameras,1);assert.equal($('gesturePractice').hidden,false);
    const before=state.water,wallet=env.localStorage.getItem(WALLET_KEY),tab=document.querySelector('.nav-item.active')?.dataset.tab;
    const h=hand();h[4]={x:.9,y:.9};h[8]={x:.5,y:.4};results({multiHandLandmarks:[h]});h[0].x-=.2;results({multiHandLandmarks:[h]});await delay(420);
@@ -45,14 +45,14 @@ test('achievement descriptions, developer command and skippable gesture practice
    document.elementFromPoint=()=>$('gesturePracticeTarget');h[4]={...h[8]};results({multiHandLandmarks:[h]});await delay(420);assert.match($('gesturePracticeStep').textContent,/3 из 3/);
    h[4]={x:.9,y:.9};results({multiHandLandmarks:[h]});h[0].y+=.08;results({multiHandLandmarks:[h]});await delay(420);
    assert.equal($('gestureComplete').hidden,false);assert.equal(state.water,before);assert.equal(env.localStorage.getItem(WALLET_KEY),wallet);
-   await click('#gestureComplete [data-action="finishGestureTraining"]');assert.equal($('gestureGuideModal').open,false);assert.equal(document.body.dataset.screen,'mainPage');assert.equal($('gestureEnabledToggle').checked,true);assert.equal(cameras,1);
-   await change('gestureEnabledToggle',false);assert.equal(stops,1);assert.equal(closed,1);assert.equal($('gestureGuideToggle').checked,false);
+   await click('#gestureComplete [data-action="finishGestureTraining"]');assert.equal($('gestureGuideModal').open,false);assert.equal(document.body.dataset.screen,'mainPage');assert.equal($('gestureGuideToggle').checked,true);assert.equal(cameras,1);
+   await change('gestureGuideToggle',false);assert.equal(stops,1);assert.equal(closed,1);assert.equal($('gestureGuideToggle').checked,false);
   });
   await t.test('skipping learning activates normal gestures directly, and a permission failure leaves the switch off',async()=>{
    await click('#gestureToggleBtn');await click('#gestureGuideIntro [data-action="skipGestureTraining"]');assert.equal($('gestureGuideModal').open,false);assert.equal(cameras,2);
    const probe=document.createElement('button');let clicks=0;probe.addEventListener('click',()=>clicks++);document.body.append(probe);document.elementFromPoint=()=>probe;
-   const pinch=hand();pinch[4]={...pinch[8]};callbacks[0]({multiHandLandmarks:[pinch]});assert.equal(clicks,0);results({multiHandLandmarks:[pinch]});assert.equal(clicks,1);probe.remove();await change('gestureEnabledToggle',false);
-   navigator.mediaDevices.getUserMedia=async()=>{throw Error('denied');};await click('#gestureToggleBtn');await click('#gestureStartTraining');assert.equal($('gestureGuideError').hidden,false);assert.equal($('gestureEnabledToggle').checked,false);assert.equal($('gestureGuideToggle').checked,false);assert.equal($('gestureGuideIntro').hidden,false);await close('gestureGuideModal');
+   const pinch=hand();pinch[4]={...pinch[8]};callbacks[0]({multiHandLandmarks:[pinch]});assert.equal(clicks,0);results({multiHandLandmarks:[pinch]});assert.equal(clicks,1);probe.remove();await change('gestureGuideToggle',false);
+   navigator.mediaDevices.getUserMedia=async()=>{throw Error('denied');};await click('#gestureToggleBtn');await click('#gestureStartTraining');assert.equal($('gestureGuideError').hidden,false);assert.equal($('gestureGuideToggle').checked,false);assert.equal($('gestureGuideToggle').checked,false);assert.equal($('gestureGuideIntro').hidden,false);await close('gestureGuideModal');
   });
   await t.test('developer entitlements and artwork remain after reload and LDM does not revoke achievements',async()=>{
    const wallet=env.localStorage.getItem(WALLET_KEY);loadState(env.localStorage);assert.equal(state.achievements.developer,true);state.preferences.lowDetailMode=true;document.dispatchEvent(new Event('fitcat:change'));await tick();assert.equal($('profileDeveloperBadge').hidden,false);assert.equal(document.documentElement.dataset.lowDetail,'on');assert.equal(env.localStorage.getItem(WALLET_KEY),wallet);

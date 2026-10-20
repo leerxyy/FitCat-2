@@ -82,31 +82,21 @@ test('LDM controls, cosmetics and journal caches preserve the real UI data', asy
       state.nutrition[0].kcal = 222; renderAnalytics(); assert.notEqual($('nutritionHistoryList').children[0], nutrition); assert.match($('nutritionHistoryList').textContent, /222/);
       assert.equal($('weightHistoryList').children[0], weight); state.preferences.lang = 'en'; renderAnalytics(); assert.notEqual($('weightHistoryList').children[0], weight); state.preferences.lang = 'ru'; renderAnalytics();
     });
-    await t.test('all limited frames keep the entire static art and aperture in LDM, then restore animated pieces', async () => {
+    await t.test('LDM preserves available frames, artwork and coins after retired catalogs are removed', async () => {
       await click('#settingsBackButton'); await click('[data-action="showProfile"]'); await click('#profileFrameEdit');
       const wallet = env.localStorage.getItem('fitcat_wallet_v1');
-      for (const frame of ['kitsune', 'pearlguard', 'seraph']) {
+      assert.equal($('frameChoice_kitsune'),null); assert.equal($('frameChoice_dragon'),null);
+      for (const frame of ['graphite','silver','jade']) {
         await click('#frameChoice_' + frame);
-        const node = $('framePickerFrame'), aperture = node.parentElement.style.getPropertyValue('--limited-avatar-aperture');
-        assert.ok(node.querySelectorAll('.limited-piece').length > 0);
-        await toggle('settingsLdmToggle', true);
-        assert.equal(node.dataset.quality, 'static'); assert.equal(node.dataset.live, 'false'); assert.equal(node.querySelector('.collectible-details').children.length, 0);
-        assert.match(node.querySelector('.collectible-art').getAttribute('src'), new RegExp('/' + frame + '\\.webp$'));
-        assert.equal(node.parentElement.style.getPropertyValue('--limited-avatar-aperture'), aperture);
-        await toggle('settingsLdmToggle', false); assert.ok(node.querySelectorAll('.limited-piece').length > 0); assert.match(node.querySelector('.collectible-art').getAttribute('src'), /-body\.webp$/);
+        await toggle('settingsLdmToggle',true); assert.equal($('profileAvatarFrame').dataset.frame,frame); assert.equal($('profileAvatarFrame').dataset.quality,'static');
+        await toggle('settingsLdmToggle',false); assert.equal($('profileAvatarFrame').dataset.frame,frame); assert.equal($('profileAvatarFrame').dataset.quality,'full');
       }
-      assert.equal(env.localStorage.getItem('fitcat_wallet_v1'), wallet); await close('profileFrameModal');
-    });
-    await t.test('limited cover previews keep a complete image and rebuild atmosphere after LDM', async () => {
-      await click('#profileCoverEdit');
-      for (const cover of ['scarlet', 'atlantis', 'cathedral']) {
-        await click('#coverChoice_' + cover); const scene = $('coverPickerScene'), path = scene.querySelector('.scene-image').getAttribute('src');
-        assert.ok(scene.querySelector('.scene-limited').children.length > 0);
-        await toggle('settingsLdmToggle', true); assert.equal(scene.querySelector('.scene-limited').children.length, 0); assert.equal(scene.querySelector('.scene-image').getAttribute('src'), path);
-        await toggle('settingsLdmToggle', false); assert.ok(scene.querySelector('.scene-limited').children.length > 0); assert.equal(scene.querySelector('.scene-image').getAttribute('src'), path);
-      }
-      await close('profileCoverModal');
-      renderPreferences(); assert.equal(state.preferences.lowDetailMode, false);
+      assert.equal(env.localStorage.getItem('fitcat_wallet_v1'),wallet); await close('profileFrameModal');
+      await click('#profileCoverEdit'); assert.equal($('coverChoice_scarlet'),null); await click('#coverChoice_forest');
+      const path=$('profileCoverScene').querySelector('img').getAttribute('src');
+      await toggle('settingsLdmToggle',true); assert.equal($('profileCoverScene').querySelector('img').getAttribute('src'),path);
+      await toggle('settingsLdmToggle',false); assert.equal($('profileCoverScene').querySelector('img').getAttribute('src'),path);
+      await close('profileCoverModal'); renderPreferences(); assert.equal(state.preferences.lowDetailMode,false);
     });
   } finally { env.restoreTimers(); }
 });
