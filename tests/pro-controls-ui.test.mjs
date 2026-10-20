@@ -76,14 +76,14 @@ test('water conditions, gestures and friend transfers share PRO access without b
     });
 
     await t.test('a camera permission request that finishes after PRO expiry releases the stream and model', async () => {
-      await click('#gestureToggleBtn'); assert.equal(cameraRequests, 1); assert.ok(pendingCamera);
+      await click('#gestureToggleBtn'); assert.equal(cameraRequests, 0); await click('#gestureGuideModal [data-action="skipGestureTraining"]'); assert.equal(cameraRequests, 1); assert.ok(pendingCamera);
       await expire(); pendingCamera(stream()); await tick(); await tick();
       assert.equal(stoppedTracks, 1); assert.equal(closedModels, 1);
       assert.equal($('gestureToggleBtn').getAttribute('aria-pressed'), 'false'); assert.equal(document.querySelectorAll('video').length, originalVideoCount);
     });
 
     await t.test('active gesture camera stops on expiry, and an expired transfer form cannot be submitted', async () => {
-      await activate(); await click('#gestureToggleBtn'); pendingCamera(stream()); await tick(); await tick();
+      await activate(); await click('#gestureToggleBtn'); await click('#gestureGuideModal [data-action="skipGestureTraining"]'); pendingCamera(stream()); await tick(); await tick();
       assert.equal($('gestureToggleBtn').getAttribute('aria-pressed'), 'true'); assert.equal(document.querySelectorAll('video').length, originalVideoCount + 1);
       await click('#walletBadge'); await click('[data-action="walletTransfer"]'); await expire();
       assert.equal($('gestureToggleBtn').getAttribute('aria-pressed'), 'false'); assert.equal(document.querySelectorAll('video').length, originalVideoCount);

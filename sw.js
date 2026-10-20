@@ -1,9 +1,10 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.25.0-r1';
+const VERSION = '3.26.0-r1';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
 const APP_FILES = [
+  'styles/engagement.css', 'js/features/achievements.js', 'js/core/achievements.js', 'js/core/engagement-copy.js', 'js/core/gesture-tracker.js', 'assets/achievements/atlas.png', 'assets/icons/developer.svg',
   'styles/performance.css', 'js/ui/performance.js',
   'assets/profile-limited/frames/kitsune-aperture.webp', 'assets/profile-limited/frames/pearlguard-aperture.webp', 'assets/profile-limited/frames/seraph-aperture.webp', 'LIMITED-COLLECTION.md',
   'LIMITED-ART-PROMPTS.json', 'js/core/profile-limited.js', 'js/core/profile-limited-copy.js', 'js/core/profile-limited-effects.js',
@@ -87,6 +88,13 @@ const APP_FILES = [
 ];
 // BEGIN ASSET HASHES — regenerate with python3 tools/generate_precache_hashes.py
 const ASSET_HASHES = {
+  "styles/engagement.css": "5127ea45e58e58783fa5cb252c2e0981060291b3b713045bbb33a6ec92c5a2a1",
+  "js/features/achievements.js": "e5ba240eec6cc07a0837ee0b295ff36db3fce123063c823338e103d84400459d",
+  "js/core/achievements.js": "4f4682b3e845df089e0a2717934985a76510bd2ef1b142f9a3123ce063c9e45b",
+  "js/core/engagement-copy.js": "16113d3cff3d2785d8fd8fe20ee62bced1e2f7c04bc34e5949c0dd46a7c7c2ed",
+  "js/core/gesture-tracker.js": "b1f055409e6334468b51148670fb5d93001c74f135b9c7abdfbd504b77914e0a",
+  "assets/achievements/atlas.png": "c0035333bcad750e60a36cb16c6f5e0c73e00437354598d5b1c563f9b9f80086",
+  "assets/icons/developer.svg": "fda7aac6d77cf07de804b22856124e6fd2bc13df6c7395fa5111984b9dc348fe",
   "styles/performance.css": "382da1866e2b07ff4dfa9647f6ded328ac81fea873246f66f4b2dd81ac5f478e",
   "js/ui/performance.js": "253df83f8bd78d34a5f8bf960be011cd0751199ec08e55fc1fc8b9a5d5227748",
   "assets/profile-limited/frames/kitsune-aperture.webp": "27cbbb06ce4b09cdac0ad68544ec4c7e5e82c071647f9cf6e2966b0a1ae63dfd",
@@ -316,8 +324,8 @@ const ASSET_HASHES = {
   "styles/photo-crop.css": "a803e6d2b47118af6f2e6ac5c43f5778c2299cdf58f6b8d325371b6c87086aac",
   "js/core/photo-crop.js": "e09b8ef73f02257a753311084032988ffdfa95faa1ea96e6b0741e1e2e750bce",
   "js/ui/photo-editor.js": "a61494f78a244471f760305cd4130f967425155efa69333fb3de49cffe90437a",
-  "./": "6f75748a065d5e36d79d13d1dac96112fd173bcf14ee96478bd5d2d046180b4a",
-  "index.html": "6f75748a065d5e36d79d13d1dac96112fd173bcf14ee96478bd5d2d046180b4a",
+  "./": "a2e457c3bb786c88ae9587e7a2ad747df1d7cf398abc55247657341eb1fd8af5",
+  "index.html": "a2e457c3bb786c88ae9587e7a2ad747df1d7cf398abc55247657341eb1fd8af5",
   "manifest.webmanifest": "67a1c801fa84b854528572b9add2e84862eb3eb15ea1d8439103361d82de21cc",
   "styles/tokens.css": "05fb694b4b89e5478e6e8d9d184383fc3debd0b97e0daf599882bf85e184e373",
   "styles/base.css": "e63750594a135f7db4e666a2372ca994af987c8bfc1b7eef47222c77340c44be",
@@ -336,7 +344,7 @@ const ASSET_HASHES = {
   "styles/statistics.css": "ba4338d9aea6f27c5a87532f72f9f4ac48c86790180d44025a1de660b45d1531",
   "styles/friends.css": "57da1967d09df676259abd5eafb88ae9b871245d14ff02d7990fde1200764196",
   "styles/profile.css": "f4889859630a9d013db290e7d116b0d1679c18b083acf2aefc63d49253a0a06e",
-  "js/app.js": "46b9efe4214d0054d450bcf73398a26dcb19639e87d6a930b97731210fa77324",
+  "js/app.js": "2308f2c50d72e67beff99069dc5f8c9af29553a7623df8bab5fdb24cb8403512",
   "js/core/weather.js": "28ac4426e104c894336d124a91a77bcea845956d2f215ba4b7bbcbbcb4635b12",
   "js/core/weather-copy.js": "71f6f5d9370433eacdf7ac68d10aa3546abccc732a513dd5023180e5d11dfae5",
   "js/core/access.js": "81784545cf8d7f78b773fafcd8056df9a41ab2c33d4cf7fff877b8391a8f22fd",
@@ -345,14 +353,14 @@ const ASSET_HASHES = {
   "js/core/statistics-copy.js": "8991015a7256553618922c9bb844978cfd6c774098c4660d3c294175153fb9ab",
   "js/core/friends-copy.js": "20d81d41805e2f3266053cc0b7a9f91bd286af8e57bb1505d95c6468dbef54d8",
   "js/core/profile-copy.js": "2be7b9a74f098d1483b27ecba8e423ff3953463b371f840dfac068073b7aecaa",
-  "js/core/store.js": "1946c67b23331c08adfa93e43859c47d549f911c294659b08bd9497f392f103a",
+  "js/core/store.js": "7a6457757ea7674676dec1819b32a6724e101041b38de0900fefbeab2220827c",
   "js/core/math.js": "dfa59715f533dcc6349f4aff95e9e4123bfdaa80d245edde642ff2431017c3d2",
-  "js/core/i18n.js": "c0353001464bd4835865bfb28bae59430691cbf0747c2b4414b0a5bcef6b2ad8",
+  "js/core/i18n.js": "34f83dfae6579ea9a23acea64f51e008da4144394f1a69578355501a26a8ab7d",
   "js/core/translations.js": "cb1058082df5c7c1d920f1791c8fd8cbfeb322cc0741ff61d0a3177bef7e6a04",
   "js/core/loader.js": "daa0281930ec31f98e0831da22cce740afdcb83c02af5f64b5830e259443a054",
   "js/core/subscription.js": "13fe3fe13ff9eaf79cc2590a4f3945bc31adb434659f2030b004677ef1137e2e",
   "js/core/subscription-copy.js": "e2e81e92a530cb703aaf9b23b63a074d01bb7fbf890a3274e2a46eb45c8ecac0",
-  "js/core/wallet.js": "30de2f907a0679021a4fe8a91d815a61de426507bd4c93087873d74069243eff",
+  "js/core/wallet.js": "11f11c8b5195d1140c6a9a23f2bd2fd55ddb3146ae9a2c3c6e15b94c3f8e2163",
   "js/core/wallet-copy.js": "2dc51c6c935894466e7b86d544e76fb33fd8d1c591e35e9dcd41e85a96450fc9",
   "js/ui/components.js": "f2d9939351320aa5112117cf3fd6f85523fe1a70aa267a4b5ff3352b4f5b81b1",
   "js/ui/sheets.js": "2e8a5133ac16adb09d06aaf359379074c890d2c78fdadb2e91b281408b826ca7",
@@ -370,14 +378,14 @@ const ASSET_HASHES = {
   "js/ui/boot.js": "b757854619ade83d91a9574de5f719ddbd21adea9cf0b9fe72c1d02021123e5f",
   "js/ui/haptics.js": "bae0864d49ab34775ef943ddf4244260f63dbb1b018e4e40625ff37c33e4710b",
   "js/features/diary.js": "467ca930ba3c0185f9cdcbd8fe6b3f3066376f67229ea498f4cb466398eb3e7a",
-  "js/features/profile.js": "2c78cb697d8b125db4475e6e1a91b22115e6a3385b8085850660f356ff4d475f",
-  "js/features/preferences.js": "6a73ef9637567eac5b1215f44f00678b1a131e877b9a317630b63ceeab75562f",
+  "js/features/profile.js": "26dc9227c4b4ada87aaa76860178c7ea4e343059a7e40988ce36f9372c65dcbe",
+  "js/features/preferences.js": "b3a907103f7e8158f14044e597eea6edd3c6b577ac6bad7fb05f5a8a2c7a2616",
   "js/features/weather.js": "9e83eb90cf8a973cd4a431152e429c8773c71397dcfc6846a0f6483b2cc45d19",
   "js/features/subscription.js": "0ee69f9f88c7d1f06d316660e8840d11e526ab21c1d78ca1e2280de28abcd11b",
-  "js/features/wallet.js": "d0ff786be2add6f881efb01ea53e91202fd82eda94d1d574c06d7015c9085014",
+  "js/features/wallet.js": "f3021fa8a6a6779c10be03c08a72909a3bfd0ee3cbb3718dd924a16ba5337c4e",
   "js/features/products.js": "8a1f7667c513d8f826f81a2070aadbbcc251e570fec7180e28c976f916895867",
   "js/features/analytics.js": "cf1b9cdc2cfd7f552776f4984afc06ab63de9c90eb94c5cc2d65aab89585580a",
-  "js/features/gestures.js": "8bcd2021a1643c71302b313bd18c3ef9ada1ed08a492f20bbd0aa14f18e9eb2e",
+  "js/features/gestures.js": "d91d562d6699c1c86aa450054d8fec3576a813a010cf184ddc9f0cef308ea8b3",
   "js/services/friends.js": "e4061edc90bed1e4b194f782e93eadf6f734da2f255892efd70e03617e8d6353",
   "js/services/weather.js": "40f123b67fc594a33fb202ab6f5b36e9d5974ab121cf9fb5321a6595b4dad0e0",
   "assets/icons/logo.svg": "fbf4e047681490c2a2843ef5e2810c697eb93971f0733f120637c974c556c5bb",

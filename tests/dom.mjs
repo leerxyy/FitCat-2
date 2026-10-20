@@ -61,9 +61,16 @@ export class Element extends EventTarget {
   get innerHTML() { return this.childNodes.map(child => child instanceof Element ? `<${child.tagName.toLowerCase()}>${child.innerHTML}</${child.tagName.toLowerCase()}>` : child.value).join(''); }
   set innerHTML(value) { this.replaceChildren(); parse(String(value), this, this.ownerDocument); }
   getAttribute(key) { return this.attributes.has(key) ? this.attributes.get(key) : null; }
-  setAttribute(key, value) { this.attributes.set(key, String(value)); }
+  setAttribute(key, value) {
+    if (key === 'id') {
+      const index = this.ownerDocument?._ids;
+      index?.get(this.getAttribute('id'))?.delete(this);
+      if (index) { const id = String(value); if (!index.has(id)) index.set(id, new Set()); index.get(id).add(this); }
+    }
+    this.attributes.set(key, String(value));
+  }
   hasAttribute(key) { return this.attributes.has(key); }
-  removeAttribute(key) { this.attributes.delete(key); }
+  removeAttribute(key) { if (key === 'id') this.ownerDocument?._ids?.get(this.getAttribute('id'))?.delete(this); this.attributes.delete(key); }
   append(...nodes) { for (let node of nodes) { if (typeof node === 'string') node = new TextNode(node); node.remove?.(); node.parentElement = this; this.childNodes.push(node); } }
   appendChild(node) { this.append(node); return node; }
   replaceChildren(...nodes) { for (const child of this.childNodes) child.parentElement = null; this.childNodes = []; this.append(...nodes); }
@@ -111,8 +118,17 @@ function parse(source, parent, document) {
   }
 }
 class Document extends EventTarget {
-  constructor(source) { super(); this.root = new Element('document', this); parse(source, this.root, this); this.documentElement = this.root.querySelector('html'); this.head = this.root.querySelector('head'); this.body = this.root.querySelector('body'); this.readyState = 'complete'; this.hidden = false; }
-  getElementById(id) { return this.root.querySelector('#' + id); }
+  constructor(source) { super(); this._ids = new Map(); this.root = new Element('document', this); parse(source, this.root, this); this.documentElement = this.root.querySelector('html'); this.head = this.root.querySelector('head'); this.body = this.root.querySelector('body'); this.readyState = 'complete'; this.hidden = false; }
+  getElementById(value) {
+    const id = String(value), connected = [...(this._ids.get(id) || [])].filter(node => {
+      let parent = node; while (parent && parent !== this.root) parent = parent.parentElement;
+      return parent === this.root;
+    });
+    if (connected.length < 2) return connected[0] ?? null;
+    // Duplicate IDs follow native document order, including reinserted nodes.
+    const first = node => { for (const child of node.children) { if (child.id === id) return child; const found = first(child); if (found) return found; } return null; };
+    return first(this.root);
+  }
   querySelector(selector) { return this.root.querySelector(selector); }
   querySelectorAll(selector) { return this.root.querySelectorAll(selector); }
   createElement(tag) { return new Element(tag, this); }

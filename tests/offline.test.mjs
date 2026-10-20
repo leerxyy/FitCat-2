@@ -22,7 +22,7 @@ function harness({ small = false, crypto = webcrypto } = {}) {
   function worker(version) {
     const events = {}; let claimed = false, skipped = false;
     const self = { registration: { scope }, location: { origin: new URL(scope).origin }, addEventListener(name, handler) { events[name] = handler; }, clients: { async claim() { claimed = true; } }, skipWaiting() { skipped = true; } };
-    vm.runInNewContext(code.replace("'3.25.0-r1'", `'${version}'`), { self, caches, URL, Request, Uint8Array, Set, Promise, crypto, fetch: async request => {
+    vm.runInNewContext(code.replace(/const VERSION = '[^']+';/, `const VERSION = '${version}';`), { self, caches, URL, Request, Uint8Array, Set, Promise, crypto, fetch: async request => {
       fetched.push(request.url); activeFetches++; peak = Math.max(peak, activeFetches);
       try {
         await new Promise(resolve => setImmediate(resolve));

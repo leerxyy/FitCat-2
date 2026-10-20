@@ -26,7 +26,7 @@ test('profile autosaves valid fields and choices without a Save button or losing
       await click('[data-tab="friends"]'); await click('[data-action="showProfile"]');
       assert.equal($('profilePage').hidden, false); assert.equal($('navDock').hidden, true); assert.equal(document.activeElement, $('profileTitle'));
       for (const [key, value] of Object.entries({ profileName: 'Meow', profileAge: '20', profileHeight: '165', profileWeight: '52', profileGender: 'male', profileGoal: 'maintain' })) assert.equal($(key).value, value);
-      assert.equal($('profileUidDisplay').textContent, '012 345 678 90'); assert.equal($('profileAchievementsText').textContent, 'Скоро здесь появятся достижения');
+      assert.equal($('profileUidDisplay').textContent, '012 345 678 90'); assert.match($('profileAchievementsText').textContent, /из 8 получено/);
       assert.equal($('saveProfileButton'), null); assert.equal($('profileForm').querySelector('button[type="submit"]'), null);
       assert.equal($('profilePhotoDelete').hidden, false); assert.equal($('profilePhotoEdit').parentElement, $('profilePhotoDelete').parentElement);
       assert.equal($('profilePhoto').querySelector('button'), null); assert.ok($('profilePhotoDelete').querySelector('svg'));
@@ -92,13 +92,13 @@ test('profile autosaves valid fields and choices without a Save button or losing
       for (const count of [1, 2, 5, 21]) {
         state.streak = count; renderIdentity(); assert.equal(state.streak, count);
         assert.equal($('profileStreakText'), null); assert.equal($('streakCount'), null);
-        assert.equal($('profileAchievementsText').textContent, 'Скоро здесь появятся достижения');
+        assert.match($('profileAchievementsText').textContent, /из 8 получено/);
       }
       assert.ok(document.querySelector('.profile-achievements use[href$="#achievement"]'));
       for (const [language, title] of [['en', 'Personal details'], ['cn', '个人资料'], ['ru', 'Личные данные']]) {
         state.preferences.lang = language; document.dispatchEvent(new Event('fitcat:language')); await tick();
         assert.equal($('profileDataTitle').textContent, title);
-        assert.equal($('profileAchievementsText').textContent, {ru:'Скоро здесь появятся достижения',en:'Achievements are coming soon',cn:'成就即将上线'}[language]); assert.equal($('profileName').value, 'Текущий ввод');
+        assert.match($('profileAchievementsText').textContent, {ru:/из 8 получено/,en:/of 8 earned/,cn:/已获得/}[language]); assert.equal($('profileName').value, 'Текущий ввод');
         assert.equal($('profileGoalControl').querySelectorAll('svg').length, 3); assert.equal($('profileGoalControl').querySelectorAll('.selection-glint').length, 3);
         assert.equal($('profileGenderControl').querySelectorAll('.selection-glint').length, 2); assert.equal($('profileUidDisplay').textContent, '012 345 678 90');
       }

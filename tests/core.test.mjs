@@ -59,7 +59,7 @@ test('midnight archives yesterday instead of writing yesterday’s food under to
   state.profile = { ...profile }; state.foods = [{ ...eaten }, { ...planned }]; state.water = 1000;
   state.lastDate = yesterday.toDateString(); state.preferences.workoutEnabled = true;
   assert.equal(rollDay(today), true);
-  assert.deepEqual(state.nutrition, [{ date: '2026-10-16', kcal: 120, protein: 9, fat: 4, carbs: 12 }]);
+  assert.deepEqual(state.nutrition, [{ date: '2026-10-16', kcal: 120, protein: 9, fat: 4, carbs: 12, foodCount:2 }]);
   assert.deepEqual(state.foods, []); assert.equal(state.water, 0); assert.equal(state.preferences.workoutEnabled, false);
   assert.equal(state.lastDate, today.toDateString()); assert.equal(rollDay(today), false);
   loadState(storage); assert.equal(state.nutrition[0].date, '2026-10-16'); assert.equal(state.foods.length, 0);
