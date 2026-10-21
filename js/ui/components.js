@@ -1,6 +1,6 @@
 import { persist } from '../core/store.js';
 import { t, number } from '../core/i18n.js';
-import { tweenValue, enter, exitDialog, cancelDialogExit } from './motion.js';
+import { tweenValue, enter, exitDialog, cancelDialogExit, MOTION } from './motion.js';
 import { initSheetGestures } from './sheets.js';
 export { reducedMotion } from './motion.js';
 
@@ -51,7 +51,7 @@ export function openDialog(id) {
   document.body.classList.add('dialog-open');
   const heading = $(dialog.getAttribute('aria-labelledby')) || dialog.querySelector('h2');
   if (heading) { heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true }); }
-  enter(dialog, { y: 20 });
+  enter(dialog, { y: (dialog.getBoundingClientRect?.().height || 600) + 24, duration: MOTION.screen, fullDistance: true });
 }
 
 export function afterDialogClose(id, run) {

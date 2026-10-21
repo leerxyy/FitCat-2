@@ -8,8 +8,7 @@
 .startup-caption { margin-top: 12px; color: var(--muted); font-size: 13px; }
 .startup-track { width: 96px; height: 2px; border-radius: 3px; margin: 29px auto 0; overflow: hidden; background: #80cde61a; }
 .startup-track::after { content: ""; display: block; width: 42%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: startup-travel 1.5s ease-in-out infinite alternate; }
-.app-root, .nav-dock { transition: opacity .4s ease; }
-.app-starting .app-root, .app-starting .nav-dock { opacity: 0; pointer-events: none; }
+.app-starting .app-root, .app-starting .nav-dock { visibility: hidden; pointer-events: none; }
 .startup-error { display: none; max-width: 270px; margin-top: 20px; }
 .startup-error p { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
 .startup-failed .startup-caption, .startup-failed .startup-track { display: none; }

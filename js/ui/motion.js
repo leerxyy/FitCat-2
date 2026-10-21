@@ -13,6 +13,15 @@ const heights = new WeakMap();
 const disclosures = new WeakMap();
 let tabTransition;
 
+// Opacity on a backdrop-filter surface OR one of its ancestors creates a new
+// backdrop root. During a fade Safari then samples a different background and
+// the glass visibly switches material when opacity returns to 1. Slide these
+// regions without fading; text, list rows and small feedback may still fade.
+const MATERIALS = '.card, .glass, .glass-button, .sheet, .appearance-preview-ui, .selection-lens, .nav-lens';
+export function containsGlass(element) {
+  return Boolean(element?.matches?.(MATERIALS) || element?.querySelector?.(MATERIALS));
+}
+
 export function reducedMotion() {
   return Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
 }
@@ -74,6 +83,10 @@ export function animateProgress(element, fraction, kind = 'bar') {
 export function play(element, keyframes, options = {}) {
   if (!element || reducedMotion() || typeof element.animate !== 'function') return null;
   try {
+    if (containsGlass(element)) {
+      if (Array.isArray(keyframes)) keyframes = keyframes.map(({ opacity, ...frame }) => frame);
+      else { const { opacity, ...frames } = keyframes; keyframes = frames; }
+    }
     const animation = element.animate(keyframes, { duration: MOTION.panel, easing: EASE, fill: 'none', ...options, duration: (options.duration ?? MOTION.panel) * motionFactor() });
     animation.finished.catch(() => {});
     return animation;
@@ -90,9 +103,9 @@ export function visualState(element, fallback) {
   return { opacity: style.opacity || fallback.opacity, transform: style.transform === 'none' ? 'translate3d(0, 0, 0)' : style.transform || fallback.transform };
 }
 
-export function enter(element, { x = 0, y = 10, delay = 0, duration = MOTION.panel, from } = {}) {
+export function enter(element, { x = 0, y = 10, delay = 0, duration = MOTION.panel, from, fullDistance = false } = {}) {
   if (!element) return;
-  const distance = lowDetailMode() ? .3 : ({ calm: .45, standard: 1, expressive: 1.3 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1);
+  const distance = fullDistance ? 1 : lowDetailMode() ? .3 : ({ calm: .45, standard: 1, expressive: 1.3 }[globalThis.document?.documentElement?.dataset?.uiMotion] || 1);
   x *= distance; y *= distance;
   const previous = entrances.get(element);
   const first = from || (previous ? visualState(element, { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` }) : { opacity: 0, transform: `translate3d(${x}px, ${y}px, 0)` });
@@ -120,10 +133,11 @@ export function switchViews(views, index, direction = 1) {
   });
   if (!outgoing || outgoing === incoming || reducedMotion() || typeof incoming?.animate !== 'function') return;
   cancelEntrance(outgoing);
-  const distance = Math.min(64, Math.max(40, (incoming.getBoundingClientRect?.().width || 390) * .14));
+  // Adjacent, equally timed panes avoid both overlapping glass and cross-fades.
+  const distance = (incoming.getBoundingClientRect?.().width || 390) + 24;
   outgoing.hidden = false; outgoing.classList.add('view-leaving');
-  const leave = play(outgoing, [start, { opacity: 0, transform: `translateX(${-direction * distance * .7}px)` }], { duration: 420 });
-  enter(incoming, { x: direction * distance, y: 0, duration: MOTION.screen, from: resume });
+  const leave = play(outgoing, [start, { transform: `translateX(${-direction * distance}px)` }], { duration: MOTION.screen });
+  enter(incoming, { x: direction * distance, y: 0, duration: MOTION.screen, from: resume, fullDistance: true });
   const clean = () => { leave?.cancel(); outgoing.hidden = true; outgoing.classList.remove('view-leaving'); };
   tabTransition = clean;
   if (leave) leave.finished.then(() => { if (tabTransition === clean) { clean(); tabTransition = null; } }, () => {});
@@ -139,7 +153,8 @@ export function exitDialog(dialog, finish, { fromY = 0 } = {}) {
   if (exits.has(dialog)) return;
   const start = fromY ? { opacity: 1, transform: `translateY(${fromY}px)` } : visualState(dialog, { opacity: 1, transform: 'translateY(0)' });
   cancelEntrance(dialog);
-  const animation = play(dialog, [start, { opacity: 0, transform: `translateY(${Math.max(26, fromY + 50)}px)` }], { duration: MOTION.close, easing: 'cubic-bezier(.4, 0, 1, 1)' });
+  const distance = (dialog.getBoundingClientRect?.().height || 600) + 24;
+  const animation = play(dialog, [start, { transform: `translateY(${Math.max(distance, fromY + 50)}px)` }], { duration: MOTION.close, easing: 'cubic-bezier(.4, 0, 1, 1)' });
   if (!animation) { finish(); return; }
   dialog.classList.add('is-closing'); exits.set(dialog, animation);
   animation.finished.then(() => {

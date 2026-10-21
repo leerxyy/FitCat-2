@@ -153,9 +153,10 @@ function switchStatistics(name, { animate = true } = {}) {
   syncSelectionLens($('statisticsSwitch'));
   if (previous !== name && animate && activeTab === 2 && !reducedMotion() && typeof incoming.animate === 'function') {
     const direction = name === 'nutrition' ? 1 : -1;
+    const distance = (incoming.getBoundingClientRect?.().width || 390) + 24;
     outgoing.hidden = false; outgoing.classList.add('stats-panel-leaving');
-    const leave = play(outgoing, [start, { opacity: 0, transform: `translateX(${-direction * 22}px)` }], { duration: MOTION.panel });
-    enter(incoming, { x: direction * 28, y: 0, duration: MOTION.screen, from: resume });
+    const leave = play(outgoing, [start, { transform: `translateX(${-direction * distance}px)` }], { duration: MOTION.screen });
+    enter(incoming, { x: direction * distance, y: 0, duration: MOTION.screen, from: resume, fullDistance: true });
     const clean = () => { leave?.cancel(); outgoing.hidden = true; outgoing.classList.remove('stats-panel-leaving'); };
     finishPanelTransition = clean;
     if (leave) leave.finished.then(() => { if (finishPanelTransition === clean) { clean(); finishPanelTransition = null; } }, () => {});

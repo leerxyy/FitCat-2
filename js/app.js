@@ -23,6 +23,7 @@ import { batchMotion } from './ui/motion.js';
 import { initAppearance, renderAppearance, flushAppearance } from './features/appearance.js';
 import { effectiveAppearance } from './core/appearance.js';
 import { applyPerformanceMode } from './ui/performance.js';
+import { initDecorationVisibility } from './ui/decorations.js';
 import { initDeveloper } from './features/developer.js';
 
 let previousAccess;
@@ -76,6 +77,7 @@ function start() {
   initProducts(); initAnalytics(); initFriends(); initGestures(); initSubscription(); initDeveloper();
   translate(); render(); updateHeading();
   showScreen(state.profile ? 'mainPage' : 'setupPage');
+  initDecorationVisibility();
   document.addEventListener('fitcat:change', renderChange);
   document.addEventListener('fitcat:subscription', checkAccess);
   document.addEventListener('fitcat:language', () => {

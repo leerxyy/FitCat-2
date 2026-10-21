@@ -43,10 +43,12 @@ body[data-screen="mainPage"] .page-heading { margin-bottom: 17px; }
 .meal-outline { position: absolute; inset: -1px; z-index: 3; border-radius: inherit; border: 1px solid #f5fbff66; opacity: 0; pointer-events: none; transition: opacity 500ms ease; }
 .meal-group.is-current .meal-outline { opacity: 1; }
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
-  .meal-outline { padding: 1px; border: 0; background: linear-gradient(125deg, transparent 10%, #eef9ff24 26%, #fff9 40%, #eef9ff24 54%, transparent 72%); background-size: 300% 300%; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; }
-  .meal-group.is-current .meal-outline { animation: fitcat-meal-white-edge 24s ease-in-out infinite alternate; }
+  .meal-outline { padding: 1px; border: 0; overflow: hidden; background: #eef9ff20; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask-composite: exclude; }
+  .meal-outline::before { content: ""; position: absolute; left: 50%; top: 50%; width: 120%; aspect-ratio: 1; background: conic-gradient(from 125deg, transparent 0deg 35deg, #eef9ff20 65deg, #fff9 95deg, #eef9ff20 125deg, transparent 155deg 360deg); pointer-events: none; }
+  .meal-group.is-current .meal-outline::before { animation: fitcat-meal-white-edge var(--shine-outline-duration, 24s) linear infinite; }
 }
-@keyframes fitcat-meal-white-edge { from { background-position: 0% 10%; } to { background-position: 100% 90%; } }
+@keyframes fitcat-meal-white-edge { from { transform: translate3d(-50%, -50%, 0) rotate(0deg); } to { transform: translate3d(-50%, -50%, 0) rotate(360deg); } }
+:root[data-glints="off"] .meal-outline::before { animation: none !important; opacity: 0; }
 #todayPage .water-card .section-heading { gap: 7px; margin-bottom: 15px; }
 #todayPage .water-reading { gap: 6px; font-size: 14px; }
 #todayPage .water-reading strong { color: #e5f6ff; font-weight: 680; }
@@ -55,7 +57,7 @@ body[data-screen="mainPage"] .page-heading { margin-bottom: 17px; }
 #todayPage .water-actions .glass-button { min-height: 45px; border-color: var(--tone-h93d6f45c, #93d6f45c); background: radial-gradient(ellipse at 40% 0%, var(--tone-h80d8ff19, #80d8ff19), transparent 75%), #0c3046a3; color: #e9f8ff; }
 #todayPage .water-actions .icon-button { width: 46px; height: 45px; min-height: 45px; border-color: var(--tone-h93d6f45c, #93d6f45c); }
 
-#todayPage[hidden] .scanner-glint::before, #todayPage[hidden] .meal-outline, body.dialog-open .scanner-glint::before, body.dialog-open .meal-outline { animation-play-state: paused; }
+#todayPage[hidden] .scanner-glint::before, #todayPage[hidden] .meal-outline::before, body.dialog-open .scanner-glint::before, body.dialog-open .meal-outline::before { animation-play-state: paused; }
 @media (min-width: 760px) { #todayPage .nutrition-card { padding: 23px 22px; }#todayPage .calorie-summary { margin-bottom: 21px; }#todayPage .calorie-ring { max-width: 210px; }#todayPage .macro-grid { padding-top: 20px; } }
 @media (max-width: 359px) { #todayPage .nutrition-card { padding: 15px 12px; }#todayPage .calorie-summary { grid-template-columns: minmax(44px, .95fr) minmax(0, 2.1fr) minmax(44px, .95fr); }#todayPage .ring-content strong { font-size: 28px; }#todayPage .ring-content span { font-size: 10px; }#todayPage .meal-summary { padding-inline: 8px; gap: 8px; }#todayPage .meal-thumb { width: 41px; height: 45px; }#todayPage .meal-kcal { font-size: 12px; }#todayPage .meal-description strong { font-size: 14px; }#todayPage .meals-card h2, #todayPage .water-card h2 { font-size: 18px; }#todayPage .water-reading { font-size: 12px; } }
 @media (prefers-reduced-motion: reduce) { .scanner-glint { display: none; }.meal-outline, #todayPage .meal-summary, #todayPage .meal-thumb { animation: none !important; transition: none !important; } }

@@ -9,7 +9,7 @@
 :root[data-low-detail="on"] body *,
 :root[data-low-detail="on"] body *::before,
 :root[data-low-detail="on"] body *::after {
-  animation-play-state: paused !important;
+  animation: none !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   filter: none !important;
@@ -29,10 +29,11 @@
 :root[data-low-detail="on"] #appScroller :is(.card, .glass, .glass-button),
 :root[data-low-detail="on"] #navDock .bottom-nav,
 :root[data-low-detail="on"] .sheet {
-  background: linear-gradient(135deg, #cdeaff0c, transparent 50%), rgb(10 28 43 / .92) !important;
+  background: linear-gradient(135deg, #cdeaff0c, transparent 50%), rgb(10 28 43 / var(--appearance-glass-alpha, .53)) !important;
   border-color: rgb(var(--accent-rgb) / .3) !important;
   box-shadow: inset 0 1px 0 #dff7ff29 !important;
 }
+:root[data-low-detail="on"] .sheet { background: linear-gradient(135deg, #cdeaff0c, transparent 50%), rgb(10 28 43 / var(--appearance-sheet-alpha, .84)) !important; }
 :root[data-low-detail="on"] #profileIdentityCard[data-has-cover="true"] { background: #0a1c2b !important; }
 :root[data-low-detail="on"] dialog::backdrop {
   -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
@@ -47,3 +48,17 @@
 /* Loading feedback must still communicate that an operation is in progress. */
 :root[data-low-detail="on"] :is(.startup-spinner, .spinner, [role="progressbar"]),
 :root[data-low-detail="on"] .startup-track::after { animation-play-state: running !important; }
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-low-detail="on"] .startup-track::after { animation: startup-travel 1.5s ease-in-out infinite alternate !important; }
+}
+
+/* Sleeping decoration never changes a surface's transparency or its filter.
+   WAAPI navigation/selector transitions remain smooth, including in LDM. */
+[data-effects-live="false"],
+[data-effects-live="false"] *,
+[data-effects-live="false"]::before, [data-effects-live="false"]::after,
+[data-effects-live="false"] *::before, [data-effects-live="false"] *::after {
+  animation-play-state: paused !important;
+}
+body.dialog-open #ambientLight .ambient-effects,
+body[data-screen="appearancePage"] #ambientLight .ambient-effects { visibility: hidden; }

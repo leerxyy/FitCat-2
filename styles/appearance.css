@@ -128,12 +128,18 @@ body[data-screen="appearancePage"] .app-root { --header-space: 14px; padding-bot
 :root[data-appearance-ready] .sheet .card { background: rgb(6 23 38 / var(--appearance-glass-alpha, .53)); -webkit-backdrop-filter: none; backdrop-filter: none; }
 :root[data-appearance-ready] .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-strong)); box-shadow: inset 0 2px 4px #e1feff6e, 0 0 19px rgb(var(--accent-rgb) / var(--appearance-glow-alpha, .09)); }
 .appearance-preview-ui { background: linear-gradient(135deg, #cee8ff0d, transparent 44%), rgb(10 28 43 / var(--appearance-glass-alpha, .53)); -webkit-backdrop-filter: var(--appearance-glass-filter, none); backdrop-filter: var(--appearance-glass-filter, none); transform: perspective(900px) rotateX(var(--preview-rotate-x, 0deg)) rotateY(var(--preview-rotate-y, 0deg)); transition: none; }
+/* A card/sheet already samples the background. Re-filtering each nested button
+   and selector adds overlapping blur passes with no useful detail. */
+:root[data-appearance-ready] #appScroller :is(.card, .glass) :is(.glass, .glass-button, .selection-lens),
+:root[data-appearance-ready] #navDock .nav-lens,
+:root[data-appearance-ready] .sheet :is(.glass, .glass-button, .selection-lens) {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
 /* Pausing decoration must never change the glass itself on input/save. */
 :root[data-appearance-adjusting="on"] .ambient-effects * { animation-play-state: paused; }
 :root[data-appearance-ready] .selection-glint::before, :root[data-appearance-ready] .selection-lens-shine::before { animation-duration: var(--shine-duration, 6s); }
 :root[data-appearance-ready] .settings-data-action .selection-glint::before { animation-duration: var(--shine-tile-duration, 10s); }
 :root[data-appearance-ready] .scanner-glint::before { animation-duration: var(--shine-scanner-duration, 8.5s); }
-:root[data-appearance-ready] .meal-group.is-current .meal-outline { animation-duration: var(--shine-outline-duration, 24s); }
 :root[data-appearance-ready] .card::before, :root[data-appearance-ready] .glass::before { animation: appearance-edge-light var(--shine-edge-duration, 23s) ease-in-out infinite alternate; }
 :root[data-appearance-ready] .btn-primary::after { animation: button-sheen var(--shine-button-duration, 25s) ease-in-out infinite; }
 :root[data-glints="off"] .selection-glint::before, :root[data-glints="off"] .selection-lens-shine::before, :root[data-glints="off"] .scanner-glint::before, :root[data-glints="off"] .btn-primary::after { animation: none !important; opacity: 0 !important; }

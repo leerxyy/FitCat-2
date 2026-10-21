@@ -42,7 +42,8 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
     target?.addEventListener?.(type,handler,options);
     listeners.push(()=>target?.removeEventListener?.(type,handler,options));
   };
-  const canRun=()=>!disposed&&!paused&&!reducedMotion()&&!lowDetailMode()&&settings.parallax&&settings.depth>0;
+  const covered=()=>Boolean(document.querySelector('dialog[open]'))&&![...motionSubscribers.values()].some(subscriber=>subscriber.activeInDialog());
+  const canRun=()=>!disposed&&!paused&&!covered()&&!reducedMotion()&&!lowDetailMode()&&settings.parallax&&settings.depth>0;
   const wantsTilt=()=>enabled||manualIntent;
   function status(value){
     if(phase===value)return;
@@ -102,7 +103,8 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
     }
     const offset=tiltOffset(origin,pose,angle);
     status('active');
-    if(Math.abs(offset.x-pointerX)+Math.abs(offset.y-pointerY)<.035)return;
+    // Subpixel sensor noise must not keep a stationary phone repainting forever.
+    if(Math.abs(offset.x-pointerX)+Math.abs(offset.y-pointerY)<.3)return;
     pointerX=offset.x;pointerY=offset.y;schedule();
   };
   function detach(){
@@ -232,12 +234,18 @@ export function initAmbient(initial = APPEARANCE_DEFAULTS) {
   on(document,'fitcat:appearance',configure);on(document,'fitcat:screen',syncPreview);
   on(document,'fitcat:appearance-tab',syncPreview);
   on(document,'close',()=>{lastTime=null;schedule();},true);
+  on(document,'fitcat:dialogopen',()=>queueMicrotask(()=>{
+    if(disposed)return;
+    // Profile-cover dialogs may subscribe during this same open event.
+    if(covered()){cancelAnimationFrame(frame);frame=0;lastTime=null;clearTimers();detach();if(wantsTilt())status('paused');}
+    else if(wantsTilt())restore();
+  }));
   on(document,'fitcat:dialogclose',()=>{
     if(document.body?.classList.contains('dialog-open'))return;
     // A live cover may have followed the phone while its backdrop stayed fixed.
     // Resume that backdrop from its last painted position, without a jump.
     if(dialogFollowing){x=wallpaperX;y=wallpaperY;dialogFollowing=false;}
-    lastTime=null;schedule();
+    lastTime=null;if(wantsTilt())restore();schedule();
   });
   on(document,'visibilitychange',()=>visibility(Boolean(document.hidden)));
   on(view,'pagehide',()=>visibility(true));on(view,'pageshow',()=>visibility(Boolean(document.hidden)));

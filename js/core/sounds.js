@@ -14,12 +14,28 @@ function normalize(value = {}) {
 
 // One context, a small decoded-buffer cache, and no timers/audio at startup.
 // The caller invokes play directly inside a genuine interaction on iOS.
-export function createSoundPlayer({ AudioContext: Context, fetch: request = globalThis.fetch, hidden = () => false, notify = () => {}, now = () => performance.now(), canUse = () => true, initial = SOUND_DEFAULTS } = {}) {
+export function createSoundPlayer({ AudioContext: Context, fetch: request = globalThis.fetch, hidden = () => false, notify = () => {}, now = () => performance.now(), canUse = () => true, initial = SOUND_DEFAULTS, setTimer = globalThis.setTimeout, clearTimer = globalThis.clearTimeout } = {}) {
   let settings = normalize(initial), context, master, serial = 0, disposed = false;
-  let lastClick = -Infinity, lastPreview = false;
+  let lastClick = -Infinity, lastPreview = false, idleTimer = 0, pending = 0, suspending = null;
   const bytes = new Map(), decoded = new Map(), voices = new Set();
   const supported = () => typeof Context === 'function';
   const announce = (state, style = settings.soundStyle) => notify({ state, style });
+  function cancelIdle() { clearTimer(idleTimer); idleTimer = 0; }
+  function sleepWhenIdle() {
+    cancelIdle();
+    if (disposed || pending || voices.size || !context || context.state !== 'running') return;
+    const audio = context;
+    // A live but silent AudioContext needlessly keeps the audio engine awake.
+    // The next genuine tap resumes synchronously before fetching/decoding.
+    idleTimer = setTimer(() => {
+      idleTimer = 0;
+      if (disposed || pending || voices.size || context !== audio || audio.state !== 'running') return;
+      try {
+        const task = Promise.resolve(audio.suspend()).catch(() => {});
+        suspending = task; task.finally(() => { if (suspending === task) suspending = null; });
+      } catch { /* Audio remains usable on platforms without suspend support. */ }
+    }, 1200);
+  }
   const load = style => {
     if (!bytes.has(style)) {
       const task = Promise.resolve().then(() => request(soundURL(style))).then(response => {
@@ -44,6 +60,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
     serial++;
     for (const voice of [...voices]) retire(voice);
     announce('idle');
+    sleepWhenIdle();
   }
   function configure(value) {
     const next = normalize(value);
@@ -54,13 +71,14 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
     if (master && context?.state !== 'closed') master.gain.setTargetAtTime(settings.soundVolume / 100, context.currentTime, .012);
   }
   function prepare() {
+    cancelIdle();
     if (!context || context.state === 'closed') {
       context = new Context({ latencyHint: 'interactive' });
       master = context.createGain(); master.gain.value = settings.soundVolume / 100;
       master.connect(context.destination);
     }
     // Call resume synchronously before loading/decoding; preserve user activation.
-    return context.state === 'running' ? Promise.resolve() : Promise.resolve(context.resume());
+    return context.state === 'running' && !suspending ? Promise.resolve() : Promise.resolve(context.resume());
   }
   async function play({ style = settings.soundStyle, preview = false, allowed = () => true } = {}) {
     if (!preview && !canUse(style)) style = SOUND_DEFAULTS.soundStyle;
@@ -69,6 +87,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
     if (!preview && !lastPreview && started - lastClick < 65) return false;
     lastClick = started; lastPreview = preview;
     const ticket = ++serial;
+    pending++;
     try {
       const ready = prepare();
       await ready;
@@ -90,21 +109,24 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
       source.onended = () => {
         voices.delete(voice); source.disconnect(); gain.disconnect();
         if (ticket === serial) announce('idle', style);
+        sleepWhenIdle();
       };
       source.start(time); announce('playing', style); return true;
     } catch {
       if (ticket === serial && !disposed && !hidden()) announce('unavailable', style);
       return false;
+    } finally {
+      pending--; sleepWhenIdle();
     }
   }
   async function suspend() {
-    stop();
+    stop(); cancelIdle();
     try { if (context && context.state !== 'closed') await context.suspend(); } catch { /* Retry on the next real interaction. */ }
   }
   return {
     supported, configure, play, stop, suspend,
     stopPreview() { if (lastPreview) stop(); },
     preload(style = settings.soundStyle) { return supported() && SOUND_STYLES.includes(style) ? load(style).then(() => true, () => false) : Promise.resolve(false); },
-    dispose() { disposed = true; stop(); bytes.clear(); decoded.clear(); try { void context?.close()?.catch(() => {}); } catch {} },
+    dispose() { disposed = true; stop(); cancelIdle(); bytes.clear(); decoded.clear(); try { void context?.close()?.catch(() => {}); } catch {} },
   };
 }

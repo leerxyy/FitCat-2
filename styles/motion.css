@@ -10,7 +10,7 @@
   from { background-position: 0% 15%; opacity: .58; }
   to { background-position: 100% 85%; opacity: .88; }
 }
-@keyframes progress-sheen { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes progress-sheen { 0%,25% { transform: translate3d(0, 0, 0); opacity: 0; } 35%,60% { opacity: .65; } 75%,100% { transform: translate3d(330%, 0, 0); opacity: 0; } }
 @keyframes button-sheen {
   0%, 15% { transform: translate3d(0, 0, 0) rotate(18deg); opacity: 0; }
   24% { opacity: .7; }

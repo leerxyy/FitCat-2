@@ -9,9 +9,10 @@ import { requirePro } from '../ui/premium.js';
 import { enter } from '../ui/motion.js';
 import { lowDetailMode } from '../ui/performance.js';
 import { GestureTracker } from '../core/gesture-tracker.js';
+import { createVideoInferenceLoop } from '../core/video-inference.js';
 
-let active=false,starting=false,video,stream,model,cursor,frame,generation=0,startTask;
-let mode='normal',step=0,advanceTimer,leaveRunning=false,lastInference=0,resumeInference;
+let active=false,starting=false,video,stream,model,cursor,inference,generation=0,startTask;
+let mode='normal',step=0,advanceTimer,leaveRunning=false,resumeInference;
 const tracker=new GestureTracker();
 const steps=['tabs','click','scroll'];
 function syncControls(){
@@ -54,7 +55,7 @@ function completeStep(){
 }
 export function stopGestures({quiet=false}={}){
  const wasActive=active;
- ++generation;active=false;starting=false;startTask=null;resumeInference=null;cancelAnimationFrame(frame);frame=0;clearTimeout(advanceTimer);advanceTimer=0;
+ ++generation;active=false;starting=false;startTask=null;resumeInference=null;inference?.dispose();inference=null;clearTimeout(advanceTimer);advanceTimer=0;
  stream?.getTracks().forEach(track=>track.stop());stream=null;video?.remove();video=null;cursor?.remove();cursor=null;
  const previous=model;model=null;try{Promise.resolve(previous?.close()).catch(()=>{});}catch{}
  tracker.reset();syncControls();
@@ -75,26 +76,18 @@ async function startGestures(nextMode='normal'){
    if(ticket!==generation)return false;if(!proAccess()){stopGestures({quiet:true});return false;}
    const instance=new Hands({locateFile:file=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`});model=instance;
    instance.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.7,minTrackingConfidence:.6});instance.onResults(results=>{if(ticket===generation&&model===instance)processGestures(results);});
-   phase='camera';const camera=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+   phase='camera';const camera=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480},frameRate:{ideal:20,max:24}},audio:false});
    if(ticket!==generation||!proAccess()){camera.getTracks().forEach(track=>track.stop());if(ticket===generation)stopGestures({quiet:true});return false;}
    stream=camera;const element=document.createElement('video');video=element;element.muted=true;element.playsInline=true;element.srcObject=camera;
    placeVideo();await element.play();
    if(ticket!==generation)return false;if(!proAccess()){stopGestures({quiet:true});return false;}
    cursor=document.createElement('div');cursor.id='gesture-cursor';cursor.hidden=true;document.body.append(cursor);
-   active=true;starting=false;tracker.reset();syncControls();lastInference=0;
-   let busy=false;
+   active=true;starting=false;tracker.reset();syncControls();
    const canInfer=()=>active&&ticket===generation&&!document.hidden&&(mode==='normal'||(mode==='training'&&step<3));
-   const loop=async now=>{
-    frame=0;if(!canInfer())return;
-    if(now-lastInference<(lowDetailMode()?80:32)){frame=requestAnimationFrame(loop);return;}
-    lastInference=now;
-    busy=true;
-    try{await instance.send({image:element});}
-    catch(error){if(ticket===generation&&active){console.warn(error);stopGestures({quiet:true});showCameraError();}return;}
-    finally{busy=false;}
-    if(canInfer())frame=requestAnimationFrame(loop);
-   };
-   resumeInference=()=>{if(!frame&&!busy&&canInfer())frame=requestAnimationFrame(loop);};
+   inference=createVideoInferenceLoop({video:element,canRun:canInfer,interval:()=>lowDetailMode()?80:50,
+    process:()=>instance.send({image:element}),
+    onError:error=>{if(ticket===generation&&active){console.warn(error);stopGestures({quiet:true});showCameraError();}},view:window});
+   resumeInference=()=>inference?.resume();
    resumeInference();return true;
   }catch(error){if(ticket===generation){console.warn(error);stopGestures({quiet:true});showCameraError(error,phase);}return false;}
  })();
@@ -132,7 +125,7 @@ function processGestures(results){
 }
 function openGuide(){
  if(!requirePro('gestures'))return;
- leaveRunning=false;mode='idle';cancelAnimationFrame(frame);frame=0;if(cursor)cursor.hidden=true;placeVideo();showIntro();syncControls();openDialog('gestureGuideModal');
+ leaveRunning=false;mode='idle';inference?.pause();if(cursor)cursor.hidden=true;placeVideo();showIntro();syncControls();openDialog('gestureGuideModal');
 }
 async function train(){
  leaveRunning=false;showStep(0);

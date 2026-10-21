@@ -46,7 +46,9 @@
 .btn-secondary:hover, .btn-small:hover { background-color: rgb(31 65 87 / 70%); }
 .icon-button.subtle { box-shadow: none; }
 .glass-button:hover { background-color: rgb(31 69 94 / 62%); }
-.macro-track i, .water-track > i { background: linear-gradient(100deg, var(--tone-h10c4e6, #10c4e6), var(--tone-h41e3f4, #41e3f4) 38%, var(--tone-h16cff3, #16cff3) 68%, var(--tone-h22d7f1, #22d7f1)); background-size: 200% 100%; animation: progress-sheen 14s ease-in-out infinite alternate; box-shadow: 0 0 10px var(--tone-r22-207-243-a25, rgb(22 207 243 / 25%)); }
+.macro-track i, .water-track > i { position: relative; overflow: hidden; background: linear-gradient(100deg, var(--tone-h10c4e6, #10c4e6), var(--tone-h41e3f4, #41e3f4) 38%, var(--tone-h16cff3, #16cff3) 68%, var(--tone-h22d7f1, #22d7f1)); box-shadow: 0 0 10px var(--tone-r22-207-243-a25, rgb(22 207 243 / 25%)); }
+.macro-track i::after, .water-track > i::after { content: ""; position: absolute; inset: 0 auto 0 -45%; width: 45%; background: linear-gradient(90deg, transparent, #e7ffff65, transparent); animation: progress-sheen 14s ease-in-out infinite; pointer-events: none; }
+:root[data-glints="off"] :is(.macro-track i, .water-track > i)::after { display: none; }
 .macro-track, .water-track { box-shadow: inset 0 1px 2px rgb(1 6 13 / 22%); }
 .bottom-nav { --glass-tint: rgb(10 31 48 / 66%); border-color: var(--tone-r133-215-252-a42, rgb(133 215 252 / 42%)); box-shadow: inset 0 1px 2px rgb(231 250 255 / 33%), inset 0 -2px 7px var(--tone-r72-178-232-a10, rgb(72 178 232 / 10%)), 0 9px 32px rgb(0 3 10 / 30%), 0 0 25px var(--tone-r11-178-225-a12, rgb(11 178 225 / 12%)); }
 .nav-item { transition: color .3s ease, transform .28s var(--ease); }
