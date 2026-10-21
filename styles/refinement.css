@@ -1,0 +1,92 @@
+/* One material and motion rhythm, with stable layout and a quieter data layer. */
+:root {
+  --muted: #a6b6c7;
+  --radius: 24px;
+  --radius-small: 15px;
+  --motion-press: 140ms;
+  --motion-screen: 420ms;
+  --motion-panel: 300ms;
+  --motion-close: 200ms;
+  --glass-glow: var(--tone-r17-193-238-a7, rgb(17 193 238 / 7%));
+}
+.today-layout { gap: 16px; }
+.card { background: linear-gradient(135deg, var(--tone-hbddfff0b, #bddfff0b), transparent 48%), linear-gradient(325deg, var(--tone-h0caedc07, #0caedc07), transparent 70%), #0c2033eb; border-color: var(--tone-ha6dcff35, #a6dcff35); }
+.card, .glass, .glass-button, .sheet { box-shadow: inset 0 1px 1px var(--tone-hdef6ff24, #def6ff24), inset 0 -1px 1px var(--tone-h87cff913, #87cff913), 0 8px 25px #00040c24, 0 0 19px var(--glass-glow); }
+.card::before, .glass::before, .glass-button::before { animation: none; background-size: 100% 100%; opacity: .5; }
+.btn-primary::after { animation: none; opacity: 0; }
+.macro-track i, .water-track > i { animation: none; background-size: 100% 100%; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card { --glass-tint: #0c2033cc; background: linear-gradient(135deg, var(--tone-hbddfff0c, #bddfff0c), transparent 48%), var(--glass-tint); backdrop-filter: blur(12px) saturate(125%); -webkit-backdrop-filter: blur(12px) saturate(125%); }
+  .bottom-nav { --glass-tint: #0a2137ae; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
+  .sheet { --glass-tint: #0c1e30e8; backdrop-filter: blur(24px) saturate(135%); -webkit-backdrop-filter: blur(24px) saturate(135%); }
+  .sheet .card { background: linear-gradient(135deg, var(--tone-ha9dfff06, #a9dfff06), transparent 60%), #061929cf; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+.sheet { border-radius: 28px 28px 0 0; }
+.sheet-heading { gap: 12px; margin-bottom: 22px; }
+.sheet-heading h2 { font-size: 22px; letter-spacing: -.025em; }
+.section-heading h2, .card > h2 { letter-spacing: -.025em; }
+.field > label, .field-legend { color: var(--tone-hb3c5d7, #b3c5d7); }
+.meal-description small, .food-details { color: var(--tone-ha6bace, #a6bace); line-height: 1.55; }
+.calorie-side strong, .macro strong, .water-reading strong { font-variant-numeric: tabular-nums; }
+.food-list { overflow-anchor: none; }
+.btn-primary, .btn-secondary, .btn-small, .glass-button, .icon-button, .text-button, .food-toggle, .profile-button {
+  transition: transform var(--motion-press) var(--ease), background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.btn-primary:active:not(:disabled), .btn-secondary:active:not(:disabled), .glass-button:active:not(:disabled) { transform: scale(.98); }
+.icon-button:active:not(:disabled), .profile-button:active:not(:disabled) { transform: scale(.95); }
+button.icon-button.close-button:active { transform: scale(.94); }
+.smart-water-conditions:active:not(:disabled), .sheet-handle:active:not(:disabled) { transform: none; }
+.nav-selection { transition-duration: var(--motion-screen); transition-timing-function: var(--ease); }
+.nav-item { transition: color 180ms ease, transform var(--motion-press) var(--ease); }
+.surface-feedback { transition-duration: 180ms; }
+.surface-feedback > .surface-light { transition: opacity 300ms ease, background-position 90ms ease-out; }
+dialog[open]::backdrop { animation-duration: var(--motion-panel); }
+dialog.is-closing::backdrop { animation-duration: var(--motion-close); }
+
+/* Tap or keyboard closes; pulling from non-interactive content also works at top. */
+.sheet-handle { position: sticky; top: -12px; z-index: 20; display: flex; align-items: center; justify-content: center; width: 76px; min-height: 32px; height: 32px; padding: 0; margin: -8px auto 4px; border: 0; border-radius: 999px; color: var(--tone-ha8c5db, #a8c5db); background: transparent; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.sheet-handle, .sheet-handle * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.sheet-handle > span { display: block; width: 38px; height: 4px; border-radius: 99px; background: var(--tone-ha8c5db6b, #a8c5db6b); transition: background-color 180ms ease, width 180ms var(--ease); pointer-events: none; }
+.sheet-handle:focus, .sheet-handle:focus-visible { outline: none; }
+.keyboard-navigation .sheet-handle:focus-visible > span { background: var(--accent); box-shadow: 0 0 0 3px var(--tone-h16cff338, #16cff338); }
+.sheet-heading, .smart-water-heading, [data-swipe-close] h2 { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+[data-swipe-close] .smart-water-heading { grid-template-columns: 1fr; }
+[data-swipe-close] .smart-water-heading > span { display: none; }
+.sheet-handle:active > span { width: 43px; background: var(--tone-hc4e8ffc4, #c4e8ffc4); }
+.sheet.is-dragging { transform: translate3d(0, var(--sheet-drag, 0px), 0); transition: none; will-change: transform; }
+.sheet.is-dragging .sheet-handle { cursor: grabbing; }
+#smartWaterModal > .smart-water-content { min-height: calc(100% - 28px); }
+
+/* Native dialogs otherwise anchor to the layout viewport behind the keyboard. */
+.sheet.keyboard-sheet { --keyboard-gap: 8px; position: absolute; inset: calc(var(--visible-top, 0px) + var(--keyboard-gap)) 0 auto; width: min(100%, 560px); height: calc(var(--visible-height, 100dvh) - var(--keyboard-gap)); max-height: calc(var(--visible-height, 100dvh) - var(--keyboard-gap)); margin: 0 auto; scroll-padding: 52px 0 20px; }
+.sheet.keyboard-sheet .autocomplete-list { max-height: min(200px, calc(var(--visible-height, 100dvh) * .4)); }
+.sheet.keyboard-sheet .field { scroll-margin-top: 54px; }
+
+/* A single traveling light is bounded by the filled, segmented water track. */
+.water-track > i { position: relative; overflow: hidden; border-radius: inherit; }
+.water-ripple { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(105deg, transparent 15%, var(--tone-hd5fcff05, #d5fcff05) 35%, #e8ffffb8 50%, var(--tone-hd5fcff08, #d5fcff08) 65%, transparent 85%); }
+
+/* Pending search rows occupy the same dropdown as the final results. */
+#searchStatus { min-height: 18px; font-size: 12px; line-height: 1.5; }
+#searchStatus:empty { display: block; }
+.autocomplete-list { border-radius: 16px; background: #10263bf5; border-color: var(--tone-h96d5f33d, #96d5f33d); box-shadow: 0 12px 28px #000a144d; }
+.autocomplete-item { min-height: 54px; }
+.autocomplete-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; background: #16446599; }
+.search-skeleton { padding: 1px 12px; pointer-events: none; }
+.search-skeleton-row { display: flex; align-items: center; gap: 12px; height: 54px; border-bottom: 1px solid var(--tone-ha9d5ee0b, #a9d5ee0b); }
+.search-skeleton-row:last-child { border: 0; }
+.search-skeleton-row > i, .search-skeleton-row b, .search-skeleton-row small { display: block; border-radius: 6px; background: var(--tone-h8ac6e51c, #8ac6e51c); animation: search-placeholder 1.6s ease-in-out infinite alternate; }
+.search-skeleton-row > i { width: 24px; height: 24px; border-radius: 8px; }
+.search-skeleton-row > span { flex: 1; }
+.search-skeleton-row b { width: 67%; height: 10px; margin-bottom: 8px; }
+.search-skeleton-row small { width: 43%; height: 7px; }
+@keyframes search-placeholder { from { opacity: .4; } to { opacity: .9; } }
+@media (hover: hover) and (pointer: fine) { .sheet-handle:hover > span { background: var(--tone-hc4e8ffab, #c4e8ffab); } }
+@media (prefers-reduced-transparency: reduce) {
+  .card, .bottom-nav, .sheet { --glass-tint: #102638; background-color: #102638; backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .surface-feedback { transition: none; }
+  button:active:not(:disabled), button.icon-button.close-button:active, .profile-button:active:not(:disabled) { transform: none; }
+  .sheet-handle > span { transition: none; }
+}

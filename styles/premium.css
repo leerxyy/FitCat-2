@@ -1,0 +1,24 @@
+.pro-entry { position:relative;overflow:visible; }
+.pro-feature-badge { position:absolute;top:-12px;right:2px;z-index:6;display:inline-flex;align-items:center;justify-content:center;min-width:0;height:22px;padding:0;border:0;background:transparent;box-shadow:none;pointer-events:auto;user-select:none;-webkit-user-select:none;white-space:nowrap; }
+.pro-feature-badge .plus-ribbon { width:56px; }
+.nutrition-switch { margin-top: 24px; }
+.nutrition-switch > .pro-entry { min-height: 48px; padding-top: 14px; }
+.nutrition-switch .pro-feature-badge { top: -9px; right: 2px; min-width: 0; padding: 0; }
+.smart-water-switch-row { position: relative; }
+.smart-water-conditions { position: static; display: inline-flex; align-items: center; min-height: 40px; padding: 5px 0; text-align: left; color: inherit; font-size: 14px; }
+.smart-water-conditions:active:not(:disabled) { transform: none; }
+.smart-water-conditions .pro-feature-badge { top: -9px; right: 16px; }
+.template-allowance { margin: 8px 0 18px; color: var(--muted); font-size: 12px; }
+#saveTemplateButton { margin-bottom: 10px; }
+.macro-history-access { display: flex; align-items: center; min-height: 44px; width: 100%; padding: 11px 14px; margin: 13px 0 14px; border: 1px solid #8dbfe333; border-radius: 14px; background: #14304b40; color: #c4deef; text-align: left; font-size: 12px; }
+.macro-history-access .pro-feature-badge { right: 10px; }
+.history-macro-lock { display: inline-flex; align-items: center; gap: 4px; min-height: 28px; padding: 3px 0; color: #aebed6; font-size: 10px; font-weight: 500; }
+.history-macro-lock .icon { width: 11px; height: 11px; }
+.pro-feature-notice { padding: 14px 15px; margin: -5px 0 20px; border: 1px solid #f0b1a53b; border-radius: 16px; background: linear-gradient(120deg, #ffba9010, #e76a9010); }
+.pro-feature-notice strong { color: #d8efff; font-size: 15px; }
+.pro-feature-notice p { color: #abc0d5; font-size: 12px; line-height: 1.6; margin-top: 5px; }
+.subscription-features li > div { min-width: 0; }
+.subscription-features li > div > strong { display: block; font-size: 13px; font-weight: 600; }
+.subscription-features li > div > small { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; line-height: 1.55; }
+.subscription-features li > .icon:last-child { width: 16px; height: 16px; color: var(--accent); }
+@media (max-width: 359px) { .nutrition-switch { gap: 6px; } .nutrition-switch > button { font-size: 10px; } }
