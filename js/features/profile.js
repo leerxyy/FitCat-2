@@ -19,9 +19,11 @@ let developerPending = false;
 let creatingProfile = false;
 const profileFields = { profileName: 'name', profileAge: 'age', profileHeight: 'height', profileWeight: 'weight', profileGender: 'gender', profileGoal: 'goal' };
 
-function profileStatus(key = 'profile_auto_hint') {
+function profileStatus(key = '') {
   $('profileAutosave').dataset.state = key === 'save_error' ? 'error' : key === 'profile_auto_invalid' ? 'invalid' : 'saved';
-  $('profileAutosaveText').dataset.i18n = key; $('profileAutosaveText').textContent = t(key);
+  $('profileAutosave').hidden = !['save_error','profile_auto_invalid'].includes(key);
+  if (key) $('profileAutosaveText').dataset.i18n = key; else $('profileAutosaveText').removeAttribute('data-i18n');
+  $('profileAutosaveText').textContent = key ? t(key) : '';
 }
 export function flushProfileFeedback() {
   clearTimeout(feedbackTimer);
@@ -40,7 +42,7 @@ function saveProfileField(input, showInvalid = false) {
     void activateDeveloper(raw).then(result => {
       if (!result) return;
       if (input.value.trim() === raw) input.value = result.name;
-      renderIdentity(); profileStatus('profile_auto_saved');
+      renderIdentity(); profileStatus();
       document.dispatchEvent(new Event('fitcat:entitlement'));
       document.dispatchEvent(new Event('fitcat:change'));
       toast(t(result.already ? 'developer_already' : 'developer_grant'));
@@ -59,7 +61,7 @@ function saveProfileField(input, showInvalid = false) {
   if (state.profile[key] === value) { if (showInvalid) profileStatus(); return; }
   try {
     setProfile({ ...state.profile, [key]: value });
-    profileStatus('profile_auto_saved'); renderIdentity();
+    profileStatus(); renderIdentity();
     profileChanged = true; clearTimeout(feedbackTimer); feedbackTimer = setTimeout(flushProfileFeedback, 180);
   } catch (error) { console.error(error); profileStatus('save_error'); }
 }

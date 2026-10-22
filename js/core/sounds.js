@@ -1,22 +1,20 @@
-export const BASIC_SOUND_STYLES = Object.freeze(['glass', 'drop', 'velvet', 'spark', 'pulse', 'air']);
-export const PREMIUM_SOUND_STYLES = Object.freeze(['suede', 'felt', 'silk', 'warm', 'tick', 'graphite', 'wood', 'paper', 'porcelain', 'matte', 'stone', 'crystal', 'frost', 'thin']);
-export const SOUND_STYLES = Object.freeze([...BASIC_SOUND_STYLES, ...PREMIUM_SOUND_STYLES]);
-export const SOUND_DEFAULTS = Object.freeze({ soundEnabled: false, soundStyle: 'glass', soundVolume: 25 });
-export const soundURL = style => new URL(`../../assets/audio/${SOUND_STYLES.includes(style) ? style : 'glass'}.wav`, import.meta.url).href;
+export const SOUND_STYLES = Object.freeze(['soft']);
+export const SOUND_DEFAULTS = Object.freeze({ soundEnabled: false, soundStyle: 'soft', soundVolume: 25 });
+export const soundURL = () => new URL('../../assets/audio/soft.wav', import.meta.url).href;
 
 function normalize(value = {}) {
   return {
     soundEnabled: value.soundEnabled === true,
-    soundStyle: SOUND_STYLES.includes(value.soundStyle) ? value.soundStyle : 'glass',
+    soundStyle: SOUND_DEFAULTS.soundStyle,
     soundVolume: typeof value.soundVolume === 'number' && Number.isFinite(value.soundVolume) ? Math.round(Math.max(0, Math.min(100, value.soundVolume))) : 25,
   };
 }
 
 // One context, a small decoded-buffer cache, and no timers/audio at startup.
 // The caller invokes play directly inside a genuine interaction on iOS.
-export function createSoundPlayer({ AudioContext: Context, fetch: request = globalThis.fetch, hidden = () => false, notify = () => {}, now = () => performance.now(), canUse = () => true, initial = SOUND_DEFAULTS, setTimer = globalThis.setTimeout, clearTimer = globalThis.clearTimeout } = {}) {
+export function createSoundPlayer({ AudioContext: Context, fetch: request = globalThis.fetch, hidden = () => false, notify = () => {}, now = () => performance.now(), initial = SOUND_DEFAULTS, setTimer = globalThis.setTimeout, clearTimer = globalThis.clearTimeout } = {}) {
   let settings = normalize(initial), context, master, serial = 0, disposed = false;
-  let lastClick = -Infinity, lastPreview = false, idleTimer = 0, pending = 0, suspending = null;
+  let lastClick = -Infinity, idleTimer = 0, pending = 0, suspending = null;
   const bytes = new Map(), decoded = new Map(), voices = new Set();
   const supported = () => typeof Context === 'function';
   const announce = (state, style = settings.soundStyle) => notify({ state, style });
@@ -80,12 +78,12 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
     // Call resume synchronously before loading/decoding; preserve user activation.
     return context.state === 'running' && !suspending ? Promise.resolve() : Promise.resolve(context.resume());
   }
-  async function play({ style = settings.soundStyle, preview = false, allowed = () => true } = {}) {
-    if (!preview && !canUse(style)) style = SOUND_DEFAULTS.soundStyle;
-    if (disposed || !supported() || hidden() || !allowed() || settings.soundVolume === 0 || (!preview && !settings.soundEnabled) || !SOUND_STYLES.includes(style)) return false;
+  async function play({ allowed = () => true } = {}) {
+    const style = SOUND_DEFAULTS.soundStyle;
+    if (disposed || !supported() || hidden() || !allowed() || settings.soundVolume === 0 || !settings.soundEnabled) return false;
     const started = now();
-    if (!preview && !lastPreview && started - lastClick < 65) return false;
-    lastClick = started; lastPreview = preview;
+    if (started - lastClick < 65) return false;
+    lastClick = started;
     const ticket = ++serial;
     pending++;
     try {
@@ -96,7 +94,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
         decoded.set(style, task);
       }
       const buffer = await decoded.get(style);
-      if (ticket !== serial || disposed || hidden() || !allowed() || context.state !== 'running' || settings.soundVolume === 0 || (!preview && (!settings.soundEnabled || !canUse(style))) || (!preview && now() - started > 900)) return false;
+      if (ticket !== serial || disposed || hidden() || !allowed() || context.state !== 'running' || settings.soundVolume === 0 || !settings.soundEnabled || now() - started > 900) return false;
       for (const voice of [...voices]) retire(voice);
       const source = context.createBufferSource(), gain = context.createGain();
       source.buffer = buffer; source.connect(gain); gain.connect(master);
@@ -125,8 +123,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
   }
   return {
     supported, configure, play, stop, suspend,
-    stopPreview() { if (lastPreview) stop(); },
-    preload(style = settings.soundStyle) { return supported() && SOUND_STYLES.includes(style) ? load(style).then(() => true, () => false) : Promise.resolve(false); },
+    preload() { return supported() ? load(SOUND_DEFAULTS.soundStyle).then(() => true, () => false) : Promise.resolve(false); },
     dispose() { disposed = true; stop(); cancelIdle(); bytes.clear(); decoded.clear(); try { void context?.close()?.catch(() => {}); } catch {} },
   };
 }

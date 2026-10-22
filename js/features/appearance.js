@@ -8,13 +8,11 @@ import { initSelectionLens, syncSelectionLens } from '../ui/selection-lens.js';
 import { requirePro, renderPremium } from '../ui/premium.js';
 import { haptic } from '../ui/haptics.js';
 import { requestDeviceTilt, disableDeviceTilt, deviceTiltStatus } from '../ui/ambient.js';
-import { SOUND_STYLES, PREMIUM_SOUND_STYLES } from '../core/sounds.js';
-import { soundSupported, playInterfaceSound, stopSoundPreview, preloadSoundChoices } from '../ui/sounds.js';
+import { SOUND_DEFAULTS } from '../core/sounds.js';
 
 let currentTab = 'style', saveError = false, tiltPending = false;
 let tiltRequest = 0;
-const tabs = ['style', 'background', 'effects', 'audio'], motions = ['calm', 'standard', 'expressive'];
-let audioStatus = { state: 'idle', style: 'glass' };
+const tabs = ['style', 'background', 'effects'], motions = ['calm', 'standard', 'expressive'];
 const applied = new WeakMap();
 let draft = null, saveTimer = 0, liveFrame = null;
 const current = () => draft ?? state.appearance;
@@ -22,7 +20,7 @@ const effective = () => effectiveAppearance(current(), proAccess());
 const setText = (node, value) => { if (node.textContent !== value) node.textContent = value; };
 export function applyAppearance() {
   const settings=effective(), root=document.documentElement;
-  const signature=JSON.stringify(settings);
+  const signature=JSON.stringify(Object.fromEntries(Object.entries(settings).filter(([key])=>!Object.hasOwn(SOUND_DEFAULTS,key))));
   const previous=applied.get(root);
   if(previous?.signature===signature)return settings;
   const palette=ACCENTS[settings.accent], timing=appearanceTimings(settings);
@@ -50,7 +48,8 @@ export function applyAppearance() {
 }
 function setSaveStatus(){
   $('appearanceSaveStatus').dataset.error=String(saveError);
-  setText($('appearanceSaveText'),t(saveError?'save_error':draft?'appearance_saving':'appearance_saved'));
+  $('appearanceSaveStatus').hidden=!saveError;
+  setText($('appearanceSaveText'),saveError?t('save_error'):'');
 }
 function renderChoices(settings){
   setText($('appearanceThemeName'),t('appearance_theme_'+settings.theme));
@@ -77,22 +76,6 @@ function renderTilt(settings=effective()){
   $('appearanceTiltStatus').dataset.state=status;
   setText($('appearanceTiltStatus'),t(key));
 }
-function renderSounds(settings=effective()) {
-  const supported=soundSupported();
-  $('appearanceSoundEnabled').disabled=!supported;
-  for(const card of $('appearanceAudioPanel').querySelectorAll('[data-sound-card]')) {
-    card.dataset.selected=String(card.dataset.soundCard===settings.soundStyle);
-    card.dataset.previewing=String(audioStatus.state==='playing'&&audioStatus.style===card.dataset.soundCard);
-  }
-  for(const button of $('appearanceAudioPanel').querySelectorAll('[data-audio-preview]')) {
-    button.disabled=!supported||settings.soundVolume===0;
-    button.setAttribute('aria-label',`${t('appearance_sound_listen')}: ${t('appearance_sound_'+button.dataset.value)}`);
-  }
-  $('appearanceSoundVolume').disabled=!supported;
-  $('appearanceSoundProNotice').hidden=proAccess()||!PREMIUM_SOUND_STYLES.includes(state.appearance.soundStyle)||state.appearance.soundStyle===settings.soundStyle;
-  const key=!supported?'appearance_sound_unsupported':audioStatus.state==='unavailable'?'appearance_sound_error':settings.soundVolume===0?'appearance_sound_muted':audioStatus.state==='playing'?'appearance_sound_playing':'appearance_sound_preview_hint';
-  setText($('appearanceSoundStatus'),t(key)+(key==='appearance_sound_playing'?`: ${t('appearance_sound_'+audioStatus.style)}`:''));
-}
 export function renderAppearance() {
   const settings=applyAppearance();
   // Hidden forms do not need their ranges, thumbnails or preview rerendered.
@@ -105,7 +88,6 @@ export function renderAppearance() {
   $('appearanceMotionNotice').hidden=!reducedMotion();
   $('appearanceProNotice').hidden=state.appearance.background===settings.background&&state.appearance.theme===settings.theme;
   renderTilt(settings);
-  renderSounds(settings);
   $('appearanceReset').disabled=isDefaultAppearance(current())&&!tiltPending;
   setSaveStatus();
   const control=$('appearanceMotionControl'), index=motions.indexOf(settings.motion);
@@ -147,12 +129,10 @@ function choose(kind,value){
     // Choosing a palette never silently resets the user's glass/blur sliders.
     update(Object.fromEntries(['theme','accent','background','effect'].map(key=>[key,preset[key]])));return;
   }
-  const choices={accent:Object.keys(ACCENTS),background:BACKGROUNDS,effect:EFFECTS,motion:motions,soundStyle:SOUND_STYLES};
+  const choices={accent:Object.keys(ACCENTS),background:BACKGROUNDS,effect:EFFECTS,motion:motions};
   if(!choices[kind]?.includes(value))return;
   if(kind==='background'&&PREMIUM_BACKGROUNDS.includes(value)&&!requirePro('appearance'))return;
-  if(kind==='soundStyle'&&PREMIUM_SOUND_STYLES.includes(value)&&!requirePro('sounds'))return;
-  const saved=update({[kind]:value,...(['accent','background'].includes(kind)?{theme:'custom'}:{})});
-  if(kind==='soundStyle'&&saved!==false)void playInterfaceSound({style:value,preview:true});
+  update({[kind]:value,...(['accent','background'].includes(kind)?{theme:'custom'}:{})});
 }
 function selectTab(value){
   if(!tabs.includes(value))return;
@@ -165,9 +145,7 @@ function selectTab(value){
     else panel.setAttribute('aria-hidden','true');
   }
   syncSelectionLens($('appearanceTabs'));
-  $('appearancePreview').hidden=value==='audio';
   document.dispatchEvent(new CustomEvent('fitcat:appearance-tab',{detail:value}));
-  if(value==='audio')preloadSoundChoices();else stopSoundPreview();
 }
 export function initAppearance(){
   onAction('openAppearance',()=>showScreen('appearancePage',{x:24,y:0,duration:MOTION.screen}));
@@ -175,8 +153,7 @@ export function initAppearance(){
   onAction('appearanceTab',button=>selectTab(button.dataset.value));
   onAction('appearanceChoice',button=>choose(button.dataset.appearanceKind,button.dataset.value));
   onAction('resetAppearance',()=>{
-    stopSoundPreview();
-    try{clearTimeout(saveTimer);cancelLiveFrame();setAppearance(APPEARANCE_DEFAULTS);draft=null;document.documentElement.dataset.appearanceAdjusting='off';tiltRequest++;tiltPending=false;disableDeviceTilt();saveError=false;renderAppearance();toast(t('appearance_reset_done'));}
+    try{clearTimeout(saveTimer);cancelLiveFrame();setAppearance({...APPEARANCE_DEFAULTS,...Object.fromEntries(Object.keys(SOUND_DEFAULTS).map(key=>[key,state.appearance[key]]))});draft=null;document.documentElement.dataset.appearanceAdjusting='off';tiltRequest++;tiltPending=false;disableDeviceTilt();saveError=false;renderAppearance();toast(t('appearance_reset_done'));}
     catch(error){console.error(error);saveError=true;setSaveStatus();}
   });
   for(const name of ['input','change'])$('appearancePage').addEventListener(name,event=>{
@@ -186,15 +163,13 @@ export function initAppearance(){
       if(typeof APPEARANCE_DEFAULTS[key]!=='number'||!Number.isFinite(value))return;
       const updated=update({[key]:value,...(['transparency','glow','dimming','blur'].includes(key)?{theme:'custom'}:{})},name==='input'?input:null);
       if(name==='change'){
-        const saved=updated!==false&&flushAppearance();
-        if(key==='soundVolume'&&saved!==false&&current().soundVolume>0)void playInterfaceSound({preview:true});
+        if(updated!==false)flushAppearance();
       }
     }else if(name==='change'&&input.dataset.appearanceToggle){
       const key=input.dataset.appearanceToggle;
       if(key==='deviceTilt'&&input.checked){void enableTilt();return;}
       if(typeof APPEARANCE_DEFAULTS[key]==='boolean'){
-        const saved=update({[key]:input.checked});
-        if(key==='soundEnabled'&&input.checked&&saved!==false)void playInterfaceSound();
+        update({[key]:input.checked});
       }
     }
   });
@@ -216,15 +191,10 @@ export function initAppearance(){
     finally{if(request===tiltRequest){tiltPending=false;renderTilt();}}
   }
   onAction('appearanceTilt',enableTilt);
-  onAction('appearanceSoundPreview',button=>{ if(SOUND_STYLES.includes(button.dataset.value))void playInterfaceSound({style:button.dataset.value,preview:true}); });
-  document.addEventListener('fitcat:audio-status',event=>{
-    audioStatus=event.detail;
-    if(!$('appearancePage').hidden&&currentTab==='audio')renderSounds();
-  });
   const motionPreference=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const motionChanged=()=>{ $('appearanceMotionNotice').hidden=!reducedMotion(); };
   if(motionPreference?.addEventListener)motionPreference.addEventListener('change',motionChanged);
   document.addEventListener('fitcat:tilt-status',()=>{if(!$('appearancePage').hidden)renderTilt();});
-  document.addEventListener('fitcat:screen',event=>{if(event.detail==='appearancePage'){renderAppearance();renderPremium();$('appearanceTitle').focus({preventScroll:true});}else{flushAppearance();stopSoundPreview();}});
+  document.addEventListener('fitcat:screen',event=>{if(event.detail==='appearancePage'){renderAppearance();renderPremium();$('appearanceTitle').focus({preventScroll:true});}else{flushAppearance();}});
   renderAppearance();selectTab('style');
 }

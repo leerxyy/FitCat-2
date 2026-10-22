@@ -23,15 +23,26 @@ body[data-screen="settingsPage"] .app-root { --header-space: 14px; padding-botto
 .settings-gesture-row[aria-pressed="true"] .settings-icon { color: #e2fcff; border-color: var(--tone-h4be1f6, #4be1f6); background-color: var(--tone-h08bdd832, #08bdd832); }
 .settings-haptics-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; gap: 12px; align-items: center; min-height: 82px; padding: 14px 0 8px; border-top: 1px solid var(--tone-h86cde329, #86cde329); }
 .settings-haptics-row .apple-switch { width: 44px; height: 27px; }.settings-haptics-row .slider::before { width: 21px; height: 21px; }
-#settingsPage .haptics-test { min-height: 38px; padding: 8px 13px; margin: 2px 0 14px 52px; border: 1px solid var(--tone-h81b6d039, #81b6d039); border-radius: 13px; color: var(--tone-hafcadd, #afcadd); background: #17405b25; font-size: 12px; }
-#settingsPage .haptics-test:disabled { opacity: .45; }
+.settings-sound-row { padding-bottom: 14px; }
+.settings-sound-volume { padding: 0 0 12px 52px; }
+.settings-sound-volume > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); font-size: 12px; }
+.settings-sound-volume output { color: var(--text); font-variant-numeric: tabular-nums; }
+#settingsSoundVolume { display: block; width: 100%; height: 36px; min-height: 36px; margin: 4px 0 0; padding: 0; border: 0; background: transparent; box-shadow: none; appearance: none; -webkit-appearance: none; touch-action: pan-y; }
+#settingsSoundVolume::-webkit-slider-runnable-track { height: 5px; border: 1px solid #a4d5e62e; border-radius: 99px; background: linear-gradient(to right, var(--accent) var(--range-fill, 25%), #294257 var(--range-fill, 25%)); }
+#settingsSoundVolume::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -9.5px; border: 1px solid #e2f9ff99; border-radius: 50%; appearance: none; -webkit-appearance: none; background: radial-gradient(circle at 30% 20%, #ffffff72, transparent 70%), var(--accent-strong); box-shadow: 0 1px 4px #0005; }
+#settingsSoundVolume::-moz-range-track { height: 5px; border-radius: 99px; background: #294257; }
+#settingsSoundVolume::-moz-range-progress { height: 5px; border-radius: 99px; background: var(--accent); }
+#settingsSoundVolume::-moz-range-thumb { width: 20px; height: 20px; border: 1px solid #e2f9ff99; border-radius: 50%; background: var(--accent-strong); }
+.settings-sound-volume:has(input:disabled) { opacity: .5; }
+.settings-sound-status { margin: 0 0 10px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.settings-sound-status[data-error="true"] { color: var(--danger); }
+@media (max-width: 359px) { .settings-sound-volume { padding-left: 43px; } }
 #settingsPage .settings-language-card { padding: 16px 14px; }
 .settings-language-control { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 3px; border: 1px solid var(--tone-h8bcde146, #8bcde146); border-radius: 17px; background: #03142157; }
 .settings-language { position: relative; isolation: isolate; min-width: 0; min-height: 43px; padding: 9px 5px; margin: 0; border: 1px solid transparent; border-radius: 13px; color: var(--tone-hb7cede, #b7cede); background: transparent; font-size: 15px; font-weight: 570; transition: background-color 260ms ease, color 260ms ease, border-color 260ms ease, transform 150ms var(--ease); }
 .settings-language.active { color: var(--tone-hdffaff, #dffaff); background: linear-gradient(145deg, var(--tone-h08cde95c, #08cde95c), var(--tone-h007b9e5c, #007b9e5c)); border-color: var(--tone-h55e4f894, #55e4f894); box-shadow: inset 0 1px 2px var(--tone-hd2fcff35, #d2fcff35), 0 0 13px var(--tone-h15d8f51c, #15d8f51c); }
 .settings-language.active .selection-glint::before { animation: fitcat-choice-glint 6s ease-in-out infinite; }
 .settings-data-action .selection-glint::before { animation: fitcat-choice-glint 10s ease-in-out infinite; opacity: 0; }.settings-data-action:nth-child(2) .selection-glint::before { animation-delay: 4s; }
-.settings-auto-hint { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 0; color: var(--tone-h91b5c9, #91b5c9); font-size: 10px; line-height: 1.6; text-align: center; }.settings-auto-hint > .icon { width: 14px; height: 14px; color: var(--tone-h54cde1, #54cde1); }
 .settings-version { margin: -10px 0 0; color: #65889f; font-size: 10px; text-align: center; }
 body.dialog-open #settingsPage .selection-glint::before, #settingsPage[hidden] .selection-glint::before { animation-play-state: paused; }
 @media (hover: hover) and (pointer: fine) { .settings-list-row:hover { background-color: var(--tone-h45bcdf0a, #45bcdf0a); }.settings-data-action:hover { border-color: var(--tone-h7be5f4, #7be5f4); } }

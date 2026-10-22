@@ -1,7 +1,5 @@
 export const premiumCopy = {
   "ru": {
-    "pro_feature_sounds": "Дополнительные звуки",
-    "pro_sounds_detail": "14 дополнительных звуков: дерево, фарфор, замша, матовая керамика и другие. Сначала можно прослушать.",
     "pro_feature_smart-water": "Умная вода",
     "pro_feature_macro-history": "История и графики БЖУ",
     "pro_feature_templates": "Шаблоны без лимита",
@@ -17,11 +15,9 @@ export const premiumCopy = {
     "pro_macro_locked": "БЖУ · Plus",
     "pro_open_macros": "БЖУ за прошлые дни",
     "pro_templates_saved": "сохранено",
-    "pro_subscription_features": "Умная вода, история и графики БЖУ, шаблоны без лимита, жесты, дополнительные темы и фоны, 14 звуков и оформление профиля."
+    "pro_subscription_features": "Умная вода, история и графики БЖУ, шаблоны без лимита, жесты, дополнительные темы и фоны и оформление профиля."
   },
   "en": {
-    "pro_feature_sounds": "Extra interface sounds",
-    "pro_sounds_detail": "14 extra sounds, including wood, porcelain, suede and matte ceramic. Preview before choosing.",
     "pro_feature_smart-water": "Smart water",
     "pro_feature_macro-history": "Macro history and charts",
     "pro_feature_templates": "Unlimited templates",
@@ -37,11 +33,9 @@ export const premiumCopy = {
     "pro_macro_locked": "Macros · Plus",
     "pro_open_macros": "Macros from previous days",
     "pro_templates_saved": "saved",
-    "pro_subscription_features": "Smart water, macro history and charts, unlimited templates, gestures, extra themes and backgrounds, 14 sounds and profile appearance."
+    "pro_subscription_features": "Smart water, macro history and charts, unlimited templates, gestures, extra themes and backgrounds and profile appearance."
   },
   "cn": {
-    "pro_feature_sounds": "额外界面音效",
-    "pro_sounds_detail": "额外14种音效，包括木材、瓷器、麂皮和磨砂陶瓷。选择前可先试听。",
     "pro_feature_smart-water": "智能饮水",
     "pro_feature_macro-history": "营养素历史与图表",
     "pro_feature_templates": "不限数量的模板",
@@ -57,6 +51,6 @@ export const premiumCopy = {
     "pro_macro_locked": "营养素 · Plus",
     "pro_open_macros": "往日营养素",
     "pro_templates_saved": "已保存",
-    "pro_subscription_features": "智能饮水、营养素历史与图表、不限数量模板、手势、额外主题与背景、14种音效及个人资料外观。"
+    "pro_subscription_features": "智能饮水、营养素历史与图表、不限数量模板、手势、额外主题与背景及个人资料外观。"
   }
 };

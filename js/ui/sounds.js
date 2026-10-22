@@ -1,21 +1,18 @@
-import { state, proAccess } from '../core/store.js';
-import { effectiveAppearance } from '../core/appearance.js';
-import { createSoundPlayer, SOUND_STYLES, PREMIUM_SOUND_STYLES } from '../core/sounds.js';
+import { state } from '../core/store.js';
+import { createSoundPlayer } from '../core/sounds.js';
 
 let current;
 export const soundSupported = () => Boolean(current?.player.supported());
 export const playInterfaceSound = options => current?.player.play(options) ?? Promise.resolve(false);
-export const stopSoundPreview = () => current?.player.stopPreview();
 export const pauseInterfaceAudio = () => current?.player.suspend();
-export const preloadSoundChoices = () => { for (const style of SOUND_STYLES) void current?.player.preload(style); };
+export const configureInterfaceAudio = settings => current?.player.configure(settings);
 
 export function initInterfaceAudio() {
   current?.dispose();
   const doc = document, view = window, removers = [];
   const player = createSoundPlayer({
     AudioContext: view.AudioContext || view.webkitAudioContext,
-    fetch: (...args) => globalThis.fetch(...args), initial: effectiveAppearance(state.appearance, proAccess()),
-    canUse: style => !PREMIUM_SOUND_STYLES.includes(style) || proAccess(),
+    fetch: (...args) => globalThis.fetch(...args), initial: state.appearance,
     hidden: () => Boolean(doc.hidden),
     notify: detail => doc.dispatchEvent(new CustomEvent('fitcat:audio-status', { detail })),
   });
@@ -27,7 +24,7 @@ export function initInterfaceAudio() {
   on(doc, 'click', event => {
     if (event.isTrusted !== true) return;
     const control = event.target.closest?.('button, summary, input[type="checkbox"], input[type="radio"]');
-    if (!valid(control) || control.closest('[data-audio-preview], [data-appearance-kind="soundStyle"]') || control.dataset.appearanceToggle === 'soundEnabled') return;
+    if (!valid(control) || control.id === 'settingsSoundEnabled') return;
     // Gesture suppression may cancel the click later in propagation. Check
     // again before starting a source, while resume is called synchronously.
     void player.play({ allowed: () => !event.defaultPrevented });
@@ -35,7 +32,7 @@ export function initInterfaceAudio() {
   on(doc, 'change', event => {
     if (event.isTrusted !== true) return;
     const input = event.target;
-    if (!valid(input) || input.dataset.appearanceRange === 'soundVolume') return;
+    if (!valid(input) || input.id === 'settingsSoundVolume') return;
     if (input.matches('input[type="range"], select')) void player.play();
   });
   on(doc, 'submit', event => { if (event.isTrusted === true) void player.play(); }, { capture: true });

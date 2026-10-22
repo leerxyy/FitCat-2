@@ -5,7 +5,7 @@ import { enter } from '../ui/motion.js';
 import { renderPremium } from '../ui/premium.js';
 
 const details = Object.freeze({ 'smart-water': 'pro_water_detail', 'macro-history': 'pro_macros_detail', templates: 'pro_templates_detail',
-  gestures: 'pro_gestures_detail', appearance: 'pro_appearance_detail', sounds: 'pro_sounds_detail', 'profile-style': 'pro_profile_style_detail' });
+  gestures: 'pro_gestures_detail', appearance: 'pro_appearance_detail', 'profile-style': 'pro_profile_style_detail' });
 let subscription, expiryTimer, requestedFeature = '', panel = 'overview', openRequest = 0;
 const expiryLabel = value => value ? new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value)) : '';
 

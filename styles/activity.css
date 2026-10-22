@@ -29,7 +29,6 @@
 .activity-workout-entry small { display: block; font-size: 11px; line-height: 1.5; color: var(--muted); margin-top: 4px; }
 .workout-entry-chevron { width: 16px; height: 16px; color: var(--tone-h86a7bc, #86a7bc); }
 .activity-workout-card.is-enabled { border-color: var(--tone-h48c5df50, #48c5df50); }
-.activity-auto-hint { display: flex; justify-content: center; align-items: center; gap: 6px; color: var(--tone-h8da8be, #8da8be); font-size: 10px; text-align: center; line-height: 1.6; margin: 2px 7px 0; }.activity-auto-hint > .icon { width: 15px; height: 15px; flex-shrink: 0; color: var(--tone-h58cbe0, #58cbe0); }
 
 .workout-sheet { height: min(calc(var(--visible-height, 100dvh) * .9), 790px); padding: 13px 18px max(20px, env(safe-area-inset-bottom, 0px)); }
 #workoutModal > .workout-content { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; gap: 16px; margin: 0; min-height: calc(100% - 28px); }

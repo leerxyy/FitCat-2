@@ -91,7 +91,6 @@
 #settingsPage .card > h2:not(:first-child) { margin-top: 24px; }
 .language-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
 #settingsPage .card > .btn-primary { margin-top: 4px; }
-.haptics-test { margin-top: 12px; }
 .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin: 22px 0 4px; }
 .settings-row > span { display: flex; align-items: center; gap: 10px; font-size: 14px; }
 .settings-row > span .icon { width: 20px; color: var(--muted); }
