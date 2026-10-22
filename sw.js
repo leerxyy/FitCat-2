@@ -1,5 +1,5 @@
 // Bump VERSION after editing any file in APP_FILES, then deploy the whole folder.
-const VERSION = '3.31.0-r1';
+const VERSION = '3.31.0-r2';
 const PREFIX = `fitcat-${encodeURIComponent(self.registration.scope)}-`;
 const CACHE = PREFIX + VERSION;
 const ROOT = self.registration.scope;
@@ -177,7 +177,7 @@ const ASSET_HASHES = {
   "assets/icons/app-icon-512.png": "8230d3fa9fa4d9d1a86e3467e4a87eee8dfa63aa551b5d223cea102343f21133",
   "assets/icons/app-icon.svg": "28f4601be8622924619a55542b2ec08cd214eb0263d3448ad686e22b00dffe62",
   "assets/icons/apple-touch-icon.png": "7a47f25f7cee3e5d51d5b625a8bd507d0244e19b5ee516c366905f53fa34ca16",
-  "assets/icons/developer.svg": "fda7aac6d77cf07de804b22856124e6fd2bc13df6c7395fa5111984b9dc348fe",
+  "assets/icons/developer.svg": "6afe0152d4c01b4ff647e8801d398978880d6f8351a13f5e5ce9fa37b1176df3",
   "assets/icons/logo.svg": "fbf4e047681490c2a2843ef5e2810c697eb93971f0733f120637c974c556c5bb",
   "assets/icons/maskable-icon-512.png": "2b6aa52a8ecaab54c0ded0dea5eb7a177ecaf7ec5257af06c4c0d9b418174762",
   "assets/icons/plus-ribbon.svg": "9c584e7ad312479c8cfe7c368007297a7e1037c66af072bacb1b4b3c7f7e8d9c",
