@@ -1,12 +1,11 @@
-export const SOUND_STYLES = Object.freeze(['soft']);
-export const SOUND_DEFAULTS = Object.freeze({ soundEnabled: false, soundStyle: 'soft', soundVolume: 25 });
-export const soundURL = () => new URL('../../assets/audio/soft.wav', import.meta.url).href;
+export const SOUND_DEFAULTS = Object.freeze({ soundEnabled: false });
+export const soundURL = () => new URL('../../assets/audio/tap.wav', import.meta.url).href;
+// Intentionally quiet, independent of any volume saved by an older release.
+const TAP_GAIN = .28;
 
 function normalize(value = {}) {
   return {
     soundEnabled: value.soundEnabled === true,
-    soundStyle: SOUND_DEFAULTS.soundStyle,
-    soundVolume: typeof value.soundVolume === 'number' && Number.isFinite(value.soundVolume) ? Math.round(Math.max(0, Math.min(100, value.soundVolume))) : 25,
   };
 }
 
@@ -17,7 +16,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
   let lastClick = -Infinity, idleTimer = 0, pending = 0, suspending = null;
   const bytes = new Map(), decoded = new Map(), voices = new Set();
   const supported = () => typeof Context === 'function';
-  const announce = (state, style = settings.soundStyle) => notify({ state, style });
+  const announce = state => notify({ state });
   function cancelIdle() { clearTimer(idleTimer); idleTimer = 0; }
   function sleepWhenIdle() {
     cancelIdle();
@@ -36,7 +35,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
   }
   const load = style => {
     if (!bytes.has(style)) {
-      const task = Promise.resolve().then(() => request(soundURL(style))).then(response => {
+      const task = Promise.resolve().then(() => request(soundURL())).then(response => {
         if (!response.ok) throw new Error('audio_unavailable');
         return response.arrayBuffer();
       }).catch(error => { bytes.delete(style); throw error; });
@@ -62,25 +61,24 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
   }
   function configure(value) {
     const next = normalize(value);
-    if (next.soundEnabled === settings.soundEnabled && next.soundStyle === settings.soundStyle && next.soundVolume === settings.soundVolume) return;
-    const invalidated = next.soundStyle !== settings.soundStyle || (settings.soundEnabled && !next.soundEnabled) || next.soundVolume === 0;
+    if (next.soundEnabled === settings.soundEnabled) return;
+    const invalidated = settings.soundEnabled && !next.soundEnabled;
     settings = next;
     if (invalidated) stop();
-    if (master && context?.state !== 'closed') master.gain.setTargetAtTime(settings.soundVolume / 100, context.currentTime, .012);
   }
   function prepare() {
     cancelIdle();
     if (!context || context.state === 'closed') {
       context = new Context({ latencyHint: 'interactive' });
-      master = context.createGain(); master.gain.value = settings.soundVolume / 100;
+      master = context.createGain(); master.gain.value = TAP_GAIN;
       master.connect(context.destination);
     }
     // Call resume synchronously before loading/decoding; preserve user activation.
     return context.state === 'running' && !suspending ? Promise.resolve() : Promise.resolve(context.resume());
   }
   async function play({ allowed = () => true } = {}) {
-    const style = SOUND_DEFAULTS.soundStyle;
-    if (disposed || !supported() || hidden() || !allowed() || settings.soundVolume === 0 || !settings.soundEnabled) return false;
+    const style = 'tap';
+    if (disposed || !supported() || hidden() || !allowed() || !settings.soundEnabled) return false;
     const started = now();
     if (started - lastClick < 65) return false;
     lastClick = started;
@@ -94,7 +92,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
         decoded.set(style, task);
       }
       const buffer = await decoded.get(style);
-      if (ticket !== serial || disposed || hidden() || !allowed() || context.state !== 'running' || settings.soundVolume === 0 || !settings.soundEnabled || now() - started > 900) return false;
+      if (ticket !== serial || disposed || hidden() || !allowed() || context.state !== 'running' || !settings.soundEnabled || now() - started > 900) return false;
       for (const voice of [...voices]) retire(voice);
       const source = context.createBufferSource(), gain = context.createGain();
       source.buffer = buffer; source.connect(gain); gain.connect(master);
@@ -123,7 +121,7 @@ export function createSoundPlayer({ AudioContext: Context, fetch: request = glob
   }
   return {
     supported, configure, play, stop, suspend,
-    preload() { return supported() ? load(SOUND_DEFAULTS.soundStyle).then(() => true, () => false) : Promise.resolve(false); },
+    preload() { return supported() ? load('tap').then(() => true, () => false) : Promise.resolve(false); },
     dispose() { disposed = true; stop(); cancelIdle(); bytes.clear(); decoded.clear(); try { void context?.close()?.catch(() => {}); } catch {} },
   };
 }

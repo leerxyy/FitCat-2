@@ -12,7 +12,7 @@
   border-color: var(--glass-edge);
   box-shadow: inset 0 1px 1px var(--tone-r222-246-255-a19, rgb(222 246 255 / 19%)), inset 1px 0 1px var(--tone-r209-238-255-a7, rgb(209 238 255 / 7%)), inset 0 -1px 1px var(--tone-r135-207-249-a13, rgb(135 207 249 / 13%)), 0 10px 30px rgb(0 4 12 / 19%), 0 0 24px var(--glass-glow);
 }
-.glass-button, .scanner-button { position: relative; }
+.glass, .glass-button, .scanner-button { position: relative; }
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .card, .glass, .glass-button { --glass-tint: rgb(10 26 42 / 53%); -webkit-backdrop-filter: blur(22px) saturate(155%); backdrop-filter: blur(22px) saturate(155%); }
   .sheet { --glass-tint: rgb(11 27 44 / 84%); -webkit-backdrop-filter: blur(30px) saturate(145%); backdrop-filter: blur(30px) saturate(145%); }
@@ -54,7 +54,6 @@
 .nav-item { transition: color .3s ease, transform .28s var(--ease); }
 .nav-item .icon { transition: filter .4s ease; }
 .nav-item.is-active .icon { filter: drop-shadow(0 0 6px var(--tone-r22-207-243-a36, rgb(22 207 243 / 36%))); }
-.nav-item.is-active::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--accent); box-shadow: 0 0 7px var(--tone-r22-207-243-a42, rgb(22 207 243 / 42%)); }
 .sheet::backdrop { background: rgb(2 9 17 / 53%); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); }
 .sheet.is-closing { pointer-events: none; }
 .meal-thumb { background: linear-gradient(145deg, var(--tone-r64-126-156-a27, rgb(64 126 156 / 27%)), rgb(19 57 77 / 43%)); box-shadow: inset 0 1px rgb(225 247 255 / 12%); }

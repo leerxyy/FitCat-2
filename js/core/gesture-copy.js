@@ -43,6 +43,7 @@ export const gestureCopy = {
     "gesture_camera_missing": "Камера не найдена или занята другим приложением.",
     "gesture_model_error": "Не удалось загрузить распознавание. Проверь интернет и повтори запуск.",
     "gesture_camera_connecting": "Подключаем камеру…",
+    "gesture_model_loading": "Загружаем распознавание…",
     "gesture_camera_active": "Камера включена",
     "gesture_camera_idle": "Камера выключена"
   },
@@ -90,6 +91,7 @@ export const gestureCopy = {
     "gesture_camera_missing": "No camera found, or another app is using it.",
     "gesture_model_error": "Could not load recognition. Check your connection and try again.",
     "gesture_camera_connecting": "Connecting camera…",
+    "gesture_model_loading": "Loading recognition…",
     "gesture_camera_active": "Camera on",
     "gesture_camera_idle": "Camera off"
   },
@@ -137,6 +139,7 @@ export const gestureCopy = {
     "gesture_camera_missing": "未找到摄像头，或正被其他应用使用。",
     "gesture_model_error": "无法加载识别。请检查网络后重试。",
     "gesture_camera_connecting": "正在连接摄像头…",
+    "gesture_model_loading": "正在加载手势识别…",
     "gesture_camera_active": "摄像头已开启",
     "gesture_camera_idle": "摄像头已关闭"
   }

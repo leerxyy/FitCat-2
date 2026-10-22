@@ -1,4 +1,4 @@
-import { SOUND_DEFAULTS, SOUND_STYLES } from './sounds.js';
+import { SOUND_DEFAULTS } from './sounds.js';
 
 export const APPEARANCE_KEY = 'fitcat_appearance_v1';
 export const APPEARANCE_DEFAULTS = Object.freeze({
@@ -20,6 +20,18 @@ export const ACCENTS = Object.freeze({
   teal: { color: '#68e0d3', strong: '#41beb2', hue: 174 },
   ice: { color: '#b6dfff', strong: '#90bddf', hue: 206 },
   pearl: { color: '#e0e7ff', strong: '#b8c3e0', hue: 225 },
+  lagoon: { color: '#5dd7cc', strong: '#39b7ad', hue: 175 },
+  emerald: { color: '#4dd5a0', strong: '#2cae7c', hue: 157 },
+  sage: { color: '#b8cfac', strong: '#90ae80', hue: 100 },
+  champagne: { color: '#ebd6ae', strong: '#ceb784', hue: 39 },
+  peach: { color: '#ffc09b', strong: '#e59a72', hue: 22 },
+  copper: { color: '#e1a385', strong: '#c37e60', hue: 20 },
+  ruby: { color: '#f18da5', strong: '#d16885', hue: 346 },
+  orchid: { color: '#d8a6ed', strong: '#b581d0', hue: 282 },
+  lavender: { color: '#cac2f3', strong: '#a79dd8', hue: 250 },
+  denim: { color: '#94adeb', strong: '#708dd0', hue: 223 },
+  aqua: { color: '#78d9ee', strong: '#51b6d1', hue: 191 },
+  silver: { color: '#c2d0db', strong: '#9eafbe', hue: 206 },
 });
 export const BACKGROUNDS = Object.freeze(['ocean', 'mountains', 'aurora', 'cosmos', 'forest', 'coast', 'dunes', 'glacier', 'gradient', 'dark']);
 export const DEPTH_BACKGROUNDS = Object.freeze(['mountains', 'forest', 'coast', 'dunes', 'glacier', 'aurora']);
@@ -40,10 +52,10 @@ export const THEME_PRESETS = Object.freeze({
 export function normalizeAppearance(value) {
   const result = { ...APPEARANCE_DEFAULTS };
   if (!value || typeof value !== 'object' || Array.isArray(value)) return result;
-  const enums = { theme: [...Object.keys(THEME_PRESETS), 'custom'], accent: Object.keys(ACCENTS), background: BACKGROUNDS, effect: EFFECTS, motion: ['calm', 'standard', 'expressive'], soundStyle: SOUND_STYLES };
+  const enums = { theme: [...Object.keys(THEME_PRESETS), 'custom'], accent: Object.keys(ACCENTS), background: BACKGROUNDS, effect: EFFECTS, motion: ['calm', 'standard', 'expressive'] };
   for (const [key, choices] of Object.entries(enums)) if (choices.includes(value[key])) result[key] = value[key];
   for (const key of ['parallax', 'deviceTilt', 'animation', 'glints', 'soundEnabled']) if (typeof value[key] === 'boolean') result[key] = value[key];
-  for (const [key, min, max] of [['transparency', 15, 70], ['glow', 0, 80], ['dimming', 0, 80], ['blur', 0, 100], ['depth', 0, 100], ['speed', 0, 100], ['intensity', 0, 100], ['glintSpeed', 0, 100], ['soundVolume', 0, 100]]) {
+  for (const [key, min, max] of [['transparency', 15, 70], ['glow', 0, 80], ['dimming', 0, 80], ['blur', 0, 100], ['depth', 0, 100], ['speed', 0, 100], ['intensity', 0, 100], ['glintSpeed', 0, 100]]) {
     if (typeof value[key] === 'number' && Number.isFinite(value[key])) result[key] = Math.round(Math.min(max, Math.max(min, value[key])));
   }
   return result;

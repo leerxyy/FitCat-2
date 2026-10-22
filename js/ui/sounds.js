@@ -32,7 +32,7 @@ export function initInterfaceAudio() {
   on(doc, 'change', event => {
     if (event.isTrusted !== true) return;
     const input = event.target;
-    if (!valid(input) || input.id === 'settingsSoundVolume') return;
+    if (!valid(input)) return;
     if (input.matches('input[type="range"], select')) void player.play();
   });
   on(doc, 'submit', event => { if (event.isTrusted === true) void player.play(); }, { capture: true });

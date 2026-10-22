@@ -22,8 +22,6 @@
 .bottom-nav.has-selection-lens { --selection-radius: 99px; }
 .bottom-nav.has-selection-lens > .selection-lens { width: var(--lens-display-width, calc((100% - 12px) / 4)); height: var(--lens-display-height, calc(100% - 12px)); }
 .bottom-nav.has-selection-lens.is-lens-held > .selection-lens { scale: 1.035 1.08; }
-.bottom-nav.has-selection-lens .nav-item.is-preview::after { content: ""; position: absolute; bottom: 4px; width: 15px; height: 2px; border-radius: 3px; background: var(--tone-h31def2, #31def2); box-shadow: 0 0 7px var(--tone-h16cff36b, #16cff36b); }
-.bottom-nav.has-selection-lens.is-lens-pressed .nav-item:not(.is-preview)::after { opacity: 0; }
 .profile-gender-control.has-selection-lens { --selection-radius: 11px; }
 .profile-goal-control.has-selection-lens { --selection-radius: 17px; }
 .profile-goal-control.has-selection-lens > button.active, .profile-goal-control.has-selection-lens > button.is-preview { border-color: transparent; }

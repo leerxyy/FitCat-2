@@ -24,19 +24,8 @@ body[data-screen="settingsPage"] .app-root { --header-space: 14px; padding-botto
 .settings-haptics-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) 44px; gap: 12px; align-items: center; min-height: 82px; padding: 14px 0 8px; border-top: 1px solid var(--tone-h86cde329, #86cde329); }
 .settings-haptics-row .apple-switch { width: 44px; height: 27px; }.settings-haptics-row .slider::before { width: 21px; height: 21px; }
 .settings-sound-row { padding-bottom: 14px; }
-.settings-sound-volume { padding: 0 0 12px 52px; }
-.settings-sound-volume > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); font-size: 12px; }
-.settings-sound-volume output { color: var(--text); font-variant-numeric: tabular-nums; }
-#settingsSoundVolume { display: block; width: 100%; height: 36px; min-height: 36px; margin: 4px 0 0; padding: 0; border: 0; background: transparent; box-shadow: none; appearance: none; -webkit-appearance: none; touch-action: pan-y; }
-#settingsSoundVolume::-webkit-slider-runnable-track { height: 5px; border: 1px solid #a4d5e62e; border-radius: 99px; background: linear-gradient(to right, var(--accent) var(--range-fill, 25%), #294257 var(--range-fill, 25%)); }
-#settingsSoundVolume::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -9.5px; border: 1px solid #e2f9ff99; border-radius: 50%; appearance: none; -webkit-appearance: none; background: radial-gradient(circle at 30% 20%, #ffffff72, transparent 70%), var(--accent-strong); box-shadow: 0 1px 4px #0005; }
-#settingsSoundVolume::-moz-range-track { height: 5px; border-radius: 99px; background: #294257; }
-#settingsSoundVolume::-moz-range-progress { height: 5px; border-radius: 99px; background: var(--accent); }
-#settingsSoundVolume::-moz-range-thumb { width: 20px; height: 20px; border: 1px solid #e2f9ff99; border-radius: 50%; background: var(--accent-strong); }
-.settings-sound-volume:has(input:disabled) { opacity: .5; }
 .settings-sound-status { margin: 0 0 10px; color: var(--muted); font-size: 11px; line-height: 1.5; }
 .settings-sound-status[data-error="true"] { color: var(--danger); }
-@media (max-width: 359px) { .settings-sound-volume { padding-left: 43px; } }
 #settingsPage .settings-language-card { padding: 16px 14px; }
 .settings-language-control { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 3px; border: 1px solid var(--tone-h8bcde146, #8bcde146); border-radius: 17px; background: #03142157; }
 .settings-language { position: relative; isolation: isolate; min-width: 0; min-height: 43px; padding: 9px 5px; margin: 0; border: 1px solid transparent; border-radius: 13px; color: var(--tone-hb7cede, #b7cede); background: transparent; font-size: 15px; font-weight: 570; transition: background-color 260ms ease, color 260ms ease, border-color 260ms ease, transform 150ms var(--ease); }
@@ -72,7 +61,7 @@ body.dialog-open #settingsPage .selection-glint::before, #settingsPage[hidden] .
 .gesture-more-title { font-size:13px;margin:22px 0 10px; }.gesture-shortcuts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 20px; }.gesture-shortcuts>div { display:flex;flex-direction:column;align-items:center;padding:8px 5px 12px;border:1px solid #95c9db26;border-radius:18px;background:#12394a22;text-align:center;min-width:0; }.gesture-shortcuts .gesture-hand { width:54px;height:54px;color:var(--accent); }.gesture-shortcuts strong { font-size:10px;line-height:1.4; }.gesture-shortcuts small { color:var(--muted);font-size:9px;line-height:1.5;margin-top:3px; }
 .gesture-guide-sheet .btn-primary,.gesture-guide-sheet .btn-secondary { width:100%; }.gesture-footnote { font-size:10px;line-height:1.6;color:var(--muted);text-align:center;margin:10px 0; }.gesture-text-button { display:block;width:100%;min-height:44px;padding:12px 6px;border:0;border-radius:14px;background:transparent;color:var(--accent);font-size:12px; }
 .gesture-guide-error { border:1px solid #ef9e923d;background:#ad4b3411;border-radius:14px;color:#edb7ac;line-height:1.6;padding:12px;font-size:12px; }
-.gesture-source { position:fixed!important;width:2px!important;height:2px!important;left:-10px!important;top:-10px!important;pointer-events:none!important;opacity:.01!important; }
+.gesture-source { position:fixed!important;width:2px!important;height:2px!important;left:0!important;top:0!important;pointer-events:none!important;opacity:.001!important; }
 .gesture-guide-sheet[open] .gesture-hand-tabs .gesture-hand-outline { animation:gesture-demo-side 3.4s ease-in-out infinite; }.gesture-guide-sheet[open] .gesture-hand-scroll .gesture-hand-outline { animation:gesture-demo-up 3.8s ease-in-out infinite; }.gesture-guide-sheet[open] :is(.gesture-pinch-contact,.gesture-pinch-rays) { animation:gesture-demo-pinch 3.2s ease-in-out infinite; }
 @keyframes gesture-demo-side { 0%,100% { transform:translateX(-3px); }50% { transform:translateX(3px); } }@keyframes gesture-demo-up { 0%,100% { transform:translateY(-3px); }50% { transform:translateY(3px); } }@keyframes gesture-demo-pinch { 0%,20%,100% { opacity:.25; }48%,65% { opacity:1; } }
 :root[data-low-detail=on] .gesture-hand * { animation:none!important; }
